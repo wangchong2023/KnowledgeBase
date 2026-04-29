@@ -1,0 +1,50 @@
+# Xcode
+.DS_Store
+*.xcuserstate
+*.xcuserdatad
+*.xcworkspace
+xcuserdata/
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Build
+build/
+*.build/
+Build/
+.dSYM/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Archives
+*.zip
+*.tar
+*.gz
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+.#*
+
+# Node (if any)
+node_modules/
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+*.local

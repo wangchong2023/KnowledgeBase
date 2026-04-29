@@ -1,0 +1,249 @@
+import SwiftUI
+
+// MARK: - LLM Settings View
+struct LLMSettingsView: View {
+    @EnvironmentObject var llmService: LLMService
+    @State private var testing = false
+    @State private var testResult: TestResult?
+    @State private var showAPIKey = false
+    
+    enum TestResult {
+        case success
+        case failure(String)
+    }
+    
+    var body: some View {
+        Form {
+            // Enable/Disable
+            Section {
+                Toggle(isOn: $llmService.isEnabled) {
+                    Label("启用 LLM 助手", systemImage: "brain.head.profile.fill")
+                        .foregroundStyle(.wikiText)
+                }
+                .tint(.wikiAccent)
+            } header: {
+                Text("状态")
+            }
+            
+            // Provider
+            Section {
+                ForEach(LLMProvider.allCases) { provider in
+                    Button(action: {
+                        llmService.provider = provider
+                        if !provider.defaultBaseURL.isEmpty {
+                            llmService.baseURL = provider.defaultBaseURL
+                        }
+                        if !provider.defaultModel.isEmpty {
+                            llmService.model = provider.defaultModel
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: provider.icon)
+                                .foregroundStyle(.wikiAccent)
+                            Text(provider.displayName)
+                                .foregroundStyle(.wikiText)
+                            Spacer()
+                            if llmService.provider == provider {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.wikiAccent)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                Text("服务商")
+            }
+            
+            // Configuration
+            Section {
+                // API Key
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("API Key")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.wikiSecondary)
+                    
+                    HStack {
+                        if showAPIKey {
+                            TextField("sk-...", text: $llmService.apiKey)
+                                .textFieldStyle(.plain)
+                                .foregroundStyle(.wikiText)
+                                .font(.system(.body, design: .monospaced))
+                        } else {
+                            SecureField("sk-...", text: $llmService.apiKey)
+                                .textFieldStyle(.plain)
+                                .foregroundStyle(.wikiText)
+                                .font(.system(.body, design: .monospaced))
+                        }
+                        
+                        Button(action: { showAPIKey.toggle() }) {
+                            Image(systemName: showAPIKey ? "eye.slash" : "eye")
+                                .foregroundStyle(.wikiSecondary)
+                        }
+                    }
+                    .padding()
+                    .background(Color.wikiCard)
+                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                }
+                
+                // Base URL
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("API 地址")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.wikiSecondary)
+                    TextField("https://api.openai.com/v1", text: $llmService.baseURL)
+                        .textFieldStyle(.plain)
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundStyle(.wikiText)
+                        .padding()
+                        .background(Color.wikiCard)
+                        .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                        .autocapitalization(.none)
+                        .keyboardType(.URL)
+                }
+                
+                // Model
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("模型")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.wikiSecondary)
+                    TextField("gpt-4o-mini", text: $llmService.model)
+                        .textFieldStyle(.plain)
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundStyle(.wikiText)
+                        .padding()
+                        .background(Color.wikiCard)
+                        .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                        .autocapitalization(.none)
+                }
+                
+                // Model suggestions
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(suggestedModels, id: \.self) { model in
+                            Button(action: { llmService.model = model }) {
+                                Text(model)
+                                    .font(.caption)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(llmService.model == model ? Color.wikiAccent.opacity(0.2) : Color.wikiCard)
+                                    .clipShape(Capsule())
+                                    .foregroundStyle(llmService.model == model ? .wikiAccent : .wikiSecondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            } header: {
+                Text("配置")
+            }
+            
+            // Test Connection
+            Section {
+                Button(action: testConnection) {
+                    HStack {
+                        if testing {
+                            ProgressView()
+                                .tint(.wikiAccent)
+                        } else {
+                            Image(systemName: "bolt.horizontal.fill")
+                                .foregroundStyle(.wikiAccent)
+                        }
+                        Text(testing ? "测试中..." : "测试连接")
+                            .foregroundStyle(.wikiText)
+                    }
+                }
+                .disabled(testing || llmService.apiKey.isEmpty)
+                
+                if let result = testResult {
+                    switch result {
+                    case .success:
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                            Text("连接成功！API Key 有效")
+                                .font(.subheadline)
+                                .foregroundStyle(.green)
+                        }
+                    case .failure(let message):
+                        HStack {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.red)
+                            Text(message)
+                                .font(.subheadline)
+                                .foregroundStyle(.red)
+                        }
+                    }
+                }
+            } header: {
+                Text("验证")
+            }
+            
+            // Chat History
+            Section {
+                HStack {
+                    Label("对话记录", systemImage: "bubble.left.and.bubble.right")
+                        .foregroundStyle(.wikiText)
+                    Spacer()
+                    Text("\(llmService.chatHistory.count) 条")
+                        .foregroundStyle(.wikiSecondary)
+                }
+                
+                Button(role: .destructive, action: {
+                    llmService.clearChatHistory()
+                }) {
+                    Label("清空对话记录", systemImage: "trash")
+                }
+            } header: {
+                Text("对话")
+            }
+            
+            // Info
+            Section {
+                VStack(alignment: .leading, spacing: 10) {
+                    InfoRow(icon: "lock.shield", text: "API Key 仅存储在本地设备")
+                    InfoRow(icon: "doc.text", text: "对话时会发送知识库内容作为上下文")
+                    InfoRow(icon: "network", text: "支持所有 OpenAI 兼容 API")
+                    InfoRow(icon: "arrow.down.doc", text: "智能导入使用 LLM 编译原始资料")
+                }
+            } header: {
+                Text("说明")
+            }
+        }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.wikiBackground)
+        .navigationTitle("LLM 设置")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    private var suggestedModels: [String] {
+        switch llmService.provider {
+        case .openAI:
+            return ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
+        case .deepSeek:
+            return ["deepseek-chat", "deepseek-reasoner"]
+        case .custom:
+            return ["default"]
+        }
+    }
+    
+    private func testConnection() {
+        testing = true
+        testResult = nil
+        
+        Task {
+            do {
+                let valid = try await llmService.validateAPIKey()
+                await MainActor.run {
+                    testing = false
+                    testResult = valid ? .success : .failure("验证失败")
+                }
+            } catch {
+                await MainActor.run {
+                    testing = false
+                    testResult = .failure(error.localizedDescription)
+                }
+            }
+        }
+    }
+}
