@@ -69,7 +69,7 @@ struct HostingSetupSheet: View {
     
     private var startButton: some View {
         Button(action: {
-            let name = roomName.isEmpty ? "知识库 Room" : roomName
+            let name = roomName.isEmpty ? L.tr("collab.room") : roomName
             collabService.startHosting(roomName: name)
             dismiss()
         }) {

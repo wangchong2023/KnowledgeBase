@@ -63,9 +63,9 @@ struct IngestView: View {
                     .padding(.bottom, 40)
                 }
                 .background(Color.wikiBackground)
-                .navigationTitle("导入")
-                .alert("错误", isPresented: $showError) {
-                    Button("确定") { errorMessage = nil }
+                .navigationTitle(L.tr("ingest.title"))
+                .alert(L.tr("ingest.error"), isPresented: $showError) {
+                    Button(L.tr("ingest.ok")) { errorMessage = nil }
                 } message: {
                     Text(errorMessage ?? "")
                 }
@@ -153,7 +153,7 @@ struct IngestView: View {
         updatedPage.relatedPageIDs = relatedIDs
         store.updatePage(updatedPage)
 
-        store.addLog(action: "智能导入", target: newTitle, details: "LLM 编译完成，类型: \(type.displayName)")
+        store.addLog(action: L.tr("logAction.smartIngest"), target: newTitle, details: L.trf("ingest.smartIngestDoneDesc", type.displayName))
 
         smartResult = nil
         ingestSuccess = true

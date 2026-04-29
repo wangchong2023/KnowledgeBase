@@ -35,7 +35,7 @@ struct TappableSceneView: UIViewRepresentable {
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard let scnView = gesture.view as? SCNView,
-                  let scene = scnView.scene else { return }
+                  scnView.scene != nil else { return }
             let location = gesture.location(in: scnView)
             let hitResults = scnView.hitTest(location, options: [SCNHitTestOption.searchMode: SCNHitTestSearchMode.all.rawValue])
             for result in hitResults {

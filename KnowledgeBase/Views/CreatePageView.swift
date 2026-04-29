@@ -12,9 +12,9 @@ struct CreatePageView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("页面标题", text: $title)
+                    TextField(L.tr("create.pageTitle"), text: $title)
                         .font(.body)
-                        .accessibilityIdentifier("页面标题")
+                        .accessibilityIdentifier("pageTitle")
                     
                     // Type picker
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -42,9 +42,9 @@ struct CreatePageView: View {
                         }
                     }
                     
-                    TextField("标签（逗号分隔）", text: $tags)
+                    TextField(L.tr("create.tagsPlaceholder"), text: $tags)
                 } header: {
-                    Text("基本信息")
+                    Text(L.tr("create.basicInfo"))
                 }
                 
                 Section {
@@ -53,9 +53,9 @@ struct CreatePageView: View {
                         .frame(minHeight: 150)
                 } header: {
                     HStack {
-                        Text("内容")
+                        Text(L.tr("create.content"))
                         Spacer()
-                        Text("支持 [[双向链接]] 语法")
+                        Text(L.tr("editor.bidirectionalLinks"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -64,28 +64,28 @@ struct CreatePageView: View {
                 // Quick templates
                 Section {
                     Button(action: applyEntityTemplate) {
-                        Label("实体模板", systemImage: "person.text.rectangle.fill")
+                        Label(L.tr("create.entityTemplate"), systemImage: "person.text.rectangle.fill")
                     }
                     Button(action: applyConceptTemplate) {
-                        Label("概念模板", systemImage: "lightbulb.fill")
+                        Label(L.tr("create.conceptTemplate"), systemImage: "lightbulb.fill")
                     }
                     Button(action: applyComparisonTemplate) {
-                        Label("对比模板", systemImage: "arrow.left.arrow.right.circle.fill")
+                        Label(L.tr("create.comparisonTemplate"), systemImage: "arrow.left.arrow.right.circle.fill")
                     }
                 } header: {
-                    Text("快速模板")
+                    Text(L.tr("create.quickTemplates"))
                 }
             }
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle("创建页面")
+            .navigationTitle(L.tr("create.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") { dismiss() }
+                    Button(L.tr("misc.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("创建") {
+                    Button(L.tr("create.create")) {
                         createPage()
                     }
                     .disabled(title.isEmpty)
@@ -115,13 +115,13 @@ struct CreatePageView: View {
         content = """
         # \(title)
         
-        ## 概述
+        ## \(L.tr("create.overview"))
         
-        ## 核心贡献
+        ## \(L.tr("create.coreContributions"))
         
-        ## 关键理念
+        ## \(L.tr("create.keyIdeas"))
         
-        ## 相关链接
+        ## \(L.tr("create.relatedLinks"))
         
         """
     }
@@ -130,15 +130,15 @@ struct CreatePageView: View {
         content = """
         # \(title)
         
-        ## 定义
+        ## \(L.tr("create.definition"))
         
-        ## 核心要点
+        ## \(L.tr("create.corePoints"))
         
         | 维度 | 说明 |
         |------|------|
         |  |  |
         
-        ## 相关链接
+        ## \(L.tr("create.relatedLinks"))
         
         """
     }
@@ -147,15 +147,15 @@ struct CreatePageView: View {
         content = """
         # \(title)
         
-        ## 对比维度
+        ## \(L.tr("create.comparisonDimensions"))
         
         | 维度 | A | B |
         |------|---|---|
         |  |  |  |
         
-        ## 结论
+        ## \(L.tr("create.conclusion"))
         
-        ## 相关链接
+        ## \(L.tr("create.relatedLinks"))
         
         """
     }

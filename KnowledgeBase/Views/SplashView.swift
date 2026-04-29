@@ -35,7 +35,7 @@ struct SplashView: View {
                         )
                         .opacity(logoOpacity)
                     
-                    Text("知识库")
+                    Text(L.tr("splash.appName"))
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .opacity(logoOpacity)

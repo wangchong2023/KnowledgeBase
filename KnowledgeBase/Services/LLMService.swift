@@ -195,7 +195,7 @@ final class LLMService: ObservableObject {
                 ]
                 
                 do {
-                    let streamResult = try await self.makeClient().sendStreamingRequest(body: requestBody)
+                let streamResult = self.makeClient().sendStreamingRequest(body: requestBody)
                     
                     var fullContent = ""
                     

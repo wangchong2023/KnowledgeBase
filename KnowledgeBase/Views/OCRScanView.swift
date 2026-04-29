@@ -12,7 +12,7 @@ struct OCRScanView: View {
     @State private var targetTitle = ""
     @State private var targetType: PageType = .source
     @State private var targetCustomIcon: String? = nil
-    @State private var targetTags: [String] = ["OCR", "扫描"]
+    @State private var targetTags: [String] = ["OCR", L.tr("ocr.scanTag")]
     @State private var showIconPicker = false
     @State private var showOCRError = false
     @State private var ocrErrorMessage = ""
@@ -41,11 +41,11 @@ struct OCRScanView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle("OCR 文字识别")
+            .navigationTitle(L.tr("ocr.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("取消") { dismiss() }
+                    Button(L.tr("misc.cancel")) { dismiss() }
                 }
             }
             .onChange(of: selectedPhoto) { _, newValue in
@@ -54,22 +54,22 @@ struct OCRScanView: View {
             .sheet(isPresented: $showIconPicker) {
                 IconPickerView(selectedIcon: $targetCustomIcon)
             }
-            .alert("文字识别失败", isPresented: $showOCRError) {
-                Button("确定", role: .cancel) {}
+            .alert(L.tr("ocr.scanFailed"), isPresented: $showOCRError) {
+                Button(L.tr("misc.ok"), role: .cancel) {}
             } message: {
                 Text(ocrErrorMessage)
             }
-            .alert("添加标签", isPresented: $showAddTagInput) {
-                TextField("输入标签名称", text: $newTagText)
-                    .accessibilityIdentifier("输入标签名称")
-                Button("添加") {
+            .alert(L.tr("editor.addTag"), isPresented: $showAddTagInput) {
+                TextField(L.tr("editor.enterTag"), text: $newTagText)
+                    .accessibilityIdentifier("enterTagName")
+                Button(L.tr("ocr.addTag")) {
                     commitNewTag()
                 }
-                Button("取消", role: .cancel) {
+                Button(L.tr("misc.cancel"), role: .cancel) {
                     newTagText = ""
                 }
             } message: {
-                Text("请输入标签名称")
+                Text(L.tr("editor.enterTag"))
             }
         }
     }
@@ -98,7 +98,7 @@ struct OCRScanView: View {
                             Image(systemName: "text.viewfinder")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.wikiSecondary)
-                            Text("选择图片进行文字识别")
+                            Text(L.tr("ocr.selectImage"))
                                 .font(.subheadline)
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -113,7 +113,7 @@ struct OCRScanView: View {
             // Photo picker
             HStack(spacing: 16) {
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                    Label("从相册选择", systemImage: "photo.on.rectangle")
+                    Label(L.tr("ocr.fromAlbum"), systemImage: "photo.on.rectangle")
                         .font(.subheadline)
                         .foregroundStyle(.wikiAccent)
                         .padding(.horizontal, 16)
@@ -129,7 +129,7 @@ struct OCRScanView: View {
                                     .tint(.white)
                                     .scaleEffect(0.8)
                             }
-                            Text(isProcessing ? "识别中..." : "识别文字")
+                            Text(isProcessing ? L.tr("ocr.processing") : L.tr("ocr.recognize"))
                         }
                         .font(.subheadline)
                         .foregroundStyle(.white)
@@ -147,14 +147,14 @@ struct OCRScanView: View {
     private var recognizedTextArea: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("识别结果", systemImage: "doc.text")
+                Label(L.tr("ocr.result"), systemImage: "doc.text")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.wikiText)
                 
                 Spacer()
                 
                 Button(action: copyToClipboard) {
-                    Label("复制", systemImage: "doc.on.doc")
+                    Label(L.tr("ocr.copy"), systemImage: "doc.on.doc")
                         .font(.caption)
                         .foregroundStyle(.wikiAccent)
                 }
@@ -176,7 +176,7 @@ struct OCRScanView: View {
             )
             
             HStack {
-                Text("字数：\(recognizedText.count)")
+                Text(L.trf("ocr.charCountFormat", recognizedText.count))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                 
@@ -188,11 +188,11 @@ struct OCRScanView: View {
     // MARK: - Save to Wiki Section
     private var saveToWikiSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("保存到知识库")
+            Text(L.tr("ocr.saveToWiki"))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.wikiText)
             
-            TextField("页面标题", text: $targetTitle)
+            TextField(L.tr("ocr.pageTitle"), text: $targetTitle)
                 .font(.subheadline)
                 .foregroundStyle(.wikiText)
                 .padding(10)
@@ -202,7 +202,7 @@ struct OCRScanView: View {
                         .stroke(Color.wikiBorder, lineWidth: 1)
                 )
             
-            Picker("页面类型", selection: $targetType) {
+            Picker(L.tr("ocr.pageType"), selection: $targetType) {
                 ForEach(PageType.allCases, id: \.self) { type in
                     Label(type.displayName, systemImage: type.icon).tag(type)
                 }
@@ -211,7 +211,7 @@ struct OCRScanView: View {
 
             // Icon picker row
             HStack {
-                Text("页面图标")
+                Text(L.tr("page.icon"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
 
@@ -226,7 +226,7 @@ struct OCRScanView: View {
                             .background((targetCustomIcon != nil ? Color.wikiAccent : targetType.themedColor).opacity(0.15))
                             .clipShape(RoundedRectangle(cornerRadius: WikiUI.microRadius))
 
-                        Text(targetCustomIcon != nil ? "更换" : "自定义")
+                        Text(targetCustomIcon != nil ? L.tr("ocr.changeIcon") : L.tr("ocr.customIcon"))
                             .font(.caption)
                             .foregroundStyle(.wikiAccent)
 
@@ -259,7 +259,7 @@ struct OCRScanView: View {
             }
             
             Button(action: saveToWiki) {
-                Label("保存到知识库", systemImage: "square.and.arrow.down")
+                Label(L.tr("ocr.saveToWiki"), systemImage: "square.and.arrow.down")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -321,7 +321,7 @@ struct OCRScanView: View {
             content: recognizedText,
             tags: targetTags
         )
-        store.addLog(action: "OCR识别", target: targetTitle, details: "字数：\(recognizedText.count)")
+        store.addLog(action: L.tr("logAction.ocrRecognize"), target: targetTitle, details: L.trf("ocr.charCountFormat", recognizedText.count))
         store.saveToDisk()
         dismiss()
     }

@@ -22,16 +22,16 @@ struct ChatView: View {
                 chatInputBar
             }
             .background(Color.wikiBackground)
-            .navigationTitle("AI 助手")
+            .navigationTitle(L.tr("chat.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button(action: { llmService.clearChatHistory() }) {
-                            Label("清空对话", systemImage: "trash")
+                            Label(L.tr("chat.clearHistory"), systemImage: "trash")
                         }
                         
                         NavigationLink(destination: LLMSettingsView()) {
-                            Label("LLM 设置", systemImage: "gearshape")
+                            Label(L.tr("chat.llmSettings"), systemImage: "gearshape")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -40,8 +40,8 @@ struct ChatView: View {
                     .accessibilityIdentifier("menu")
                 }
             }
-            .alert("错误", isPresented: $showError) {
-                Button("确定") { errorMessage = nil }
+            .alert(L.tr("misc.error"), isPresented: $showError) {
+                Button(L.tr("misc.ok")) { errorMessage = nil }
             } message: {
                 Text(errorMessage ?? "")
             }
@@ -54,7 +54,7 @@ struct ChatView: View {
             HStack(spacing: 10) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
-                Text("请先配置 LLM API Key")
+                Text(L.tr("chat.configureFirst"))
                     .font(.subheadline)
                     .foregroundStyle(.wikiText)
                 Spacer()
@@ -100,26 +100,36 @@ struct ChatView: View {
     private var chatWelcome: some View {
         VStack(spacing: 24) {
             Spacer().frame(height: 40)
-            
-            Image(systemName: "bubble.left.and.bubble.right.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.wikiAccent, .wikiConcept],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+
+            // 带光晕的图标
+            ZStack {
+                Circle()
+                    .fill(Color.wikiAccent.opacity(0.1))
+                    .frame(width: 100, height: 100)
+                    .blur(radius: 12)
+
+                Image(systemName: "bubble.left.and.bubble.right.fill")
+                    .font(.system(size: 44, weight: .light))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.wikiAccent, .wikiConcept],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-            
-            Text("知识库 AI 助手")
+                    .shadow(color: .wikiAccent.opacity(0.3), radius: 12, x: 0, y: 6)
+            }
+
+            Text(L.tr("chat.welcomeTitle"))
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.wikiText)
-            
-            Text("基于你的知识库内容回答问题，发现关联，发现盲区")
+
+            Text(L.tr("chat.welcomeDesc"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
-            
+                .padding(.horizontal, 24)
+
             VStack(spacing: 10) {
                 ForEach(suggestedQueries, id: \.self) { query in
                     Button(action: { sendMessage(query) }) {
@@ -148,17 +158,17 @@ struct ChatView: View {
         
         if conceptCount > 0 {
             return [
-                "总结我的知识库中最重要的概念",
-                "有哪些页面之间可能存在关联但没有链接？",
-                "知识库中有哪些盲区需要补充？",
-                "对比不同概念的异同"
+                L.tr("chat.suggested.summarize"),
+                L.tr("chat.suggested.connections"),
+                L.tr("chat.suggested.gaps"),
+                L.tr("chat.suggested.compare")
             ]
         } else {
             return [
-                "知识库中有哪些内容？",
-                "帮我整理知识结构",
-                "推荐可以添加的新页面",
-                "解释这些概念之间的关系"
+                L.tr("chat.suggested.whatContent"),
+                L.tr("chat.suggested.organize"),
+                L.tr("chat.suggested.recommend"),
+                L.tr("chat.suggested.explain")
             ]
         }
     }
@@ -203,7 +213,7 @@ struct ChatView: View {
             Divider()
             
             HStack(alignment: .bottom, spacing: 12) {
-                TextField("问你的知识库...", text: $inputText, axis: .vertical)
+                TextField(L.tr("chat.inputPlaceholder"), text: $inputText, axis: .vertical)
                     .font(.subheadline)
                     .lineLimit(1...5)
                     .focused($isInputFocused)

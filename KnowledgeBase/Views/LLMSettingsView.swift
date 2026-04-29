@@ -17,12 +17,12 @@ struct LLMSettingsView: View {
             // Enable/Disable
             Section {
                 Toggle(isOn: $llmService.isEnabled) {
-                    Label("启用 LLM 助手", systemImage: "brain.head.profile.fill")
+                    Label(L.tr("llm.enableAssistant"), systemImage: "brain.head.profile.fill")
                         .foregroundStyle(.wikiText)
                 }
                 .tint(.wikiAccent)
             } header: {
-                Text("状态")
+                Text(L.tr("llm.status"))
             }
             
             // Provider
@@ -51,7 +51,7 @@ struct LLMSettingsView: View {
                     }
                 }
             } header: {
-                Text("服务商")
+                Text(L.tr("llm.provider"))
             }
             
             // Configuration
@@ -87,7 +87,7 @@ struct LLMSettingsView: View {
                 
                 // Base URL
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("API 地址")
+                    Text(L.tr("llm.apiAddress"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     TextField("https://api.openai.com/v1", text: $llmService.baseURL)
@@ -103,7 +103,7 @@ struct LLMSettingsView: View {
                 
                 // Model
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("模型")
+                    Text(L.tr("llm.model"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     TextField("gpt-4o-mini", text: $llmService.model)
@@ -134,7 +134,7 @@ struct LLMSettingsView: View {
                     }
                 }
             } header: {
-                Text("配置")
+                Text(L.tr("llm.configuration"))
             }
             
             // Test Connection
@@ -148,7 +148,7 @@ struct LLMSettingsView: View {
                             Image(systemName: "bolt.horizontal.fill")
                                 .foregroundStyle(.wikiAccent)
                         }
-                        Text(testing ? "测试中..." : "测试连接")
+                        Text(testing ? L.tr("llm.testing") : L.tr("llm.testConnection"))
                             .foregroundStyle(.wikiText)
                     }
                 }
@@ -160,7 +160,7 @@ struct LLMSettingsView: View {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
-                            Text("连接成功！API Key 有效")
+                            Text(L.tr("llm.connectionSuccess"))
                                 .font(.subheadline)
                                 .foregroundStyle(.green)
                         }
@@ -175,44 +175,44 @@ struct LLMSettingsView: View {
                     }
                 }
             } header: {
-                Text("验证")
+                Text(L.tr("llm.validation"))
             }
             
             // Chat History
             Section {
                 HStack {
-                    Label("对话记录", systemImage: "bubble.left.and.bubble.right")
+                    Label(L.tr("llm.chatHistory"), systemImage: "bubble.left.and.bubble.right")
                         .foregroundStyle(.wikiText)
                     Spacer()
-                    Text("\(llmService.chatHistory.count) 条")
+                    Text("\(llmService.chatHistory.count) \(L.tr("llm.messages"))")
                         .foregroundStyle(.wikiSecondary)
                 }
                 
                 Button(role: .destructive, action: {
                     llmService.clearChatHistory()
                 }) {
-                    Label("清空对话记录", systemImage: "trash")
+                    Label(L.tr("llm.clearHistory"), systemImage: "trash")
                 }
             } header: {
-                Text("对话")
+                Text(L.tr("llm.chatSection"))
             }
             
             // Info
             Section {
                 VStack(alignment: .leading, spacing: 10) {
-                    InfoRow(icon: "lock.shield", text: "API Key 仅存储在本地设备")
-                    InfoRow(icon: "doc.text", text: "对话时会发送知识库内容作为上下文")
-                    InfoRow(icon: "network", text: "支持所有 OpenAI 兼容 API")
-                    InfoRow(icon: "arrow.down.doc", text: "智能导入使用 LLM 编译原始资料")
+                    InfoRow(icon: "lock.shield", text: L.tr("llm.info.localKey"))
+                    InfoRow(icon: "doc.text", text: L.tr("llm.info.contextSent"))
+                    InfoRow(icon: "network", text: L.tr("llm.info.openAICompatible"))
+                    InfoRow(icon: "arrow.down.doc", text: L.tr("llm.info.smartIngest"))
                 }
             } header: {
-                Text("说明")
+                Text(L.tr("llm.info"))
             }
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle("LLM 设置")
+        .navigationTitle(L.tr("llm.title"))
         .navigationBarTitleDisplayMode(.inline)
     }
     
@@ -236,7 +236,7 @@ struct LLMSettingsView: View {
                 let valid = try await llmService.validateAPIKey()
                 await MainActor.run {
                     testing = false
-                    testResult = valid ? .success : .failure("验证失败")
+                    testResult = valid ? .success : .failure(L.tr("llm.validationFailed"))
                 }
             } catch {
                 await MainActor.run {

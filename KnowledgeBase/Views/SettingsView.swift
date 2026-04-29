@@ -8,6 +8,7 @@ struct SettingsView: View {
     @State private var showImportSuccess = false
     @State private var importedCount = 0
     @StateObject private var syncService = iCloudSyncService()
+    @State private var selectedLanguage: LanguageMode = L.languageMode
     
     var body: some View {
         NavigationStack {
@@ -20,14 +21,28 @@ struct SettingsView: View {
                                 .tag(mode)
                         }
                     } label: {
-                        Label("外观模式", systemImage: "paintbrush.fill")
+                        Label(L.tr("settings.appearanceMode"), systemImage: "paintbrush.fill")
                             .foregroundStyle(.wikiText)
                     }
                     .tint(.wikiAccent)
                     
                     AccentColorPicker(colors: ["blue", "purple", "green", "orange", "pink", "red", "teal", "indigo"])
+
+                    Picker(selection: $selectedLanguage) {
+                        ForEach(LanguageMode.allCases, id: \.self) { mode in
+                            Label(mode.displayName, systemImage: mode.icon)
+                                .tag(mode)
+                        }
+                    } label: {
+                        Label(L.tr("settings.language"), systemImage: "globe")
+                            .foregroundStyle(.wikiText)
+                    }
+                    .tint(.wikiAccent)
+                    .onChange(of: selectedLanguage) { _, newValue in
+                        L.languageMode = newValue
+                    }
                 } header: {
-                    Text("外观")
+                    Text(L.tr("settings.section.appearance"))
                 }
                 
                 // ── AI 配置 ──
@@ -36,7 +51,7 @@ struct SettingsView: View {
                         ChatView()
                     }
 
-                    SettingsNavigationRow(icon: "wrench.and.screwdriver.fill", title: "LLM 配置", identifier: "AI-LLM设置") {
+                    SettingsNavigationRow(icon: "wrench.and.screwdriver.fill", title: L.tr("settings.llmConfig"), identifier: "AI-LLM设置") {
                         LLMSettingsView()
                     } trailing: {
                         if llmService.isEnabled {
@@ -44,22 +59,22 @@ struct SettingsView: View {
                                 .foregroundStyle(.green)
                                 .font(.caption)
                         } else {
-                            Text("未配置")
+                            Text(L.tr("settings.llmNotConfigured"))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
 
-                    SettingsNavigationRow(icon: "cpu.fill", title: "端侧 LLM", identifier: "AI-端侧LLM") {
+                    SettingsNavigationRow(icon: "cpu.fill", title: L.tr("settings.onDeviceLLM"), identifier: "AI-端侧LLM") {
                         OnDeviceLLMSettingsView()
                     }
                 } header: {
-                    Text("AI")
+                    Text(L.tr("settings.section.ai"))
                 }
                 
                 // ── 数据管理 ──
                 Section {
-                    SettingsNavigationRow(icon: "icloud", title: "iCloud 同步", identifier: "数据-iCloud同步") {
+                    SettingsNavigationRow(icon: "icloud", title: L.tr("settings.iCloudSync"), identifier: "数据-iCloud同步") {
                         iCloudSyncView(syncService: syncService, store: store)
                     } trailing: {
                         if syncService.iCloudAvailable {
@@ -67,7 +82,7 @@ struct SettingsView: View {
                                 .fill(syncService.syncStatus == .synced ? Color.wikiAccent : Color.wikiSecondary)
                                 .frame(width: 8, height: 8)
                         } else {
-                            Text("不可用")
+                            Text(L.tr("settings.unavailable"))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -78,7 +93,7 @@ struct SettingsView: View {
                     }
                     
                     ShareLink(item: exportAllAsMarkdown()) {
-                        Label("导出为 Markdown", systemImage: "square.and.arrow.up")
+                        Label(L.tr("settings.exportMarkdown"), systemImage: "square.and.arrow.up")
                             .foregroundStyle(.wikiText)
                     }
                     
@@ -89,10 +104,10 @@ struct SettingsView: View {
                                 .foregroundStyle(.wikiSecondary)
                                 .frame(width: 24)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("从剪贴板导入")
+                                Text(L.tr("settings.importClipboard"))
                                     .font(.body)
                                     .foregroundStyle(.wikiText)
-                                Text("支持 JSON 数组或 Markdown 分隔文本")
+                                Text(L.tr("settings.importClipboardHint"))
                                     .font(.caption)
                                     .foregroundStyle(.wikiSecondary)
                             }
@@ -101,60 +116,60 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                 } header: {
-                    Text("数据管理")
+                    Text(L.tr("settings.section.data"))
                 }
                 
                 // ── 更多功能 ──
                 Section {
-                    SettingsNavigationRow(icon: "waveform", title: L.tr("tab.voice"), subtitle: "语音录制并自动转写为知识条目", identifier: "功能-语音笔记") {
+                    SettingsNavigationRow(icon: "waveform", title: L.tr("tab.voice"), subtitle: L.tr("settings.voiceNote"), identifier: "功能-语音笔记") {
                         VoiceNoteView()
                     }
 
-                    SettingsNavigationRow(icon: "doc.richtext", title: L.tr("tab.pdf"), subtitle: "导入、阅读与管理 PDF 文档") {
+                    SettingsNavigationRow(icon: "doc.richtext", title: L.tr("tab.pdf"), subtitle: L.tr("settings.pdfManager") ) {
                         PDFLibraryView()
                     }
 
-                    SettingsNavigationRow(icon: "person.2.fill", title: L.tr("tab.collab"), subtitle: "多人协作编辑与知识共享") {
+                    SettingsNavigationRow(icon: "person.2.fill", title: L.tr("tab.collab"), subtitle: L.tr("settings.collaboration")) {
                         CollaborationView()
                     }
 
-                    SettingsNavigationRow(icon: "cube.transparent.fill", title: "3D 图谱", subtitle: "球形分布知识节点，旋转缩放查看全局") {
+                    SettingsNavigationRow(icon: "cube.transparent.fill", title: L.tr("settings.graph3D"), subtitle: L.tr("settings.graph3DHint")) {
                         Graph3DView()
                     }
 
-                    SettingsNavigationRow(icon: "visionpro", title: "空间计算", subtitle: "在 Apple Vision Pro 中沉浸式浏览") {
+                    SettingsNavigationRow(icon: "visionpro", title: L.tr("settings.spatialComputing"), subtitle: L.tr("settings.spatialComputingHint")) {
                         VisionProSpatialView()
                     }
                 } header: {
-                    Text("更多功能")
+                    Text(L.tr("settings.section.moreFeatures"))
                 }
                 
                 // ── 知识库统计 ──
                 Section {
-                    SettingsStatRow(icon: "doc.richtext.fill", label: "总页面", value: "\(store.totalPages)")
-                    SettingsStatRow(icon: "text.word.spacing", label: "总字数", value: "\(store.totalWords)")
+                    SettingsStatRow(icon: "doc.richtext.fill", label: L.tr("settings.totalPages"), value: "\(store.totalPages)")
+                    SettingsStatRow(icon: "text.word.spacing", label: L.tr("settings.totalWords"), value: "\(store.totalWords)")
                     
-                    SettingsStatRow(icon: "exclamationmark.triangle", label: "占位页面", value: "\(store.stubCount)")
-                    Text("被链接但内容为空的页面，建议补充内容")
+                    SettingsStatRow(icon: "exclamationmark.triangle", label: L.tr("settings.stubPages"), value: "\(store.stubCount)")
+                    Text(L.tr("settings.stubPagesHint"))
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary.opacity(0.7))
                     
-                    SettingsStatRow(icon: "clock", label: "操作日志", value: "\(store.logEntries.count)")
+                    SettingsStatRow(icon: "clock", label: L.tr("settings.operationLog"), value: "\(store.logEntries.count)")
                 } header: {
-                    Text("知识库统计")
+                    Text(L.tr("settings.section.stats"))
                 }
                 
                 // ── 维护 ──
                 Section {
-                    SettingsNavigationRow(icon: "tag", title: "标签管理", subtitle: "浏览所有标签及关联页面", identifier: "维护-标签管理") {
+                    SettingsNavigationRow(icon: "tag", title: L.tr("settings.tagManager"), subtitle: L.tr("settings.tagManagerHint"), identifier: "维护-标签管理") {
                         TagCloudView()
                     }
 
-                    SettingsNavigationRow(icon: "stethoscope", title: "健康检查", identifier: "维护-健康检查") {
+                    SettingsNavigationRow(icon: "stethoscope", title: L.tr("settings.healthCheck"), identifier: "维护-健康检查") {
                         LintView()
                     }
 
-                    SettingsNavigationRow(icon: "list.bullet.indent", title: "总索引", identifier: "维护-总索引") {
+                    SettingsNavigationRow(icon: "list.bullet.indent", title: L.tr("settings.masterIndex"), identifier: "维护-总索引") {
                         IndexView()
                     }
 
@@ -162,7 +177,7 @@ struct SettingsView: View {
                         PerformanceDashboardView(service: store.performanceService)
                     }
                 } header: {
-                    Text("维护")
+                    Text(L.tr("settings.section.maintenance"))
                 }
                 
                 // ── 关于 ──
@@ -172,47 +187,47 @@ struct SettingsView: View {
                             Image(systemName: "books.vertical.circle.fill")
                                 .font(.title2)
                                 .foregroundStyle(.wikiAccent)
-                            Text("知识库")
+                            Text(L.tr("settings.aboutApp"))
                                 .font(.title3.weight(.bold))
                                 .foregroundStyle(.wikiText)
                         }
                         
-                        Text("基于 Karpathy LLM Wiki 方法论的 iOS 知识管理应用")
+                        Text(L.tr("settings.aboutAppDesc"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     }
                     .padding(.vertical, 4)
                 } header: {
-                    Text("关于")
+                    Text(L.tr("settings.section.about"))
                 }
                 
                 // ── 危险操作 ──
                 Section {
                     Button(role: .destructive, action: { showResetConfirmation = true }) {
-                        Label("重置知识库", systemImage: "trash")
+                        Label(L.tr("settings.reset"), systemImage: "trash")
                     }
                     .accessibilityIdentifier("危险-重置知识库")
                 } header: {
-                    Text("危险操作")
+                    Text(L.tr("settings.section.danger"))
                 }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle("设置")
-            .confirmationDialog("确认重置", isPresented: $showResetConfirmation) {
-                Button("重置所有数据", role: .destructive) {
+            .navigationTitle(L.tr("settings.settings"))
+            .confirmationDialog(L.tr("settings.confirmReset"), isPresented: $showResetConfirmation) {
+                Button(L.tr("settings.resetAllData"), role: .destructive) {
                     store.resetAllData()
                     store.seedDefaultContent()
                 }
-                Button("取消", role: .cancel) {}
+                Button(L.tr("settings.cancel"), role: .cancel) {}
             } message: {
-                Text("此操作将删除所有页面和日志，恢复为默认内容。不可恢复。")
+                Text(L.tr("settings.resetWarning"))
             }
-            .alert("导入完成", isPresented: $showImportSuccess) {
-                Button("好的") {}
+            .alert(L.tr("settings.importComplete"), isPresented: $showImportSuccess) {
+                Button(L.tr("settings.ok")) {}
             } message: {
-                Text("成功导入 \(importedCount) 个页面")
+                Text(L.trf("settings.importSuccess", Int(importedCount)))
             }
         }
     }

@@ -26,16 +26,16 @@ struct SidebarView: View {
             // ── 导航：总索引、操作日志、常用知识 ──
             Section {
                 Button(action: { showIndexView = true }) {
-                    Label("总索引", systemImage: "list.bullet.indent")
+                    Label(L.tr("sidebar.masterIndex"), systemImage: "list.bullet.indent")
                         .foregroundStyle(.wikiAccent)
                 }
-                .accessibilityIdentifier("总索引")
+                .accessibilityIdentifier("masterIndex")
 
                 Button(action: { showLogView = true }) {
-                    Label("操作日志", systemImage: "clock.arrow.circlepath")
+                    Label(L.tr("sidebar.operationLog"), systemImage: "clock.arrow.circlepath")
                         .foregroundStyle(.wikiSecondary)
                 }
-                .accessibilityIdentifier("操作日志")
+                .accessibilityIdentifier("operationLog")
 
                 // 常用知识：显示前 3 条，点击直接跳转
                 if !frequentPages.isEmpty {
@@ -47,7 +47,7 @@ struct SidebarView: View {
                                         .foregroundStyle(page.type.themedColor)
                                     Text(page.title)
                                     Spacer()
-                                    Text("\(page.outgoingLinks.count)链")
+                                    Text("\(page.outgoingLinks.count)\(L.tr("sidebar.linkUnit"))")
                                         .foregroundStyle(.wikiSecondary)
                                 }
                             }
@@ -56,7 +56,7 @@ struct SidebarView: View {
                         HStack {
                             Image(systemName: "flame.fill")
                                 .foregroundStyle(.orange)
-                            Text("常用知识")
+                            Text(L.tr("sidebar.frequentKnowledge"))
                                 .foregroundStyle(.wikiText)
                             Spacer()
                             Image(systemName: "chevron.up.chevron.down")
@@ -67,7 +67,7 @@ struct SidebarView: View {
                     .tint(.orange)
                 }
             } header: {
-                Text("导航")
+                Text(L.tr("sidebar.navigation"))
                     .foregroundStyle(.wikiSecondary)
             }
 
@@ -80,7 +80,7 @@ struct SidebarView: View {
                             .tag(page.id)
                     }
                 } header: {
-                    Label("已收藏", systemImage: "pin.fill")
+                    Label(L.tr("pinned"), systemImage: "pin.fill")
                         .foregroundStyle(.wikiComparison)
                 }
             }
@@ -91,7 +91,7 @@ struct SidebarView: View {
                     HStack {
                         Image(systemName: "stethoscope")
                             .foregroundStyle(store.lintIssues.isEmpty ? .green : .orange)
-                        Text("健康检查")
+                        Text(L.tr("sidebar.healthCheck"))
                             .foregroundStyle(.wikiText)
                         Spacer()
                         if !store.lintIssues.isEmpty {
@@ -105,9 +105,9 @@ struct SidebarView: View {
                         }
                     }
                 }
-                .accessibilityIdentifier("健康检查")
+                .accessibilityIdentifier("healthCheck")
             } header: {
-                Text("工具")
+                Text(L.tr("sidebar.tools"))
                     .foregroundStyle(.wikiSecondary)
             }
 
@@ -152,7 +152,7 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle("知识库")
+        .navigationTitle(L.tr("tab.wiki"))
         .sheet(isPresented: $showLogView) {
             LogView()
         }

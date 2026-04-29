@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Wiki Empty State
 /// 通用空状态组件，统一各页面的空数据展示。
 /// - Parameters:
-///   - icon: SF Symbol 图标名
+///   - icon: SF Symbol 主图标名
 ///   - title: 主标题
 ///   - description: 可选描述文本
 ///   - hint: 可选提示（通常是高亮小字）
@@ -47,31 +47,59 @@ struct WikiEmptyState: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 48))
-                .foregroundStyle(.wikiSecondary)
+        VStack(spacing: 24) {
+            // 视觉区：图标 + 装饰卡片
+            ZStack {
+                // 背景装饰圆
+                Circle()
+                    .fill(Color.wikiAccent.opacity(0.07))
+                    .frame(width: 120, height: 120)
 
-            Text(title)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.wikiText)
+                Circle()
+                    .fill(Color.wikiAccent.opacity(0.04))
+                    .frame(width: 160, height: 160)
 
-            if let description = description {
-                Text(description)
-                    .font(.subheadline)
-                    .foregroundStyle(.wikiSecondary)
+                // 主图标
+                Image(systemName: icon)
+                    .font(.system(size: 44, weight: .light))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.wikiAccent, .wikiAccent.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+            .frame(height: 100)
+
+            // 文字区
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.wikiText)
+
+                if let description = description {
+                    Text(description)
+                        .font(.subheadline)
+                        .foregroundStyle(.wikiSecondary)
+                        .multilineTextAlignment(.center)
+                }
             }
 
+            // 提示区
             if let hint = hint {
                 Text(hint)
                     .font(.caption)
-                    .foregroundStyle(.wikiAccent.opacity(0.8))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.wikiAccent.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                    .foregroundStyle(.wikiAccent)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
+                    .background(
+                        RoundedRectangle(cornerRadius: WikiUI.chipRadius)
+                            .fill(Color.wikiAccent.opacity(0.1))
+                    )
             }
 
+            // 操作按钮
             if let action = action {
                 Button(action: action.handler) {
                     HStack(spacing: 6) {
@@ -84,12 +112,20 @@ struct WikiEmptyState: View {
                     .foregroundStyle(actionForegroundColor(for: action.role))
                     .padding(.horizontal, 20)
                     .padding(.vertical, 10)
-                    .background(actionBackgroundColor(for: action.role))
-                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
+                    .background(
+                        action.role == .primary || action.role == nil
+                            ? Color.wikiAccent
+                            : Color.clear
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.small))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: WikiUI.small)
+                            .stroke(action.role == .primary || action.role == nil ? Color.clear : Color.wikiAccent, lineWidth: 1)
+                    )
                 }
             }
         }
-        .padding()
+        .padding(.horizontal, 32)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(buildAccessibilityLabel())
@@ -97,37 +133,17 @@ struct WikiEmptyState: View {
 
     private func actionForegroundColor(for role: Action.Role?) -> Color {
         switch role {
-        case .primary, .none:
-            Color.white
-        case .secondary:
-            Color.wikiAccent
-        case .destructive:
-            Color.red
-        }
-    }
-
-    private func actionBackgroundColor(for role: Action.Role?) -> Color {
-        switch role {
-        case .primary, .none:
-            Color.wikiAccent
-        case .secondary:
-            Color.wikiAccent.opacity(0.1)
-        case .destructive:
-            Color.red.opacity(0.1)
+        case .primary, .none: return .white
+        case .secondary: return .wikiAccent
+        case .destructive: return .red
         }
     }
 
     private func buildAccessibilityLabel() -> String {
         var label = "\(title)。"
-        if let description = description {
-            label += " \(description)。"
-        }
-        if let hint = hint {
-            label += " 提示：\(hint)"
-        }
-        if action != nil {
-            label += " 可执行操作。"
-        }
+        if let description = description { label += " \(description)。" }
+        if let hint = hint { label += " 提示：\(hint)" }
+        if action != nil { label += " 可执行操作。" }
         return label
     }
 }

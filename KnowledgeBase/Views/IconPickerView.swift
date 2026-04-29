@@ -9,32 +9,36 @@ struct IconPickerView: View {
 
     // MARK: - Icon Categories
     private static let iconCategories: [(String, [String])] = [
-        ("常用", [
+        ("iconPicker.common", [
             "person.text.rectangle.fill", "building.2.fill", "books.vertical.fill", "lightbulb.fill",
             "doc.richtext.fill", "globe", "star.fill", "heart.fill",
             "tag.fill", "folder.fill", "paperclip", "link",
             "camera.fill", "music.note", "paintpalette.fill", "hammer.fill"
         ]),
-        ("学术", [
+        ("iconPicker.academic", [
             "graduationcap.fill", "brain.head.profile.fill", "atom", "dna",
             "chart.bar.fill", "chart.pie.fill", "cube.box.fill", "gearshape.fill",
             "cpu", "desktopcomputer", "server.rack", "circle.hexagongrid.fill"
         ]),
-        ("自然", [
+        ("iconPicker.nature", [
             "tree.fill", "leaf.fill", "sun.max.fill", "moon.fill",
             "cloud.fill", "drop.fill", "flame.fill", "bolt.fill",
             "mountain.2.fill", "water.waves", "wind", "snowflake"
         ]),
-        ("交通", [
+        ("iconPicker.transport", [
             "airplane", "car.fill", "train.side.front.filled",
             "ship.fill", "bicycle", "sailboat.fill"
         ]),
-        ("符号", [
+        ("iconPicker.symbols", [
             "exclamationmark.triangle.fill", "checkmark.circle.fill",
             "xmark.circle.fill", "questionmark.circle.fill",
             "info.circle.fill", "bell.fill", "flag.fill", "bookmark.fill"
         ])
     ]
+
+    private func categoryDisplayName(_ key: String) -> String {
+        L.tr(key)
+    }
 
     private let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 6)
 
@@ -48,17 +52,17 @@ struct IconPickerView: View {
 
                     // Icon categories
                     ForEach(Self.iconCategories, id: \.0) { category, icons in
-                        iconCategorySection(title: category, icons: icons)
+                        iconCategorySection(title: categoryDisplayName(category), icons: icons)
                     }
                 }
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle("选择图标")
+            .navigationTitle(L.tr("iconPicker.selectIcon"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("完成") { dismiss() }
+                    Button(L.tr("misc.ok")) { dismiss() }
                         .fontWeight(.medium)
                 }
             }
@@ -76,7 +80,7 @@ struct IconPickerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(selectedIcon != nil ? "已选择自定义图标" : "使用默认图标")
+                Text(selectedIcon != nil ? L.tr("iconPicker.customSelected") : L.tr("iconPicker.useDefault"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.wikiText)
                 if selectedIcon != nil {
@@ -93,7 +97,7 @@ struct IconPickerView: View {
                     selectedIcon = nil
                     dismiss()
                 }) {
-                    Text("重置")
+                    Text(L.tr("iconPicker.reset"))
                         .font(.caption.weight(.medium))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)

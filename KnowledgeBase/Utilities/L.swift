@@ -1,39 +1,86 @@
 import Foundation
 
+// MARK: - Language Mode
+/// 语言偏好选项
+enum LanguageMode: String, CaseIterable {
+    case system
+    case chinese
+    case english
+
+    var displayName: String {
+        switch self {
+        case .system: return L.tr("settings.language.system")
+        case .chinese: return "简体中文"
+        case .english: return "English"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .system: return "globe"
+        case .chinese: return "character.book.closed"
+        case .english: return "character.cursor.ibeam"
+        }
+    }
+}
+
 // MARK: - Localization Helper
 /// Simple localization system: Chinese Simplified (zh-Hans) default, English fallback.
-/// Detects system language automatically.
+/// Supports user-configurable language preference, defaults to system language.
 enum L {
-    
-    // MARK: - Language Detection
-    static var currentLanguage: String {
-        let preferred = Locale.preferredLanguages.first ?? "en"
-        if preferred.hasPrefix("zh-Hans") || preferred.hasPrefix("zh-CN") || preferred.hasPrefix("zh_Hans") {
-            return "zh-Hans"
-        }
-        return "en"
+
+    // MARK: - Language Preference
+    /// 用户语言偏好，存储在 UserDefaults
+    private static let languageModeKey = "km_language_mode"
+    private static var languageModeRaw: String {
+        get { UserDefaults.standard.string(forKey: languageModeKey) ?? LanguageMode.system.rawValue }
+        set { UserDefaults.standard.set(newValue, forKey: languageModeKey) }
     }
-    
+
+    /// 当前语言模式
+    static var languageMode: LanguageMode {
+        get { LanguageMode(rawValue: languageModeRaw) ?? .system }
+        set { languageModeRaw = newValue.rawValue }
+    }
+
+    /// 当前实际语言代码：优先读用户偏好，否则跟随系统
+    static var currentLanguage: String {
+        switch languageMode {
+        case .system:
+            let preferred = Locale.preferredLanguages.first ?? "en"
+            if preferred.hasPrefix("zh-Hans") || preferred.hasPrefix("zh-CN") || preferred.hasPrefix("zh_Hans") {
+                return "zh-Hans"
+            }
+            return "en"
+        case .chinese:
+            return "zh-Hans"
+        case .english:
+            return "en"
+        }
+    }
+
     static var isChinese: Bool { currentLanguage == "zh-Hans" }
-    
+
     // MARK: - Lookup
-    private static var strings: [String: String] = {
-        loadStrings()
-    }()
-    
-    private static func loadStrings() -> [String: String] {
+    /// 每次调用 tr() 时重新读取语言，确保语言切换后立即生效
+    static func tr(_ key: String) -> String {
         let lang = currentLanguage
         if let url = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: "\(lang).lproj"),
            let data = try? Data(contentsOf: url),
            let dict = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: String] {
-            return dict
+            return dict[key] ?? key
         }
         // Fallback: use embedded strings
-        return lang == "zh-Hans" ? zhStrings : enStrings
+        return lang == "zh-Hans" ? zhStrings[key] ?? key : enStrings[key] ?? key
     }
-    
-    static func tr(_ key: String) -> String {
-        strings[key] ?? key
+
+    /// 带格式化参数的翻译，如 trf("settings.count", 42) → "共 42 条"
+    static func trf(_ key: String, _ args: CVarArg...) -> String {
+        let template = tr(key)
+        if args.isEmpty {
+            return template
+        }
+        return String(format: template, arguments: args)
     }
     
     // MARK: - Embedded Strings (Fallback)
@@ -124,8 +171,6 @@ enum L {
         
         // MARK: - Ingest
         "ingest.title": "知识导入",
-        "ingest.subtitle": "将原始资料编译到 Wiki，自动提取关键信息并建立交叉引用",
-        "ingest.ocrScan": "OCR 扫描",
         "ingest.titleLabel": "标题",
         "ingest.titlePlaceholder": "输入页面标题",
         "ingest.typeLabel": "类型",
@@ -135,7 +180,6 @@ enum L {
         "ingest.smartIngest": "智能导入 (LLM)",
         "ingest.smartIngest.description": "LLM 将自动编译原始资料：提取关键信息、建立交叉引用、推荐标签和类型",
         "ingest.compiling": "编译中...",
-        "ingest.ingestButton": "导入到 Wiki",
         "ingest.success": "导入成功！知识已编译到 Wiki",
         "ingest.flow": "导入流程",
         "ingest.step1": "将原始资料粘贴到内容区域",
@@ -165,6 +209,8 @@ enum L {
         "graph.title": "知识图谱",
         "graph.emptyDesc": "页面间的关联将在此可视化",
         "graph.all": "全部",
+        "graph.nodesConnections": "%d 节点 · %d 连接",
+        "graph.linkHint": "在编辑页面时使用 [[页面名]] 即可建立链接",
         "graph.nodes": "节点",
         "graph.connections": "连接",
         
@@ -173,7 +219,6 @@ enum L {
         "settings.darkMode": "暗色模式",
         "settings.accentColor": "主题色",
         "settings.wikiStats": "知识库统计",
-        "settings.totalPages": "总页面",
         "settings.totalWords": "总字数",
         "settings.stubPages": "占位页面",
         "settings.operationLog": "操作日志",
@@ -184,7 +229,6 @@ enum L {
         "settings.notConfigured": "未配置",
         "settings.healthCheck": "健康检查",
         "settings.fullIndex": "总索引",
-        "settings.exportMarkdown": "导出为 Markdown",
         "settings.importClipboard": "从剪贴板导入",
         "settings.about": "关于",
         "settings.aboutDesc": "基于 Karpathy LLM Wiki 方法论的 iOS 知识管理应用",
@@ -199,7 +243,6 @@ enum L {
         "settings.feature.darkTheme": "暗色主题",
         "settings.dangerZone": "危险操作",
         "settings.resetWiki": "重置知识库",
-        "settings.confirmReset": "确认重置",
         "settings.resetAllData": "重置所有数据",
         "settings.resetWarning": "此操作将删除所有页面和日志，恢复为默认内容。不可恢复。",
         "settings.importComplete": "导入完成",
@@ -393,7 +436,8 @@ enum L {
         "widget.stub": "占位",
         "widget.wordCount": "字数",
         "widget.recentUpdates": "最近更新",
-        
+        "widget.pageCount": "%d 页",
+
         // MARK: - Shortcuts
         "shortcuts.searchWiki": "搜索知识库",
         "shortcuts.searchWikiDesc": "在知识库中搜索内容",
@@ -408,6 +452,8 @@ enum L {
         "shortcuts.pageContent": "页面内容",
         "shortcuts.createdPage": "已创建页面「%@」",
         "shortcuts.statsFormat": "知识库统计：总页面 %d，总字数 %d，实体 %d，概念 %d，占位 %d",
+        "shortcuts.stats": "统计",
+        "shortcuts.search": "搜索",
         
         // MARK: - Lint Messages
         "lint.orphanPage": "孤立页面: 「%@」没有任何反向链接",
@@ -796,7 +842,273 @@ enum L {
         "settings.theme.system": "跟随系统",
         "settings.theme.light": "浅色模式",
         "settings.theme.dark": "深色模式",
+
+        // MARK: - Language Settings
+        "settings.language.system": "跟随系统",
+        "settings.appearanceMode": "外观模式",
+        "settings.language": "语言",
+
+        "settings.section.danger": "危险操作",
+
+        "settings.onDeviceLLM": "端侧 LLM",
+        "settings.exportMarkdown": "导出为 Markdown",
+        "settings.spatialComputingHint": "在 Apple Vision Pro 中沉浸式浏览",
+        "settings.totalPages": "总页面",
+        "settings.stubPagesHint": "被链接但内容为空的页面，建议补充内容",
+        "settings.tagManagerHint": "浏览所有标签及关联页面",
+        "settings.masterIndex": "总索引",
+        "settings.aboutAppDesc": "基于 Karpathy LLM Wiki 方法论的 iOS 知识管理应用",
+        "settings.confirmReset": "确认重置",
+        "settings.cancel": "取消",
+        "settings.settings": "设置",
+
+        "ingest.hero.subtitle": "将原始资料编译到 Wiki，自动提取关键信息并建立交叉引用",
+        "ingest.ocrScan": "OCR 扫描",
+        "ingest.ocrScanHint": "从图片中识别文字",
+        "ingest.tip5": "更新索引和操作日志",
+
+        "tooltip.tag.desc": "为页面添加标签，方便分类检索和批量管理",
+
+        "misc.gotIt": "知道了",
+
+        // MARK: - Page Detail
+        "page.empty": "这个页面还没有内容",
+        "page.emptyHint": "点击右上角 ✏️ 开始编辑，使用 [[页面名]] 建立关联",
+        "page.pin": "固定页面",
+        "page.unpin": "取消固定",
+        "page.backlinks": "反向链接",
+        "page.backlinksCount": "%d 个页面",
+        "page.edit": "编辑页面",
+        "page.doneEditing": "完成编辑",
+        "page.type": "页面类型",
+        "page.icon": "图标",
+        "page.tags": "标签",
+        "page.alias": "别名",
+        "page.confidence": "可信度",
+        "page.status": "状态",
+        "page.created": "创建时间",
+        "page.updated": "更新时间",
+        "page.wordCount": "%d 字",
+        "page.outLinks": "出链 (%d)",
+        "page.backLinks": "反向链接 (%d)",
+        "page.noOutLinks": "无出链",
+        "page.noBackLinks": "无反向链接",
+        "page.searchPlaceholder": "搜索页面...",
+        "page.close": "关闭",
+
+        // MARK: - Create Page
+        "create.pageTitle": "页面标题",
+        "create.selectType": "选择类型",
+        "create.selectIcon": "选择图标",
+        "create.contentPlaceholder": "输入内容...",
+        "create.creating": "创建中...",
+        "create.selectTypeHint": "为新页面选择一个合适的类型",
+
+        // MARK: - iCloud Sync
+        "icloud.title": "iCloud 同步",
+        "icloud.status": "iCloud 同步状态",
+        "icloud.upload": "上传到 iCloud",
+        "icloud.download": "从 iCloud 下载",
+        "icloud.bidirectional": "双向同步",
+        "icloud.notConfigured": "未配置",
+        "icloud.enableSync": "启用 iCloud 同步",
+        "icloud.disableSync": "停用 iCloud 同步",
+        "icloud.syncNow": "立即同步",
+        "icloud.neverSynced": "从未同步",
+
+        // MARK: - OCR Scan
+        "ocr.scan": "扫描图片",
+        "ocr.confirm": "确定",
+        "ocr.scanFailed": "文字识别失败",
+        "ocr.noTextFound": "未在图片中找到文字",
+        "ocr.usePhoto": "使用照片",
+        "ocr.useCamera": "拍照",
+        "ocr.processing": "正在识别文字...",
+
+        // MARK: - LLM Settings
+        "llm.title": "LLM 设置",
+        "llm.enable": "启用 LLM 助手",
+        "llm.apiKey": "API Key",
+        "llm.apiKeyPlaceholder": "输入 API Key",
+        "llm.apiAddressPlaceholder": "https://api.openai.com",
+        "llm.modelPlaceholder": "gpt-4o-mini",
+        "llm.save": "保存",
+        "llm.saved": "已保存",
+        "llm.notConfigured": "未配置",
+        "llm.configured": "已配置",
+        "llm.notEnabled": "未启用",
+        "llm.enabled": "已启用",
+
+        // MARK: - Tag Cloud
+        "tag.title": "标签管理",
+        "tag.noTags": "还没有任何标签",
+        "tag.noTagsHint": "在编辑页面时添加标签，或导入内容时指定标签",
+        "tag.rename": "重命名",
+        "tag.delete": "删除",
+        "tag.tagPages": "标签 #%@ 的页面",
+        "tag.allPages": "所有页面",
+        "tag.manage": "管理",
+
+        // MARK: - PDF Reader
+        "pdf.title": "PDF 文档",
+        "pdf.libraryHint": "添加 PDF 文档，阅读并高亮标注，提取内容到知识库",
+        "pdf.add": "添加 PDF",
+        "pdf.addDocument": "添加文档",
+        "pdf.import": "导入",
+        "pdf.cancel": "取消",
+        "pdf.noDocuments": "还没有 PDF 文档",
+        "pdf.noDocumentsHint": "点击上方按钮添加 PDF 文件",
+
+        // MARK: - Chat
+        "chat.notConfigured": "请先配置 LLM API Key",
+        "chat.error": "错误",
+        "chat.ok": "确定",
+        "chat.expanding": "展开全文",
+        "chat.collapse": "收起",
+        "chat.sending": "发送中...",
+
+        // MARK: - Sidebar
+        "sidebar.masterIndex": "总索引",
+        "sidebar.backToMain": "返回",
+
+        // MARK: - Search
+        "search.title": "搜索",
+        "search.recentUpdates": "最近更新",
+        "search.recentCreated": "最近创建",
+        "search.byTitle": "标题",
+        "search.byType": "类型",
+
+        // MARK: - Index
+        "index.entities": "实体",
+        "index.concepts": "概念",
+        "index.sources": "来源",
+        "index.comparisons": "对比",
+        "index.maps": "地图",
+        "index.raw": "原始",
+        "index.total": "总计",
+        "index.lastUpdated": "最后更新",
+        "index.viewAll": "查看全部",
+
+        // MARK: - Markdown Editor
+        "editor.searchPage": "搜索页面...",
+        "editor.tagPlaceholder": "输入标签",
+        "editor.aliasPlaceholder": "输入别名",
+
+        // MARK: - Lint
+        "lint.title": "健康检查",
+        "lint.running": "检查中...",
+        "lint.noIssues": "知识库状态良好",
+        "lint.noIssuesHint": "没有发现断链、孤立页面或矛盾内容",
+        "lint.ok": "正常",
+
+        // MARK: - Backlinks
+        "backlinks.title": "反向链接",
+        "backlinks.noOutLinks": "无出链",
+        "backlinks.noBackLinks": "无反向链接",
+
+        // MARK: - Graph
+
+        // MARK: - Ingest View
+        "ingest.smartIngestDone": "智能导入",
+        "ingest.smartIngestDoneDesc": "LLM 编译完成，类型: %@",
+
+        // MARK: - Loading
+        "loading": "加载中...",
+
+        // MARK: - Log
+        "log.title": "操作日志",
+
+        // MARK: - Widget & Watch
+        "widget.title": "知识库",
+        "widget.characters": "字",
+        "widget.placeholder": "占位",
+
+        // MARK: - Page Detail (Format & Accessibility)
+        "page.statusFormat": "状态: %@",
+        "page.confidenceFormat": "可信度: %@",
+        "page.deletePageTitle": "删除「%@」",
+        "page.typeAccessibility": "页面类型: %@",
+        "page.statusAccessibility": "状态: %@",
+        "page.confidenceAccessibility": "可信度: %@",
+        "page.titleAccessibility": "页面标题: %@",
+        "page.aliasAccessibility": "别名: %@",
+        "page.tagsAccessibility": "标签: %@",
+        "page.createdFormat": "创建: %@",
+        "page.updatedFormat": "更新: %@",
+        "page.outLinksCount": "%d 出链",
+        "page.metaAccessibility": "元信息，创建于 %@，%@ 字，%d 个出站链接",
+        "page.doubleTapToNavigate": "双击跳转到该页面",
+        "page.confirmDelete": "确认删除",
+        "page.deleteMessage": "此操作不可恢复，页面及所有引用将被删除。",
+
+        // MARK: - iCloud Sync (Additional)
+        "icloud.lastSyncFormat": "上次同步：%@",
+        "icloud.pullWillOverwrite": "从 iCloud 下载将覆盖本地数据",
+        "icloud.pullOverwriteMessage": "所有本地页面将被远程数据替换，此操作不可撤销。",
+        "icloud.autoSyncFailed": "自动同步失败",
+
+        // MARK: - Sidebar (Additional)
+        "sidebar.frequentKnowledge": "常用知识",
+        "sidebar.linkUnit": "链",
+
+        // MARK: - OCR (Additional)
+        "ocr.scanTag": "扫描",
+        "ocr.addTag": "添加",
+        "ocr.changeIcon": "更换",
+        "ocr.customIcon": "自定义",
+        "ocr.charCountFormat": "字数：%d",
+
+        // MARK: - PDF (Additional)
+        "pdf.noteLabel": "备注：",
+        "pdf.ingestModeFormat": "模式: %@",
+        "pdf.pageCountFormat": "%d 页",
+        "pdf.highlightCountFormat": "%d 标注",
+        "pdf.createdPage": "创建页面 %@",
+        "pdf.pageNumber": "第 %d 页",
+
+        // MARK: - Tag (Additional)
+        "tag.renameTag": "重命名标签",
+        "tag.newName": "新名称",
+        "tag.renameMessage": "将 #%@ 重命名为新名称",
+        "tag.deleteTag": "删除标签",
+        "tag.deleteMessage": "将从 %d 个页面中移除 #%@，此操作不可撤销",
+
+        // MARK: - Search (Additional)
+        "search.noResultsHint": "尝试更换关键词或调整筛选条件",
+        "search.pagesCount": "%d 个页面",
+        "search.search": "搜索",
+
+        // MARK: - Index (Additional)
+        "index.entityCount": "实体 (%d)",
+        "index.conceptCount": "概念 (%d)",
+        "index.sourceCount": "来源 (%d)",
+        "index.comparisonCount": "对比 (%d)",
+        "index.wordCount": "%d 字",
+
+        // MARK: - Icon Picker
+        "iconPicker.common": "常用",
+        "iconPicker.academic": "学术",
+        "iconPicker.nature": "自然",
+        "iconPicker.transport": "交通",
+        "iconPicker.symbols": "符号",
+        "iconPicker.selectIcon": "选择图标",
+        "iconPicker.customSelected": "已选择自定义图标",
+        "iconPicker.useDefault": "使用默认图标",
+        "iconPicker.reset": "重置",
+        "iconPicker.allIcons": "全部图标",
+
+        // MARK: - Backlinks (Additional)
+        "backlinks.outgoingCount": "出链 (%d)",
+        "backlinks.backlinksCount": "反向链接 (%d)",
+
+        // MARK: - Splash (Additional)
+        "splash.appName": "知识库",
+
+        // MARK: - Collaboration
+        "collab.room": "知识库 Room",
+        "collab.joining": "正在加入房间...",
     ]
+
     
     private static let enStrings: [String: String] = [
         // MARK: - Tab Bar
@@ -883,7 +1195,6 @@ enum L {
         // MARK: - Ingest
         "ingest.title": "Knowledge Ingest",
         "ingest.subtitle": "Compile raw material into Wiki, auto-extract key info and build cross-references",
-        "ingest.ocrScan": "OCR Scan",
         "ingest.titleLabel": "Title",
         "ingest.titlePlaceholder": "Enter page title",
         "ingest.typeLabel": "Type",
@@ -923,6 +1234,8 @@ enum L {
         "graph.title": "Knowledge Graph",
         "graph.emptyDesc": "Page connections will be visualized here",
         "graph.all": "All",
+        "graph.nodesConnections": "%d nodes · %d connections",
+        "graph.linkHint": "Use [[Page Name]] in the editor to create links",
         "graph.nodes": "nodes",
         "graph.connections": "connections",
         
@@ -931,7 +1244,6 @@ enum L {
         "settings.darkMode": "Dark Mode",
         "settings.accentColor": "Accent Color",
         "settings.wikiStats": "Wiki Statistics",
-        "settings.totalPages": "Total Pages",
         "settings.totalWords": "Total Words",
         "settings.stubPages": "Stub Pages",
         "settings.operationLog": "Operation Log",
@@ -942,7 +1254,6 @@ enum L {
         "settings.notConfigured": "Not Configured",
         "settings.healthCheck": "Health Check",
         "settings.fullIndex": "Full Index",
-        "settings.exportMarkdown": "Export as Markdown",
         "settings.importClipboard": "Import from Clipboard",
         "settings.about": "About",
         "settings.aboutDesc": "iOS knowledge management app based on Karpathy LLM Wiki methodology",
@@ -957,7 +1268,6 @@ enum L {
         "settings.feature.darkTheme": "Dark theme",
         "settings.dangerZone": "Danger Zone",
         "settings.resetWiki": "Reset Wiki",
-        "settings.confirmReset": "Confirm Reset",
         "settings.resetAllData": "Reset All Data",
         "settings.resetWarning": "This will delete all pages and logs, restoring default content. Cannot be undone.",
         "settings.importComplete": "Import Complete",
@@ -1151,6 +1461,7 @@ enum L {
         "widget.stub": "Stub",
         "widget.wordCount": "Word Count",
         "widget.recentUpdates": "Recent Updates",
+        "widget.pageCount": "%d pages",
         
         // MARK: - Shortcuts
         "shortcuts.searchWiki": "Search Wiki",
@@ -1554,5 +1865,336 @@ enum L {
         "settings.theme.system": "System",
         "settings.theme.light": "Light",
         "settings.theme.dark": "Dark",
+
+        // MARK: - Language Settings
+        "settings.language.system": "Follow System",
+        "settings.appearanceMode": "Appearance",
+        "settings.language": "Language",
+
+        // MARK: - Settings Sections
+        "settings.section.appearance": "Appearance",
+        "settings.section.ai": "AI",
+        "settings.section.data": "Data Management",
+        "settings.section.moreFeatures": "More Features",
+        "settings.section.stats": "Knowledge Base Statistics",
+        "settings.section.maintenance": "Maintenance",
+        "settings.section.about": "About",
+        "settings.section.danger": "Danger Zone",
+
+        // MARK: - Settings Labels
+        "settings.llmConfig": "LLM Settings",
+        "settings.llmNotConfigured": "Not Configured",
+        "settings.onDeviceLLM": "On-Device LLM",
+        "settings.exportMarkdown": "Export as Markdown",
+        "settings.importClipboardHint": "Supports JSON array or Markdown separated text",
+        "settings.voiceNote": "Voice Recording & Transcription",
+        "settings.pdfManager": "Import, Read & Manage PDF Documents",
+        "settings.collaboration": "Multi-person Collaboration & Sharing",
+        "settings.graph3D": "3D Graph",
+        "settings.graph3DHint": "Spherical knowledge nodes, rotate and zoom to explore",
+        "settings.spatialComputing": "Spatial Computing",
+        "settings.spatialComputingHint": "Immersive browsing in Apple Vision Pro",
+        "settings.totalPages": "Total Pages",
+        "settings.stubPagesHint": "Pages that are linked but have no content",
+        "settings.tagManager": "Tag Manager",
+        "settings.tagManagerHint": "Browse all tags and their associated pages",
+        "settings.masterIndex": "Master Index",
+        "settings.reset": "Reset Knowledge Base",
+        "settings.aboutApp": "Knowledge Base",
+        "settings.aboutAppDesc": "iOS knowledge management app based on Karpathy's LLM Wiki methodology",
+        "settings.confirmReset": "Confirm Reset",
+        "settings.cancel": "Cancel",
+        "settings.ok": "OK",
+        "settings.importSuccess": "Successfully imported %d pages",
+        "settings.settings": "Settings",
+
+        // MARK: - Ingest
+        "ingest.hero.title": "Knowledge Import",
+        "ingest.hero.subtitle": "Compile raw materials into your knowledge base, auto-extract key information and create cross-references",
+        "ingest.ocrScan": "OCR Scan",
+        "ingest.ocrScanHint": "Recognize text from images",
+        "ingest.manualEntry": "Manual Entry",
+        "ingest.manualEntryHint": "Paste or type content",
+        "ingest.manualTitle": "Manual Entry",
+        "ingest.field.title": "Title",
+        "ingest.field.type": "Type",
+        "ingest.field.titlePlaceholder": "Enter page title",
+        "ingest.field.tags": "Tags (comma-separated)",
+        "ingest.field.tagsPlaceholder": "AI, Knowledge Management, LLM",
+        "ingest.field.content": "Content",
+        "ingest.submit": "Import to Wiki",
+        "ingest.submitting": "Compiling...",
+        "ingest.smartToggle": "Smart Import (LLM)",
+        "ingest.smartToggleHint": "LLM will auto-compile raw materials: extract key info, create cross-references, recommend tags and types",
+        "ingest.field.icon": "Icon",
+        "ingest.iconCustom": "Customized",
+        "ingest.iconDefault": "Default",
+        "ingest.iconReset": "Reset",
+        "ingest.preview": "LLM Compilation Preview",
+        "ingest.previewConfirm": "Confirm Import",
+        "ingest.previewDiscard": "Discard",
+        "ingest.suggestLinks": "Suggested Links",
+        "ingest.tips": "Import Process",
+        "ingest.tip1": "Paste raw materials into the content area",
+        "ingest.tip2": "Select page type, icon and tags",
+        "ingest.tip3": "Click Import, system will auto-compile",
+        "ingest.tip4": "Auto-detect cross-references with existing pages",
+        "ingest.tip5": "Update index and operation log",
+
+        // MARK: - Tooltip Descriptions
+        "tooltip.createPage.title": "Create Your First Page",
+        "tooltip.createPage.desc": "Tap the + button in the top right, choose a page type, and create your first knowledge entry",
+        "tooltip.wikiLink.title": "Page Interlinking",
+        "tooltip.wikiLink.desc": "Type [[Page Name]] in the editor to link to other pages and build your knowledge network",
+        "tooltip.graphFilter.title": "Graph Filtering",
+        "tooltip.graphFilter.desc": "Tap the top labels to filter nodes by type, quickly locate your target",
+        "tooltip.ingest.title": "Smart Import",
+        "tooltip.ingest.desc": "Import content in bulk via PDF, web pages, or OCR scan",
+        "tooltip.chat.title": "AI Assistant",
+        "tooltip.chat.desc": "Ask questions based on your knowledge base, AI will answer combining your existing pages",
+        "tooltip.tag.title": "Tag Management",
+        "tooltip.tag.desc": "Add tags to pages for easy categorization, search and batch management",
+
+        // MARK: - Misc
+        "misc.gotIt": "Got it",
+
+        // MARK: - Page Detail
+        "page.empty": "This page has no content yet",
+        "page.emptyHint": "Tap ✏️ in the top right to start editing, use [[Page Name]] to create links",
+        "page.pin": "Pin page",
+        "page.unpin": "Unpin",
+        "page.backlinks": "Backlinks",
+        "page.backlinksCount": "%d pages",
+        "page.edit": "Edit page",
+        "page.doneEditing": "Done editing",
+        "page.type": "Page type",
+        "page.icon": "Icon",
+        "page.tags": "Tags",
+        "page.alias": "Alias",
+        "page.confidence": "Confidence",
+        "page.status": "Status",
+        "page.created": "Created",
+        "page.updated": "Updated",
+        "page.wordCount": "%d words",
+        "page.outLinks": "Out-links (%d)",
+        "page.backLinks": "Backlinks (%d)",
+        "page.noOutLinks": "No out-links",
+        "page.noBackLinks": "No backlinks",
+        "page.searchPlaceholder": "Search pages...",
+        "page.close": "Close",
+
+        // MARK: - Create Page
+        "create.pageTitle": "Page title",
+        "create.selectType": "Select type",
+        "create.selectIcon": "Select icon",
+        "create.contentPlaceholder": "Enter content...",
+        "create.creating": "Creating...",
+        "create.selectTypeHint": "Choose a suitable type for the new page",
+
+        // MARK: - iCloud Sync
+        "icloud.title": "iCloud Sync",
+        "icloud.status": "iCloud Sync Status",
+        "icloud.upload": "Upload to iCloud",
+        "icloud.download": "Download from iCloud",
+        "icloud.bidirectional": "Two-way sync",
+        "icloud.notConfigured": "Not configured",
+        "icloud.enableSync": "Enable iCloud Sync",
+        "icloud.disableSync": "Disable iCloud Sync",
+        "icloud.syncNow": "Sync now",
+        "icloud.neverSynced": "Never synced",
+
+        // MARK: - OCR Scan
+        "ocr.scan": "Scan image",
+        "ocr.confirm": "Confirm",
+        "ocr.scanFailed": "Text recognition failed",
+        "ocr.noTextFound": "No text found in image",
+        "ocr.usePhoto": "From Library",
+        "ocr.useCamera": "Take Photo",
+        "ocr.processing": "Recognizing text...",
+
+        // MARK: - LLM Settings
+        "llm.title": "LLM Settings",
+        "llm.enable": "Enable LLM Assistant",
+        "llm.apiKey": "API Key",
+        "llm.apiKeyPlaceholder": "Enter API Key",
+        "llm.apiAddressPlaceholder": "https://api.openai.com",
+        "llm.modelPlaceholder": "gpt-4o-mini",
+        "llm.save": "Save",
+        "llm.saved": "Saved",
+        "llm.notConfigured": "Not configured",
+        "llm.configured": "Configured",
+        "llm.notEnabled": "Not enabled",
+        "llm.enabled": "Enabled",
+
+        // MARK: - Tag Cloud
+        "tag.title": "Tag Manager",
+        "tag.noTags": "No tags yet",
+        "tag.noTagsHint": "Add tags when editing pages, or specify tags when importing",
+        "tag.rename": "Rename",
+        "tag.delete": "Delete",
+        "tag.tagPages": "Pages tagged #%@",
+        "tag.allPages": "All pages",
+        "tag.manage": "Manage",
+
+        // MARK: - PDF Reader
+        "pdf.title": "PDF Documents",
+        "pdf.libraryHint": "Add PDF documents, read and highlight, extract content to knowledge base",
+        "pdf.add": "Add PDF",
+        "pdf.addDocument": "Add Document",
+        "pdf.import": "Import",
+        "pdf.cancel": "Cancel",
+        "pdf.noDocuments": "No PDF documents yet",
+        "pdf.noDocumentsHint": "Tap the button above to add a PDF file",
+
+        // MARK: - Chat
+        "chat.notConfigured": "Please configure LLM API Key first",
+        "chat.error": "Error",
+        "chat.ok": "OK",
+        "chat.expanding": "Expand full text",
+        "chat.collapse": "Collapse",
+        "chat.sending": "Sending...",
+
+        // MARK: - Sidebar
+        "sidebar.masterIndex": "Master Index",
+        "sidebar.backToMain": "Back",
+
+        // MARK: - Search
+        "search.title": "Search",
+        "search.recentUpdates": "Recently Updated",
+        "search.recentCreated": "Recently Created",
+        "search.byTitle": "By Title",
+        "search.byType": "By Type",
+
+        // MARK: - Index
+        "index.entities": "Entities",
+        "index.concepts": "Concepts",
+        "index.sources": "Sources",
+        "index.comparisons": "Comparisons",
+        "index.maps": "Maps",
+        "index.raw": "Raw",
+        "index.total": "Total",
+        "index.lastUpdated": "Last Updated",
+        "index.viewAll": "View all",
+
+        // MARK: - Markdown Editor
+        "editor.searchPage": "Search pages...",
+        "editor.tagPlaceholder": "Enter tag",
+        "editor.aliasPlaceholder": "Enter alias",
+
+        // MARK: - Lint
+        "lint.title": "Health Check",
+        "lint.running": "Checking...",
+        "lint.noIssues": "Knowledge base is in good health",
+        "lint.noIssuesHint": "No broken links, orphaned pages or conflicting content found",
+        "lint.ok": "OK",
+
+        // MARK: - Backlinks
+        "backlinks.title": "Backlinks",
+        "backlinks.noOutLinks": "No out-links",
+        "backlinks.noBackLinks": "No backlinks",
+
+        // MARK: - Graph
+
+        // MARK: - Ingest View
+        "ingest.smartIngestDone": "Smart Import",
+        "ingest.smartIngestDoneDesc": "LLM compilation complete, type: %@",
+
+        // MARK: - Loading
+        "loading": "Loading...",
+
+        // MARK: - Log
+        "log.title": "Operation Log",
+
+        // MARK: - Widget & Watch
+        "widget.title": "Knowledge Base",
+        "widget.characters": "chars",
+        "widget.placeholder": "Placeholder",
+
+        // MARK: - Collaboration
+        "collab.room": "Knowledge Base Room",
+        "collab.joining": "Joining room...",
+
+        // MARK: - Page Detail (Format & Accessibility)
+        "page.statusFormat": "Status: %@",
+        "page.confidenceFormat": "Confidence: %@",
+        "page.deletePageTitle": "Delete \"%@\"",
+        "page.typeAccessibility": "Page type: %@",
+        "page.statusAccessibility": "Status: %@",
+        "page.confidenceAccessibility": "Confidence: %@",
+        "page.titleAccessibility": "Page title: %@",
+        "page.aliasAccessibility": "Aliases: %@",
+        "page.tagsAccessibility": "Tags: %@",
+        "page.createdFormat": "Created: %@",
+        "page.updatedFormat": "Updated: %@",
+        "page.outLinksCount": "%d links",
+        "page.metaAccessibility": "Meta info, created on %@, %@ words, %d outgoing links",
+        "page.doubleTapToNavigate": "Double-tap to navigate",
+        "page.confirmDelete": "Confirm Delete",
+        "page.deleteMessage": "This action cannot be undone. The page and all references will be deleted.",
+
+        // MARK: - iCloud Sync (Additional)
+        "icloud.lastSyncFormat": "Last sync: %@",
+        "icloud.pullWillOverwrite": "Downloading from iCloud will overwrite local data",
+        "icloud.pullOverwriteMessage": "All local pages will be replaced by remote data, this action cannot be undone.",
+        "icloud.autoSyncFailed": "Auto sync failed",
+
+        // MARK: - Sidebar (Additional)
+        "sidebar.frequentKnowledge": "Frequent Knowledge",
+        "sidebar.linkUnit": " links",
+
+        // MARK: - OCR (Additional)
+        "ocr.scanTag": "scan",
+        "ocr.addTag": "Add",
+        "ocr.changeIcon": "Change",
+        "ocr.customIcon": "Custom",
+        "ocr.charCountFormat": "Characters: %d",
+
+        // MARK: - PDF (Additional)
+        "pdf.noteLabel": "Note: ",
+        "pdf.ingestModeFormat": "Mode: %@",
+        "pdf.pageCountFormat": "%d pages",
+        "pdf.highlightCountFormat": "%d highlights",
+        "pdf.createdPage": "Created page %@",
+        "pdf.pageNumber": "Page %d",
+
+        // MARK: - Tag (Additional)
+        "tag.renameTag": "Rename Tag",
+        "tag.newName": "New name",
+        "tag.renameMessage": "Rename #%@ to new name",
+        "tag.deleteTag": "Delete Tag",
+        "tag.deleteMessage": "Will remove #%@ from %d pages, this action cannot be undone",
+
+        // MARK: - Search (Additional)
+        "search.noResultsHint": "Try different keywords or adjust filter criteria",
+        "search.pagesCount": "%d pages",
+        "search.search": "Search",
+
+        // MARK: - Index (Additional)
+        "index.entityCount": "Entities (%d)",
+        "index.conceptCount": "Concepts (%d)",
+        "index.sourceCount": "Sources (%d)",
+        "index.comparisonCount": "Comparisons (%d)",
+        "index.wordCount": "%d words",
+
+        // MARK: - Icon Picker
+        "iconPicker.common": "Common",
+        "iconPicker.academic": "Academic",
+        "iconPicker.nature": "Nature",
+        "iconPicker.transport": "Transport",
+        "iconPicker.symbols": "Symbols",
+        "iconPicker.selectIcon": "Select Icon",
+        "iconPicker.customSelected": "Custom icon selected",
+        "iconPicker.useDefault": "Use default icon",
+        "iconPicker.reset": "Reset",
+        "iconPicker.allIcons": "All Icons",
+
+        // MARK: - Backlinks (Additional)
+        "backlinks.outgoingCount": "Outgoing (%d)",
+        "backlinks.backlinksCount": "Backlinks (%d)",
+
+        // MARK: - Splash (Additional)
+        "splash.appName": "Knowledge Base",
+
+        // MARK: - Collaboration
     ]
 }

@@ -30,8 +30,8 @@ struct OnDeviceLLMSettingsView: View {
         .sheet(isPresented: $showTestSheet) {
             OnDeviceTestView(onDeviceService: onDeviceService)
         }
-        .alert("操作失败", isPresented: $showError) {
-            Button("确定", role: .cancel) {}
+        .alert(L.tr("ondevice.error.inferenceFailed"), isPresented: $showError) {
+            Button(L.tr("misc.ok"), role: .cancel) {}
         } message: {
             Text(errorMessage)
         }

@@ -9,14 +9,14 @@ struct IndexView: View {
                 // Summary
                 Section {
                     HStack {
-                        IndexStatView(label: "页面", value: "\(store.totalPages)", color: .wikiAccent)
-                        IndexStatView(label: "实体", value: "\(store.entityCount)", color: .wikiEntity)
-                        IndexStatView(label: "概念", value: "\(store.conceptCount)", color: .wikiConcept)
-                        IndexStatView(label: "来源", value: "\(store.sourceCount)", color: .wikiSource)
+                        IndexStatView(label: L.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
+                        IndexStatView(label: L.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
+                        IndexStatView(label: L.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
+                        IndexStatView(label: L.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
                     }
                     .padding(.vertical, 4)
                 } header: {
-                    Text("概览")
+                    Text(L.tr("index.overview"))
                 }
                 
                 // Entities
@@ -29,7 +29,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label("实体 (\(entities.count))", systemImage: "person.text.rectangle.fill")
+                        Label(L.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
                             .foregroundStyle(.wikiEntity)
                     }
                 }
@@ -44,7 +44,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label("概念 (\(concepts.count))", systemImage: "lightbulb.fill")
+                        Label(L.trf("index.conceptCount", concepts.count), systemImage: "lightbulb.fill")
                             .foregroundStyle(.wikiConcept)
                     }
                 }
@@ -59,7 +59,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label("来源 (\(sources.count))", systemImage: "doc.richtext.fill")
+                        Label(L.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
                             .foregroundStyle(.wikiSource)
                     }
                 }
@@ -74,7 +74,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label("对比 (\(comparisons.count))", systemImage: "arrow.left.arrow.right.circle.fill")
+                        Label(L.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
                             .foregroundStyle(.wikiComparison)
                     }
                 }
@@ -82,7 +82,7 @@ struct IndexView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle("总索引")
+            .navigationTitle(L.tr("sidebar.masterIndex"))
         }
     }
 }
@@ -126,7 +126,7 @@ struct IndexRowView: View {
                     .lineLimit(1)
                 
                 HStack(spacing: 6) {
-                    Text("\(page.wordCount) 字")
+                    Text(L.trf("index.wordCount", page.wordCount))
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
                     

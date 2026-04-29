@@ -21,11 +21,11 @@ struct WikilinkPickerSheet: View {
                 pageList
             }
             .background(Color.wikiBackground)
-            .navigationTitle("插入 Wiki 链接")
+            .navigationTitle(L.tr("editor.insertWikiLink"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") { dismiss() }
+                    Button(L.tr("editor.cancel")) { dismiss() }
                 }
             }
         }
@@ -35,7 +35,7 @@ struct WikilinkPickerSheet: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.wikiSecondary)
-            TextField("搜索页面...", text: $searchText)
+            TextField(L.tr("editor.searchPages"), text: $searchText)
                 .foregroundStyle(.wikiText)
             if !searchText.isEmpty {
                 Button(action: { searchText = "" }) {
@@ -166,7 +166,7 @@ struct InlineTagInput: View {
     
     var body: some View {
         HStack(spacing: 8) {
-            TextField("输入标签", text: $text)
+            TextField(L.tr("editor.enterTag"), text: $text)
                 .font(.caption)
                 .textFieldStyle(.plain)
                 .padding(.horizontal, 10)

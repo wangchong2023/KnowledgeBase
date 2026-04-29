@@ -27,7 +27,7 @@ struct WatchWikiStatsView: View {
                         Text("\(totalPages)")
                             .font(.title3.weight(.bold))
                             .foregroundStyle(.wikiText)
-                        Text("页面")
+                        Text(L.tr("widget.pages"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -39,7 +39,7 @@ struct WatchWikiStatsView: View {
                         Text(formatNumber(totalWords))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(.wikiText)
-                        Text("字")
+                        Text(L.tr("widget.words"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -49,7 +49,7 @@ struct WatchWikiStatsView: View {
                 
                 // Recent pages
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("最近更新")
+                    Text(L.tr("widget.recentUpdates"))
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.wikiSecondary)
                     
@@ -69,7 +69,7 @@ struct WatchWikiStatsView: View {
             }
             .padding()
         }
-        .navigationTitle("知识库")
+        .navigationTitle(L.tr("widget.title"))
         .onAppear {
             loadData()
         }
@@ -113,10 +113,10 @@ struct KMWidgetPreview: View {
                 Image(systemName: "books.vertical.circle.fill")
                     .font(.title3)
                     .foregroundStyle(.wikiAccent)
-                Text("知识库")
+                Text(L.tr("widget.title"))
                     .font(.caption.weight(.bold))
                 Spacer()
-                Text("\(totalPages) 页")
+                Text(L.trf("widget.pages", totalPages))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -126,26 +126,26 @@ struct KMWidgetPreview: View {
             HStack(spacing: 12) {
                 VStack(spacing: 2) {
                     Text("\(totalWords)").font(.caption.weight(.bold))
-                    Text("字数").font(.caption2).foregroundStyle(.secondary)
+                    Text(L.tr("widget.characters")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 
                 VStack(spacing: 2) {
                     Text("\(activeCount)").font(.caption.weight(.bold))
-                    Text("活跃").font(.caption2).foregroundStyle(.secondary)
+                    Text(L.tr("widget.active")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 
                 VStack(spacing: 2) {
                     Text("\(stubCount)").font(.caption.weight(.bold))
-                    Text("占位").font(.caption2).foregroundStyle(.secondary)
+                    Text(L.tr("widget.stub")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
             }
             
             if !recentTitles.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("最近更新")
+                    Text(L.tr("widget.recentUpdates"))
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
                     

@@ -85,7 +85,7 @@ struct MarkdownEditorView: View {
                 Button(action: { withAnimation { showTagInput.toggle() } }) {
                     HStack(spacing: 2) {
                         Image(systemName: "plus.circle.fill").font(.caption)
-                        Text("添加标签").font(.caption)
+                        Text(L.tr("editor.addTag")).font(.caption)
                     }
                     .foregroundStyle(.wikiSecondary)
                     .padding(.horizontal, 8)
@@ -112,7 +112,7 @@ struct MarkdownEditorView: View {
                 Button(action: { withAnimation { showAliasInput.toggle() } }) {
                     HStack(spacing: 2) {
                         Image(systemName: "plus.circle.fill").font(.caption)
-                        Text("添加别名").font(.caption)
+                        Text(L.tr("editor.addAlias")).font(.caption)
                     }
                     .foregroundStyle(.wikiSecondary)
                     .padding(.horizontal, 8)

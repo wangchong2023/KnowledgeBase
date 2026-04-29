@@ -32,10 +32,10 @@ struct PageDetailView: View {
                         Image(systemName: "pencil.line")
                             .font(.system(size: 32))
                             .foregroundStyle(.wikiSecondary)
-                        Text("这个页面还没有内容")
+                        Text(L.tr("page.empty"))
                             .font(.subheadline)
                             .foregroundStyle(.wikiSecondary)
-                        Text("点击右上角 ✏️ 开始编辑，使用 [[页面名]] 建立关联")
+                        Text(L.tr("page.emptyHint"))
                             .font(.caption)
                             .foregroundStyle(.wikiAccent.opacity(0.7))
                             .padding(.horizontal, 20)
@@ -78,7 +78,7 @@ struct PageDetailView: View {
                     Image(systemName: page.isPinned ? "pin.fill" : "pin")
                         .foregroundStyle(page.isPinned ? .wikiComparison : .wikiSecondary)
                 }
-                .accessibilityLabel(page.isPinned ? "取消固定" : "固定页面")
+                .accessibilityLabel(page.isPinned ? L.tr("page.unpin") : L.tr("page.pin"))
                 
                 Button(action: { showBacklinks.toggle() }) {
                     HStack(spacing: 4) {
@@ -87,8 +87,8 @@ struct PageDetailView: View {
                     }
                     .foregroundStyle(.wikiAccent)
                 }
-                .accessibilityLabel("反向链接")
-                .accessibilityValue("\(backlinks.count) 个页面")
+                .accessibilityLabel(L.tr("page.backlinks"))
+                .accessibilityValue(L.trf("page.backlinksCount", backlinks.count))
 
                 Button(action: {
                     if isEditing {
@@ -99,7 +99,7 @@ struct PageDetailView: View {
                     Image(systemName: isEditing ? "checkmark.circle.fill" : "pencil.circle.fill")
                         .foregroundStyle(isEditing ? .green : .wikiAccent)
                 }
-                .accessibilityLabel(isEditing ? "完成编辑" : "编辑页面")
+                .accessibilityLabel(isEditing ? L.tr("page.doneEditing") : L.tr("page.edit"))
             }
             
             ToolbarItemGroup(placement: .topBarLeading) {
@@ -115,17 +115,17 @@ struct PageDetailView: View {
                             }
                         }
                     } label: {
-                        Label("页面类型", systemImage: page.displayIcon)
+                        Label(L.tr("page.type"), systemImage: page.displayIcon)
                     }
 
                     // Page icon
                     Button(action: { showIconPicker = true }) {
                         HStack {
                             Image(systemName: page.displayIcon)
-                            Text("页面图标")
+                            Text(L.tr("page.icon"))
                             if page.customIcon != nil {
                                 Spacer()
-                                Text("已自定义")
+                                Text(L.tr("editor.iconCustomized"))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -143,7 +143,7 @@ struct PageDetailView: View {
                             }
                         }
                     } label: {
-                        Label("状态: \(page.status.displayName)", systemImage: "flag.fill")
+                        Label(L.trf("page.statusFormat", page.status.displayName), systemImage: "flag.fill")
                     }
                     
                     // Confidence
@@ -157,13 +157,13 @@ struct PageDetailView: View {
                             }
                         }
                     } label: {
-                        Label("可信度: \(page.confidence.displayName)", systemImage: "signal")
+                        Label(L.trf("page.confidenceFormat", page.confidence.displayName), systemImage: "signal")
                     }
                     
                     Divider()
                     
                     Button(role: .destructive, action: { showDeleteConfirmation = true }) {
-                        Label("删除页面", systemImage: "trash")
+                        Label(L.tr("page.deletePage"), systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -171,13 +171,13 @@ struct PageDetailView: View {
                 }
             }
         }
-        .confirmationDialog("确认删除", isPresented: $showDeleteConfirmation) {
-            Button("删除「\(page.title)」", role: .destructive) {
+        .confirmationDialog(L.tr("page.confirmDelete"), isPresented: $showDeleteConfirmation) {
+            Button(L.trf("page.deletePageTitle", page.title), role: .destructive) {
                 store.deletePage(page)
             }
-            Button("取消", role: .cancel) {}
+            Button(L.tr("misc.cancel"), role: .cancel) {}
         } message: {
-            Text("此操作不可恢复，页面及所有引用将被删除。")
+            Text(L.tr("page.deleteMessage"))
         }
         .sheet(isPresented: $showBacklinks) {
             BacklinksView(page: page)
@@ -208,7 +208,7 @@ struct PageDetailView: View {
                 Image(systemName: "books.vertical.fill")
                     .font(.caption2)
                     .foregroundStyle(.wikiSecondary)
-                Text("Wiki")
+                Text(L.tr("page.wiki"))
                     .font(.caption2)
                     .foregroundStyle(.wikiSecondary)
                 Image(systemName: "chevron.right")
@@ -239,7 +239,7 @@ struct PageDetailView: View {
                 .clipShape(Capsule())
                 .foregroundStyle(page.type.themedColor)
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel("页面类型: \(page.type.displayName)")
+                .accessibilityLabel(L.trf("page.typeAccessibility", page.type.displayName))
 
                 // Status badge
                 HStack(spacing: 4) {
@@ -255,7 +255,7 @@ struct PageDetailView: View {
                 .clipShape(Capsule())
                 .foregroundStyle(page.status.color)
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel("状态: \(page.status.displayName)")
+                .accessibilityLabel(L.trf("page.statusAccessibility", page.status.displayName))
 
                 // Confidence
                 HStack(spacing: 4) {
@@ -270,7 +270,7 @@ struct PageDetailView: View {
                 .clipShape(Capsule())
                 .foregroundStyle(page.confidence.color)
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel("可信度: \(page.confidence.displayName)")
+                .accessibilityLabel(L.trf("page.confidenceAccessibility", page.confidence.displayName))
                 
                 Spacer()
             }
@@ -279,7 +279,7 @@ struct PageDetailView: View {
                 .font(.system(size: 28, weight: .bold, design: .rounded))
                 .foregroundStyle(.wikiText)
                 .accessibilityAddTraits(.isHeader)
-                .accessibilityLabel("页面标题: \(page.title)")
+                .accessibilityLabel(L.trf("page.titleAccessibility", page.title))
             
             // Aliases
             if !page.aliases.isEmpty {
@@ -299,7 +299,7 @@ struct PageDetailView: View {
                         }
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("别名: \(page.aliases.joined(separator: "，"))")
+                    .accessibilityLabel(L.trf("page.aliasAccessibility", page.aliases.joined(separator: ", ")))
                 }
             }
 
@@ -318,21 +318,21 @@ struct PageDetailView: View {
                         }
                     }
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("标签: \(page.tags.map { "#\($0)" }.joined(separator: "，"))")
+                    .accessibilityLabel(L.trf("page.tagsAccessibility", page.tags.map { "#\($0)" }.joined(separator: ", ")))
                 }
             }
             
             // Meta info
             HStack(spacing: 16) {
-                Label("创建: \(page.created.formatted(date: .abbreviated, time: .omitted))", systemImage: "calendar")
-                Label("更新: \(page.updated.formatted(date: .abbreviated, time: .omitted))", systemImage: "clock")
-                Label("\(page.wordCount) 字", systemImage: "textformat")
-                Label("\(page.outgoingLinks.count) 出链", systemImage: "link")
+                Label(L.trf("page.createdFormat", page.created.formatted(date: .abbreviated, time: .omitted)), systemImage: "calendar")
+                Label(L.trf("page.updatedFormat", page.updated.formatted(date: .abbreviated, time: .omitted)), systemImage: "clock")
+                Label(L.trf("page.wordCount", page.wordCount), systemImage: "textformat")
+                Label(L.trf("page.outLinksCount", page.outgoingLinks.count), systemImage: "link")
             }
             .font(.caption)
             .foregroundStyle(.wikiSecondary)
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("元信息，创建于 \(page.created.formatted(date: .abbreviated, time: .omitted))，\(page.wordCount) 字，\(page.outgoingLinks.count) 个出站链接")
+            .accessibilityLabel(L.trf("page.metaAccessibility", page.created.formatted(date: .abbreviated, time: .omitted), page.wordCount, page.outgoingLinks.count))
         }
         .padding()
     }
@@ -343,7 +343,7 @@ struct PageDetailView: View {
             HStack {
                 Image(systemName: "link")
                     .foregroundStyle(.wikiAccent)
-                Text("反向链接")
+                Text(L.tr("page.backlinks"))
                     .font(.headline)
                     .foregroundStyle(.wikiText)
                 Text("(\(backlinks.count))")
@@ -352,7 +352,7 @@ struct PageDetailView: View {
             }
             
             if backlinks.isEmpty {
-                Text("暂无反向链接")
+                Text(L.tr("page.noBackLinks"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                     .padding(.vertical, 8)
@@ -385,8 +385,8 @@ struct PageDetailView: View {
                         .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("反向链接: \(linkedPage.title)，类型: \(linkedPage.type.displayName)")
-                    .accessibilityHint("双击跳转到该页面")
+                    .accessibilityLabel(L.trf("page.backlinkAccessibility", linkedPage.title, linkedPage.type.displayName))
+                    .accessibilityHint(L.tr("page.doubleTapToNavigate"))
                 }
             }
         }

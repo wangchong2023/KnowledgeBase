@@ -263,7 +263,7 @@ final class SQLiteStoreCore {
             return
         }
         str.withCString { cstr in
-            sqlite3_bind_text(stmt, index, cstr, Int32(str.utf8.count), transient())
+            _ = sqlite3_bind_text(stmt, index, cstr, Int32(str.utf8.count), transient())
         }
     }
 

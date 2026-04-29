@@ -157,37 +157,37 @@ struct MarkdownEditorToolbar: View {
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: "粗体", icon: "bold") {
+                EditorToolbarButton(title: L.tr("editor.bold"), icon: "bold") {
                     onWrap("**")
                 }
-                EditorToolbarButton(title: "斜体", icon: "italic") {
+                EditorToolbarButton(title: L.tr("editor.italic"), icon: "italic") {
                     onWrap("*")
                 }
-                EditorToolbarButton(title: "代码", icon: "chevron.left.forwardslash.chevron.right") {
+                EditorToolbarButton(title: L.tr("editor.code"), icon: "chevron.left.forwardslash.chevron.right") {
                     onWrap("`")
                 }
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: "链接", icon: "link") {
+                EditorToolbarButton(title: L.tr("editor.link"), icon: "link") {
                     onInsert("[[", "]]")
                 }
-                EditorToolbarButton(title: "列表", icon: "list.bullet") {
+                EditorToolbarButton(title: L.tr("editor.list"), icon: "list.bullet") {
                     onInsert("- ", nil)
                 }
-                EditorToolbarButton(title: "引用", icon: "text.quote") {
+                EditorToolbarButton(title: L.tr("editor.quote"), icon: "text.quote") {
                     onInsert("> ", nil)
                 }
-                EditorToolbarButton(title: "表格", icon: "tablecells") {
+                EditorToolbarButton(title: L.tr("editor.table"), icon: "tablecells") {
                     onInsertMultiline("\n| 列1 | 列2 | 列3 |\n|------|------|------|\n| 内容 | 内容 | 内容 |\n")
                 }
-                EditorToolbarButton(title: "分割线", icon: "minus") {
+                EditorToolbarButton(title: L.tr("editor.divider"), icon: "minus") {
                     onInsertMultiline("\n---\n")
                 }
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: "Wiki链接", icon: "link.circle.fill") {
+                EditorToolbarButton(title: L.tr("editor.wikiLink"), icon: "link.circle.fill") {
                     onShowLinkPicker()
                 }
             }

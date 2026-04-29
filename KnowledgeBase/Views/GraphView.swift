@@ -13,6 +13,7 @@ struct GraphContainerView: View {
     @State private var isAnimating = false
     @State private var showLegend = false
     @State private var filterType: PageType?
+    @StateObject private var tooltipManager = TooltipManager.shared
 
     var filteredNodes: [GraphNode] {
         guard let filter = filterType else { return nodes }
@@ -29,6 +30,10 @@ struct GraphContainerView: View {
         NavigationStack {
             ZStack {
                 Color.wikiBackground.ignoresSafeArea()
+
+                // 点阵背景装饰
+                WikiDotPattern(dotColor: .wikiBorder, spacing: 24, dotSize: 2)
+                    .opacity(0.35)
 
                 if nodes.isEmpty {
                     emptyStateView
@@ -53,11 +58,11 @@ struct GraphContainerView: View {
                     }
                 }
             }
-            .navigationTitle("知识图谱")
+            .navigationTitle(L.tr("graph.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {
-                        Text("\(filteredNodes.count) 节点 · \(filteredEdges.count) 连接")
+                        Text(L.trf("graph.nodesConnections", filteredNodes.count, filteredEdges.count))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
 
@@ -78,24 +83,47 @@ struct GraphContainerView: View {
 
     // MARK: - Empty State
     private var emptyStateView: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "circle.hexagongrid.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(.wikiSecondary)
-            Text("知识图谱")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.wikiText)
-            Text("页面间的关联将在此可视化")
-                .font(.subheadline)
-                .foregroundStyle(.wikiSecondary)
-            Text("在编辑页面时使用 [[页面名]] 即可建立链接")
+        VStack(spacing: 24) {
+            ZStack {
+                Circle()
+                    .fill(Color.wikiAccent.opacity(0.07))
+                    .frame(width: 120, height: 120)
+                Circle()
+                    .fill(Color.wikiAccent.opacity(0.04))
+                    .frame(width: 160, height: 160)
+                Image(systemName: "circle.hexagongrid.fill")
+                    .font(.system(size: 44, weight: .light))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.wikiAccent, .wikiAccent.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+            .frame(height: 100)
+
+            VStack(spacing: 8) {
+                Text(L.tr("graph.title"))
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.wikiText)
+                Text(L.tr("graph.emptyDesc"))
+                    .font(.subheadline)
+                    .foregroundStyle(.wikiSecondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            Text(L.tr("graph.linkHint"))
                 .font(.caption)
-                .foregroundStyle(.wikiAccent.opacity(0.8))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color.wikiAccent.opacity(0.08))
-                .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                .foregroundStyle(.wikiAccent)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(
+                    RoundedRectangle(cornerRadius: WikiUI.chipRadius)
+                        .fill(Color.wikiAccent.opacity(0.1))
+                )
         }
+        .padding(.horizontal, 32)
     }
 
     // MARK: - Graph Canvas
@@ -200,8 +228,11 @@ struct GraphContainerView: View {
         VStack {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    FilterPill(title: "全部", isSelected: filterType == nil) {
+                    FilterPill(title: L.tr("search.all"), isSelected: filterType == nil) {
                         withAnimation { filterType = nil }
+                        if !tooltipManager.isShown(.graphFilter) {
+                            withAnimation { tooltipManager.activeTooltip = .graphFilter }
+                        }
                     }
 
                     ForEach(PageType.allCases) { type in
@@ -222,6 +253,27 @@ struct GraphContainerView: View {
 
             Spacer()
         }
+        .overlay(alignment: .top) {
+            if tooltipManager.activeTooltip == .graphFilter {
+                VStack {
+                    HStack {
+                        Spacer()
+                        WikiTooltip(
+                            title: L.tr(tooltipManager.activeTooltip?.titleKey ?? ""),
+                            description: L.tr(tooltipManager.activeTooltip?.descriptionKey ?? ""),
+                            icon: tooltipManager.activeTooltip?.icon ?? "questionmark",
+                            arrowDirection: .bottom,
+                            accentColor: .wikiAccent
+                        )
+                        .padding(.trailing, 16)
+                    }
+                    Spacer()
+                }
+                .padding(.top, 50)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: tooltipManager.activeTooltip)
     }
 
     // MARK: - Legend Overlay

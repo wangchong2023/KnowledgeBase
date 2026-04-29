@@ -37,7 +37,7 @@ struct iCloudSyncView: View {
                             .foregroundStyle(.wikiText)
                         
                         if let date = syncService.lastSyncDate {
-                            Text("上次同步：\(date.formatted(.dateTime.year().month().day().hour().minute()))")
+                            Text(L.trf("icloud.lastSyncFormat", date.formatted(.dateTime.year().month().day().hour().minute())))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -51,14 +51,14 @@ struct iCloudSyncView: View {
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text("iCloud 同步状态")
+                Text(L.tr("icloud.syncStatus"))
             }
             
             // MARK: - Actions Section
             Section {
                 // Push to iCloud
                 Button(action: pushToCloud) {
-                    Label("上传到 iCloud", systemImage: "icloud.and.arrow.up")
+                    Label(L.tr("icloud.pushToCloud"), systemImage: "icloud.and.arrow.up")
                         .foregroundStyle(.wikiAccent)
                 }
                 .accessibilityIdentifier("push-to-icloud")
@@ -66,7 +66,7 @@ struct iCloudSyncView: View {
 
                 // Pull from iCloud
                 Button(action: { showPullConfirmation = true }) {
-                    Label("从 iCloud 下载", systemImage: "icloud.and.arrow.down")
+                    Label(L.tr("icloud.pullFromCloud"), systemImage: "icloud.and.arrow.down")
                         .foregroundStyle(.wikiAccent)
                 }
                 .accessibilityIdentifier("pull-from-icloud")
@@ -74,17 +74,17 @@ struct iCloudSyncView: View {
                 
                 // Bidirectional sync
                 Button(action: bidirectionalSync) {
-                    Label("双向同步", systemImage: "arrow.triangle.2.circlepath.icloud")
+                    Label(L.tr("icloud.bidirectionalSync"), systemImage: "arrow.triangle.2.circlepath.icloud")
                         .foregroundStyle(.wikiAccent)
                 }
                 .disabled(!syncService.iCloudAvailable || isSyncing)
             } header: {
-                Text("同步操作")
+                Text(L.tr("icloud.syncActions"))
             }
             
             // MARK: - Settings Section
             Section {
-                Toggle("自动同步", isOn: $autoSync)
+                Toggle(L.tr("icloud.autoSync"), isOn: $autoSync)
                     .foregroundStyle(.wikiText)
                     .accessibilityIdentifier("auto-sync")
                     .onChange(of: autoSync) { _, newValue in
@@ -98,7 +98,7 @@ struct iCloudSyncView: View {
                     }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("冲突解决策略")
+                    Text(L.tr("icloud.conflictPolicy"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiText)
                     
@@ -113,20 +113,20 @@ struct iCloudSyncView: View {
                     }
                 }
             } header: {
-                Text("同步设置")
+                Text(L.tr("icloud.syncSettings"))
             }
             
             // MARK: - Info Section
             Section {
                 VStack(alignment: .leading, spacing: 12) {
-                    SyncInfoRow(icon: "1.circle.fill", text: "数据通过 iCloud 私有数据库存储")
-                    SyncInfoRow(icon: "2.circle.fill", text: "仅限同一 Apple ID 的设备间同步")
-                    SyncInfoRow(icon: "3.circle.fill", text: "冲突时默认合并两边数据")
-                    SyncInfoRow(icon: "4.circle.fill", text: "页面以更新时间为准，保留较新版本")
+                    SyncInfoRow(icon: "1.circle.fill", text: L.tr("icloud.info1"))
+                    SyncInfoRow(icon: "2.circle.fill", text: L.tr("icloud.info2"))
+                    SyncInfoRow(icon: "3.circle.fill", text: L.tr("icloud.info3"))
+                    SyncInfoRow(icon: "4.circle.fill", text: L.tr("icloud.info4"))
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text("关于 iCloud 同步")
+                Text(L.tr("icloud.aboutSync"))
             }
             
             // MARK: - Danger Section
@@ -134,7 +134,7 @@ struct iCloudSyncView: View {
                 Button(role: .destructive) {
                     clearCloudData()
                 } label: {
-                    Label("清除 iCloud 数据", systemImage: "trash.icloud")
+                    Label(L.tr("icloud.clearCloudData"), systemImage: "trash.icloud")
                         .foregroundStyle(.red)
                 }
                 .disabled(isSyncing)
@@ -143,9 +143,9 @@ struct iCloudSyncView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle("iCloud 同步")
-        .alert("同步错误", isPresented: $showError) {
-            Button("确定", role: .cancel) {}
+        .navigationTitle(L.tr("icloud.title"))
+        .alert(L.tr("icloud.syncError"), isPresented: $showError) {
+            Button(L.tr("misc.ok"), role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
@@ -162,20 +162,20 @@ struct iCloudSyncView: View {
                 conflictResolution = .keepRemote
                 UserDefaults.standard.set(ConflictResolution.keepRemote.rawValue, forKey: "wikicraft_conflict_resolution")
             }
-            Button("取消", role: .cancel) {}
+            Button(L.tr("misc.cancel"), role: .cancel) {}
         } message: {
-            Text("本地与远程数据存在冲突，请选择解决方式。")
+            Text(L.tr("icloud.conflictMessage"))
         }
-        .alert("从 iCloud 下载将覆盖本地数据", isPresented: $showPullConfirmation) {
-            Button("下载", role: .destructive) {
+        .alert(L.tr("icloud.pullWillOverwrite"), isPresented: $showPullConfirmation) {
+            Button(L.tr("icloud.download"), role: .destructive) {
                 performActualPull()
             }
-            Button("取消", role: .cancel) {}
+            Button(L.tr("misc.cancel"), role: .cancel) {}
         } message: {
-            Text("所有本地页面将被远程数据替换，此操作不可撤销。")
+            Text(L.tr("icloud.pullOverwriteMessage"))
         }
-        .alert("自动同步失败", isPresented: $showAutoSyncError) {
-            Button("确定", role: .cancel) {}
+        .alert(L.tr("icloud.autoSyncFailed"), isPresented: $showAutoSyncError) {
+            Button(L.tr("misc.ok"), role: .cancel) {}
         } message: {
             Text(autoSyncErrorMessage)
         }

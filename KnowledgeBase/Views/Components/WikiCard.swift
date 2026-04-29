@@ -181,12 +181,12 @@ struct WikiIconChip: View {
 }
 
 // MARK: - Wiki Primary Button
-/// 主要操作按钮，统一渐变背景。
+/// 主要操作按钮，渐变背景跟随用户选择的主题色。
 struct WikiPrimaryButton: View {
     let title: String
     var icon: String? = nil
     var isLoading: Bool = false
-    var gradientColors: [Color] = [.wikiSource, .wikiAccent]
+    var gradientColors: [Color] = [.wikiAccent, .wikiAccent.opacity(0.7)]
     let action: () -> Void
 
     var body: some View {

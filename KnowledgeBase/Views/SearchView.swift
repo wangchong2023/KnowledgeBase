@@ -8,10 +8,10 @@ struct SearchView: View {
     @State private var sortBy: SortOption = .updated
     
     enum SortOption: String, CaseIterable {
-        case updated = "最近更新"
-        case created = "最近创建"
-        case title = "标题"
-        case type = "类型"
+        case updated = "search.sort.recentlyUpdated"
+        case created = "search.sort.recentlyCreated"
+        case title = "search.sort.title"
+        case type = "search.sort.type"
     }
     
     var filteredPages: [WikiPage] {
@@ -60,9 +60,9 @@ struct SearchView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.wikiSecondary)
-                    TextField("搜索页面、标签、内容...", text: $searchText)
+                    TextField(L.tr("search.placeholder"), text: $searchText)
                         .foregroundStyle(.wikiText)
-                        .accessibilityIdentifier("搜索页面、标签、内容...")
+                        .accessibilityIdentifier("searchPlaceholder")
                     
                     if !searchText.isEmpty {
                         Button(action: { searchText = "" }) {
@@ -81,7 +81,7 @@ struct SearchView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         // Type filters
-                        FilterPill(title: "全部", isSelected: filterType == nil) {
+                        FilterPill(title: L.tr("search.all"), isSelected: filterType == nil) {
                             filterType = nil
                         }
                         
@@ -102,14 +102,14 @@ struct SearchView: View {
                         Menu {
                             ForEach(SortOption.allCases, id: \.self) { option in
                                 Button(action: { sortBy = option }) {
-                                    Label(option.rawValue, systemImage: sortBy == option ? "checkmark" : "")
+                                    Label(L.tr(option.rawValue), systemImage: sortBy == option ? "checkmark" : "")
                                 }
                             }
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "arrow.up.arrow.down")
                                     .font(.caption)
-                                Text(sortBy.rawValue)
+                                Text(L.tr(sortBy.rawValue))
                                     .font(.caption)
                             }
                             .padding(.horizontal, 10)
@@ -131,7 +131,7 @@ struct SearchView: View {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.wikiSecondary)
-                            Text("输入关键词搜索页面、标签或内容")
+                            Text(L.tr("search.placeholder"))
                                 .font(.subheadline)
                                 .foregroundStyle(.wikiSecondary)
                         } else {
@@ -139,10 +139,10 @@ struct SearchView: View {
                             Image(systemName: "doc.text.magnifyingglass")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.wikiSecondary)
-                            Text("没有找到匹配的页面")
+                            Text(L.tr("search.noResults"))
                                 .font(.subheadline)
                                 .foregroundStyle(.wikiSecondary)
-                            Text("尝试更换关键词或调整筛选条件")
+                            Text(L.tr("search.noResultsHint"))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary.opacity(0.7))
                         }
@@ -167,7 +167,7 @@ struct SearchView: View {
                 
                 // Result count
                 HStack {
-                    Text("\(filteredPages.count) 个页面")
+                    Text(L.trf("search.pagesCount", filteredPages.count))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                     Spacer()

@@ -17,7 +17,7 @@ struct LintView: View {
                             } else {
                                 Image(systemName: "stethoscope")
                             }
-                            Text(isRunning ? "检查中..." : "运行健康检查")
+                            Text(isRunning ? L.tr("lint.checking") : L.tr("lint.runCheck"))
                                 .fontWeight(.semibold)
                         }
                         .frame(maxWidth: .infinity)
@@ -37,7 +37,7 @@ struct LintView: View {
                     .padding()
                     
                     if !store.lintIssues.isEmpty {
-                        Text("发现 \(store.lintIssues.count) 个问题")
+                        Text(L.trf("lint.foundIssues", store.lintIssues.count))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -51,10 +51,10 @@ struct LintView: View {
                         Image(systemName: "checkmark.seal.fill")
                             .font(.system(size: 56))
                             .foregroundStyle(.green)
-                        Text("知识库状态良好")
+                        Text(L.tr("lint.noIssues"))
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(.wikiText)
-                        Text("没有发现断链、孤立页面或矛盾内容")
+                        Text(L.tr("lint.noIssuesHint"))
                             .font(.subheadline)
                             .foregroundStyle(.wikiSecondary)
                         Spacer()
@@ -69,7 +69,7 @@ struct LintView: View {
                                     LintIssueRow(issue: issue)
                                 }
                             } header: {
-                                Label("错误 (\(errors.count))", systemImage: "xmark.circle.fill")
+                                Label(L.trf("lint.errors", errors.count), systemImage: "xmark.circle.fill")
                                     .foregroundStyle(.red)
                             }
                         }
@@ -82,7 +82,7 @@ struct LintView: View {
                                     LintIssueRow(issue: issue)
                                 }
                             } header: {
-                                Label("警告 (\(warnings.count))", systemImage: "exclamationmark.triangle.fill")
+                                Label(L.trf("lint.warnings", warnings.count), systemImage: "exclamationmark.triangle.fill")
                                     .foregroundStyle(.orange)
                             }
                         }
@@ -95,7 +95,7 @@ struct LintView: View {
                                     LintIssueRow(issue: issue)
                                 }
                             } header: {
-                                Label("提示 (\(infos.count))", systemImage: "info.circle.fill")
+                                Label(L.trf("lint.tips", infos.count), systemImage: "info.circle.fill")
                                     .foregroundStyle(.blue)
                             }
                         }
@@ -105,7 +105,7 @@ struct LintView: View {
                 }
             }
             .background(Color.wikiBackground)
-            .navigationTitle("健康检查")
+            .navigationTitle(L.tr("lint.title"))
         }
     }
     
@@ -149,7 +149,7 @@ struct LintIssueRow: View {
             if let pageID = issue.pageID,
                let _ = store.pageByID(pageID) {
                 Button(action: { store.selectedPageID = pageID }) {
-                    Text("前往页面 →")
+                    Text(L.tr("lint.goToPage"))
                         .font(.caption2)
                         .foregroundStyle(.wikiAccent)
                 }

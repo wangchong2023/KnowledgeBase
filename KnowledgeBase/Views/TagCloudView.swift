@@ -28,10 +28,10 @@ struct TagCloudView: View {
                         Image(systemName: "tag")
                             .font(.system(size: 40))
                             .foregroundStyle(.wikiSecondary)
-                        Text("还没有任何标签")
+                        Text(L.tr("tag.noTags"))
                             .font(.subheadline)
                             .foregroundStyle(.wikiSecondary)
-                        Text("在编辑页面时添加标签，或导入内容时指定标签")
+                        Text(L.tr("tag.noTagsHint"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary.opacity(0.7))
                             .multilineTextAlignment(.center)
@@ -68,13 +68,13 @@ struct TagCloudView: View {
                                         tagToRename = tagItem.tag
                                         newTagName = tagItem.tag
                                     }) {
-                                        Label("重命名", systemImage: "pencil")
+                                        Label(L.tr("tag.rename"), systemImage: "pencil")
                                     }
                                     Button(role: .destructive, action: {
                                         tagToDelete = tagItem.tag
                                         showDeleteConfirm = true
                                     }) {
-                                        Label("删除", systemImage: "trash")
+                                        Label(L.tr("tag.delete"), systemImage: "trash")
                                     }
                                 }
                             }
@@ -98,10 +98,10 @@ struct TagCloudView: View {
                             }
                         } header: {
                             HStack {
-                                Text("标签 #\(tag) 的页面")
+                                Text(L.trf("tag.tagPages", tag))
                                     .foregroundStyle(.wikiText)
                                 Spacer()
-                                Text("\(filteredPages.filter { $0.tags.contains(tag) }.count) 个页面")
+                                Text(L.trf("page.backlinksCount", filteredPages.filter { $0.tags.contains(tag) }.count))
                                     .font(.caption)
                                     .foregroundStyle(.wikiSecondary)
                             }
@@ -114,7 +114,7 @@ struct TagCloudView: View {
                         Image(systemName: "tag")
                             .font(.title)
                             .foregroundStyle(.wikiSecondary)
-                        Text("选择标签查看相关页面")
+                        Text(L.tr("tagcloud.selectTag"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -122,15 +122,15 @@ struct TagCloudView: View {
                 }
             }
             .background(Color.wikiBackground)
-            .navigationTitle("标签管理")
+            .navigationTitle(L.tr("tag.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .alert("重命名标签", isPresented: Binding(
+            .alert(L.tr("tag.renameTag"), isPresented: Binding(
                 get: { tagToRename != nil },
                 set: { if !$0 { tagToRename = nil } }
             )) {
-                TextField("新名称", text: $newTagName)
-                Button("取消", role: .cancel) { tagToRename = nil }
-                Button("确定") {
+                TextField(L.tr("tag.newName"), text: $newTagName)
+                Button(L.tr("misc.cancel"), role: .cancel) { tagToRename = nil }
+                Button(L.tr("misc.ok")) {
                     guard let old = tagToRename, !newTagName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
                     let trimmed = newTagName.trimmingCharacters(in: .whitespaces)
                     store.renameTag(old, to: trimmed)
@@ -138,11 +138,11 @@ struct TagCloudView: View {
                     tagToRename = nil
                 }
             } message: {
-                Text("将 #\(tagToRename ?? "") 重命名为新名称")
+                Text(L.trf("tag.renameMessage", tagToRename ?? ""))
             }
-            .alert("删除标签", isPresented: $showDeleteConfirm) {
-                Button("取消", role: .cancel) { tagToDelete = nil }
-                Button("删除", role: .destructive) {
+            .alert(L.tr("tag.deleteTag"), isPresented: $showDeleteConfirm) {
+                Button(L.tr("misc.cancel"), role: .cancel) { tagToDelete = nil }
+                Button(L.tr("misc.delete"), role: .destructive) {
                     if let tag = tagToDelete {
                         store.deleteTag(tag)
                         if selectedTag == tag { selectedTag = nil }
@@ -151,7 +151,7 @@ struct TagCloudView: View {
                 }
             } message: {
                 let count = tags.first { $0.tag == tagToDelete }?.count ?? 0
-                Text("将从 \(count) 个页面中移除 #\(tagToDelete ?? "")，此操作不可撤销")
+                Text(L.trf("tag.deleteMessage", count, tagToDelete ?? ""))
             }
         }
     }

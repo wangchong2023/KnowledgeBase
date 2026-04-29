@@ -16,7 +16,7 @@ struct LogView: View {
                         Text(L.tr("log.noLogs"))
                             .font(.subheadline)
                             .foregroundStyle(.wikiSecondary)
-                        Text("创建、编辑、导入等操作会自动记录在此")
+                        Text(L.tr("log.noLogs"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary.opacity(0.7))
                     }
@@ -76,7 +76,7 @@ private struct LogEntryRow: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text(entry.action)
+                        Text(L.tr(entry.action))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(actionColor(entry.action))
                         
@@ -128,12 +128,16 @@ private struct LogEntryRow: View {
         case "创建", L.tr("logAction.create"): return .green
         case "更新", L.tr("logAction.update"): return .blue
         case "删除", L.tr("logAction.delete"): return .red
-        case "Lint", L.tr("logAction.healthCheck"): return .orange
+        case "Lint", L.tr("logAction.lint"), L.tr("logAction.healthCheck"): return .orange
         case "导入", L.tr("logAction.ingest"): return .wikiSource
-        case "智能导入": return .wikiAccent
+        case "智能导入", L.tr("logAction.smartIngest"): return .wikiAccent
         case "撤销操作", L.tr("logAction.undo"): return .purple
         case "重做操作", L.tr("logAction.redo"): return .purple
         case "同步": return .teal
+        case "导入PDF", L.tr("logAction.importPDF"), L.tr("logAction.ingestPDF"): return .wikiSource
+        case "删除PDF", L.tr("logAction.deletePDF"): return .red
+        case "高亮标注", L.tr("logAction.highlight"): return .wikiAccent
+        case "OCR识别", L.tr("logAction.ocrRecognize"): return .wikiConcept
         default: return .wikiSecondary
         }
     }
@@ -143,12 +147,16 @@ private struct LogEntryRow: View {
         case "创建", L.tr("logAction.create"): return "plus"
         case "更新", L.tr("logAction.update"): return "pencil"
         case "删除", L.tr("logAction.delete"): return "trash"
-        case "Lint", L.tr("logAction.healthCheck"): return "stethoscope"
+        case "Lint", L.tr("logAction.lint"), L.tr("logAction.healthCheck"): return "stethoscope"
         case "导入", L.tr("logAction.ingest"): return "arrow.down.doc"
-        case "智能导入": return "sparkles"
+        case "智能导入", L.tr("logAction.smartIngest"): return "sparkles"
         case "撤销操作", L.tr("logAction.undo"): return "arrow.uturn.backward"
         case "重做操作", L.tr("logAction.redo"): return "arrow.uturn.forward"
         case "同步": return "icloud"
+        case "导入PDF", L.tr("logAction.importPDF"), L.tr("logAction.ingestPDF"): return "arrow.down.doc"
+        case "删除PDF", L.tr("logAction.deletePDF"): return "trash"
+        case "高亮标注", L.tr("logAction.highlight"): return "highlighter"
+        case "OCR识别", L.tr("logAction.ocrRecognize"): return "text.viewfinder"
         default: return "circle"
         }
     }

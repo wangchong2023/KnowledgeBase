@@ -8,7 +8,7 @@ struct AccentColorPicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("主题色")
+            Text(L.tr("settings.accentColor"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiText)
 

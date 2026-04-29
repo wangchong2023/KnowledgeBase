@@ -24,14 +24,14 @@ struct PDFIngestSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle("导入到知识库")
+            .navigationTitle(L.tr("pdf.ingestToWiki"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("取消") { dismiss() }
+                    Button(L.tr("misc.cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("导入") { ingestContent() }
+                    Button(L.tr("pdf.ingest")) { ingestContent() }
                         .fontWeight(.semibold)
                         .disabled(targetTitle.isEmpty)
                 }
@@ -46,45 +46,45 @@ struct PDFIngestSheet: View {
     // MARK: - Target Section
     private var targetSection: some View {
         Section {
-            TextField("页面标题", text: $targetTitle)
+            TextField(L.tr("pdf.pageTitle"), text: $targetTitle)
                 .foregroundStyle(.wikiText)
             
-            Picker("页面类型", selection: $targetType) {
+            Picker(L.tr("pdf.pageType"), selection: $targetType) {
                 ForEach(PageType.allCases, id: \.self) { type in
                     Text(type.displayName).tag(type)
                 }
             }
         } header: {
-            Text("目标页面")
+            Text(L.tr("pdf.targetPage"))
         }
     }
     
     // MARK: - Range Section
     private var rangeSection: some View {
         Section {
-            Picker("提取方式", selection: $ingestMode) {
-                Text("全文").tag("fullText")
-                Text("指定页范围").tag("pageRange")
-                Text("仅标注内容").tag("highlights")
+            Picker(L.tr("pdf.extractionMethod"), selection: $ingestMode) {
+                Text(L.tr("pdf.fullText")).tag("fullText")
+                Text(L.tr("pdf.pageRange")).tag("pageRange")
+                Text(L.tr("pdf.highlightsOnly")).tag("highlights")
             }
             .pickerStyle(.segmented)
             
             if ingestMode == "pageRange" {
                 HStack {
-                    Text("从第")
+                    Text(L.tr("pdf.fromPage"))
                     TextField("1", value: $pageStart, format: .number)
                         .keyboardType(.numberPad)
                         .frame(width: 50)
-                    Text("页到第")
+                    Text(L.tr("pdf.toPage"))
                     TextField("\(documentInfo.pageCount)", value: $pageEnd, format: .number)
                         .keyboardType(.numberPad)
                         .frame(width: 50)
-                    Text("页")
+                    Text(L.tr("pdf.page"))
                 }
                 .foregroundStyle(.wikiText)
             }
         } header: {
-            Text("提取范围")
+            Text(L.tr("pdf.extractionRange"))
         }
     }
     
@@ -93,7 +93,7 @@ struct PDFIngestSheet: View {
     private var highlightsSection: some View {
         if ingestMode == "highlights" && documentInfo.highlights.isEmpty {
             Section {
-                Text("暂无标注内容，请先在阅读时添加高亮标注")
+                Text(L.tr("pdf.noHighlights"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
             }
@@ -111,7 +111,7 @@ struct PDFIngestSheet: View {
             }
             .frame(maxHeight: 150)
         } header: {
-            Text("内容预览")
+            Text(L.tr("pdf.contentPreview"))
         }
     }
     
@@ -119,7 +119,7 @@ struct PDFIngestSheet: View {
     private var previewText: String {
         switch ingestMode {
         case "fullText":
-            guard let pdfDoc = pdfDocument else { return "无法加载 PDF" }
+            guard let pdfDoc = pdfDocument else { return L.tr("pdf.cannotLoadPDF") }
             let text = PDFService.shared.extractText(from: pdfDoc, pageRange: 0..<min(2, pdfDoc.pageCount))
             return String(text.prefix(500))
         case "pageRange":
@@ -155,7 +155,7 @@ struct PDFIngestSheet: View {
             content = documentInfo.highlights.map { h in
                 var text = "> \(h.text)"
                 if !h.note.isEmpty {
-                    text += "\n\n备注：\(h.note)"
+                    text += "\n\n\(L.tr("pdf.noteLabel")) \(h.note)"
                 }
                 return text
             }.joined(separator: "\n\n---\n\n")
@@ -167,9 +167,9 @@ struct PDFIngestSheet: View {
             title: targetTitle,
             type: targetType,
             content: content,
-            tags: ["PDF", "导入"]
+            tags: ["PDF", L.tr("logAction.ingest")]
         )
-        store.addLog(action: "导入PDF", target: targetTitle, details: "模式: \(ingestMode)")
+        store.addLog(action: L.tr("logAction.importPDF"), target: targetTitle, details: L.trf("pdf.ingestModeFormat", ingestMode))
         store.saveToDisk()
         dismiss()
     }
@@ -215,11 +215,11 @@ struct PDFDocumentRow: View {
                 .lineLimit(1)
             
             HStack(spacing: 8) {
-                Label("\(doc.pageCount) 页", systemImage: "doc.text")
+                Label(L.trf("pdf.pageCountFormat", doc.pageCount), systemImage: "doc.text")
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                 
-                Label("\(doc.highlights.count) 标注", systemImage: "highlighter")
+                Label(L.trf("pdf.highlightCountFormat", doc.highlights.count), systemImage: "highlighter")
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
             }

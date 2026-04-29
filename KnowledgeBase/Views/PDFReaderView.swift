@@ -18,7 +18,7 @@ struct PDFLibraryView: View {
                     docList
                 }
             }
-            .navigationTitle("PDF 文档")
+            .navigationTitle(L.tr("pdf.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: { showFilePicker = true }) {
@@ -45,11 +45,11 @@ struct PDFLibraryView: View {
     // MARK: - Empty State
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("PDF 文档库", systemImage: "doc.richtext")
+            Label(L.tr("pdf.library"), systemImage: "doc.richtext")
         } description: {
-            Text("添加 PDF 文档，阅读并高亮标注，提取内容到知识库")
+            Text(L.tr("pdf.libraryHint"))
         } actions: {
-            Button("添加 PDF") { showFilePicker = true }
+            Button(L.tr("pdf.add")) { showFilePicker = true }
                 .buttonStyle(.borderedProminent)
                 .tint(.wikiAccent)
         }
@@ -67,11 +67,11 @@ struct PDFLibraryView: View {
                     Button(role: .destructive) {
                         deleteDocument(doc)
                     } label: {
-                        Label("删除", systemImage: "trash")
+                        Label(L.tr("pdf.delete"), systemImage: "trash")
                     }
                     
                     Button(action: { ingestPDF(doc) }) {
-                        Label("导入", systemImage: "arrow.down.doc")
+                        Label(L.tr("pdf.ingest"), systemImage: "arrow.down.doc")
                     }
                     .tint(.wikiAccent)
                 }
@@ -105,11 +105,11 @@ struct PDFLibraryView: View {
                 )
                 documents.append(docInfo)
                 PDFService.shared.saveDocumentsInfo(documents)
-                store.addLog(action: "导入PDF", target: docInfo.title, details: "\(docInfo.pageCount) 页")
+                store.addLog(action: L.tr("logAction.importPDF"), target: docInfo.title, details: L.trf("pdf.pageCountFormat", docInfo.pageCount))
             }
             
         case .failure(let error):
-            store.addLog(action: "导入PDF失败", target: "", details: error.localizedDescription)
+            store.addLog(action: L.tr("logAction.importPDFFailed"), target: "", details: error.localizedDescription)
         }
     }
     
@@ -117,7 +117,7 @@ struct PDFLibraryView: View {
         _ = PDFService.shared.deletePDF(fileName: doc.fileName)
         documents.removeAll { $0.id == doc.id }
         PDFService.shared.saveDocumentsInfo(documents)
-        store.addLog(action: "删除PDF", target: doc.title)
+        store.addLog(action: L.tr("logAction.deletePDF"), target: doc.title)
     }
     
     private func ingestPDF(_ doc: PDFDocumentInfo) {
@@ -129,9 +129,9 @@ struct PDFLibraryView: View {
                 title: doc.title,
                 type: .source,
                 content: text,
-                tags: ["PDF", "导入"]
+                tags: ["PDF", L.tr("logAction.ingest")]
             )
-            store.addLog(action: "导入PDF", target: doc.title, details: "创建页面 \(page.title)")
+            store.addLog(action: L.tr("logAction.importPDF"), target: doc.title, details: L.trf("pdf.createdPage", page.title))
             store.saveToDisk()
         }
     }
@@ -166,7 +166,7 @@ struct PDFReaderView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("完成") { dismiss() }
+                    Button(L.tr("pdf.done")) { dismiss() }
                 }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button(action: { showHighlightPanel.toggle() }) {
@@ -202,7 +202,7 @@ struct PDFReaderView: View {
             )
             .ignoresSafeArea()
         } else {
-            ContentUnavailableView("无法加载 PDF", systemImage: "exclamationmark.triangle")
+            ContentUnavailableView(L.tr("pdf.cannotLoadPDF"), systemImage: "exclamationmark.triangle")
         }
     }
     
@@ -237,7 +237,7 @@ struct PDFReaderView: View {
     // MARK: - Highlight Editor
     private var highlightEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("标注选中文字")
+            Text(L.tr("pdf.annotateSelected"))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.wikiText)
             
@@ -261,12 +261,12 @@ struct PDFReaderView: View {
                 Spacer()
             }
             
-            TextField("添加备注...", text: $highlightNote)
+            TextField(L.tr("pdf.addNote"), text: $highlightNote)
                 .font(.caption)
                 .textFieldStyle(.roundedBorder)
             
             Button(action: saveHighlight) {
-                Text("保存标注")
+                Text(L.tr("pdf.saveAnnotation"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12)
@@ -298,7 +298,7 @@ struct PDFReaderView: View {
         highlightNote = ""
         showHighlightPanel = false
         
-        store.addLog(action: "高亮标注", target: documentInfo.title, details: "第 \(currentPage + 1) 页")
+        store.addLog(action: L.tr("logAction.highlight"), target: documentInfo.title, details: L.trf("pdf.pageNumber", currentPage + 1))
     }
 }
 

@@ -19,7 +19,7 @@ struct BacklinksView: View {
                 // Outgoing links
                 Section {
                     if outgoingPages.isEmpty {
-                        Text("无出链")
+                        Text(L.tr("backlinks.noOutgoing"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     } else {
@@ -50,14 +50,14 @@ struct BacklinksView: View {
                 } header: {
                     HStack {
                         Image(systemName: "arrow.right")
-                        Text("出链 (\(outgoingPages.count))")
+                        Text(L.trf("backlinks.outgoingCount", outgoingPages.count))
                     }
                 }
                 
                 // Backlinks
                 Section {
                     if backlinks.isEmpty {
-                        Text("无反向链接")
+                        Text(L.tr("backlinks.noBackLinks"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     } else {
@@ -88,7 +88,7 @@ struct BacklinksView: View {
                 } header: {
                     HStack {
                         Image(systemName: "arrow.left")
-                        Text("反向链接 (\(backlinks.count))")
+                        Text(L.trf("backlinks.backlinksCount", backlinks.count))
                     }
                 }
             }
@@ -99,7 +99,7 @@ struct BacklinksView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("关闭") { dismiss() }
+                    Button(L.tr("backlinks.close")) { dismiss() }
                 }
             }
         }
