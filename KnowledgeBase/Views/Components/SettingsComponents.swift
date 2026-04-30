@@ -7,26 +7,30 @@ struct AccentColorPicker: View {
     let colors: [String]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(L.tr("settings.accentColor"))
-                .font(.subheadline)
+        HStack(spacing: 10) {
+            Label(L.tr("settings.accentColor"), systemImage: "paintpalette.fill")
                 .foregroundStyle(.wikiText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .id(L.languageMode)
 
+            Spacer()
+            
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     ForEach(colors, id: \.self) { color in
                         let isSelected = themeManager.accentColorRaw == color
                         Button(action: { themeManager.setAccentColor(color) }) {
                             Circle()
                                 .fill(Color.wikiNamed(color))
-                                .frame(width: 32, height: 32)
+                                .frame(width: 28, height: 28)
                                 .overlay(
                                     Circle()
-                                        .strokeBorder(.white, lineWidth: 2)
+                                        .strokeBorder(.white, lineWidth: isSelected ? 2 : 0)
                                 )
                                 .overlay(
                                     Circle()
-                                        .strokeBorder(.wikiBorder, lineWidth: isSelected ? 3 : 0)
+                                        .strokeBorder(.wikiBorder, lineWidth: isSelected ? 2 : 0)
                                 )
                                 .overlay(
                                     Group {

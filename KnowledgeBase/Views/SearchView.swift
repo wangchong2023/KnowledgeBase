@@ -176,7 +176,7 @@ struct SearchView: View {
                 .padding(.bottom, 8)
             }
             .background(Color.wikiBackground)
-            .navigationTitle("搜索")
+            .navigationTitle(L.tr("search.title"))
         }
     }
 }

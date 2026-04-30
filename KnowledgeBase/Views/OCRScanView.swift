@@ -43,11 +43,6 @@ struct OCRScanView: View {
             .background(Color.wikiBackground)
             .navigationTitle(L.tr("ocr.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(L.tr("misc.cancel")) { dismiss() }
-                }
-            }
             .onChange(of: selectedPhoto) { _, newValue in
                 loadImage(from: newValue)
             }

@@ -11,9 +11,12 @@
 		02DEE2EEA1F7BE8CB0C96EE9 /* CreatePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5600890BF01FE825B81F0A3 /* CreatePageView.swift */; };
 		08450DF0A96EC6EC61B1A48E /* KMShortcutsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23ECEBA8FAC37F5D875D36AC /* KMShortcutsService.swift */; };
 		0873F7193D49209AC2DB4808 /* IngestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7B454DDC566330132441156 /* IngestService.swift */; };
+		08C290C722153227FEE4F8BD /* PageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD6EE31F7D4F4AE82233E97E /* PageType.swift */; };
 		0C347C8D888A7ABFF3BC43BE /* OCRScanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AE70C21CDF46508EBBE364C /* OCRScanView.swift */; };
+		0C62652E9338CDC411C559E5 /* ColorSchemeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E8F30ABB87F9772EBBE2CBE /* ColorSchemeMode.swift */; };
 		0E05D37A8622200529E4A232 /* PDFService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8FD78B5550DD2D03937A35 /* PDFService.swift */; };
 		13419756D33D77228D027CC5 /* CollaborationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43CCD1DD200F8364FEFED456 /* CollaborationModels.swift */; };
+		1564474CC4F3C3A09463B3F8 /* WikiColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FD5E425787E92D67241C1E /* WikiColors.swift */; };
 		1822C29462F025E0020398B6 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B8824F5F6B9F02B7B2F2389 /* SplashView.swift */; };
 		19E624AAFA900B2CF9ADABE1 /* KnowledgeBase.app in Resources */ = {isa = PBXBuildFile; fileRef = 602EB6C8BEC5B69D2069E8E4 /* KnowledgeBase.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		1AEF604E95BA7369E0C8E204 /* WikiTooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A4F29A71F94448F64F0E40E /* WikiTooltip.swift */; };
@@ -23,21 +26,24 @@
 		23CD38F5B0046C383CE60E16 /* GraphLayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6EA583291C7C07AFA3DE0C2 /* GraphLayoutEngine.swift */; };
 		24113BD279D543CD3943EBE6 /* MarkdownRendererView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D762AD4C1FC17F203A48ACA0 /* MarkdownRendererView.swift */; };
 		299EA97B250FDE709DAB7091 /* WikiDecorators.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBA1878EDE2EB154489EEF8 /* WikiDecorators.swift */; };
+		2B8D9CD9786164989699B2C8 /* PageDetailHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FD53A35361CFDA79708A33C /* PageDetailHeader.swift */; };
 		2D636D61D2680B14AF2D28B4 /* SettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91F9B5EBB39BA7A9B5464997 /* SettingsComponents.swift */; };
-		3480ACE8FB439879D6050AD2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 345D5B12330B0BD89ED32B79 /* ContentView.swift */; };
 		35CB156D28CF962EEB7D1C9B /* PDFReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8309B7E2A3440512B4F68280 /* PDFReaderView.swift */; };
 		360D50FB0755CBD8A2CE8320 /* KMiCloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B389CB4AFA708A6C4DFE2D36 /* KMiCloudSyncService.swift */; };
 		363C825E953BD0CAC06931A9 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E53E5D478B388A1EC6F5CDB /* LogView.swift */; };
 		405D99C6E8BAADDD3F94CE4F /* KMUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312F890E76B754400C6AE4D4 /* KMUITests.swift */; };
+		4231A81ECE4DCD8CC6A751DD /* WikiCardComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A70D3D4C7ECF990498AEEF04 /* WikiCardComponents.swift */; };
 		424970E72FBD12EAE9722702 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA744A49616C573E13247ECF /* SearchView.swift */; };
 		4B1FF234D420AEC215A28975 /* WikiEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306343D2D963861AFDA3A6F2 /* WikiEmptyState.swift */; };
 		4B7B1B5E1ED3695D22162FD8 /* IngestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65F5FDF39C739BDCF084DA1 /* IngestView.swift */; };
 		4D79AECFD45624F629E2D431 /* KMSeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDC0DB714F1ED76F7384186A /* KMSeedData.swift */; };
 		5227750A6891A477157F6E65 /* SQLiteMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15B2C70D8E98CEF66A8EB698 /* SQLiteMigrator.swift */; };
 		5538483ECACD35159E29A105 /* KMBackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9389A424AA258E6ED7BA6A28 /* KMBackupService.swift */; };
+		589FEF6FDD265901EFB47651 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A47CC2141005B7A2957D141 /* ContentView.swift */; };
 		59592D2AB321D81974780188 /* LLMClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD02B7F90FB5301EEB6723B /* LLMClient.swift */; };
 		59C3B98CDF6B4A131A275E56 /* CollaborationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F96EDAC46E1D9EBED5110920 /* CollaborationView.swift */; };
 		5A397677AF38C462B56FE2DE /* CollaborationComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523846F7C20BBE7FD8EB7A73 /* CollaborationComponents.swift */; };
+		5B113506DD11D69E7949D13C /* WikiPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 105BE646513C58266EA81E23 /* WikiPage.swift */; };
 		5C6A14574F8340121512CE16 /* OnDeviceComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EF614BE6E00098B47D36172 /* OnDeviceComponents.swift */; };
 		5D14C5E6452807CC76B71265 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A1972AC6048C58209B2410A /* SettingsView.swift */; };
 		60C52C14B1878057A09D4965 /* ChatComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB749014A97B1EDE68815590 /* ChatComponents.swift */; };
@@ -48,6 +54,7 @@
 		6F15BAA75C4F72F7264843BA /* KMWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E140FE90FF44DDBBD3752924 /* KMWatchView.swift */; };
 		71C5FCA1C472159DA69110B5 /* KMStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B99B61971A587ACDFC844FCB /* KMStore.swift */; };
 		76E2668F2A074BDEC46745C7 /* AccessibilityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F35FB1ACE2B813B57A223052 /* AccessibilityService.swift */; };
+		7724696944D0E023B9D70F53 /* WikiNavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13193709456967B49578E3B3 /* WikiNavigationView.swift */; };
 		77E78BA3B6F84F41A7E60853 /* OnDeviceLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C61B08BFEB8D22BB3BFDCE0 /* OnDeviceLLMService.swift */; };
 		7C304F2705BF22DF1B91B2F1 /* OnDeviceLLMSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05B55D816A13672F22D4B03B /* OnDeviceLLMSettingsView.swift */; };
 		7C6C0B7D19889AA069A8DECD /* IndexView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBF7D8959D183A4C4D08702 /* IndexView.swift */; };
@@ -63,18 +70,21 @@
 		8F785F858D3985FF7990A979 /* SQLiteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043181ACFF6C57C048A7FBB7 /* SQLiteStore.swift */; };
 		8F8C48D61926E20679C9B77D /* WikiCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F904A08F7F655A902EEA24 /* WikiCard.swift */; };
 		906DC648D1087A3CAC929D3B /* VisionProSpatialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C45746BF817B769D00D1D /* VisionProSpatialView.swift */; };
+		9746BD227131D2600FF12E1F /* WikiWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E844DA878DB57DB897065C0D /* WikiWelcomeView.swift */; };
 		9968FB8D35D48DE2F2F80886 /* HostingSetupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B364363A8BE17A9E76A21FDC /* HostingSetupSheet.swift */; };
 		9E68A482590659891B6533B3 /* CollaborationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE790F98F3C8719E49FF0645 /* CollaborationService.swift */; };
 		9FEFCE028A22599179ABD406 /* UndoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F95417B899E529B59C36C3E /* UndoService.swift */; };
 		A1769F16682FC36E8295D00D /* GraphComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 283EA44C422184C0EF6E2515 /* GraphComponents.swift */; };
 		A7887BD02FA529C7EA700BCB /* DeepLinkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 989F3012D0E4AC2CD45D0FFC /* DeepLinkService.swift */; };
-		AA62E9BEDDB1572BB269570F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94AA5F7590CECE48337CD7F0 /* Models.swift */; };
+		A98A656F5C896AD940110347 /* WikiUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89DD06C8652D0EDF9CE5C3A4 /* WikiUI.swift */; };
+		B49DF339CAC863C8B91045D9 /* LintIssue.swift in Sources */ = {isa = PBXBuildFile; fileRef = F00041C14865CB6349D8623A /* LintIssue.swift */; };
 		B5740F8963F3485C8F420BE9 /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C51271BDFEE2EFD557C2D7 /* SpeechService.swift */; };
 		B8215A5A980999C4287620A5 /* OCRService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F33512E52D7A4A51728B8C71 /* OCRService.swift */; };
 		BE5B41A04EE38DD20AB7EB4B /* VoiceNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6C6CA98BE80665C43B4EC7 /* VoiceNoteView.swift */; };
 		C00C526D2BC7AC0862AF26A6 /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6C2558DB2F6D74CE6821D40 /* GraphView.swift */; };
 		C5BB1F71A277E2569339B1C9 /* BacklinksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11ACB488B18A06B04411784 /* BacklinksView.swift */; };
 		D4CF75670F267110F4A17ACC /* LogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E892E5B695CEF1108F9E850 /* LogService.swift */; };
+		D6D4A9F3B0B2F54CCD86E7E5 /* GraphModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB820192BE4768FB630672A /* GraphModels.swift */; };
 		D753D96E42745FDC2111E226 /* Graph3DView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B2A8DA06B000015C908951F /* Graph3DView.swift */; };
 		DA3CFA3C31213EF7C0AD6FFB /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95BFCC6AFDE414884AAE834 /* ChatView.swift */; };
 		DB9D4D8F2ED213905F12F7E6 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6F8CCD1BF89ABCD0D420706 /* SidebarView.swift */; };
@@ -125,6 +135,8 @@
 		079ED4ADD358541D08B4C06D /* PDFComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFComponents.swift; sourceTree = "<group>"; };
 		0A1972AC6048C58209B2410A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0F87802ACDFD832A7C822D9F /* PageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageStore.swift; sourceTree = "<group>"; };
+		105BE646513C58266EA81E23 /* WikiPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiPage.swift; sourceTree = "<group>"; };
+		13193709456967B49578E3B3 /* WikiNavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiNavigationView.swift; sourceTree = "<group>"; };
 		13F904A08F7F655A902EEA24 /* WikiCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiCard.swift; sourceTree = "<group>"; };
 		15B2C70D8E98CEF66A8EB698 /* SQLiteMigrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteMigrator.swift; sourceTree = "<group>"; };
 		1C61B08BFEB8D22BB3BFDCE0 /* OnDeviceLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceLLMService.swift; sourceTree = "<group>"; };
@@ -140,7 +152,6 @@
 		32B539CA96E1C7AA259336DA /* KMTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMTests.swift; sourceTree = "<group>"; };
 		32C51271BDFEE2EFD557C2D7 /* SpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechService.swift; sourceTree = "<group>"; };
 		33C138D7DFBDC2C18301268B /* TagCloudView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagCloudView.swift; sourceTree = "<group>"; };
-		345D5B12330B0BD89ED32B79 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3A4F29A71F94448F64F0E40E /* WikiTooltip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiTooltip.swift; sourceTree = "<group>"; };
 		3C96AD97B102E2B68C993060 /* LLMModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMModels.swift; sourceTree = "<group>"; };
 		43CCD1DD200F8364FEFED456 /* CollaborationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollaborationModels.swift; sourceTree = "<group>"; };
@@ -153,28 +164,34 @@
 		6AE70C21CDF46508EBBE364C /* OCRScanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRScanView.swift; sourceTree = "<group>"; };
 		6B2A8DA06B000015C908951F /* Graph3DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graph3DView.swift; sourceTree = "<group>"; };
 		6B6C6CA98BE80665C43B4EC7 /* VoiceNoteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteView.swift; sourceTree = "<group>"; };
+		6E8F30ABB87F9772EBBE2CBE /* ColorSchemeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSchemeMode.swift; sourceTree = "<group>"; };
 		70FC7A5C87A79F0FCBD63D47 /* KMWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMWatchApp.swift; sourceTree = "<group>"; };
 		73E99BE8941DB0DA9E8B22AD /* KMWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KMWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7A47CC2141005B7A2957D141 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7D06267D8F7B8F784F47242B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		7FD53A35361CFDA79708A33C /* PageDetailHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageDetailHeader.swift; sourceTree = "<group>"; };
 		8309B7E2A3440512B4F68280 /* PDFReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFReaderView.swift; sourceTree = "<group>"; };
 		86B4F5F01E0B3B0F63829F9B /* IngestViewComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestViewComponents.swift; sourceTree = "<group>"; };
+		89DD06C8652D0EDF9CE5C3A4 /* WikiUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiUI.swift; sourceTree = "<group>"; };
 		8E1613B7E9DFBF5CC12A70E7 /* SQLiteStoreCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteStoreCore.swift; sourceTree = "<group>"; };
 		8F95417B899E529B59C36C3E /* UndoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoService.swift; sourceTree = "<group>"; };
 		91F9B5EBB39BA7A9B5464997 /* SettingsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
 		9389A424AA258E6ED7BA6A28 /* KMBackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMBackupService.swift; sourceTree = "<group>"; };
-		94AA5F7590CECE48337CD7F0 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		97E28C6473D1471DDFFFA3BD /* KMApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMApp.swift; sourceTree = "<group>"; };
 		989F3012D0E4AC2CD45D0FFC /* DeepLinkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkService.swift; sourceTree = "<group>"; };
 		9DAC0B0A535851B6DCEF1CF4 /* MarkdownTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownTextView.swift; sourceTree = "<group>"; };
 		9E892E5B695CEF1108F9E850 /* LogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogService.swift; sourceTree = "<group>"; };
 		9EDC775DB73F6721F9A5616F /* VoiceNoteComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteComponents.swift; sourceTree = "<group>"; };
 		A55C45746BF817B769D00D1D /* VisionProSpatialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionProSpatialView.swift; sourceTree = "<group>"; };
+		A70D3D4C7ECF990498AEEF04 /* WikiCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiCardComponents.swift; sourceTree = "<group>"; };
+		A9FD5E425787E92D67241C1E /* WikiColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiColors.swift; sourceTree = "<group>"; };
 		B364363A8BE17A9E76A21FDC /* HostingSetupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingSetupSheet.swift; sourceTree = "<group>"; };
 		B389CB4AFA708A6C4DFE2D36 /* KMiCloudSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMiCloudSyncService.swift; sourceTree = "<group>"; };
 		B5877520E4EA3FDC2CA62627 /* PerformanceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceService.swift; sourceTree = "<group>"; };
 		B7B454DDC566330132441156 /* IngestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestService.swift; sourceTree = "<group>"; };
 		B94EB008959D8B606ECABC85 /* LintService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LintService.swift; sourceTree = "<group>"; };
 		B99B61971A587ACDFC844FCB /* KMStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMStore.swift; sourceTree = "<group>"; };
+		BD6EE31F7D4F4AE82233E97E /* PageType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageType.swift; sourceTree = "<group>"; };
 		BE2D6728318706422B93F487 /* LintView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LintView.swift; sourceTree = "<group>"; };
 		BE790F98F3C8719E49FF0645 /* CollaborationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollaborationService.swift; sourceTree = "<group>"; };
 		BEBA1878EDE2EB154489EEF8 /* WikiDecorators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiDecorators.swift; sourceTree = "<group>"; };
@@ -185,6 +202,7 @@
 		C6F8CCD1BF89ABCD0D420706 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		CA2B7E052FC2F629F675FADD /* KMTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB227E4B179732E50618C17F /* LinkService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkService.swift; sourceTree = "<group>"; };
+		CBB820192BE4768FB630672A /* GraphModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphModels.swift; sourceTree = "<group>"; };
 		CBC958E8CE4A6CF198884209 /* LLMContextBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMContextBuilder.swift; sourceTree = "<group>"; };
 		CEEF55DEDDAC04FBCE472A92 /* IconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconPickerView.swift; sourceTree = "<group>"; };
 		D762AD4C1FC17F203A48ACA0 /* MarkdownRendererView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRendererView.swift; sourceTree = "<group>"; };
@@ -196,8 +214,10 @@
 		E135D162B659388E7F2222A0 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeManager.swift; sourceTree = "<group>"; };
 		E140FE90FF44DDBBD3752924 /* KMWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMWatchView.swift; sourceTree = "<group>"; };
 		E6EA583291C7C07AFA3DE0C2 /* GraphLayoutEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphLayoutEngine.swift; sourceTree = "<group>"; };
+		E844DA878DB57DB897065C0D /* WikiWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiWelcomeView.swift; sourceTree = "<group>"; };
 		EA744A49616C573E13247ECF /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		ECD02B7F90FB5301EEB6723B /* LLMClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMClient.swift; sourceTree = "<group>"; };
+		F00041C14865CB6349D8623A /* LintIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LintIssue.swift; sourceTree = "<group>"; };
 		F067C8EFCE60A43EC5A52CCB /* MCSessionDelegateImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCSessionDelegateImpl.swift; sourceTree = "<group>"; };
 		F33512E52D7A4A51728B8C71 /* OCRService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRService.swift; sourceTree = "<group>"; };
 		F35FB1ACE2B813B57A223052 /* AccessibilityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityService.swift; sourceTree = "<group>"; };
@@ -251,7 +271,10 @@
 			isa = PBXGroup;
 			children = (
 				43CCD1DD200F8364FEFED456 /* CollaborationModels.swift */,
-				94AA5F7590CECE48337CD7F0 /* Models.swift */,
+				CBB820192BE4768FB630672A /* GraphModels.swift */,
+				F00041C14865CB6349D8623A /* LintIssue.swift */,
+				BD6EE31F7D4F4AE82233E97E /* PageType.swift */,
+				105BE646513C58266EA81E23 /* WikiPage.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -279,6 +302,7 @@
 				FDFFCB37100F4BD12DE3F3FB /* BackupView.swift */,
 				D95BFCC6AFDE414884AAE834 /* ChatView.swift */,
 				F96EDAC46E1D9EBED5110920 /* CollaborationView.swift */,
+				7A47CC2141005B7A2957D141 /* ContentView.swift */,
 				C5600890BF01FE825B81F0A3 /* CreatePageView.swift */,
 				6B2A8DA06B000015C908951F /* Graph3DView.swift */,
 				C6C2558DB2F6D74CE6821D40 /* GraphView.swift */,
@@ -303,6 +327,8 @@
 				A55C45746BF817B769D00D1D /* VisionProSpatialView.swift */,
 				6B6C6CA98BE80665C43B4EC7 /* VoiceNoteView.swift */,
 				FE91393096F8C34B715391A5 /* WidgetAndWatchViews.swift */,
+				13193709456967B49578E3B3 /* WikiNavigationView.swift */,
+				E844DA878DB57DB897065C0D /* WikiWelcomeView.swift */,
 				F550A0186ECF63D8D09F9F71 /* Components */,
 			);
 			path = Views;
@@ -331,8 +357,11 @@
 		CA42AFDA2168AF0074CF4C35 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				6E8F30ABB87F9772EBBE2CBE /* ColorSchemeMode.swift */,
 				5448508DF3A211F225E77178 /* L.swift */,
 				E135D162B659388E7F2222A0 /* ThemeManager.swift */,
+				A9FD5E425787E92D67241C1E /* WikiColors.swift */,
+				89DD06C8652D0EDF9CE5C3A4 /* WikiUI.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -341,7 +370,6 @@
 			isa = PBXGroup;
 			children = (
 				7D06267D8F7B8F784F47242B /* Assets.xcassets */,
-				345D5B12330B0BD89ED32B79 /* ContentView.swift */,
 				DA0969A983C6780951E315CE /* Info.plist */,
 				97E28C6473D1471DDFFFA3BD /* KMApp.swift */,
 				092D0257F82D84825A792ADF /* Models */,
@@ -374,10 +402,12 @@
 				86B4F5F01E0B3B0F63829F9B /* IngestViewComponents.swift */,
 				9DAC0B0A535851B6DCEF1CF4 /* MarkdownTextView.swift */,
 				1EF614BE6E00098B47D36172 /* OnDeviceComponents.swift */,
+				7FD53A35361CFDA79708A33C /* PageDetailHeader.swift */,
 				079ED4ADD358541D08B4C06D /* PDFComponents.swift */,
 				91F9B5EBB39BA7A9B5464997 /* SettingsComponents.swift */,
 				9EDC775DB73F6721F9A5616F /* VoiceNoteComponents.swift */,
 				13F904A08F7F655A902EEA24 /* WikiCard.swift */,
+				A70D3D4C7ECF990498AEEF04 /* WikiCardComponents.swift */,
 				BEBA1878EDE2EB154489EEF8 /* WikiDecorators.swift */,
 				306343D2D963861AFDA3A6F2 /* WikiEmptyState.swift */,
 				C6AE679FADCDFE0410B041C7 /* WikiLoadingOverlay.swift */,
@@ -549,13 +579,15 @@
 				13419756D33D77228D027CC5 /* CollaborationModels.swift in Sources */,
 				9E68A482590659891B6533B3 /* CollaborationService.swift in Sources */,
 				59C3B98CDF6B4A131A275E56 /* CollaborationView.swift in Sources */,
-				3480ACE8FB439879D6050AD2 /* ContentView.swift in Sources */,
+				0C62652E9338CDC411C559E5 /* ColorSchemeMode.swift in Sources */,
+				589FEF6FDD265901EFB47651 /* ContentView.swift in Sources */,
 				02DEE2EEA1F7BE8CB0C96EE9 /* CreatePageView.swift in Sources */,
 				A7887BD02FA529C7EA700BCB /* DeepLinkService.swift in Sources */,
 				FF189F54BE4E2DAC1FB004DB /* EditorComponents.swift in Sources */,
 				D753D96E42745FDC2111E226 /* Graph3DView.swift in Sources */,
 				A1769F16682FC36E8295D00D /* GraphComponents.swift in Sources */,
 				23CD38F5B0046C383CE60E16 /* GraphLayoutEngine.swift in Sources */,
+				D6D4A9F3B0B2F54CCD86E7E5 /* GraphModels.swift in Sources */,
 				C00C526D2BC7AC0862AF26A6 /* GraphView.swift in Sources */,
 				9968FB8D35D48DE2F2F80886 /* HostingSetupSheet.swift in Sources */,
 				1B50B967C226F1626FF1585B /* IconPickerView.swift in Sources */,
@@ -576,6 +608,7 @@
 				7F8A96665B5735CFAF0FE5D3 /* LLMService.swift in Sources */,
 				850F1807A7551007F8A53E06 /* LLMSettingsView.swift in Sources */,
 				DFB7526998B8C7A751404805 /* LinkService.swift in Sources */,
+				B49DF339CAC863C8B91045D9 /* LintIssue.swift in Sources */,
 				68CC5F35B793B87F63994529 /* LintService.swift in Sources */,
 				F16A9478CA7973B26344E6AC /* LintView.swift in Sources */,
 				D4CF75670F267110F4A17ACC /* LogService.swift in Sources */,
@@ -585,7 +618,6 @@
 				FDF38D24723763127FC81761 /* MarkdownParser.swift in Sources */,
 				24113BD279D543CD3943EBE6 /* MarkdownRendererView.swift in Sources */,
 				FAD322263847B54E7AB4B28D /* MarkdownTextView.swift in Sources */,
-				AA62E9BEDDB1572BB269570F /* Models.swift in Sources */,
 				0C347C8D888A7ABFF3BC43BE /* OCRScanView.swift in Sources */,
 				B8215A5A980999C4287620A5 /* OCRService.swift in Sources */,
 				5C6A14574F8340121512CE16 /* OnDeviceComponents.swift in Sources */,
@@ -594,8 +626,10 @@
 				8CBC2A7A07BE809297CAA113 /* PDFComponents.swift in Sources */,
 				35CB156D28CF962EEB7D1C9B /* PDFReaderView.swift in Sources */,
 				0E05D37A8622200529E4A232 /* PDFService.swift in Sources */,
+				2B8D9CD9786164989699B2C8 /* PageDetailHeader.swift in Sources */,
 				1FB68ADD978D458D2B897A6C /* PageDetailView.swift in Sources */,
 				63AC94B936C42DDAD6E611E4 /* PageStore.swift in Sources */,
+				08C290C722153227FEE4F8BD /* PageType.swift in Sources */,
 				DED4AAC87B562FE254CA4EAF /* PerformanceService.swift in Sources */,
 				5227750A6891A477157F6E65 /* SQLiteMigrator.swift in Sources */,
 				8F785F858D3985FF7990A979 /* SQLiteStore.swift in Sources */,
@@ -614,10 +648,16 @@
 				BE5B41A04EE38DD20AB7EB4B /* VoiceNoteView.swift in Sources */,
 				6706019DFA7CE462D986FFCA /* WidgetAndWatchViews.swift in Sources */,
 				8F8C48D61926E20679C9B77D /* WikiCard.swift in Sources */,
+				4231A81ECE4DCD8CC6A751DD /* WikiCardComponents.swift in Sources */,
+				1564474CC4F3C3A09463B3F8 /* WikiColors.swift in Sources */,
 				299EA97B250FDE709DAB7091 /* WikiDecorators.swift in Sources */,
 				4B1FF234D420AEC215A28975 /* WikiEmptyState.swift in Sources */,
 				8E3D816406FFF7385D1532C9 /* WikiLoadingOverlay.swift in Sources */,
+				7724696944D0E023B9D70F53 /* WikiNavigationView.swift in Sources */,
+				5B113506DD11D69E7949D13C /* WikiPage.swift in Sources */,
 				1AEF604E95BA7369E0C8E204 /* WikiTooltip.swift in Sources */,
+				A98A656F5C896AD940110347 /* WikiUI.swift in Sources */,
+				9746BD227131D2600FF12E1F /* WikiWelcomeView.swift in Sources */,
 				E996062E910611AB02F3C5D7 /* iCloudSyncView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

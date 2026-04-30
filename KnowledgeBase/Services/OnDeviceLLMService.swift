@@ -19,6 +19,20 @@ final class OnDeviceLLMService: ObservableObject {
     private var currentModel: AnyObject?
     private let configKey = "wikicraft_ondevice_config"
     
+    // MARK: - Constants
+    /// Default max tokens for text generation
+    private static let defaultMaxTokens: Int = 256
+    /// Temperature for text generation
+    private static let generationTemperature: Double = 0.7
+    /// Max tokens for smart ingest compilation
+    private static let smartIngestMaxTokens: Int = 500
+    /// Max tokens for on-device chat
+    private static let chatMaxTokens: Int = 300
+    /// Number of relevant pages to include in context
+    private static let contextPageLimit: Int = 5
+    /// Character limit for page content preview in context
+    private static let contentPreviewChars: Int = 200
+    
     // MARK: - Init
     init() {
         checkAvailability()
@@ -154,7 +168,7 @@ final class OnDeviceLLMService: ObservableObject {
     }
     
     // MARK: - Generate Text
-    func generate(prompt: String, maxTokens: Int = 256) async throws -> String {
+    func generate(prompt: String, maxTokens: Int = defaultMaxTokens) async throws -> String {
         guard isModelLoaded else {
             throw OnDeviceError.modelNotLoaded
         }
@@ -176,7 +190,7 @@ final class OnDeviceLLMService: ObservableObject {
             let inputFeatures: [String: Any] = [
                 "prompt": prompt,
                 "max_tokens": maxTokens,
-                "temperature": 0.7
+                "temperature": Self.generationTemperature
             ]
             
             do {
@@ -217,7 +231,7 @@ final class OnDeviceLLMService: ObservableObject {
         \(L.tr("ondevice.ingest.linkAndFormat"))
         """
         
-        let generated = try await generate(prompt: prompt, maxTokens: 500)
+        let generated = try await generate(prompt: prompt, maxTokens: Self.smartIngestMaxTokens)
         
         return SmartIngestResult(
             compiledContent: generated,
@@ -238,12 +252,12 @@ final class OnDeviceLLMService: ObservableObject {
             page.tags.contains(where: { query.lowercased().contains($0.lowercased()) })
         }
         
-        for page in relevant.prefix(5) {
-            context += "\n\n## \(page.title)\n\(String(page.content.prefix(200)))"
+        for page in relevant.prefix(Self.contextPageLimit) {
+            context += "\n\n## \(page.title)\n\(String(page.content.prefix(Self.contentPreviewChars)))"
         }
         
         let prompt = "\(context)\n\n\(L.tr("ondevice.chatQuestion")): \(query)"
-        return try await generate(prompt: prompt, maxTokens: 300)
+        return try await generate(prompt: prompt, maxTokens: Self.chatMaxTokens)
     }
     
     // MARK: - Cancel

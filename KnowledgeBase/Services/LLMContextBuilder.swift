@@ -4,6 +4,22 @@ import Foundation
 /// Builds system prompts and retrieves relevant wiki context for LLM queries.
 final class LLMContextBuilder {
     
+    // MARK: - Configuration Constants
+    /// Max entities listed in the system prompt overview.
+    private static let maxEntityOverview = 20
+    /// Max concepts listed in the system prompt overview.
+    private static let maxConceptOverview = 20
+    /// Max sources listed in the system prompt overview.
+    private static let maxSourceOverview = 10
+    /// Max recent pages shown in the system prompt overview.
+    private static let maxRecentOverview = 5
+    /// Content preview length per page in system prompt.
+    private static let contentPreviewLength = 100
+    /// Max pages included in the relevant context for a query.
+    private static let maxContextPages = 10
+    /// Content preview length per page in query context.
+    private static let contextPreviewLength = 500
+    
     // MARK: - System Prompt
     func buildSystemPrompt(pages: [WikiPage]) -> String {
         var prompt = """
@@ -34,20 +50,20 @@ final class LLMContextBuilder {
         prompt += "\n- \(L.tr("llm.prompt.totalPages")): \(totalPages)"
         prompt += "\n- \(L.tr("llm.prompt.entityCount")): \(entities.count), \(L.tr("llm.prompt.conceptCount")): \(concepts.count), \(L.tr("llm.prompt.sourceCount")): \(sources.count)"
         prompt += "\n\n\(L.tr("llm.prompt.entityList"))"
-        for entity in entities.prefix(20) {
-            prompt += "\n- [[\(entity.title)]]: \(String(entity.content.prefix(100)))"
+        for entity in entities.prefix(Self.maxEntityOverview) {
+            prompt += "\n- [[\(entity.title)]]: \(String(entity.content.prefix(Self.contentPreviewLength)))"
         }
         prompt += "\n\n\(L.tr("llm.prompt.conceptList"))"
-        for concept in concepts.prefix(20) {
-            prompt += "\n- [[\(concept.title)]]: \(String(concept.content.prefix(100)))"
+        for concept in concepts.prefix(Self.maxConceptOverview) {
+            prompt += "\n- [[\(concept.title)]]: \(String(concept.content.prefix(Self.contentPreviewLength)))"
         }
         prompt += "\n\n\(L.tr("llm.prompt.sourceList"))"
-        for source in sources.prefix(10) {
+        for source in sources.prefix(Self.maxSourceOverview) {
             prompt += "\n- [[\(source.title)]]"
         }
         
         // Add recent changes
-        let recent = activePages.sorted { $0.updated > $1.updated }.prefix(5)
+        let recent = activePages.sorted { $0.updated > $1.updated }.prefix(Self.maxRecentOverview)
         if !recent.isEmpty {
             prompt += "\n\n\(L.tr("llm.prompt.recentUpdates"))"
             for page in recent {
@@ -89,10 +105,10 @@ final class LLMContextBuilder {
         let allRelevant = pages.filter { extendedIDs.contains($0.id) }
         
         var context = "\(L.tr("llm.prompt.relevantPages"))\n"
-        for page in allRelevant.prefix(10) {
+        for page in allRelevant.prefix(Self.maxContextPages) {
             context += "\n---\n## \(page.title)\n\(L.tr("llm.prompt.typeLabel")): \(page.type.displayName) | \(L.tr("llm.prompt.statusLabel")): \(page.status.displayName)\n\n"
-            context += String(page.content.prefix(500))
-            if page.content.count > 500 { context += "..." }
+            context += String(page.content.prefix(Self.contextPreviewLength))
+            if page.content.count > Self.contextPreviewLength { context += "..." }
             context += "\n"
         }
         

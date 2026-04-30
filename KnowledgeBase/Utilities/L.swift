@@ -10,8 +10,8 @@ enum LanguageMode: String, CaseIterable {
     var displayName: String {
         switch self {
         case .system: return L.tr("settings.language.system")
-        case .chinese: return "简体中文"
-        case .english: return "English"
+        case .chinese: return L.tr("settings.language.chinese")
+        case .english: return L.tr("settings.language.english")
         }
     }
 
@@ -80,7 +80,25 @@ enum L {
         if args.isEmpty {
             return template
         }
-        return String(format: template, arguments: args)
+        // 手动替换占位符，避免 String(format:) 的 locale 问题
+        var result = template
+        var argIndex = 0
+        while argIndex < args.count {
+            if let range = result.range(of: "%@") {
+                result.replaceSubrange(range, with: "\(args[argIndex])")
+                argIndex += 1
+            } else if let range = result.range(of: "%d") {
+                if let intVal = args[argIndex] as? Int {
+                    result.replaceSubrange(range, with: "\(intVal)")
+                } else {
+                    result.replaceSubrange(range, with: "\(args[argIndex])")
+                }
+                argIndex += 1
+            } else {
+                break
+            }
+        }
+        return result
     }
     
     // MARK: - Embedded Strings (Fallback)
@@ -120,6 +138,12 @@ enum L {
         
         // MARK: - Welcome Page
         "welcome.subtitle": "基于 Karpathy LLM Wiki 的 iOS 知识管理",
+        "welcome.quickStart": "快速上手",
+        "welcome.guide.createPage": "创建第一个知识页面",
+        "welcome.guide.wikiLink": "使用 [[页面名]] 建立双向链接",
+        "welcome.guide.browseGraph": "在图谱中浏览知识关联",
+        "welcome.guide.search": "通过搜索快速定位内容",
+        "welcome.wikilinkHint": "编辑页面时输入 [[页面名]] 即可自动建立双向链接",
         "stat.totalPages": "总页面",
         "stat.entities": "实体",
         "stat.concepts": "概念",
@@ -190,6 +214,7 @@ enum L {
         "ingest.llmPreview": "LLM 编译预览",
         "ingest.confirmIngest": "确认导入",
         "ingest.discard": "放弃",
+        "ingest.compileRules": "编译规则：提取关键信息、建立 [[双向链接]]、推荐标签",
         "ingest.suggestedRelations": "建议关联",
         "ingest.error": "错误",
         "ingest.ok": "确定",
@@ -247,7 +272,10 @@ enum L {
         "settings.resetWarning": "此操作将删除所有页面和日志，恢复为默认内容。不可恢复。",
         "settings.importComplete": "导入完成",
         "settings.importedCount": "成功导入 %d 个页面",
+        "settings.importedPageTitle": "导入页面 %d",
+        "settings.importTag": "导入",
         "settings.gotIt": "好的",
+        "settings.importSuccess": "成功导入 %d 个页面",
         
         // MARK: - Chat
         "chat.title": "AI 助手",
@@ -368,6 +396,7 @@ enum L {
         
         // MARK: - Editor
         "editor.pageTitle": "页面标题",
+        "editor.pageTitlePlaceholder": "输入页面标题",
         "editor.addTag": "添加标签",
         "editor.enterTag": "输入标签",
         "editor.addAlias": "添加别名",
@@ -385,6 +414,12 @@ enum L {
         "editor.searchPages": "搜索页面...",
         "editor.cancel": "取消",
         "editor.bidirectionalLinks": "支持 [[双向链接]] 语法",
+        "editor.iconCustomized": "已自定义",
+        "editor.selectedText": "选中文本",
+        "editor.tableColumn1": "列1",
+        "editor.tableColumn2": "列2",
+        "editor.tableColumn3": "列3",
+        "editor.tableContent": "内容",
         
         // MARK: - Create Page
         "create.title": "创建页面",
@@ -437,6 +472,7 @@ enum L {
         "widget.wordCount": "字数",
         "widget.recentUpdates": "最近更新",
         "widget.pageCount": "%d 页",
+        "widget.knowledgeCompile": "知识编译",
 
         // MARK: - Shortcuts
         "shortcuts.searchWiki": "搜索知识库",
@@ -482,6 +518,7 @@ enum L {
         "logAction.redo": "重做操作",
         "logAction.healthCheck": "健康检查",
         "logAction.lintIssuesFound": "发现 %d 个问题",
+        "logAction.sync": "同步",
         
         // MARK: - Export
         "export.header": "知识库导出",
@@ -651,6 +688,10 @@ enum L {
         "misc.loading": "加载中...",
         "misc.noData": "暂无数据",
         "misc.search": "搜索",
+
+        // MARK: - Empty State
+        "empty.hint": "提示",
+        "empty.actionHint": "可执行操作",
         
         // MARK: - Undo
         "undo.undo": "撤销",
@@ -845,10 +886,22 @@ enum L {
 
         // MARK: - Language Settings
         "settings.language.system": "跟随系统",
+        "settings.language.chinese": "简体中文",
+        "settings.language.english": "English",
         "settings.appearanceMode": "外观模式",
         "settings.language": "语言",
 
         "settings.section.danger": "危险操作",
+        "settings.section.appearance": "外观",
+        "settings.section.ai": "人工智能",
+        "settings.section.data": "数据管理",
+        "settings.section.moreFeatures": "更多功能",
+        "settings.section.stats": "知识库统计",
+        "settings.section.maintenance": "维护",
+        "settings.section.about": "关于",
+        "settings.collaboration": "协作",
+        "settings.ok": "确定",
+        "settings.reset": "重置",
 
         "settings.onDeviceLLM": "端侧 LLM",
         "settings.exportMarkdown": "导出为 Markdown",
@@ -856,18 +909,68 @@ enum L {
         "settings.totalPages": "总页面",
         "settings.stubPagesHint": "被链接但内容为空的页面，建议补充内容",
         "settings.tagManagerHint": "浏览所有标签及关联页面",
+        "settings.tagManager": "标签管理",
         "settings.masterIndex": "总索引",
+        "settings.aboutApp": "关于",
         "settings.aboutAppDesc": "基于 Karpathy LLM Wiki 方法论的 iOS 知识管理应用",
+        "settings.llmNotConfigured": "未配置",
+        "settings.importClipboardHint": "支持 JSON 数组或 Markdown 分隔文本",
+        "settings.pdfManager": "PDF 导入与阅读",
+        "settings.graph3DHint": "球形知识节点，旋转缩放探索",
+        "settings.llmConfig": "LLM 设置",
+        "settings.graph3D": "3D 图谱",
+        "settings.voiceNote": "语音笔记",
+        "settings.spatialComputing": "空间计算",
         "settings.confirmReset": "确认重置",
         "settings.cancel": "取消",
         "settings.settings": "设置",
 
+        "ingest.hero.title": "知识导入",
         "ingest.hero.subtitle": "将原始资料编译到 Wiki，自动提取关键信息并建立交叉引用",
         "ingest.ocrScan": "OCR 扫描",
         "ingest.ocrScanHint": "从图片中识别文字",
         "ingest.tip5": "更新索引和操作日志",
+        "ingest.tip1": "将原始资料粘贴到内容区域",
+        "ingest.tip2": "选择页面类型和标签",
+        "ingest.tip3": "点击导入，系统自动编译",
+        "ingest.tip4": "自动检测已有页面的交叉引用",
+        "ingest.tips": "使用提示",
+        "ingest.manualEntry": "手动输入",
+        "ingest.manualEntryHint": "粘贴或输入内容",
+        "ingest.preview": "预览",
+        "ingest.submit": "导入",
+        "ingest.submitting": "导入中...",
+        "ingest.field.title": "标题",
+        "ingest.field.content": "内容",
+        "ingest.field.type": "类型",
+        "ingest.field.tags": "标签",
+        "ingest.field.icon": "图标",
+        "ingest.field.titlePlaceholder": "输入页面标题",
+        "ingest.field.tagsPlaceholder": "标签，用逗号分隔",
+        "ingest.manualTitle": "手动输入",
+        "ingest.iconCustom": "自定义",
+        "ingest.iconDefault": "默认",
+        "ingest.iconReset": "重置",
+        "ingest.smartToggle": "智能导入",
+        "ingest.smartToggleHint": "使用 AI 提取关键信息并建立链接",
+        "ingest.previewConfirm": "确认导入",
+        "ingest.previewDiscard": "放弃",
+        "ingest.suggestLinks": "建议链接",
 
         "tooltip.tag.desc": "为页面添加标签，方便分类检索和批量管理",
+
+        // MARK: - Tooltip Descriptions
+        "tooltip.createPage.title": "创建第一个页面",
+        "tooltip.createPage.desc": "点击右上角 + 按钮，选择页面类型，创建你的第一个知识条目",
+        "tooltip.wikiLink.title": "页面互联",
+        "tooltip.wikiLink.desc": "在编辑器中输入 [[页面名]] 链接到其他页面，构建你的知识网络",
+        "tooltip.graphFilter.title": "图谱筛选",
+        "tooltip.graphFilter.desc": "点击顶部标签按类型筛选节点，快速定位目标",
+        "tooltip.ingest.title": "智能导入",
+        "tooltip.ingest.desc": "通过 PDF、网页或 OCR 扫描批量导入内容",
+        "tooltip.chat.title": "AI 助手",
+        "tooltip.chat.desc": "基于你的知识库提问，AI 将结合现有页面回答",
+        "tooltip.tag.title": "标签管理",
 
         "misc.gotIt": "知道了",
 
@@ -882,6 +985,8 @@ enum L {
         "page.doneEditing": "完成编辑",
         "page.type": "页面类型",
         "page.icon": "图标",
+        "page.wiki": "知识库",
+        "page.deletePage": "删除页面",
         "page.tags": "标签",
         "page.alias": "别名",
         "page.confidence": "可信度",
@@ -895,6 +1000,8 @@ enum L {
         "page.noBackLinks": "无反向链接",
         "page.searchPlaceholder": "搜索页面...",
         "page.close": "关闭",
+        "page.wordCountUnit": "字",
+        "page.outLinkUnit": "出链",
 
         // MARK: - Create Page
         "create.pageTitle": "页面标题",
@@ -1038,6 +1145,7 @@ enum L {
         "page.outLinksCount": "%d 出链",
         "page.metaAccessibility": "元信息，创建于 %@，%@ 字，%d 个出站链接",
         "page.doubleTapToNavigate": "双击跳转到该页面",
+        "page.backlinkAccessibility": "反向链接：%@，类型 %@",
         "page.confirmDelete": "确认删除",
         "page.deleteMessage": "此操作不可恢复，页面及所有引用将被删除。",
 
@@ -1143,6 +1251,12 @@ enum L {
         
         // MARK: - Welcome Page
         "welcome.subtitle": "iOS Knowledge Management based on Karpathy LLM Wiki",
+        "welcome.quickStart": "Quick Start",
+        "welcome.guide.createPage": "Create your first knowledge page",
+        "welcome.guide.wikiLink": "Use [[Page Name]] to create bidirectional links",
+        "welcome.guide.browseGraph": "Browse knowledge connections in the graph",
+        "welcome.guide.search": "Quickly find content through search",
+        "welcome.wikilinkHint": "Type [[Page Name]] in the editor to automatically create bidirectional links",
         "stat.totalPages": "Pages",
         "stat.entities": "Entities",
         "stat.concepts": "Concepts",
@@ -1218,6 +1332,7 @@ enum L {
         "ingest.suggestedRelations": "Suggested Relations",
         "ingest.error": "Error",
         "ingest.ok": "OK",
+        "ingest.compileRules": "Compilation rules: extract key info, establish [[bidirectional links]], recommend tags",
         
         // MARK: - Lint
         "lint.runCheck": "Run Health Check",
@@ -1272,6 +1387,8 @@ enum L {
         "settings.resetWarning": "This will delete all pages and logs, restoring default content. Cannot be undone.",
         "settings.importComplete": "Import Complete",
         "settings.importedCount": "Successfully imported %d pages",
+        "settings.importedPageTitle": "Imported Page %d",
+        "settings.importTag": "imported",
         "settings.gotIt": "Got it",
         
         // MARK: - Chat
@@ -1393,6 +1510,7 @@ enum L {
         
         // MARK: - Editor
         "editor.pageTitle": "Page Title",
+        "editor.pageTitlePlaceholder": "Enter page title",
         "editor.addTag": "Add Tag",
         "editor.enterTag": "Enter tag",
         "editor.addAlias": "Add Alias",
@@ -1410,7 +1528,13 @@ enum L {
         "editor.searchPages": "Search pages...",
         "editor.cancel": "Cancel",
         "editor.bidirectionalLinks": "Supports [[bidirectional links]] syntax",
-        
+        "editor.iconCustomized": "Customized",
+        "editor.selectedText": "Selected text",
+        "editor.tableColumn1": "Column 1",
+        "editor.tableColumn2": "Column 2",
+        "editor.tableColumn3": "Column 3",
+        "editor.tableContent": "Content",
+
         // MARK: - Create Page
         "create.title": "Create Page",
         "create.basicInfo": "Basic Info",
@@ -1462,6 +1586,7 @@ enum L {
         "widget.wordCount": "Word Count",
         "widget.recentUpdates": "Recent Updates",
         "widget.pageCount": "%d pages",
+        "widget.knowledgeCompile": "Knowledge Compile",
         
         // MARK: - Shortcuts
         "shortcuts.searchWiki": "Search Wiki",
@@ -1505,6 +1630,7 @@ enum L {
         "logAction.redo": "Redo",
         "logAction.healthCheck": "Health Check",
         "logAction.lintIssuesFound": "Found %d issues",
+        "logAction.sync": "Sync",
         
         // MARK: - Export
         "export.header": "Knowledge Base Export",
@@ -1674,8 +1800,10 @@ enum L {
         "misc.loading": "Loading...",
         "misc.noData": "No data",
         "misc.search": "Search",
-        
-        // MARK: - Undo
+
+        // MARK: - Empty State
+        "empty.hint": "Hint",
+        "empty.actionHint": "Action available",
         "undo.undo": "Undo",
         "undo.redo": "Redo",
         "undo.unavailable": "Nothing to undo",
@@ -1868,6 +1996,8 @@ enum L {
 
         // MARK: - Language Settings
         "settings.language.system": "Follow System",
+        "settings.language.chinese": "简体中文",
+        "settings.language.english": "English",
         "settings.appearanceMode": "Appearance",
         "settings.language": "Language",
 
@@ -1969,6 +2099,8 @@ enum L {
         "page.doneEditing": "Done editing",
         "page.type": "Page type",
         "page.icon": "Icon",
+        "page.wiki": "Knowledge Base",
+        "page.deletePage": "Delete Page",
         "page.tags": "Tags",
         "page.alias": "Alias",
         "page.confidence": "Confidence",
@@ -1982,6 +2114,8 @@ enum L {
         "page.noBackLinks": "No backlinks",
         "page.searchPlaceholder": "Search pages...",
         "page.close": "Close",
+        "page.wordCountUnit": "words",
+        "page.outLinkUnit": "out-links",
 
         // MARK: - Create Page
         "create.pageTitle": "Page title",
@@ -2131,6 +2265,7 @@ enum L {
         "page.doubleTapToNavigate": "Double-tap to navigate",
         "page.confirmDelete": "Confirm Delete",
         "page.deleteMessage": "This action cannot be undone. The page and all references will be deleted.",
+        "page.backlinkAccessibility": "Backlink: %@, type %@",
 
         // MARK: - iCloud Sync (Additional)
         "icloud.lastSyncFormat": "Last sync: %@",

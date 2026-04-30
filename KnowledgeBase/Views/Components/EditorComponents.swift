@@ -23,11 +23,6 @@ struct WikilinkPickerSheet: View {
             .background(Color.wikiBackground)
             .navigationTitle(L.tr("editor.insertWikiLink"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("editor.cancel")) { dismiss() }
-                }
-            }
         }
     }
     

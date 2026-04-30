@@ -97,11 +97,6 @@ struct BacklinksView: View {
             .background(Color.wikiBackground)
             .navigationTitle(page.title)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("backlinks.close")) { dismiss() }
-                }
-            }
         }
     }
 }

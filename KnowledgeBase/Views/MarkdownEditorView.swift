@@ -64,7 +64,7 @@ struct MarkdownEditorView: View {
     // MARK: - Title Editor
     private var titleEditor: some View {
         HStack {
-            TextField("页面标题", text: $page.title)
+            TextField(L.tr("editor.pageTitlePlaceholder"), text: $page.title)
                 .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(.wikiText)
                 .padding()

@@ -12,7 +12,11 @@ final class LogService: ObservableObject {
     private var logsFileURL: URL {
         documentsDirectory.appendingPathComponent("wikicraft_logs.json")
     }
-
+    
+    // MARK: - Constants
+    /// Maximum number of log entries to retain
+    private static let maxLogEntries = 500
+    
     // MARK: - Init
     init() {
         loadFromDisk()
@@ -22,7 +26,7 @@ final class LogService: ObservableObject {
     func addLog(action: String, target: String, details: String = "") {
         let entry = LogEntry(action: action, target: target, details: details)
         logEntries.insert(entry, at: 0)
-        if logEntries.count > 500 { logEntries = Array(logEntries.prefix(500)) }
+        if logEntries.count > Self.maxLogEntries { logEntries = Array(logEntries.prefix(Self.maxLogEntries)) }
         saveToDisk()
     }
 

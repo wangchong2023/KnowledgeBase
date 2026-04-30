@@ -80,16 +80,11 @@ struct BackupView: View {
             .navigationTitle(L.tr("backup.title")
             )
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("close")) { dismiss() }
-                }
-            }
             .alert(L.tr("backup.restoreTitle"), isPresented: $showRestoreConfirmation) {
                 Button(L.tr("backup.restore"), role: .destructive) {
                     restoreFromBackup()
                 }
-                Button(L.tr("cancel"), role: .cancel) {}
+                Button(L.tr("misc.cancel"), role: .cancel) {}
             } message: {
                 Text(L.tr("backup.restoreMessage")
                 )
@@ -154,7 +149,7 @@ struct BackupEntryRow: View {
             Button(role: .destructive) {
                 onDelete()
             } label: {
-                Label(L.tr("delete"), systemImage: "trash")
+                Label(L.tr("misc.delete"), systemImage: "trash")
             }
         }
     }

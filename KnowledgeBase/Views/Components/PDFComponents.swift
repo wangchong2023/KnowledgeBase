@@ -27,9 +27,6 @@ struct PDFIngestSheet: View {
             .navigationTitle(L.tr("pdf.ingestToWiki"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(L.tr("misc.cancel")) { dismiss() }
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(L.tr("pdf.ingest")) { ingestContent() }
                         .fontWeight(.semibold)

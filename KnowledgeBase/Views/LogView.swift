@@ -47,11 +47,6 @@ struct LogView: View {
             .background(Color.wikiBackground)
             .navigationTitle(L.tr("settings.operationLog"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("log.close")) { dismiss() }
-                }
-            }
         }
     }
 }
@@ -133,7 +128,7 @@ private struct LogEntryRow: View {
         case "智能导入", L.tr("logAction.smartIngest"): return .wikiAccent
         case "撤销操作", L.tr("logAction.undo"): return .purple
         case "重做操作", L.tr("logAction.redo"): return .purple
-        case "同步": return .teal
+        case "同步", L.tr("logAction.sync"): return .teal
         case "导入PDF", L.tr("logAction.importPDF"), L.tr("logAction.ingestPDF"): return .wikiSource
         case "删除PDF", L.tr("logAction.deletePDF"): return .red
         case "高亮标注", L.tr("logAction.highlight"): return .wikiAccent
@@ -141,7 +136,7 @@ private struct LogEntryRow: View {
         default: return .wikiSecondary
         }
     }
-    
+
     private func actionIcon(_ action: String) -> String {
         switch action {
         case "创建", L.tr("logAction.create"): return "plus"
@@ -152,7 +147,7 @@ private struct LogEntryRow: View {
         case "智能导入", L.tr("logAction.smartIngest"): return "sparkles"
         case "撤销操作", L.tr("logAction.undo"): return "arrow.uturn.backward"
         case "重做操作", L.tr("logAction.redo"): return "arrow.uturn.forward"
-        case "同步": return "icloud"
+        case "同步", L.tr("logAction.sync"): return "icloud"
         case "导入PDF", L.tr("logAction.importPDF"), L.tr("logAction.ingestPDF"): return "arrow.down.doc"
         case "删除PDF", L.tr("logAction.deletePDF"): return "trash"
         case "高亮标注", L.tr("logAction.highlight"): return "highlighter"

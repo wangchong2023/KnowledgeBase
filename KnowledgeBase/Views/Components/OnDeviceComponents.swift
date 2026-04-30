@@ -21,11 +21,6 @@ struct OnDeviceTestView: View {
             .background(Color.wikiBackground)
             .navigationTitle(L.tr("ondevice.test"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("misc.close")) { dismiss() }
-                }
-            }
         }
     }
     

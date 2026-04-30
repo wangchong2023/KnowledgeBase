@@ -4,6 +4,10 @@ import Foundation
 /// Runs health checks on the wiki: broken links, orphan pages, stubs, stale content.
 /// Returns issues without side effects — caller decides what to do with results.
 final class LintService {
+    
+    /// Threshold (in days) after which an active page is considered stale.
+    private static let stalePageThresholdDays = 30
+    
     /// Run all lint checks and return the list of issues found.
     func runLint(pages: [WikiPage], linkService: LinkService) -> [LintIssue] {
         var issues: [LintIssue] = []
@@ -46,8 +50,8 @@ final class LintService {
         }
 
         // Check for stale pages (not updated in 30 days)
-        let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
-        for page in pages where page.updated < thirtyDaysAgo && page.status == .active {
+        let staleThreshold = Calendar.current.date(byAdding: .day, value: -Self.stalePageThresholdDays, to: Date()) ?? Date()
+        for page in pages where page.updated < staleThreshold && page.status == .active {
             issues.append(LintIssue(
                 severity: .info,
                 pageID: page.id,

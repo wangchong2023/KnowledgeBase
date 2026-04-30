@@ -10,6 +10,12 @@ final class LLMClient {
     private let apiKey: String
     private var currentTask: URLSessionDataTask?
     
+    // MARK: - Constants
+    /// Timeout for non-streaming requests (seconds)
+    private static let defaultTimeout: TimeInterval = 60
+    /// Timeout for streaming requests (seconds, longer to accommodate slow responses)
+    private static let streamingTimeout: TimeInterval = 120
+    
     init(baseURL: String, apiKey: String) {
         self.baseURL = baseURL
         self.apiKey = apiKey
@@ -31,7 +37,7 @@ final class LLMClient {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 60
+        request.timeoutInterval = Self.defaultTimeout
         
         let httpBody = try JSONSerialization.data(withJSONObject: body)
         request.httpBody = httpBody
@@ -77,7 +83,7 @@ final class LLMClient {
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 request.setValue("Bearer \(self.apiKey)", forHTTPHeaderField: "Authorization")
-                request.timeoutInterval = 120
+                request.timeoutInterval = Self.streamingTimeout
                 
                 let httpBody = try? JSONSerialization.data(withJSONObject: body)
                 request.httpBody = httpBody

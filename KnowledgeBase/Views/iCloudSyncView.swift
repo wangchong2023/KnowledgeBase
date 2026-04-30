@@ -22,6 +22,10 @@ struct iCloudSyncView: View {
     @State private var autoSync = UserDefaults.standard.bool(forKey: "wikicraft_auto_sync")
     @State private var autoSyncTimer: Timer?
     
+    // MARK: - Constants
+    /// Auto-sync interval in seconds (5 minutes)
+    private static let autoSyncInterval: TimeInterval = 300
+    
     var body: some View {
         List {
             // MARK: - Status Section
@@ -194,7 +198,7 @@ struct iCloudSyncView: View {
         guard autoSync, syncService.iCloudAvailable else { return }
         
         // Auto-sync every 5 minutes
-        autoSyncTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { _ in
+        autoSyncTimer = Timer.scheduledTimer(withTimeInterval: Self.autoSyncInterval, repeats: true) { _ in
             Task { @MainActor in
                 guard !isSyncing else { return }
                 await performAutoSync()
@@ -220,11 +224,7 @@ struct iCloudSyncView: View {
                 localLogs: store.logEntries
             )
             if !finalPages.isEmpty {
-                store.resetAllData()
-                for page in finalPages {
-                    store.addImportedPage(page)
-                }
-                store.saveToDisk()
+                replaceLocalData(with: finalPages)
             }
         } catch {
             await MainActor.run {
@@ -277,12 +277,7 @@ struct iCloudSyncView: View {
                 let (pages, _) = try await syncService.pullFromCloud()
                 await MainActor.run {
                     if !pages.isEmpty {
-                        // Replace local data with remote
-                        store.resetAllData()
-                        for page in pages {
-                            store.addImportedPage(page)
-                        }
-                        store.saveToDisk()
+                        replaceLocalData(with: pages)
                     }
                 }
             } catch {
@@ -313,12 +308,7 @@ struct iCloudSyncView: View {
                     localLogs: store.logEntries
                 )
                 await MainActor.run {
-                    // Update store with merged data
-                    store.resetAllData()
-                    for page in finalPages {
-                        store.addImportedPage(page)
-                    }
-                    store.saveToDisk()
+                    replaceLocalData(with: finalPages)
                 }
             } catch {
                 await MainActor.run {
@@ -328,6 +318,16 @@ struct iCloudSyncView: View {
             }
             await MainActor.run { isSyncing = false }
         }
+    }
+    
+    // MARK: - Helpers
+    /// Replaces all local data with imported pages from sync results.
+    private func replaceLocalData(with pages: [WikiPage]) {
+        store.resetAllData()
+        for page in pages {
+            store.addImportedPage(page)
+        }
+        store.saveToDisk()
     }
     
     private func clearCloudData() {

@@ -24,54 +24,51 @@ struct IngestView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 20) {
-                        IngestHeroSection()
+            ScrollView {
+                VStack(spacing: 20) {
+                    IngestHeroSection()
 
-                        IngestEntryCardsSection(
-                            showManualForm: $showManualForm,
-                            newType: $newType
+                    IngestEntryCardsSection(
+                        showManualForm: $showManualForm,
+                        newType: $newType
+                    )
+
+                    // Manual form (animated reveal)
+                    if showManualForm {
+                        IngestManualFormSection(
+                            newTitle: $newTitle,
+                            newContent: $newContent,
+                            newType: $newType,
+                            newCustomIcon: $newCustomIcon,
+                            newTags: $newTags,
+                            showIconPicker: $showIconPicker,
+                            useSmartIngest: $useSmartIngest,
+                            smartResult: $smartResult,
+                            isIngesting: $isIngesting,
+                            ingestSuccess: $ingestSuccess,
+                            errorMessage: $errorMessage,
+                            showError: $showError,
+                            llmService: llmService,
+                            store: store,
+                            onPerformIngest: performIngest,
+                            onConfirmSmartIngest: confirmSmartIngest
                         )
-
-                        // Manual form (animated reveal)
-                        if showManualForm {
-                            IngestManualFormSection(
-                                newTitle: $newTitle,
-                                newContent: $newContent,
-                                newType: $newType,
-                                newCustomIcon: $newCustomIcon,
-                                newTags: $newTags,
-                                showIconPicker: $showIconPicker,
-                                useSmartIngest: $useSmartIngest,
-                                smartResult: $smartResult,
-                                isIngesting: $isIngesting,
-                                ingestSuccess: $ingestSuccess,
-                                errorMessage: $errorMessage,
-                                showError: $showError,
-                                llmService: llmService,
-                                store: store,
-                                onPerformIngest: performIngest,
-                                onConfirmSmartIngest: confirmSmartIngest
-                            )
-                            .id("manualForm")
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
-
-                        IngestTipsSection()
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
-                    .padding(.bottom, 40)
+
+                    IngestTipsSection()
                 }
-                .background(Color.wikiBackground)
-                .navigationTitle(L.tr("ingest.title"))
-                .alert(L.tr("ingest.error"), isPresented: $showError) {
-                    Button(L.tr("ingest.ok")) { errorMessage = nil }
-                } message: {
-                    Text(errorMessage ?? "")
-                }
-                .sheet(isPresented: $showIconPicker) {
-                    IconPickerView(selectedIcon: $newCustomIcon)
-                }
+                .padding(.bottom, 40)
+            }
+            .background(Color.wikiBackground)
+            .navigationTitle(L.tr("ingest.title"))
+            .alert(L.tr("ingest.error"), isPresented: $showError) {
+                Button(L.tr("ingest.ok")) { errorMessage = nil }
+            } message: {
+                Text(errorMessage ?? "")
+            }
+            .sheet(isPresented: $showIconPicker) {
+                IconPickerView(selectedIcon: $newCustomIcon)
             }
         }
     }

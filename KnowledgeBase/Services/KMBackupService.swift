@@ -8,8 +8,10 @@ final class BackupService: ObservableObject {
     @Published var lastBackupDate: Date?
     @Published var isAutoBackupEnabled: Bool = true
     
-    private let maxBackups = 20
-    private let backupInterval: TimeInterval = 300 // 5 minutes minimum between auto-backups
+    /// Maximum number of backups to retain before auto-cleanup removes the oldest.
+    private static let maxBackups = 20
+    /// Minimum time interval (seconds) between consecutive auto-backups to avoid thrashing.
+    private static let backupInterval: TimeInterval = 300
     
     struct BackupEntry: Identifiable, Codable {
         let id: UUID
@@ -54,7 +56,7 @@ final class BackupService: ObservableObject {
         guard isAutoBackupEnabled else { return }
         
         // Throttle: don't backup too frequently
-        if let last = lastBackupDate, Date().timeIntervalSince(last) < backupInterval {
+        if let last = lastBackupDate, Date().timeIntervalSince(last) < Self.backupInterval {
             return
         }
         
@@ -142,17 +144,17 @@ final class BackupService: ObservableObject {
     
     // MARK: - Clean Old Backups
     private func cleanOldBackups() {
-        guard backupEntries.count > maxBackups else { return }
+        guard backupEntries.count > Self.maxBackups else { return }
         
         let sorted = backupEntries.sorted { $0.timestamp > $1.timestamp }
-        let toRemove = sorted.suffix(from: maxBackups)
+        let toRemove = sorted.suffix(from: Self.maxBackups)
         
         for entry in toRemove {
             let url = Self.backupDirectory.appendingPathComponent(entry.fileName)
             try? FileManager.default.removeItem(at: url)
         }
         
-        backupEntries = Array(sorted.prefix(maxBackups))
+        backupEntries = Array(sorted.prefix(Self.maxBackups))
         saveBackupEntries()
     }
     

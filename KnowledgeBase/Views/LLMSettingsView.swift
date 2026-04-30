@@ -58,7 +58,7 @@ struct LLMSettingsView: View {
             Section {
                 // API Key
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("API Key")
+                    Text(L.tr("llm.apiKey"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     

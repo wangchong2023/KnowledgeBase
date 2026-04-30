@@ -14,6 +14,25 @@ struct GraphContainerView: View {
     @State private var showLegend = false
     @State private var filterType: PageType?
     @StateObject private var tooltipManager = TooltipManager.shared
+    
+    // MARK: - Constants
+    /// Minimum node size in graph
+    private static let minNodeSize: CGFloat = 24
+    /// Maximum node size in graph
+    private static let maxNodeSize: CGFloat = 40
+    /// Selected node size (larger than normal)
+    private static let selectedNodeSize: CGFloat = 40
+    /// Size increment per connection
+    private static let nodeSizeIncrement: CGFloat = 3
+    /// Base node size
+    private static let nodeBaseSize: CGFloat = 20
+    /// Geometry height offset for safe area
+    private static let geometryHeightOffset: CGFloat = 100
+    /// Geometry size used for initial layout
+    private static let defaultGeometrySize = CGSize(
+        width: UIScreen.main.bounds.width,
+        height: UIScreen.main.bounds.height - 100
+    )
 
     var filteredNodes: [GraphNode] {
         guard let filter = filterType else { return nodes }
@@ -61,10 +80,11 @@ struct GraphContainerView: View {
             .navigationTitle(L.tr("graph.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 12) {
                         Text(L.trf("graph.nodesConnections", filteredNodes.count, filteredEdges.count))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
+                            .fixedSize()
 
                         Button(action: { showLegend.toggle() }) {
                             Image(systemName: "info.circle")
@@ -72,6 +92,8 @@ struct GraphContainerView: View {
                         }
                         .accessibilityIdentifier("toggle-legend")
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.trailing, 4)
                 }
             }
         }
@@ -164,7 +186,7 @@ struct GraphContainerView: View {
             ForEach(filteredNodes) { node in
                 let isSelected = selectedNodeID == node.id
                 let linkCount = edges.filter { $0.source == node.id || $0.target == node.id }.count
-                let nodeSize: CGFloat = isSelected ? 40 : max(24, min(40, 20 + CGFloat(linkCount) * 3))
+                let nodeSize: CGFloat = isSelected ? Self.selectedNodeSize : max(Self.minNodeSize, min(Self.maxNodeSize, Self.nodeBaseSize + CGFloat(linkCount) * Self.nodeSizeIncrement))
 
                 GraphNodeView(
                     node: node,
@@ -201,7 +223,7 @@ struct GraphContainerView: View {
                 }
                 .onEnded { _ in lastOffset = offset }
         )
-        .onAppear { graphSize = geometrySize }
+        .onAppear { graphSize = Self.defaultGeometrySize }
     }
 
     // MARK: - Zoom Controls
@@ -269,7 +291,12 @@ struct GraphContainerView: View {
                     }
                     Spacer()
                 }
-                .padding(.top, 50)
+                .padding(.top, 60)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    withAnimation { tooltipManager.activeTooltip = nil }
+                    tooltipManager.markShown(.graphFilter)
+                }
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
@@ -290,15 +317,11 @@ struct GraphContainerView: View {
     }
 
     // MARK: - Helpers
-    private var geometrySize: CGSize {
-        CGSize(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height - 100)
-    }
-
     private func layoutGraph() {
         let result = GraphLayoutEngine.layout(
             pages: store.pages,
             linkResolver: { title in store.pageByTitle(title) },
-            canvasSize: graphSize.width > 0 ? graphSize : geometrySize
+            canvasSize: graphSize.width > 0 ? graphSize : Self.defaultGeometrySize
         )
         nodes = result.nodes
         edges = result.edges

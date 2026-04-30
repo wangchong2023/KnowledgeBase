@@ -20,6 +20,10 @@ final class CollaborationService: NSObject, ObservableObject {
 
     private let maxRecentEdits = 100
     private let serviceType = "wikicraft-collab"
+    
+    // MARK: - Constants
+    /// Timeout for peer invitation response (seconds)
+    private static let inviteTimeout: TimeInterval = 30
 
     // MC objects — only initialized on real devices
     private var myPeerID: MCPeerID?
@@ -94,7 +98,7 @@ final class CollaborationService: NSObject, ObservableObject {
 
     func joinRoom(_ room: DiscoveredRoom) {
         guard !isSimulator, let session = session, let browser = browser else { return }
-        browser.invitePeer(room.peerID, to: session, withContext: nil, timeout: 30)
+        browser.invitePeer(room.peerID, to: session, withContext: nil, timeout: Self.inviteTimeout)
         self.role = .editor
         statusMessage = L.tr("collab.status.joining")
     }

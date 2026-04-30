@@ -166,9 +166,6 @@ struct PerformanceDashboardView: View {
             .navigationTitle(L.tr("perf.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("close")) { dismiss() }
-                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         service.updateMemoryUsage()

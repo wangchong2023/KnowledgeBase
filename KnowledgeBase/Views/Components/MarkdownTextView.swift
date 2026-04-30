@@ -120,7 +120,7 @@ final class EditorActionExecutor {
         } else {
             let pos = min(coordinator.cursorState.cursorPosition, (tv.text as NSString).length)
             tv.selectedRange = NSRange(location: pos, length: 0)
-            tv.insertText(wrapper + "选中文本" + wrapper)
+            tv.insertText(wrapper + L.tr("editor.selectedText") + wrapper)
         }
     }
 
@@ -179,7 +179,7 @@ struct MarkdownEditorToolbar: View {
                     onInsert("> ", nil)
                 }
                 EditorToolbarButton(title: L.tr("editor.table"), icon: "tablecells") {
-                    onInsertMultiline("\n| 列1 | 列2 | 列3 |\n|------|------|------|\n| 内容 | 内容 | 内容 |\n")
+                    onInsertMultiline("\n| \(L.tr("editor.tableColumn1")) | \(L.tr("editor.tableColumn2")) | \(L.tr("editor.tableColumn3")) |\n|------|------|------|\n| \(L.tr("editor.tableContent")) | \(L.tr("editor.tableContent")) | \(L.tr("editor.tableContent")) |\n")
                 }
                 EditorToolbarButton(title: L.tr("editor.divider"), icon: "minus") {
                     onInsertMultiline("\n---\n")

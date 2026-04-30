@@ -6,7 +6,7 @@ struct KMApp: App {
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var llmService = LLMService()
     @State private var hasSeenSplash = false
-    
+
     var body: some Scene {
         WindowGroup {
             // ContentView 已在 body 内读取 themeManager.accentColorRaw 触发重建
@@ -17,6 +17,8 @@ struct KMApp: App {
                     .environmentObject(themeManager)
                     .environmentObject(llmService)
                     .preferredColorScheme(themeManager.colorSchemeMode.preferredColorScheme)
+                    // 将主题色注入 environment，使所有子视图通过 @Environment(\.wikiAccentColor) 获取最新值
+                    .environment(\.wikiAccentColor, themeManager.accentColor)
                 
                 if !hasSeenSplash {
                     SplashView(onDismiss: {

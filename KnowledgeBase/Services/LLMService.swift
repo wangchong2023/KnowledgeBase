@@ -63,57 +63,70 @@ final class LLMService: ObservableObject {
     
     /// Syncs changes from configStore back into our @Published properties.
     private func setupExternalSync() {
-        configStore.$provider
+        // Use configStore.objectWillChange to avoid needing Combine's publisher(for:) extension.
+        // Each sink updates the specific published property when the configStore changes.
+        configStore.objectWillChange
             .receive(on: RunLoop.main)
-            .filter { [weak self] in $0 != self?.provider }
-            .sink { [weak self] in
+            .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.provider = $0
-            }
-            .store(in: &cancellables)
-        
-        configStore.$apiKey
-            .receive(on: RunLoop.main)
-            .filter { [weak self] in $0 != self?.apiKey }
-            .sink { [weak self] in
-                guard let self = self else { return }
-                self.apiKey = $0
-            }
-            .store(in: &cancellables)
-        
-        configStore.$baseURL
-            .receive(on: RunLoop.main)
-            .filter { [weak self] in $0 != self?.baseURL }
-            .sink { [weak self] in
-                guard let self = self else { return }
-                self.baseURL = $0
-            }
-            .store(in: &cancellables)
-        
-        configStore.$model
-            .receive(on: RunLoop.main)
-            .filter { [weak self] in $0 != self?.model }
-            .sink { [weak self] in
-                guard let self = self else { return }
-                self.model = $0
-            }
-            .store(in: &cancellables)
-        
-        configStore.$isEnabled
-            .receive(on: RunLoop.main)
-            .filter { [weak self] in $0 != self?.isEnabled }
-            .sink { [weak self] in
-                guard let self = self else { return }
-                self.isEnabled = $0
+                if self.configStore.provider != self.provider { self.provider = self.configStore.provider }
+                if self.configStore.apiKey != self.apiKey { self.apiKey = self.configStore.apiKey }
+                if self.configStore.baseURL != self.baseURL { self.baseURL = self.configStore.baseURL }
+                if self.configStore.model != self.model { self.model = self.configStore.model }
+                if self.configStore.isEnabled != self.isEnabled { self.isEnabled = self.configStore.isEnabled }
             }
             .store(in: &cancellables)
     }
     
     private var cancellables = Set<AnyCancellable>()
     
+    // MARK: - Constants
+    /// Non-streaming chat temperature
+    private static let chatTemperature: Double = 0.7
+    /// Non-streaming chat max tokens
+    private static let chatMaxTokens: Int = 2000
+    /// Smart ingest temperature (lower = more focused/deterministic)
+    private static let ingestTemperature: Double = 0.3
+    /// Smart ingest max tokens
+    private static let ingestMaxTokens: Int = 3000
+    /// Validation request max tokens (minimal response)
+    private static let validationMaxTokens: Int = 5
+
     // MARK: - Client Factory (stateless per-request)
     private func makeClient() -> LLMClient {
         LLMClient(baseURL: baseURL, apiKey: apiKey)
+    }
+    
+    // MARK: - Request Body Builder
+    /// Builds the messages array for chat completions, including system prompt + history + query.
+    private func buildChatMessages(systemPrompt: String, query: String) -> [[String: Any]] {
+        var messages: [[String: Any]] = [["role": "system", "content": systemPrompt]]
+        for msg in historyStore.recent(10) {
+            messages.append(["role": msg.role.rawValue, "content": msg.content])
+        }
+        messages.append(["role": "user", "content": query])
+        return messages
+    }
+    
+    /// Creates a non-streaming request body dictionary.
+    private func makeChatRequestBody(systemPrompt: String, query: String) -> [String: Any] {
+        [
+            "model": model,
+            "messages": buildChatMessages(systemPrompt: systemPrompt, query: query),
+            "temperature": Self.chatTemperature,
+            "max_tokens": Self.chatMaxTokens
+        ]
+    }
+    
+    /// Creates a streaming request body dictionary.
+    private func makeStreamingRequestBody(systemPrompt: String, query: String) -> [String: Any] {
+        [
+            "model": model,
+            "messages": buildChatMessages(systemPrompt: systemPrompt, query: query),
+            "temperature": Self.chatTemperature,
+            "max_tokens": Self.chatMaxTokens,
+            "stream": true
+        ]
     }
     
     // MARK: - Chat Completion (Non-streaming)
@@ -125,21 +138,7 @@ final class LLMService: ObservableObject {
         let context = contextBuilder.buildRelevantContext(query: query, pages: pages)
         let systemPrompt = contextBuilder.buildSystemPrompt(pages: pages) + "\n\n" + context
         
-        var messages: [[String: Any]] = [
-            ["role": "system", "content": systemPrompt]
-        ]
-        
-        for msg in historyStore.recent(10) {
-            messages.append(["role": msg.role.rawValue, "content": msg.content])
-        }
-        messages.append(["role": "user", "content": query])
-        
-        let requestBody: [String: Any] = [
-            "model": model,
-            "messages": messages,
-            "temperature": 0.7,
-            "max_tokens": 2000
-        ]
+        let requestBody = makeChatRequestBody(systemPrompt: systemPrompt, query: query)
         
         let response = try await makeClient().sendRequest(body: requestBody)
         
@@ -177,22 +176,7 @@ final class LLMService: ObservableObject {
                 let context = self.contextBuilder.buildRelevantContext(query: query, pages: pages)
                 let systemPrompt = self.contextBuilder.buildSystemPrompt(pages: pages) + "\n\n" + context
                 
-                var messages: [[String: Any]] = [
-                    ["role": "system", "content": systemPrompt]
-                ]
-                
-                for msg in self.historyStore.recent(10) {
-                    messages.append(["role": msg.role.rawValue, "content": msg.content])
-                }
-                messages.append(["role": "user", "content": query])
-                
-                let requestBody: [String: Any] = [
-                    "model": self.model,
-                    "messages": messages,
-                    "temperature": 0.7,
-                    "max_tokens": 2000,
-                    "stream": true
-                ]
+                let requestBody = self.makeStreamingRequestBody(systemPrompt: systemPrompt, query: query)
                 
                 do {
                 let streamResult = self.makeClient().sendStreamingRequest(body: requestBody)
@@ -254,8 +238,8 @@ final class LLMService: ObservableObject {
                 ["role": "system", "content": systemPrompt],
                 ["role": "user", "content": prompt]
             ],
-            "temperature": 0.3,
-            "max_tokens": 3000
+            "temperature": Self.ingestTemperature,
+            "max_tokens": Self.ingestMaxTokens
         ]
         
         let response = try await makeClient().sendRequest(body: requestBody)
@@ -318,7 +302,7 @@ final class LLMService: ObservableObject {
         let requestBody: [String: Any] = [
             "model": model,
             "messages": [["role": "user", "content": "Hi"]],
-            "max_tokens": 5
+            "max_tokens": Self.validationMaxTokens
         ]
         
         _ = try await makeClient().sendRequest(body: requestBody)

@@ -66,6 +66,14 @@ final class SQLiteStoreCore {
     }
 
     // MARK: - CRUD (Raw SQL)
+    
+    /// Returns the four array fields of a WikiPage as a tuple of raw [String] arrays.
+    /// The JSON encoding is done by bindJSONString to avoid duplication.
+    /// Returns: .0=aliases, .1=tags, .2=sources, .3=relatedIDs
+    private func pageArrayFields(_ page: WikiPage) -> ([String], [String], [String], [String]) {
+        (page.aliases, page.tags, page.sources, page.relatedPageIDs.map(\.uuidString))
+    }
+    
     func insertPage(_ page: WikiPage) {
         let sql = """
         INSERT OR REPLACE INTO pages (
@@ -78,22 +86,19 @@ final class SQLiteStoreCore {
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }
         defer { sqlite3_finalize(stmt) }
 
-        let jsonData = try! JSONEncoder().encode([
-            page.aliases, page.tags, page.sources, page.relatedPageIDs.map(\.uuidString)
-        ])
-        let arrays = try! JSONDecoder().decode([[String]].self, from: jsonData)
+        let arrays = pageArrayFields(page)
 
         sqlite3_bind_text(stmt, 1, page.id.uuidString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
         sqlite3_bind_text(stmt, 2, page.title, -1, transient())
         sqlite3_bind_text(stmt, 3, page.type.rawValue, -1, staticDestructor())
         sqlite3_bind_text(stmt, 4, page.customIcon ?? "", -1, transient())
         sqlite3_bind_text(stmt, 5, page.content, -1, transient())
-        bindJSONString(stmt, 6, arrays[0])
-        bindJSONString(stmt, 7, arrays[1])
+        bindJSONString(stmt, 6, arrays.0)
+        bindJSONString(stmt, 7, arrays.1)
         sqlite3_bind_text(stmt, 8, page.status.rawValue, -1, staticDestructor())
         sqlite3_bind_text(stmt, 9, page.confidence.rawValue, -1, staticDestructor())
-        bindJSONString(stmt, 10, arrays[2])
-        bindJSONString(stmt, 11, arrays[3])
+        bindJSONString(stmt, 10, arrays.2)
+        bindJSONString(stmt, 11, arrays.3)
         sqlite3_bind_int(stmt, 12, page.isPinned ? 1 : 0)
         sqlite3_bind_double(stmt, 13, page.created.timeIntervalSince1970)
         sqlite3_bind_double(stmt, 14, page.updated.timeIntervalSince1970)
@@ -116,21 +121,18 @@ final class SQLiteStoreCore {
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }
         defer { sqlite3_finalize(stmt) }
 
-        let jsonData = try! JSONEncoder().encode([
-            page.aliases, page.tags, page.sources, page.relatedPageIDs.map(\.uuidString)
-        ])
-        let arrays = try! JSONDecoder().decode([[String]].self, from: jsonData)
+        let arrays = pageArrayFields(page)
 
         sqlite3_bind_text(stmt, 1, page.title, -1, transient())
         sqlite3_bind_text(stmt, 2, page.type.rawValue, -1, staticDestructor())
         sqlite3_bind_text(stmt, 3, page.customIcon ?? "", -1, transient())
         sqlite3_bind_text(stmt, 4, page.content, -1, transient())
-        bindJSONString(stmt, 5, arrays[0])
-        bindJSONString(stmt, 6, arrays[1])
+        bindJSONString(stmt, 5, arrays.0)
+        bindJSONString(stmt, 6, arrays.1)
         sqlite3_bind_text(stmt, 7, page.status.rawValue, -1, staticDestructor())
         sqlite3_bind_text(stmt, 8, page.confidence.rawValue, -1, staticDestructor())
-        bindJSONString(stmt, 9, arrays[2])
-        bindJSONString(stmt, 10, arrays[3])
+        bindJSONString(stmt, 9, arrays.2)
+        bindJSONString(stmt, 10, arrays.3)
         sqlite3_bind_int(stmt, 11, page.isPinned ? 1 : 0)
         sqlite3_bind_double(stmt, 12, page.updated.timeIntervalSince1970)
         sqlite3_bind_text(stmt, 13, page.id.uuidString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))

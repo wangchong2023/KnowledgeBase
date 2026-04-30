@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var importedCount = 0
     @StateObject private var syncService = iCloudSyncService()
     @State private var selectedLanguage: LanguageMode = L.languageMode
+    @Binding var languageForceUpdate: Bool
     
     var body: some View {
         NavigationStack {
@@ -25,8 +26,10 @@ struct SettingsView: View {
                             .foregroundStyle(.wikiText)
                     }
                     .tint(.wikiAccent)
+                    .id(languageForceUpdate)
                     
                     AccentColorPicker(colors: ["blue", "purple", "green", "orange", "pink", "red", "teal", "indigo"])
+                        .id(languageForceUpdate)
 
                     Picker(selection: $selectedLanguage) {
                         ForEach(LanguageMode.allCases, id: \.self) { mode in
@@ -40,7 +43,9 @@ struct SettingsView: View {
                     .tint(.wikiAccent)
                     .onChange(of: selectedLanguage) { _, newValue in
                         L.languageMode = newValue
+                        languageForceUpdate.toggle()
                     }
+                    .id(languageForceUpdate)
                 } header: {
                     Text(L.tr("settings.section.appearance"))
                 }
@@ -257,7 +262,7 @@ struct SettingsView: View {
                     .replacingOccurrences(of: "^#+\\s*", with: "", options: .regularExpression)
                     .trimmingCharacters(in: .whitespaces)
                 
-                if title.isEmpty { title = "导入页面 \(count + 1)" }
+                if title.isEmpty { title = L.trf("settings.importedPageTitle", count + 1) }
                 if store.pageByTitle(title) != nil { continue }
                 
                 let content = section.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -265,7 +270,7 @@ struct SettingsView: View {
                     title: title,
                     type: .concept,
                     content: content,
-                    tags: ["导入"]
+                    tags: [L.tr("settings.importTag")]
                 )
                 _ = page
                 count += 1
@@ -280,9 +285,9 @@ struct SettingsView: View {
     }
     
     private func exportAllAsMarkdown() -> String {
-        var output = "# 知识库导出\n\n"
-        output += "导出时间: \(Date().formatted())\n"
-        output += "总页面: \(store.totalPages)\n\n---\n\n"
+        var output = "# \(L.tr("export.header"))\n\n"
+        output += "\(L.tr("export.exportTime")): \(Date().formatted())\n"
+        output += "\(L.tr("export.totalPages")): \(store.totalPages)\n\n---\n\n"
         
         for type in PageType.allCases {
             let typePages = store.pages.filter { $0.type == type }
@@ -293,17 +298,17 @@ struct SettingsView: View {
             for page in typePages.sorted(by: { $0.title < $1.title }) {
                 output += "---\n\n"
                 output += "### \(page.title)\n\n"
-                output += "- 类型: \(page.type.displayName)\n"
-                output += "- 状态: \(page.status.displayName)\n"
-                output += "- 可信度: \(page.confidence.displayName)\n"
+                output += "- \(L.tr("export.type")): \(page.type.displayName)\n"
+                output += "- \(L.tr("export.status")): \(page.status.displayName)\n"
+                output += "- \(L.tr("export.confidence")): \(page.confidence.displayName)\n"
                 if !page.tags.isEmpty {
-                    output += "- 标签: \(page.tags.joined(separator: ", "))\n"
+                    output += "- \(L.tr("export.tags")): \(page.tags.joined(separator: ", "))\n"
                 }
                 if !page.aliases.isEmpty {
-                    output += "- 别名: \(page.aliases.joined(separator: ", "))\n"
+                    output += "- \(L.tr("export.aliases")): \(page.aliases.joined(separator: ", "))\n"
                 }
-                output += "- 创建: \(page.created.formatted())\n"
-                output += "- 更新: \(page.updated.formatted())\n\n"
+                output += "- \(L.tr("export.created")): \(page.created.formatted())\n"
+                output += "- \(L.tr("export.updated")): \(page.updated.formatted())\n\n"
                 output += page.content
                 output += "\n\n"
             }

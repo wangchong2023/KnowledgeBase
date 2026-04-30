@@ -81,9 +81,6 @@ struct CreatePageView: View {
             .navigationTitle(L.tr("create.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("misc.cancel")) { dismiss() }
-                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L.tr("create.create")) {
                         createPage()
@@ -129,34 +126,34 @@ struct CreatePageView: View {
     private func applyConceptTemplate() {
         content = """
         # \(title)
-        
+
         ## \(L.tr("create.definition"))
-        
+
         ## \(L.tr("create.corePoints"))
-        
-        | 维度 | 说明 |
+
+        | \(L.tr("create.dimension")) | \(L.tr("create.description")) |
         |------|------|
         |  |  |
-        
+
         ## \(L.tr("create.relatedLinks"))
-        
+
         """
     }
-    
+
     private func applyComparisonTemplate() {
         content = """
         # \(title)
-        
+
         ## \(L.tr("create.comparisonDimensions"))
-        
-        | 维度 | A | B |
+
+        | \(L.tr("create.dimension")) | A | B |
         |------|---|---|
         |  |  |  |
-        
+
         ## \(L.tr("create.conclusion"))
-        
+
         ## \(L.tr("create.relatedLinks"))
-        
+
         """
     }
 }

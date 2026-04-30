@@ -18,7 +18,7 @@ struct PageDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 // Header
-                pageHeader
+                PageDetailHeader(page: page)
                 
                 Divider()
                     .background(Color.wikiBorder)
@@ -200,143 +200,6 @@ struct PageDetailView: View {
         }
     }
     
-    // MARK: - Page Header
-    private var pageHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Breadcrumb: type path
-            HStack(spacing: 4) {
-                Image(systemName: "books.vertical.fill")
-                    .font(.caption2)
-                    .foregroundStyle(.wikiSecondary)
-                Text(L.tr("page.wiki"))
-                    .font(.caption2)
-                    .foregroundStyle(.wikiSecondary)
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 8))
-                    .foregroundStyle(.wikiSecondary)
-                Text(page.type.displayName)
-                    .font(.caption2)
-                    .foregroundStyle(page.type.themedColor)
-                if page.isPinned {
-                    Spacer()
-                    Image(systemName: "pin.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.wikiComparison)
-                }
-            }
-            
-            HStack(spacing: 10) {
-                // Type badge
-                HStack(spacing: 4) {
-                    Image(systemName: page.displayIcon)
-                        .font(.caption)
-                    Text(page.type.displayName)
-                        .font(.caption.weight(.medium))
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(page.type.themedColor.opacity(0.2))
-                .clipShape(Capsule())
-                .foregroundStyle(page.type.themedColor)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(L.trf("page.typeAccessibility", page.type.displayName))
-
-                // Status badge
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(page.status.color)
-                        .frame(width: 6, height: 6)
-                    Text(page.status.displayName)
-                        .font(.caption)
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(page.status.color.opacity(0.15))
-                .clipShape(Capsule())
-                .foregroundStyle(page.status.color)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(L.trf("page.statusAccessibility", page.status.displayName))
-
-                // Confidence
-                HStack(spacing: 4) {
-                    Image(systemName: "signal")
-                        .font(.caption2)
-                    Text(page.confidence.displayName)
-                        .font(.caption)
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(page.confidence.color.opacity(0.15))
-                .clipShape(Capsule())
-                .foregroundStyle(page.confidence.color)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(L.trf("page.confidenceAccessibility", page.confidence.displayName))
-                
-                Spacer()
-            }
-            
-            Text(page.title)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundStyle(.wikiText)
-                .accessibilityAddTraits(.isHeader)
-                .accessibilityLabel(L.trf("page.titleAccessibility", page.title))
-            
-            // Aliases
-            if !page.aliases.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.branch")
-                            .font(.caption2)
-                            .foregroundStyle(.wikiSource)
-                        ForEach(page.aliases, id: \.self) { alias in
-                            Text(alias)
-                                .font(.caption2)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Color.wikiSource.opacity(0.15))
-                                .clipShape(Capsule())
-                                .foregroundStyle(.wikiSource)
-                        }
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel(L.trf("page.aliasAccessibility", page.aliases.joined(separator: ", ")))
-                }
-            }
-
-            // Tags
-            if !page.tags.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(page.tags, id: \.self) { tag in
-                            Text("#\(tag)")
-                                .font(.caption2)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(Color.wikiAccent.opacity(0.15))
-                                .clipShape(Capsule())
-                                .foregroundStyle(.wikiAccent)
-                        }
-                    }
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel(L.trf("page.tagsAccessibility", page.tags.map { "#\($0)" }.joined(separator: ", ")))
-                }
-            }
-            
-            // Meta info
-            HStack(spacing: 16) {
-                Label(L.trf("page.createdFormat", page.created.formatted(date: .abbreviated, time: .omitted)), systemImage: "calendar")
-                Label(L.trf("page.updatedFormat", page.updated.formatted(date: .abbreviated, time: .omitted)), systemImage: "clock")
-                Label(L.trf("page.wordCount", page.wordCount), systemImage: "textformat")
-                Label(L.trf("page.outLinksCount", page.outgoingLinks.count), systemImage: "link")
-            }
-            .font(.caption)
-            .foregroundStyle(.wikiSecondary)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel(L.trf("page.metaAccessibility", page.created.formatted(date: .abbreviated, time: .omitted), page.wordCount, page.outgoingLinks.count))
-        }
-        .padding()
-    }
-    
     // MARK: - Backlinks Section
     private var backlinksSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -358,9 +221,6 @@ struct PageDetailView: View {
                     .padding(.vertical, 8)
             } else {
                 ForEach(backlinks) { linkedPage in
-                    // NavigationLink(value:) works in any NavigationStack/NavigationSplitView
-                    // — the nearest ancestor picks it up. In Graph tab it pushes a new
-                    // PageDetailView; in Wiki tab the SplitView updates the detail column.
                     NavigationLink(value: linkedPage) {
                         HStack(spacing: 10) {
                             Image(systemName: linkedPage.displayIcon)
@@ -396,9 +256,6 @@ struct PageDetailView: View {
     // MARK: - Navigation
     private func navigateToPage(_ title: String) {
         if let target = store.pageByTitle(title) {
-            // In Wiki SplitView: update selectedPageID to switch detail column.
-            // In Graph NavigationStack: the NavigationLink(value:) + navigationDestination
-            // registered above will handle push navigation when content links are tapped.
             store.selectedPageID = target.id
         }
     }

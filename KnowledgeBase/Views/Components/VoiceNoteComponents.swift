@@ -22,11 +22,6 @@ struct SaveVoiceNoteSheet: View {
             .background(Color.wikiBackground)
             .navigationTitle(L.tr("speech.saveTitle"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("misc.cancel")) { dismiss() }
-                }
-            }
         }
     }
     

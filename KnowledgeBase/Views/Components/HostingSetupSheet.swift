@@ -21,11 +21,6 @@ struct HostingSetupSheet: View {
             .background(Color.wikiBackground)
             .navigationTitle(L.tr("collab.hostSession"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(L.tr("misc.cancel")) { dismiss() }
-                }
-            }
         }
     }
     

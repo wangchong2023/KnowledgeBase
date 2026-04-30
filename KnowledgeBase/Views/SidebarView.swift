@@ -140,7 +140,6 @@ struct SidebarView: View {
                                     .foregroundStyle(type.themedColor)
                                 Text(type.displayName)
                                     .foregroundStyle(.wikiText)
-                                Spacer()
                                 Text("\(typePages.count)")
                                     .font(.caption)
                                     .foregroundStyle(.wikiSecondary)
@@ -220,7 +219,7 @@ struct PageSidebarRow: View {
                             .lineLimit(1)
 
                         if page.isStub {
-                            Text("stub")
+                            Text(L.tr("status.stub"))
                                 .font(.system(size: 9))
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 1)

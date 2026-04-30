@@ -165,9 +165,6 @@ struct PDFReaderView: View {
             .navigationTitle(documentInfo.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button(L.tr("pdf.done")) { dismiss() }
-                }
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     Button(action: { showHighlightPanel.toggle() }) {
                         Image(systemName: showHighlightPanel ? "highlighter.fill" : "highlighter")

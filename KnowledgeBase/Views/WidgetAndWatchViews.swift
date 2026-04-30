@@ -168,6 +168,6 @@ struct KMWidgetPreview: View {
         totalWords: 4500,
         activeCount: 7,
         stubCount: 2,
-        recentTitles: ["LLM Wiki", "nanoGPT", "知识编译"]
+        recentTitles: ["LLM Wiki", "nanoGPT", L.tr("widget.knowledgeCompile")]
     )
 }
