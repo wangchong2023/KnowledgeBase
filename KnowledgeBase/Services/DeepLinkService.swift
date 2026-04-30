@@ -18,7 +18,7 @@ final class DeepLinkService: ObservableObject {
     
     // MARK: - URL Scheme Handling
     func handleURL(_ url: URL) -> Bool {
-        guard url.scheme == "wikicraft" else { return false }
+        guard url.scheme == "knowledgebase" else { return false }
         
         switch url.host {
         case "page":
@@ -67,14 +67,14 @@ final class DeepLinkService: ObservableObject {
             attributeSet.contentDescription = String(page.content.prefix(200))
             attributeSet.keywords = page.tags + page.aliases
             
-            let activity = NSUserActivity(activityType: "com.wikicraft.openPage")
+            let activity = NSUserActivity(activityType: "com.km.app.openPage")
             activity.userInfo = ["pageID": page.id.uuidString]
             activity.title = page.title
             attributeSet.relatedUniqueIdentifier = page.id.uuidString
             
             let item = CSSearchableItem(
                 uniqueIdentifier: page.id.uuidString,
-                domainIdentifier: "com.wikicraft.pages",
+                domainIdentifier: "com.km.app.pages",
                 attributeSet: attributeSet
             )
             item.expirationDate = nil
@@ -100,7 +100,7 @@ final class DeepLinkService: ObservableObject {
     
     // MARK: - Spotlight Query Handling
     func handleSpotlightActivity(_ userActivity: NSUserActivity) -> Bool {
-        guard userActivity.activityType == "com.wikicraft.openPage",
+        guard userActivity.activityType == "com.km.app.openPage",
               let userInfo = userActivity.userInfo,
               let idString = userInfo["pageID"] as? String,
               let id = UUID(uuidString: idString) else {

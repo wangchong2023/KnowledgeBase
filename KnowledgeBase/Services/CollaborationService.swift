@@ -19,7 +19,7 @@ final class CollaborationService: NSObject, ObservableObject {
     @Published var isSimulator: Bool = false
 
     private let maxRecentEdits = 100
-    private let serviceType = "wikicraft-collab"
+    private let serviceType = "km-collab"
     
     // MARK: - Constants
     /// Timeout for peer invitation response (seconds)
@@ -38,7 +38,7 @@ final class CollaborationService: NSObject, ObservableObject {
 
     private let deviceName = UIDevice.current.name
     private var userName: String {
-        UserDefaults.standard.string(forKey: "wikicraft_username") ?? deviceName
+        UserDefaults.standard.string(forKey: "km_username") ?? deviceName
     }
 
     // MARK: - Init
@@ -168,7 +168,7 @@ final class CollaborationService: NSObject, ObservableObject {
 
     // MARK: - Set Username
     func setUserName(_ name: String) {
-        UserDefaults.standard.set(name, forKey: "wikicraft_username")
+        UserDefaults.standard.set(name, forKey: "km_username")
     }
 
     // MARK: - Private Helpers
