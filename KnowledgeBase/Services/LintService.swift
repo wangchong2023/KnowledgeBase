@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - Lint Service (Health Check)
-/// Runs health checks on the wiki: broken links, orphan pages, stubs, stale content.
+/// 对知识库进行健康检查：断裂链接、孤立页面、存根页面、陈旧内容。
 /// Returns issues without side effects — caller decides what to do with results.
 final class LintService {
     

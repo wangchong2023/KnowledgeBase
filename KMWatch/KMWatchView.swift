@@ -8,7 +8,7 @@ private extension Color {
 }
 
 // MARK: - Apple Watch Quick View
-/// Lightweight view for Apple Watch showing key wiki stats and recent pages
+/// Apple Watch 简易视图，展示知识库关键统计和最近页面
 struct WatchWikiStatsView: View {
     @State private var totalPages = 0
     @State private var totalWords = 0

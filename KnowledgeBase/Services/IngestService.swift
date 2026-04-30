@@ -14,7 +14,7 @@ protocol AnyPageStore {
 // MARK: - Ingest Service (Knowledge Ingestion)
 /// Handles raw content ingestion: creates source pages and auto-links existing concepts.
 final class IngestService {
-    /// Ingest raw content into the wiki by creating a new page and auto-linking known concepts.
+    /// 将原始内容摄入知识库：创建新页面并自动链接已知概念。
     /// - Returns: The created page (with auto-linked content).
     func ingestRawContent(
         title: String,

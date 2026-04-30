@@ -1,7 +1,7 @@
 import Foundation
 
 // MARK: - LLM Context Builder
-/// Builds system prompts and retrieves relevant wiki context for LLM queries.
+/// 构建系统提示词并为 LLM 查询检索相关知识库上下文。
 final class LLMContextBuilder {
     
     // MARK: - Configuration Constants
@@ -40,7 +40,7 @@ final class LLMContextBuilder {
         \(Localized.tr("llm.prompt.overview"))
         """
         
-        // Summarize wiki content for context
+        // 总结知识库内容作为上下文
         let activePages = pages.filter { $0.status == .active || $0.status == .stub }
         let totalPages = activePages.count
         let entities = activePages.filter { $0.type == .entity }

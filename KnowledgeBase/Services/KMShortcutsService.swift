@@ -1,7 +1,7 @@
 import SwiftUI
 import AppIntents
 
-// MARK: - Search Wiki Intent
+// MARK: - 搜索知识库 Intent
 struct SearchWikiIntent: AppIntent {
     static var title: LocalizedStringResource = LocalizedStringResource("shortcuts.searchWiki", table: nil)
     static var description = IntentDescription(LocalizedStringResource("shortcuts.searchWikiDesc", table: nil))
@@ -31,7 +31,7 @@ struct SearchWikiIntent: AppIntent {
     }
 }
 
-// MARK: - Get Wiki Stats Intent
+// MARK: - 获取知识库统计 Intent
 struct GetWikiStatsIntent: AppIntent {
     static var title: LocalizedStringResource = LocalizedStringResource("shortcuts.wikiStats", table: nil)
     static var description = IntentDescription(LocalizedStringResource("shortcuts.wikiStatsDesc", table: nil))
@@ -47,7 +47,7 @@ struct GetWikiStatsIntent: AppIntent {
     }
 }
 
-// MARK: - Create Wiki Page Intent
+// MARK: - 创建知识页面 Intent
 struct CreateWikiPageIntent: AppIntent {
     static var title: LocalizedStringResource = LocalizedStringResource("shortcuts.createPage", table: nil)
     static var description = IntentDescription(LocalizedStringResource("shortcuts.createPageDesc", table: nil))
