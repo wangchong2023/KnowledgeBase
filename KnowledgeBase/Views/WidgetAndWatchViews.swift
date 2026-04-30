@@ -27,7 +27,7 @@ struct WatchWikiStatsView: View {
                         Text("\(totalPages)")
                             .font(.title3.weight(.bold))
                             .foregroundStyle(.wikiText)
-                        Text(L.tr("widget.pages"))
+                        Text(Localized.tr("widget.pages"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -39,7 +39,7 @@ struct WatchWikiStatsView: View {
                         Text(formatNumber(totalWords))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(.wikiText)
-                        Text(L.tr("widget.words"))
+                        Text(Localized.tr("widget.words"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -49,7 +49,7 @@ struct WatchWikiStatsView: View {
                 
                 // Recent pages
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(L.tr("widget.recentUpdates"))
+                    Text(Localized.tr("widget.recentUpdates"))
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.wikiSecondary)
                     
@@ -69,7 +69,7 @@ struct WatchWikiStatsView: View {
             }
             .padding()
         }
-        .navigationTitle(L.tr("widget.title"))
+        .navigationTitle(Localized.tr("widget.title"))
         .onAppear {
             loadData()
         }
@@ -113,10 +113,10 @@ struct KMWidgetPreview: View {
                 Image(systemName: "books.vertical.circle.fill")
                     .font(.title3)
                     .foregroundStyle(.wikiAccent)
-                Text(L.tr("widget.title"))
+                Text(Localized.tr("widget.title"))
                     .font(.caption.weight(.bold))
                 Spacer()
-                Text(L.trf("widget.pages", totalPages))
+                Text(Localized.trf("widget.pages", totalPages))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
@@ -126,26 +126,26 @@ struct KMWidgetPreview: View {
             HStack(spacing: 12) {
                 VStack(spacing: 2) {
                     Text("\(totalWords)").font(.caption.weight(.bold))
-                    Text(L.tr("widget.characters")).font(.caption2).foregroundStyle(.secondary)
+                    Text(Localized.tr("widget.characters")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 
                 VStack(spacing: 2) {
                     Text("\(activeCount)").font(.caption.weight(.bold))
-                    Text(L.tr("widget.active")).font(.caption2).foregroundStyle(.secondary)
+                    Text(Localized.tr("widget.active")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 
                 VStack(spacing: 2) {
                     Text("\(stubCount)").font(.caption.weight(.bold))
-                    Text(L.tr("widget.stub")).font(.caption2).foregroundStyle(.secondary)
+                    Text(Localized.tr("widget.stub")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
             }
             
             if !recentTitles.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L.tr("widget.recentUpdates"))
+                    Text(Localized.tr("widget.recentUpdates"))
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
                     
@@ -168,6 +168,6 @@ struct KMWidgetPreview: View {
         totalWords: 4500,
         activeCount: 7,
         stubCount: 2,
-        recentTitles: ["LLM Wiki", "nanoGPT", L.tr("widget.knowledgeCompile")]
+        recentTitles: ["LLM Wiki", "nanoGPT", Localized.tr("widget.knowledgeCompile")]
     )
 }

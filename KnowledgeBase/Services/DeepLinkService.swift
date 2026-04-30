@@ -83,7 +83,7 @@ final class DeepLinkService: ObservableObject {
         
         CSSearchableIndex.default().indexSearchableItems(searchableItems) { error in
             if let error = error {
-                print(String(format: L.tr("deepLink.log.indexingFailed"), error.localizedDescription))
+                print(String(format: Localized.tr("deepLink.log.indexingFailed"), error.localizedDescription))
             }
         }
     }

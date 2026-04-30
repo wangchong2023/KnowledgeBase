@@ -23,7 +23,7 @@ struct PageDetailHeader: View {
             Image(systemName: "books.vertical.fill")
                 .font(.caption2)
                 .foregroundStyle(.wikiSecondary)
-            Text(L.tr("page.wiki"))
+            Text(Localized.tr("page.wiki"))
                 .font(.caption2)
                 .foregroundStyle(.wikiSecondary)
             Image(systemName: "chevron.right")
@@ -63,7 +63,7 @@ struct PageDetailHeader: View {
             .font(.system(size: 28, weight: .bold, design: .rounded))
             .foregroundStyle(.wikiText)
             .accessibilityAddTraits(.isHeader)
-            .accessibilityLabel(L.trf("page.titleAccessibility", page.title))
+            .accessibilityLabel(Localized.trf("page.titleAccessibility", page.title))
     }
     
     // MARK: - Aliases
@@ -86,7 +86,7 @@ struct PageDetailHeader: View {
                     }
                 }
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel(L.trf("page.aliasAccessibility", page.aliases.joined(separator: ", ")))
+                .accessibilityLabel(Localized.trf("page.aliasAccessibility", page.aliases.joined(separator: ", ")))
             }
         }
     }
@@ -108,7 +108,7 @@ struct PageDetailHeader: View {
                     }
                 }
                 .accessibilityElement(children: .combine)
-                .accessibilityLabel(L.trf("page.tagsAccessibility", page.tags.map { "#\($0)" }.joined(separator: ", ")))
+                .accessibilityLabel(Localized.trf("page.tagsAccessibility", page.tags.map { "#\($0)" }.joined(separator: ", ")))
             }
         }
     }
@@ -116,15 +116,15 @@ struct PageDetailHeader: View {
     // MARK: - Meta Info
     private var metaInfoView: some View {
         HStack(spacing: 16) {
-            Label(L.trf("page.createdFormat", page.created.formatted(date: .abbreviated, time: .omitted)), systemImage: "calendar")
-            Label(L.trf("page.updatedFormat", page.updated.formatted(date: .abbreviated, time: .omitted)), systemImage: "clock")
-            Label(L.trf("page.wordCount", page.wordCount), systemImage: "textformat")
-            Label(L.trf("page.outLinksCount", page.outgoingLinks.count), systemImage: "link")
+            Label(Localized.trf("page.createdFormat", page.created.formatted(date: .abbreviated, time: .omitted)), systemImage: "calendar")
+            Label(Localized.trf("page.updatedFormat", page.updated.formatted(date: .abbreviated, time: .omitted)), systemImage: "clock")
+            Label(Localized.trf("page.wordCount", page.wordCount), systemImage: "textformat")
+            Label(Localized.trf("page.outLinksCount", page.outgoingLinks.count), systemImage: "link")
         }
         .font(.caption)
         .foregroundStyle(.wikiSecondary)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(L.trf("page.metaAccessibility", page.created.formatted(date: .abbreviated, time: .omitted), page.wordCount, page.outgoingLinks.count))
+        .accessibilityLabel(Localized.trf("page.metaAccessibility", page.created.formatted(date: .abbreviated, time: .omitted), page.wordCount, page.outgoingLinks.count))
     }
 }
 
@@ -145,7 +145,7 @@ private struct TypeBadge: View {
         .clipShape(Capsule())
         .foregroundStyle(page.type.themedColor)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(L.trf("page.typeAccessibility", page.type.displayName))
+        .accessibilityLabel(Localized.trf("page.typeAccessibility", page.type.displayName))
     }
 }
 
@@ -167,7 +167,7 @@ private struct StatusBadge: View {
         .clipShape(Capsule())
         .foregroundStyle(page.status.color)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(L.trf("page.statusAccessibility", page.status.displayName))
+        .accessibilityLabel(Localized.trf("page.statusAccessibility", page.status.displayName))
     }
 }
 
@@ -188,6 +188,6 @@ private struct ConfidenceBadge: View {
         .clipShape(Capsule())
         .foregroundStyle(page.confidence.color)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(L.trf("page.confidenceAccessibility", page.confidence.displayName))
+        .accessibilityLabel(Localized.trf("page.confidenceAccessibility", page.confidence.displayName))
     }
 }

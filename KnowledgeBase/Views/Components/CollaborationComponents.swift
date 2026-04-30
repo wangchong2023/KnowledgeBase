@@ -35,7 +35,7 @@ struct DiscoveredRoomRow: View {
                     Text(room.roomName)
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.wikiText)
-                    Text("\(L.tr("collab.hostedBy")) \(room.owner)")
+                    Text("\(Localized.tr("collab.hostedBy")) \(room.owner)")
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }

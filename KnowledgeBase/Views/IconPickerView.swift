@@ -37,7 +37,7 @@ struct IconPickerView: View {
     ]
 
     private func categoryDisplayName(_ key: String) -> String {
-        L.tr(key)
+        Localized.tr(key)
     }
 
     private let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 6)
@@ -58,11 +58,11 @@ struct IconPickerView: View {
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("iconPicker.selectIcon"))
+            .navigationTitle(Localized.tr("iconPicker.selectIcon"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(L.tr("misc.ok")) { dismiss() }
+                    Button(Localized.tr("misc.ok")) { dismiss() }
                         .fontWeight(.medium)
                 }
             }
@@ -80,7 +80,7 @@ struct IconPickerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(selectedIcon != nil ? L.tr("iconPicker.customSelected") : L.tr("iconPicker.useDefault"))
+                Text(selectedIcon != nil ? Localized.tr("iconPicker.customSelected") : Localized.tr("iconPicker.useDefault"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.wikiText)
                 if selectedIcon != nil {
@@ -97,7 +97,7 @@ struct IconPickerView: View {
                     selectedIcon = nil
                     dismiss()
                 }) {
-                    Text(L.tr("iconPicker.reset"))
+                    Text(Localized.tr("iconPicker.reset"))
                         .font(.caption.weight(.medium))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)

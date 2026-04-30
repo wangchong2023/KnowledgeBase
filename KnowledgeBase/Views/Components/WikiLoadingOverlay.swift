@@ -30,7 +30,7 @@ struct WikiLoadingOverlay: View {
                 backgroundColor
                     .ignoresSafeArea()
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel(message ?? L.tr("misc.loading"))
+                    .accessibilityLabel(message ?? Localized.tr("misc.loading"))
 
                 VStack(spacing: 16) {
                     ProgressView()

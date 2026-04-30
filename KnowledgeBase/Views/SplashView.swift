@@ -35,7 +35,7 @@ struct SplashView: View {
                         )
                         .opacity(logoOpacity)
                     
-                    Text(L.tr("splash.appName"))
+                    Text(Localized.tr("splash.appName"))
                         .font(.system(size: 28, weight: .bold, design: .rounded))
                         .foregroundStyle(.white)
                         .opacity(logoOpacity)
@@ -44,7 +44,7 @@ struct SplashView: View {
                 
                 // 名言
                 VStack(spacing: 16) {
-                    Text(L.tr("splash.quote"))
+                    Text(Localized.tr("splash.quote"))
                         .font(.system(size: 17, weight: .medium, design: .serif))
                         .foregroundStyle(.white.opacity(0.9))
                         .multilineTextAlignment(.center)
@@ -53,7 +53,7 @@ struct SplashView: View {
                         .opacity(quoteOpacity)
                     
                     // 闪光效果
-                    Text(L.tr("splash.quote"))
+                    Text(Localized.tr("splash.quote"))
                         .font(.system(size: 17, weight: .medium, design: .serif))
                         .foregroundStyle(
                             LinearGradient(
@@ -67,7 +67,7 @@ struct SplashView: View {
                         .padding(.horizontal, 40)
                         .offset(x: shimmerOffset)
                         .mask(
-                            Text(L.tr("splash.quote"))
+                            Text(Localized.tr("splash.quote"))
                                 .font(.system(size: 17, weight: .medium, design: .serif))
                                 .multilineTextAlignment(.center)
                                 .lineSpacing(6)
@@ -101,7 +101,7 @@ struct SplashView: View {
                     }
                 }) {
                     HStack(spacing: 8) {
-                        Text(L.tr("splash.enter"))
+                        Text(Localized.tr("splash.enter"))
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                         Image(systemName: "arrow.right")
                             .font(.system(size: 13, weight: .semibold))

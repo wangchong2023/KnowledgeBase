@@ -37,15 +37,15 @@ final class SpeechService: ObservableObject {
                 self.hasPermission = status == .authorized
                 switch status {
                 case .authorized:
-                    self.statusMessage = L.tr("speech.status.ready")
+                    self.statusMessage = Localized.tr("speech.status.ready")
                 case .denied:
-                    self.statusMessage = L.tr("speech.status.denied")
+                    self.statusMessage = Localized.tr("speech.status.denied")
                 case .restricted:
-                    self.statusMessage = L.tr("speech.status.restricted")
+                    self.statusMessage = Localized.tr("speech.status.restricted")
                 case .notDetermined:
-                    self.statusMessage = L.tr("speech.status.notDetermined")
+                    self.statusMessage = Localized.tr("speech.status.notDetermined")
                 @unknown default:
-                    self.statusMessage = L.tr("speech.status.unknown")
+                    self.statusMessage = Localized.tr("speech.status.unknown")
                 }
             }
         }
@@ -54,16 +54,16 @@ final class SpeechService: ObservableObject {
     // MARK: - Languages
     private func loadSupportedLanguages() {
         let locales: [(String, String)] = [
-            ("zh-CN", L.tr("speech.lang.zhHans")),
-            ("zh-TW", L.tr("speech.lang.zhHant")),
-            ("en-US", L.tr("speech.lang.enUS")),
-            ("en-GB", L.tr("speech.lang.enGB")),
-            ("ja-JP", L.tr("speech.lang.jaJP")),
-            ("ko-KR", L.tr("speech.lang.koKR")),
-            ("fr-FR", L.tr("speech.lang.frFR")),
-            ("de-DE", L.tr("speech.lang.deDE")),
-            ("es-ES", L.tr("speech.lang.esES")),
-            ("pt-BR", L.tr("speech.lang.ptBR")),
+            ("zh-CN", Localized.tr("speech.lang.zhHans")),
+            ("zh-TW", Localized.tr("speech.lang.zhHant")),
+            ("en-US", Localized.tr("speech.lang.enUS")),
+            ("en-GB", Localized.tr("speech.lang.enGB")),
+            ("ja-JP", Localized.tr("speech.lang.jaJP")),
+            ("ko-KR", Localized.tr("speech.lang.koKR")),
+            ("fr-FR", Localized.tr("speech.lang.frFR")),
+            ("de-DE", Localized.tr("speech.lang.deDE")),
+            ("es-ES", Localized.tr("speech.lang.esES")),
+            ("pt-BR", Localized.tr("speech.lang.ptBR")),
         ]
         
         supportedLanguages = locales.filter { locale in
@@ -84,80 +84,97 @@ final class SpeechService: ObservableObject {
     // MARK: - Start Recording
     func startRecording() {
         guard hasPermission else {
-            statusMessage = L.tr("speech.status.denied")
+            statusMessage = Localized.tr("speech.status.denied")
             return
         }
-        
+
         let locale = Locale(identifier: selectedLanguage)
         guard let recognizer = SFSpeechRecognizer(locale: locale) else {
-            statusMessage = L.tr("speech.status.localeNotSupported")
+            statusMessage = Localized.tr("speech.status.localeNotSupported")
             return
         }
-        
+
         speechRecognizer = recognizer
-        
+
         let audioEngine = AVAudioEngine()
         self.audioEngine = audioEngine
-        
-        let inputNode = audioEngine.inputNode
-        
+
         #if targetEnvironment(simulator)
-        statusMessage = L.tr("speech.status.simulatorNotSupported")
-        return
+        statusMessage = Localized.tr("speech.status.simulatorNotSupported")
         #else
-        
+        setupRecognitionRequest()
+        guard recognitionRequest != nil else { return }
+
+        setupAudioTap(inputNode: audioEngine.inputNode)
+        startAudioEngine(audioEngine)
+        startRecognitionTask(recognizer: recognizer)
+        #endif
+    }
+
+    // MARK: - Setup Recognition Request
+    private func setupRecognitionRequest() {
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
-        guard let recognitionRequest = recognitionRequest else { return }
-        
-        recognitionRequest.shouldReportPartialResults = true
-        recognitionRequest.requiresOnDeviceRecognition = false
-        
-        // Install audio tap for level monitoring
-        // Use nil format to let the system choose the optimal format
+        guard let request = recognitionRequest else { return }
+        request.shouldReportPartialResults = true
+        request.requiresOnDeviceRecognition = false
+    }
+
+    // MARK: - Setup Audio Tap
+    private func setupAudioTap(inputNode: AVAudioInputNode) {
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: nil) { [weak self] buffer, _ in
             self?.recognitionRequest?.append(buffer)
-            
-            // Calculate audio level
-            let channelData = buffer.floatChannelData?[0]
-            let channelDataArray = Array(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
-            let rms = sqrt(channelDataArray.map { $0 * $0 }.reduce(0, +) / Float(channelDataArray.count))
-            let avgPower = 20 * log10(max(rms, 1e-8))
-            
-            DispatchQueue.main.async {
-                self?.audioLevel = max(0, min(1, (avgPower + 50) / 50))
-                self?.audioLevelHistory.removeFirst()
-                self?.audioLevelHistory.append(max(0, min(1, (avgPower + 50) / 50)))
-            }
+            self?.calculateAudioLevel(from: buffer)
         }
-        
+    }
+
+    // MARK: - Calculate Audio Level
+    private func calculateAudioLevel(from buffer: AVAudioPCMBuffer) {
+        let channelData = buffer.floatChannelData?[0]
+        let channelDataArray = Array(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
+        let rms = sqrt(channelDataArray.map { $0 * $0 }.reduce(0, +) / Float(channelDataArray.count))
+        let avgPower = 20 * log10(max(rms, 1e-8))
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.audioLevel = max(0, min(1, (avgPower + 50) / 50))
+            self.audioLevelHistory.removeFirst()
+            self.audioLevelHistory.append(max(0, min(1, (avgPower + 50) / 50)))
+        }
+    }
+
+    // MARK: - Start Audio Engine
+    private func startAudioEngine(_ audioEngine: AVAudioEngine) {
         audioEngine.prepare()
-        
+
         do {
             try audioEngine.start()
             isRecording = true
-            statusMessage = L.tr("speech.status.recording")
+            statusMessage = Localized.tr("speech.status.recording")
         } catch {
-            statusMessage = L.tr("speech.status.audioError")
-            return
+            statusMessage = Localized.tr("speech.status.audioError")
         }
-        
-        recognitionTask = recognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
+    }
+
+    // MARK: - Start Recognition Task
+    private func startRecognitionTask(recognizer: SFSpeechRecognizer) {
+        guard let request = recognitionRequest else { return }
+
+        recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
             DispatchQueue.main.async {
                 if let result = result {
                     self?.transcribedText = result.bestTranscription.formattedString
-                    
+
                     if result.isFinal {
                         self?.stopRecording()
                     }
                 }
-                
+
                 if let error = error {
-                    self?.statusMessage = "\(L.tr("speech.status.error")): \(error.localizedDescription)"
+                    self?.statusMessage = "\(Localized.tr("speech.status.error")): \(error.localizedDescription)"
                     self?.stopRecording()
                 }
             }
         }
-        #endif
     }
     
     // MARK: - Stop Recording
@@ -172,9 +189,9 @@ final class SpeechService: ObservableObject {
         audioLevelHistory = Array(repeating: 0, count: 20)
         
         if !transcribedText.isEmpty {
-            statusMessage = L.tr("speech.status.complete")
+            statusMessage = Localized.tr("speech.status.complete")
         } else {
-            statusMessage = L.tr("speech.status.ready")
+            statusMessage = Localized.tr("speech.status.ready")
         }
     }
     
@@ -227,7 +244,7 @@ final class SpeechService: ObservableObject {
     // MARK: - Clear
     func clearTranscription() {
         transcribedText = ""
-        statusMessage = L.tr("speech.status.ready")
+        statusMessage = Localized.tr("speech.status.ready")
     }
     
     // MARK: - Persistence
@@ -265,9 +282,9 @@ enum SpeechError: LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .localeNotSupported: return L.tr("speech.error.localeNotSupported")
-        case .notAuthorized: return L.tr("speech.error.notAuthorized")
-        case .audioEngineError: return L.tr("speech.error.audioEngine")
+        case .localeNotSupported: return Localized.tr("speech.error.localeNotSupported")
+        case .notAuthorized: return Localized.tr("speech.error.notAuthorized")
+        case .audioEngineError: return Localized.tr("speech.error.audioEngine")
         }
     }
 }

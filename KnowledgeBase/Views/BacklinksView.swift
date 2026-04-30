@@ -19,7 +19,7 @@ struct BacklinksView: View {
                 // Outgoing links
                 Section {
                     if outgoingPages.isEmpty {
-                        Text(L.tr("backlinks.noOutgoing"))
+                        Text(Localized.tr("backlinks.noOutgoing"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     } else {
@@ -50,14 +50,14 @@ struct BacklinksView: View {
                 } header: {
                     HStack {
                         Image(systemName: "arrow.right")
-                        Text(L.trf("backlinks.outgoingCount", outgoingPages.count))
+                        Text(Localized.trf("backlinks.outgoingCount", outgoingPages.count))
                     }
                 }
                 
                 // Backlinks
                 Section {
                     if backlinks.isEmpty {
-                        Text(L.tr("backlinks.noBackLinks"))
+                        Text(Localized.tr("backlinks.noBackLinks"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     } else {
@@ -88,7 +88,7 @@ struct BacklinksView: View {
                 } header: {
                     HStack {
                         Image(systemName: "arrow.left")
-                        Text(L.trf("backlinks.backlinksCount", backlinks.count))
+                        Text(Localized.trf("backlinks.backlinksCount", backlinks.count))
                     }
                 }
             }

@@ -151,11 +151,11 @@ struct VisionProSpatialView: View {
                             )
                         )
                     
-                    Text(L.tr("spatial.title"))
+                    Text(Localized.tr("spatial.title"))
                         .font(.title2.weight(.bold))
                         .foregroundStyle(.wikiText)
                     
-                    Text(L.tr("spatial.subtitle"))
+                    Text(Localized.tr("spatial.subtitle"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                         .multilineTextAlignment(.center)
@@ -168,14 +168,14 @@ struct VisionProSpatialView: View {
                 
                 // Feature List
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(L.tr("spatial.features"))
+                    Text(Localized.tr("spatial.features"))
                         .font(.headline)
                         .foregroundStyle(.wikiText)
                     
-                    SpatialFeatureRow(icon: "cube.transparent.fill", title: L.tr("spatial.feature.3dGraph"), desc: L.tr("spatial.feature.3dGraph.desc"))
-                    SpatialFeatureRow(icon: "hand.tap.fill", title: L.tr("spatial.feature.gesture"), desc: L.tr("spatial.feature.gesture.desc"))
-                    SpatialFeatureRow(icon: "eye.fill", title: L.tr("spatial.feature.gaze"), desc: L.tr("spatial.feature.gaze.desc"))
-                    SpatialFeatureRow(icon: "person.crop.circle.badge.plus", title: L.tr("spatial.feature.spatialAudio"), desc: L.tr("spatial.feature.spatialAudio.desc"))
+                    SpatialFeatureRow(icon: "cube.transparent.fill", title: Localized.tr("spatial.feature.3dGraph"), desc: Localized.tr("spatial.feature.3dGraph.desc"))
+                    SpatialFeatureRow(icon: "hand.tap.fill", title: Localized.tr("spatial.feature.gesture"), desc: Localized.tr("spatial.feature.gesture.desc"))
+                    SpatialFeatureRow(icon: "eye.fill", title: Localized.tr("spatial.feature.gaze"), desc: Localized.tr("spatial.feature.gaze.desc"))
+                    SpatialFeatureRow(icon: "person.crop.circle.badge.plus", title: Localized.tr("spatial.feature.spatialAudio"), desc: Localized.tr("spatial.feature.spatialAudio.desc"))
                 }
                 .padding()
                 .background(Color.wikiCard)
@@ -185,7 +185,7 @@ struct VisionProSpatialView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "info.circle.fill")
                         .foregroundStyle(.blue)
-                    Text(L.tr("spatial.requirement"))
+                    Text(Localized.tr("spatial.requirement"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                         .multilineTextAlignment(.center)
@@ -195,7 +195,7 @@ struct VisionProSpatialView: View {
             .padding()
         }
         .background(Color.wikiBackground)
-        .navigationTitle(L.tr("spatial.title"))
+        .navigationTitle(Localized.tr("spatial.title"))
     }
 }
 
@@ -323,7 +323,7 @@ struct SpatialPageDetailView: View {
                     .font(.body)
             }
             
-            Button(L.tr("misc.close")) { dismiss() }
+            Button(Localized.tr("misc.close")) { dismiss() }
         }
         .padding(40)
     }

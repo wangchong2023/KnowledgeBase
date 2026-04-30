@@ -58,10 +58,10 @@ final class CollaborationService: NSObject, ObservableObject {
     private func checkAvailability() {
         #if targetEnvironment(simulator)
         isAvailable = false
-        statusMessage = L.tr("collab.status.simulatorNotSupported")
+        statusMessage = Localized.tr("collab.status.simulatorNotSupported")
         #else
         isAvailable = true
-        statusMessage = L.tr("collab.status.ready")
+        statusMessage = Localized.tr("collab.status.ready")
         #endif
     }
 
@@ -80,7 +80,7 @@ final class CollaborationService: NSObject, ObservableObject {
 
         isHosting = true
         isJoined = true
-        statusMessage = L.tr("collab.status.hosting")
+        statusMessage = Localized.tr("collab.status.hosting")
     }
 
     // MARK: - Join Session
@@ -93,14 +93,14 @@ final class CollaborationService: NSObject, ObservableObject {
         setupSession(peerID: peerID)
         setupBrowser(peerID: peerID)
 
-        statusMessage = L.tr("collab.status.searching")
+        statusMessage = Localized.tr("collab.status.searching")
     }
 
     func joinRoom(_ room: DiscoveredRoom) {
         guard !isSimulator, let session = session, let browser = browser else { return }
         browser.invitePeer(room.peerID, to: session, withContext: nil, timeout: Self.inviteTimeout)
         self.role = .editor
-        statusMessage = L.tr("collab.status.joining")
+        statusMessage = Localized.tr("collab.status.joining")
     }
 
     // MARK: - Stop
@@ -119,9 +119,9 @@ final class CollaborationService: NSObject, ObservableObject {
         recentEdits.removeAll()
 
         #if !targetEnvironment(simulator)
-        statusMessage = L.tr("collab.status.disconnected")
+        statusMessage = Localized.tr("collab.status.disconnected")
         #else
-        statusMessage = L.tr("collab.status.simulatorNotSupported")
+        statusMessage = Localized.tr("collab.status.simulatorNotSupported")
         #endif
     }
 
@@ -206,7 +206,7 @@ final class CollaborationService: NSObject, ObservableObject {
                 handler(true, self?.session)
             },
             onError: { [weak self] error in
-                self?.statusMessage = "\(L.tr("collab.status.advertiseError")): \(error.localizedDescription)"
+                self?.statusMessage = "\(Localized.tr("collab.status.advertiseError")): \(error.localizedDescription)"
             }
         )
         advertiser = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: [
@@ -221,7 +221,7 @@ final class CollaborationService: NSObject, ObservableObject {
         browserDelegate = MCBrowserDelegateImpl(
             onRoomFound: { [weak self] peerID, info in
                 guard let self = self else { return }
-                let roomName = info?["room"] ?? L.tr("collab.defaultRoom")
+                let roomName = info?["room"] ?? Localized.tr("collab.defaultRoom")
                 let owner = info?["owner"] ?? peerID.displayName
                 let id = peerID.displayName
                 if !self.discoveredRooms.contains(where: { $0.id == id }) {
@@ -232,7 +232,7 @@ final class CollaborationService: NSObject, ObservableObject {
                 self?.discoveredRooms.removeAll { $0.id == peerID.displayName }
             },
             onError: { [weak self] error in
-                self?.statusMessage = "\(L.tr("collab.status.browseError")): \(error.localizedDescription)"
+                self?.statusMessage = "\(Localized.tr("collab.status.browseError")): \(error.localizedDescription)"
             }
         )
         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
@@ -252,20 +252,20 @@ final class CollaborationService: NSObject, ObservableObject {
             connectedPeers.append(user)
         }
         isJoined = true
-        statusMessage = L.tr("collab.status.connected")
+        statusMessage = Localized.tr("collab.status.connected")
     }
 
     private func handlePeerDisconnected(_ peerID: MCPeerID) {
         connectedPeers.removeAll { $0.id == peerID.displayName }
         if connectedPeers.isEmpty && !isHosting {
             isJoined = false
-            statusMessage = L.tr("collab.status.disconnected")
+            statusMessage = Localized.tr("collab.status.disconnected")
         }
     }
 
     private func handleSessionStatusChange(_ state: MCSessionState, peerID: MCPeerID) {
         if state == .connecting {
-            statusMessage = L.tr("collab.status.connecting")
+            statusMessage = Localized.tr("collab.status.connecting")
         }
     }
 
@@ -278,7 +278,7 @@ final class CollaborationService: NSObject, ObservableObject {
         // Try to decode as page sync
         if let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            payload["type"] as? String == "pageSync" {
-            statusMessage = L.tr("collab.status.pageReceived")
+            statusMessage = Localized.tr("collab.status.pageReceived")
         }
     }
 }

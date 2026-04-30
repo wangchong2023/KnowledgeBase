@@ -22,11 +22,11 @@ struct SearchWikiIntent: AppIntent {
         let results = store.searchResults
         
         if results.isEmpty {
-            return .result(value: String(format: L.tr("shortcuts.noResults"), query))
+            return .result(value: String(format: Localized.tr("shortcuts.noResults"), query))
         }
         
         let titles = results.prefix(5).map { $0.title }
-        let summary = String(format: L.tr("shortcuts.foundResults"), results.count) + ":\n" + titles.joined(separator: "、")
+        let summary = String(format: Localized.tr("shortcuts.foundResults"), results.count) + ":\n" + titles.joined(separator: "、")
         return .result(value: summary)
     }
 }
@@ -41,7 +41,7 @@ struct GetWikiStatsIntent: AppIntent {
         let store = KMStore()
         store.loadFromDisk()
         
-        let stats = String(format: L.tr("shortcuts.statsFormat"), store.totalPages, store.totalWords, store.entityCount, store.conceptCount, store.stubCount)
+        let stats = String(format: Localized.tr("shortcuts.statsFormat"), store.totalPages, store.totalWords, store.entityCount, store.conceptCount, store.stubCount)
         
         return .result(value: stats)
     }
@@ -70,7 +70,7 @@ struct CreateWikiPageIntent: AppIntent {
         let page = store.createPage(title: pageTitle, type: .concept, content: pageContent)
         store.saveToDisk()
         
-        return .result(value: String(format: L.tr("shortcuts.createdPage"), page.title))
+        return .result(value: String(format: Localized.tr("shortcuts.createdPage"), page.title))
     }
 }
 

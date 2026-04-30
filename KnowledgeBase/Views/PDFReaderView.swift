@@ -18,7 +18,7 @@ struct PDFLibraryView: View {
                     docList
                 }
             }
-            .navigationTitle(L.tr("pdf.title"))
+            .navigationTitle(Localized.tr("pdf.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: { showFilePicker = true }) {
@@ -45,11 +45,11 @@ struct PDFLibraryView: View {
     // MARK: - Empty State
     private var emptyState: some View {
         ContentUnavailableView {
-            Label(L.tr("pdf.library"), systemImage: "doc.richtext")
+            Label(Localized.tr("pdf.library"), systemImage: "doc.richtext")
         } description: {
-            Text(L.tr("pdf.libraryHint"))
+            Text(Localized.tr("pdf.libraryHint"))
         } actions: {
-            Button(L.tr("pdf.add")) { showFilePicker = true }
+            Button(Localized.tr("pdf.add")) { showFilePicker = true }
                 .buttonStyle(.borderedProminent)
                 .tint(.wikiAccent)
         }
@@ -67,11 +67,11 @@ struct PDFLibraryView: View {
                     Button(role: .destructive) {
                         deleteDocument(doc)
                     } label: {
-                        Label(L.tr("pdf.delete"), systemImage: "trash")
+                        Label(Localized.tr("pdf.delete"), systemImage: "trash")
                     }
                     
                     Button(action: { ingestPDF(doc) }) {
-                        Label(L.tr("pdf.ingest"), systemImage: "arrow.down.doc")
+                        Label(Localized.tr("pdf.ingest"), systemImage: "arrow.down.doc")
                     }
                     .tint(.wikiAccent)
                 }
@@ -105,11 +105,11 @@ struct PDFLibraryView: View {
                 )
                 documents.append(docInfo)
                 PDFService.shared.saveDocumentsInfo(documents)
-                store.addLog(action: L.tr("logAction.importPDF"), target: docInfo.title, details: L.trf("pdf.pageCountFormat", docInfo.pageCount))
+                store.addLog(action: Localized.tr("logAction.importPDF"), target: docInfo.title, details: Localized.trf("pdf.pageCountFormat", docInfo.pageCount))
             }
             
         case .failure(let error):
-            store.addLog(action: L.tr("logAction.importPDFFailed"), target: "", details: error.localizedDescription)
+            store.addLog(action: Localized.tr("logAction.importPDFFailed"), target: "", details: error.localizedDescription)
         }
     }
     
@@ -117,7 +117,7 @@ struct PDFLibraryView: View {
         _ = PDFService.shared.deletePDF(fileName: doc.fileName)
         documents.removeAll { $0.id == doc.id }
         PDFService.shared.saveDocumentsInfo(documents)
-        store.addLog(action: L.tr("logAction.deletePDF"), target: doc.title)
+        store.addLog(action: Localized.tr("logAction.deletePDF"), target: doc.title)
     }
     
     private func ingestPDF(_ doc: PDFDocumentInfo) {
@@ -129,9 +129,9 @@ struct PDFLibraryView: View {
                 title: doc.title,
                 type: .source,
                 content: text,
-                tags: ["PDF", L.tr("logAction.ingest")]
+                tags: ["PDF", Localized.tr("logAction.ingest")]
             )
-            store.addLog(action: L.tr("logAction.importPDF"), target: doc.title, details: L.trf("pdf.createdPage", page.title))
+            store.addLog(action: Localized.tr("logAction.importPDF"), target: doc.title, details: Localized.trf("pdf.createdPage", page.title))
             store.saveToDisk()
         }
     }
@@ -199,7 +199,7 @@ struct PDFReaderView: View {
             )
             .ignoresSafeArea()
         } else {
-            ContentUnavailableView(L.tr("pdf.cannotLoadPDF"), systemImage: "exclamationmark.triangle")
+            ContentUnavailableView(Localized.tr("pdf.cannotLoadPDF"), systemImage: "exclamationmark.triangle")
         }
     }
     
@@ -234,7 +234,7 @@ struct PDFReaderView: View {
     // MARK: - Highlight Editor
     private var highlightEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(L.tr("pdf.annotateSelected"))
+            Text(Localized.tr("pdf.annotateSelected"))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.wikiText)
             
@@ -258,12 +258,12 @@ struct PDFReaderView: View {
                 Spacer()
             }
             
-            TextField(L.tr("pdf.addNote"), text: $highlightNote)
+            TextField(Localized.tr("pdf.addNote"), text: $highlightNote)
                 .font(.caption)
                 .textFieldStyle(.roundedBorder)
             
             Button(action: saveHighlight) {
-                Text(L.tr("pdf.saveAnnotation"))
+                Text(Localized.tr("pdf.saveAnnotation"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12)
@@ -295,7 +295,7 @@ struct PDFReaderView: View {
         highlightNote = ""
         showHighlightPanel = false
         
-        store.addLog(action: L.tr("logAction.highlight"), target: documentInfo.title, details: L.trf("pdf.pageNumber", currentPage + 1))
+        store.addLog(action: Localized.tr("logAction.highlight"), target: documentInfo.title, details: Localized.trf("pdf.pageNumber", currentPage + 1))
     }
 }
 

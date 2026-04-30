@@ -25,13 +25,13 @@ struct OnDeviceLLMSettingsView: View {
             .padding()
         }
         .background(Color.wikiBackground)
-        .navigationTitle(L.tr("ondevice.title"))
+        .navigationTitle(Localized.tr("ondevice.title"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showTestSheet) {
             OnDeviceTestView(onDeviceService: onDeviceService)
         }
-        .alert(L.tr("ondevice.error.inferenceFailed"), isPresented: $showError) {
-            Button(L.tr("misc.ok"), role: .cancel) {}
+        .alert(Localized.tr("ondevice.error.inferenceFailed"), isPresented: $showError) {
+            Button(Localized.tr("misc.ok"), role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
@@ -50,7 +50,7 @@ struct OnDeviceLLMSettingsView: View {
                     )
                 )
             
-            Text(L.tr("ondevice.subtitle"))
+            Text(Localized.tr("ondevice.subtitle"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -66,22 +66,22 @@ struct OnDeviceLLMSettingsView: View {
                 .foregroundStyle(onDeviceService.isAvailable ? .green : .red)
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(onDeviceService.isAvailable ? L.tr("ondevice.available") : L.tr("ondevice.unavailable"))
+                Text(onDeviceService.isAvailable ? Localized.tr("ondevice.available") : Localized.tr("ondevice.unavailable"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.wikiText)
                 
                 if onDeviceService.isAvailable {
                     if #available(iOS 18.2, *) {
-                        Text(L.tr("ondevice.supportsFoundation"))
+                        Text(Localized.tr("ondevice.supportsFoundation"))
                             .font(.caption)
                             .foregroundStyle(.green)
                     } else if #available(iOS 17.0, *) {
-                        Text(L.tr("ondevice.supportsCoreML"))
+                        Text(Localized.tr("ondevice.supportsCoreML"))
                             .font(.caption)
                             .foregroundStyle(.blue)
                     }
                 } else {
-                    Text(L.tr("ondevice.requiresIOS17"))
+                    Text(Localized.tr("ondevice.requiresIOS17"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -97,7 +97,7 @@ struct OnDeviceLLMSettingsView: View {
     // MARK: - Model Selection
     private var modelSelectionSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L.tr("ondevice.models"))
+            Text(Localized.tr("ondevice.models"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
             
@@ -106,7 +106,7 @@ struct OnDeviceLLMSettingsView: View {
                     Image(systemName: "cube.box")
                         .font(.title2)
                         .foregroundStyle(.wikiSecondary)
-                    Text(L.tr("ondevice.noModels"))
+                    Text(Localized.tr("ondevice.noModels"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -133,11 +133,11 @@ struct OnDeviceLLMSettingsView: View {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
-                    Text("\(L.tr("ondevice.modelLoaded")): \(onDeviceService.loadedModelName)")
+                    Text("\(Localized.tr("ondevice.modelLoaded")): \(onDeviceService.loadedModelName)")
                         .font(.subheadline)
                         .foregroundStyle(.wikiText)
                     Spacer()
-                    Button(L.tr("ondevice.unload")) {
+                    Button(Localized.tr("ondevice.unload")) {
                         onDeviceService.unloadModel()
                     }
                     .font(.caption)
@@ -153,7 +153,7 @@ struct OnDeviceLLMSettingsView: View {
                             ProgressView()
                                 .tint(.white)
                         }
-                        Text(L.tr("ondevice.loadModel"))
+                        Text(Localized.tr("ondevice.loadModel"))
                     }
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white)
@@ -168,7 +168,7 @@ struct OnDeviceLLMSettingsView: View {
             Button(action: { showImportPicker = true }) {
                 HStack {
                     Image(systemName: "square.and.arrow.down.fill")
-                    Text(L.tr("ondevice.importModel"))
+                    Text(Localized.tr("ondevice.importModel"))
                 }
                 .font(.subheadline)
                 .foregroundStyle(.wikiAccent)
@@ -209,14 +209,14 @@ struct OnDeviceLLMSettingsView: View {
     // MARK: - Test Section
     private var testSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L.tr("ondevice.test"))
+            Text(Localized.tr("ondevice.test"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
             
             Button(action: { showTestSheet = true }) {
                 HStack {
                     Image(systemName: "text.bubble.fill")
-                    Text(L.tr("ondevice.testGeneration"))
+                    Text(Localized.tr("ondevice.testGeneration"))
                 }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.white)
@@ -229,7 +229,7 @@ struct OnDeviceLLMSettingsView: View {
             
             if onDeviceService.inferenceSpeed > 0 {
                 HStack {
-                    Text(L.tr("ondevice.inferenceSpeed"))
+                    Text(Localized.tr("ondevice.inferenceSpeed"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                     Spacer()
@@ -245,14 +245,14 @@ struct OnDeviceLLMSettingsView: View {
     // MARK: - Info
     private var infoSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L.tr("ondevice.info"))
+            Text(Localized.tr("ondevice.info"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
             
-            InfoRow(icon: "lock.shield.fill", text: L.tr("ondevice.info.privacy"))
-            InfoRow(icon: "wifi.slash", text: L.tr("ondevice.info.offline"))
-            InfoRow(icon: "bolt.fill", text: L.tr("ondevice.info.ne"))
-            InfoRow(icon: "memorychip", text: L.tr("ondevice.info.memory"))
+            InfoRow(icon: "lock.shield.fill", text: Localized.tr("ondevice.info.privacy"))
+            InfoRow(icon: "wifi.slash", text: Localized.tr("ondevice.info.offline"))
+            InfoRow(icon: "bolt.fill", text: Localized.tr("ondevice.info.ne"))
+            InfoRow(icon: "memorychip", text: Localized.tr("ondevice.info.memory"))
         }
         .padding()
         .background(Color.wikiCard)

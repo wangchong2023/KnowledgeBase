@@ -17,7 +17,7 @@ struct LintView: View {
                             } else {
                                 Image(systemName: "stethoscope")
                             }
-                            Text(isRunning ? L.tr("lint.checking") : L.tr("lint.runCheck"))
+                            Text(isRunning ? Localized.tr("lint.checking") : Localized.tr("lint.runCheck"))
                                 .fontWeight(.semibold)
                         }
                         .frame(maxWidth: .infinity)
@@ -37,7 +37,7 @@ struct LintView: View {
                     .padding()
                     
                     if !store.lintIssues.isEmpty {
-                        Text(L.trf("lint.foundIssues", store.lintIssues.count))
+                        Text(Localized.trf("lint.foundIssues", store.lintIssues.count))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -51,10 +51,10 @@ struct LintView: View {
                         Image(systemName: "checkmark.seal.fill")
                             .font(.system(size: 56))
                             .foregroundStyle(.green)
-                        Text(L.tr("lint.noIssues"))
+                        Text(Localized.tr("lint.noIssues"))
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(.wikiText)
-                        Text(L.tr("lint.noIssuesHint"))
+                        Text(Localized.tr("lint.noIssuesHint"))
                             .font(.subheadline)
                             .foregroundStyle(.wikiSecondary)
                         Spacer()
@@ -69,7 +69,7 @@ struct LintView: View {
                                     LintIssueRow(issue: issue)
                                 }
                             } header: {
-                                Label(L.trf("lint.errors", errors.count), systemImage: "xmark.circle.fill")
+                                Label(Localized.trf("lint.errors", errors.count), systemImage: "xmark.circle.fill")
                                     .foregroundStyle(.red)
                             }
                         }
@@ -82,7 +82,7 @@ struct LintView: View {
                                     LintIssueRow(issue: issue)
                                 }
                             } header: {
-                                Label(L.trf("lint.warnings", warnings.count), systemImage: "exclamationmark.triangle.fill")
+                                Label(Localized.trf("lint.warnings", warnings.count), systemImage: "exclamationmark.triangle.fill")
                                     .foregroundStyle(.orange)
                             }
                         }
@@ -95,7 +95,7 @@ struct LintView: View {
                                     LintIssueRow(issue: issue)
                                 }
                             } header: {
-                                Label(L.trf("lint.tips", infos.count), systemImage: "info.circle.fill")
+                                Label(Localized.trf("lint.tips", infos.count), systemImage: "info.circle.fill")
                                     .foregroundStyle(.blue)
                             }
                         }
@@ -105,7 +105,7 @@ struct LintView: View {
                 }
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("lint.title"))
+            .navigationTitle(Localized.tr("lint.title"))
         }
     }
     
@@ -149,7 +149,7 @@ struct LintIssueRow: View {
             if let pageID = issue.pageID,
                let _ = store.pageByID(pageID) {
                 Button(action: { store.selectedPageID = pageID }) {
-                    Text(L.tr("lint.goToPage"))
+                    Text(Localized.tr("lint.goToPage"))
                         .font(.caption2)
                         .foregroundStyle(.wikiAccent)
                 }

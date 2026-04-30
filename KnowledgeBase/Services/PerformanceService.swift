@@ -75,16 +75,16 @@ final class PerformanceService: ObservableObject {
     // MARK: - Summary
     var summary: String {
         """
-        \(L.tr("perf.summary.title"))
+        \(Localized.tr("perf.summary.title"))
         ━━━━━━━━━━━━━━━━━━━
-        \(L.tr("perf.summary.pages")): \(metrics.pageCount) (\(metrics.totalWords) \(L.tr("perf.summary.words")))
-        \(L.tr("perf.summary.graph")): \(metrics.graphNodeCount) \(L.tr("perf.summary.nodes")), \(metrics.graphEdgeCount) \(L.tr("perf.summary.edges"))
-        \(L.tr("perf.summary.memory")): \(String(format: "%.1f", metrics.memoryUsageMB)) MB
-        \(L.tr("perf.summary.save")): \(String(format: "%.3f", metrics.saveDuration))s
-        \(L.tr("perf.summary.load")): \(String(format: "%.3f", metrics.loadDuration))s
-        \(L.tr("perf.summary.lint")): \(String(format: "%.3f", metrics.lintDuration))s
-        \(L.tr("perf.summary.graphLayout")): \(String(format: "%.3f", metrics.graphLayoutDuration))s
-        \(L.tr("perf.summary.search")): \(String(format: "%.3f", metrics.searchDuration))s
+        \(Localized.tr("perf.summary.pages")): \(metrics.pageCount) (\(metrics.totalWords) \(Localized.tr("perf.summary.words")))
+        \(Localized.tr("perf.summary.graph")): \(metrics.graphNodeCount) \(Localized.tr("perf.summary.nodes")), \(metrics.graphEdgeCount) \(Localized.tr("perf.summary.edges"))
+        \(Localized.tr("perf.summary.memory")): \(String(format: "%.1f", metrics.memoryUsageMB)) MB
+        \(Localized.tr("perf.summary.save")): \(String(format: "%.3f", metrics.saveDuration))s
+        \(Localized.tr("perf.summary.load")): \(String(format: "%.3f", metrics.loadDuration))s
+        \(Localized.tr("perf.summary.lint")): \(String(format: "%.3f", metrics.lintDuration))s
+        \(Localized.tr("perf.summary.graphLayout")): \(String(format: "%.3f", metrics.graphLayoutDuration))s
+        \(Localized.tr("perf.summary.search")): \(String(format: "%.3f", metrics.searchDuration))s
         """
     }
 }
@@ -101,7 +101,7 @@ struct PerformanceDashboardView: View {
                 VStack(spacing: 20) {
                     // Memory
                     MetricCardView(
-                        title: L.tr("perf.memory"),
+                        title: Localized.tr("perf.memory"),
                         value: String(format: "%.1f MB", service.metrics.memoryUsageMB),
                         icon: "memorychip",
                         color: .blue
@@ -110,13 +110,13 @@ struct PerformanceDashboardView: View {
                     // Page Stats
                     HStack(spacing: 12) {
                         MetricCardView(
-                            title: L.tr("perf.pages"),
+                            title: Localized.tr("perf.pages"),
                             value: "\(service.metrics.pageCount)",
                             icon: "doc.fill",
                             color: .green
                         )
                         MetricCardView(
-                            title: L.tr("perf.words"),
+                            title: Localized.tr("perf.words"),
                             value: "\(service.metrics.totalWords)",
                             icon: "textformat",
                             color: .purple
@@ -126,13 +126,13 @@ struct PerformanceDashboardView: View {
                     // Graph Stats
                     HStack(spacing: 12) {
                         MetricCardView(
-                            title: L.tr("perf.nodes"),
+                            title: Localized.tr("perf.nodes"),
                             value: "\(service.metrics.graphNodeCount)",
                             icon: "circle.fill",
                             color: .orange
                         )
                         MetricCardView(
-                            title: L.tr("perf.edges"),
+                            title: Localized.tr("perf.edges"),
                             value: "\(service.metrics.graphEdgeCount)",
                             icon: "line.diagonal",
                             color: .pink
@@ -141,29 +141,29 @@ struct PerformanceDashboardView: View {
                     
                     // Timing
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(L.tr("perf.timing"))
+                        Text(Localized.tr("perf.timing"))
                             .font(.headline)
                             .foregroundStyle(.wikiText)
                         
-                        TimingRowView(label: L.tr("perf.save"), duration: service.metrics.saveDuration, color: .green)
-                        TimingRowView(label: L.tr("perf.load"), duration: service.metrics.loadDuration, color: .blue)
-                        TimingRowView(label: L.tr("perf.lint"), duration: service.metrics.lintDuration, color: .orange)
-                        TimingRowView(label: L.tr("perf.graphLayout"), duration: service.metrics.graphLayoutDuration, color: .purple)
-                        TimingRowView(label: L.tr("perf.search"), duration: service.metrics.searchDuration, color: .pink)
+                        TimingRowView(label: Localized.tr("perf.save"), duration: service.metrics.saveDuration, color: .green)
+                        TimingRowView(label: Localized.tr("perf.load"), duration: service.metrics.loadDuration, color: .blue)
+                        TimingRowView(label: Localized.tr("perf.lint"), duration: service.metrics.lintDuration, color: .orange)
+                        TimingRowView(label: Localized.tr("perf.graphLayout"), duration: service.metrics.graphLayoutDuration, color: .purple)
+                        TimingRowView(label: Localized.tr("perf.search"), duration: service.metrics.searchDuration, color: .pink)
                     }
                     .padding()
                     .background(Color.wikiCard)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     
                     // Last Updated
-                    Text(L.tr("perf.lastUpdated") + ": " + service.metrics.lastUpdated.formatted())
+                    Text(Localized.tr("perf.lastUpdated") + ": " + service.metrics.lastUpdated.formatted())
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("perf.title"))
+            .navigationTitle(Localized.tr("perf.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {

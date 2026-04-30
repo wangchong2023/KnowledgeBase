@@ -13,10 +13,10 @@ struct LogView: View {
                         Image(systemName: "clock.arrow.circlepath")
                             .font(.system(size: 40))
                             .foregroundStyle(.wikiSecondary)
-                        Text(L.tr("log.noLogs"))
+                        Text(Localized.tr("log.noLogs"))
                             .font(.subheadline)
                             .foregroundStyle(.wikiSecondary)
-                        Text(L.tr("log.noLogs"))
+                        Text(Localized.tr("log.noLogs"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary.opacity(0.7))
                     }
@@ -45,7 +45,7 @@ struct LogView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("settings.operationLog"))
+            .navigationTitle(Localized.tr("settings.operationLog"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -71,7 +71,7 @@ private struct LogEntryRow: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text(L.tr(entry.action))
+                        Text(Localized.tr(entry.action))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(actionColor(entry.action))
                         
@@ -108,7 +108,7 @@ private struct LogEntryRow: View {
                         .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
                         .padding(.leading, 44)
                 } else {
-                    Text(L.tr("log.noDetails"))
+                    Text(Localized.tr("log.noDetails"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                         .padding(.leading, 44)
@@ -120,38 +120,38 @@ private struct LogEntryRow: View {
     
     private func actionColor(_ action: String) -> Color {
         switch action {
-        case "创建", L.tr("logAction.create"): return .green
-        case "更新", L.tr("logAction.update"): return .blue
-        case "删除", L.tr("logAction.delete"): return .red
-        case "Lint", L.tr("logAction.lint"), L.tr("logAction.healthCheck"): return .orange
-        case "导入", L.tr("logAction.ingest"): return .wikiSource
-        case "智能导入", L.tr("logAction.smartIngest"): return .wikiAccent
-        case "撤销操作", L.tr("logAction.undo"): return .purple
-        case "重做操作", L.tr("logAction.redo"): return .purple
-        case "同步", L.tr("logAction.sync"): return .teal
-        case "导入PDF", L.tr("logAction.importPDF"), L.tr("logAction.ingestPDF"): return .wikiSource
-        case "删除PDF", L.tr("logAction.deletePDF"): return .red
-        case "高亮标注", L.tr("logAction.highlight"): return .wikiAccent
-        case "OCR识别", L.tr("logAction.ocrRecognize"): return .wikiConcept
+        case "创建", Localized.tr("logAction.create"): return .green
+        case "更新", Localized.tr("logAction.update"): return .blue
+        case "删除", Localized.tr("logAction.delete"): return .red
+        case "Lint", Localized.tr("logAction.lint"), Localized.tr("logAction.healthCheck"): return .orange
+        case "导入", Localized.tr("logAction.ingest"): return .wikiSource
+        case "智能导入", Localized.tr("logAction.smartIngest"): return .wikiAccent
+        case "撤销操作", Localized.tr("logAction.undo"): return .purple
+        case "重做操作", Localized.tr("logAction.redo"): return .purple
+        case "同步", Localized.tr("logAction.sync"): return .teal
+        case "导入PDF", Localized.tr("logAction.importPDF"), Localized.tr("logAction.ingestPDF"): return .wikiSource
+        case "删除PDF", Localized.tr("logAction.deletePDF"): return .red
+        case "高亮标注", Localized.tr("logAction.highlight"): return .wikiAccent
+        case "OCR识别", Localized.tr("logAction.ocrRecognize"): return .wikiConcept
         default: return .wikiSecondary
         }
     }
 
     private func actionIcon(_ action: String) -> String {
         switch action {
-        case "创建", L.tr("logAction.create"): return "plus"
-        case "更新", L.tr("logAction.update"): return "pencil"
-        case "删除", L.tr("logAction.delete"): return "trash"
-        case "Lint", L.tr("logAction.lint"), L.tr("logAction.healthCheck"): return "stethoscope"
-        case "导入", L.tr("logAction.ingest"): return "arrow.down.doc"
-        case "智能导入", L.tr("logAction.smartIngest"): return "sparkles"
-        case "撤销操作", L.tr("logAction.undo"): return "arrow.uturn.backward"
-        case "重做操作", L.tr("logAction.redo"): return "arrow.uturn.forward"
-        case "同步", L.tr("logAction.sync"): return "icloud"
-        case "导入PDF", L.tr("logAction.importPDF"), L.tr("logAction.ingestPDF"): return "arrow.down.doc"
-        case "删除PDF", L.tr("logAction.deletePDF"): return "trash"
-        case "高亮标注", L.tr("logAction.highlight"): return "highlighter"
-        case "OCR识别", L.tr("logAction.ocrRecognize"): return "text.viewfinder"
+        case "创建", Localized.tr("logAction.create"): return "plus"
+        case "更新", Localized.tr("logAction.update"): return "pencil"
+        case "删除", Localized.tr("logAction.delete"): return "trash"
+        case "Lint", Localized.tr("logAction.lint"), Localized.tr("logAction.healthCheck"): return "stethoscope"
+        case "导入", Localized.tr("logAction.ingest"): return "arrow.down.doc"
+        case "智能导入", Localized.tr("logAction.smartIngest"): return "sparkles"
+        case "撤销操作", Localized.tr("logAction.undo"): return "arrow.uturn.backward"
+        case "重做操作", Localized.tr("logAction.redo"): return "arrow.uturn.forward"
+        case "同步", Localized.tr("logAction.sync"): return "icloud"
+        case "导入PDF", Localized.tr("logAction.importPDF"), Localized.tr("logAction.ingestPDF"): return "arrow.down.doc"
+        case "删除PDF", Localized.tr("logAction.deletePDF"): return "trash"
+        case "高亮标注", Localized.tr("logAction.highlight"): return "highlighter"
+        case "OCR识别", Localized.tr("logAction.ocrRecognize"): return "text.viewfinder"
         default: return "circle"
         }
     }

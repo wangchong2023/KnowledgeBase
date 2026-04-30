@@ -42,15 +42,15 @@ final class AccessibilityService: ObservableObject {
         parts.append(page.type.displayName)
         parts.append(page.status.displayName)
         if !page.tags.isEmpty {
-            parts.append(L.tr("a11y.tags") + ": " + page.tags.joined(separator: ", "))
+            parts.append(Localized.tr("a11y.tags") + ": " + page.tags.joined(separator: ", "))
         }
-        let wordStr = "\(page.wordCount) " + L.tr("a11y.words")
+        let wordStr = "\(page.wordCount) " + Localized.tr("a11y.words")
         parts.append(wordStr)
         return parts.joined(separator: ", ")
     }
     
     static func graphNodeAnnouncement(_ node: GraphNode, linkCount: Int) -> String {
-        "\(node.title), \(node.type.displayName), \(linkCount) " + L.tr("a11y.links")
+        "\(node.title), \(node.type.displayName), \(linkCount) " + Localized.tr("a11y.links")
     }
     
     // MARK: - Haptic Feedback
@@ -78,15 +78,15 @@ extension View {
         self
             .accessibilityElement(children: .combine)
             .accessibilityLabel(AccessibilityService.pageAnnouncement(page))
-            .accessibilityHint(L.tr("a11y.tapToOpen"))
+            .accessibilityHint(Localized.tr("a11y.tapToOpen"))
             .accessibilityAddTraits(.isButton)
     }
     
     func wikiGraphNode(title: String, type: PageType, linkCount: Int) -> some View {
         self
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(title), \(type.displayName), \(linkCount) " + L.tr("a11y.links"))
-            .accessibilityHint(L.tr("a11y.tapToOpen"))
+            .accessibilityLabel("\(title), \(type.displayName), \(linkCount) " + Localized.tr("a11y.links"))
+            .accessibilityHint(Localized.tr("a11y.tapToOpen"))
             .accessibilityAddTraits(.isButton)
     }
     

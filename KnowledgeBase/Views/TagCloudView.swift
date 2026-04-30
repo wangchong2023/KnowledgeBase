@@ -28,10 +28,10 @@ struct TagCloudView: View {
                         Image(systemName: "tag")
                             .font(.system(size: 40))
                             .foregroundStyle(.wikiSecondary)
-                        Text(L.tr("tag.noTags"))
+                        Text(Localized.tr("tag.noTags"))
                             .font(.subheadline)
                             .foregroundStyle(.wikiSecondary)
-                        Text(L.tr("tag.noTagsHint"))
+                        Text(Localized.tr("tag.noTagsHint"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary.opacity(0.7))
                             .multilineTextAlignment(.center)
@@ -68,13 +68,13 @@ struct TagCloudView: View {
                                         tagToRename = tagItem.tag
                                         newTagName = tagItem.tag
                                     }) {
-                                        Label(L.tr("tag.rename"), systemImage: "pencil")
+                                        Label(Localized.tr("tag.rename"), systemImage: "pencil")
                                     }
                                     Button(role: .destructive, action: {
                                         tagToDelete = tagItem.tag
                                         showDeleteConfirm = true
                                     }) {
-                                        Label(L.tr("tag.delete"), systemImage: "trash")
+                                        Label(Localized.tr("tag.delete"), systemImage: "trash")
                                     }
                                 }
                             }
@@ -98,10 +98,10 @@ struct TagCloudView: View {
                             }
                         } header: {
                             HStack {
-                                Text(L.trf("tag.tagPages", tag))
+                                Text(Localized.trf("tag.tagPages", tag))
                                     .foregroundStyle(.wikiText)
                                 Spacer()
-                                Text(L.trf("page.backlinksCount", filteredPages.filter { $0.tags.contains(tag) }.count))
+                                Text(Localized.trf("page.backlinksCount", filteredPages.filter { $0.tags.contains(tag) }.count))
                                     .font(.caption)
                                     .foregroundStyle(.wikiSecondary)
                             }
@@ -114,7 +114,7 @@ struct TagCloudView: View {
                         Image(systemName: "tag")
                             .font(.title)
                             .foregroundStyle(.wikiSecondary)
-                        Text(L.tr("tagcloud.selectTag"))
+                        Text(Localized.tr("tagcloud.selectTag"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -122,15 +122,15 @@ struct TagCloudView: View {
                 }
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("tag.title"))
+            .navigationTitle(Localized.tr("tag.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .alert(L.tr("tag.renameTag"), isPresented: Binding(
+            .alert(Localized.tr("tag.renameTag"), isPresented: Binding(
                 get: { tagToRename != nil },
                 set: { if !$0 { tagToRename = nil } }
             )) {
-                TextField(L.tr("tag.newName"), text: $newTagName)
-                Button(L.tr("misc.cancel"), role: .cancel) { tagToRename = nil }
-                Button(L.tr("misc.ok")) {
+                TextField(Localized.tr("tag.newName"), text: $newTagName)
+                Button(Localized.tr("misc.cancel"), role: .cancel) { tagToRename = nil }
+                Button(Localized.tr("misc.ok")) {
                     guard let old = tagToRename, !newTagName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
                     let trimmed = newTagName.trimmingCharacters(in: .whitespaces)
                     store.renameTag(old, to: trimmed)
@@ -138,11 +138,11 @@ struct TagCloudView: View {
                     tagToRename = nil
                 }
             } message: {
-                Text(L.trf("tag.renameMessage", tagToRename ?? ""))
+                Text(Localized.trf("tag.renameMessage", tagToRename ?? ""))
             }
-            .alert(L.tr("tag.deleteTag"), isPresented: $showDeleteConfirm) {
-                Button(L.tr("misc.cancel"), role: .cancel) { tagToDelete = nil }
-                Button(L.tr("misc.delete"), role: .destructive) {
+            .alert(Localized.tr("tag.deleteTag"), isPresented: $showDeleteConfirm) {
+                Button(Localized.tr("misc.cancel"), role: .cancel) { tagToDelete = nil }
+                Button(Localized.tr("misc.delete"), role: .destructive) {
                     if let tag = tagToDelete {
                         store.deleteTag(tag)
                         if selectedTag == tag { selectedTag = nil }
@@ -151,7 +151,7 @@ struct TagCloudView: View {
                 }
             } message: {
                 let count = tags.first { $0.tag == tagToDelete }?.count ?? 0
-                Text(L.trf("tag.deleteMessage", count, tagToDelete ?? ""))
+                Text(Localized.trf("tag.deleteMessage", count, tagToDelete ?? ""))
             }
         }
     }

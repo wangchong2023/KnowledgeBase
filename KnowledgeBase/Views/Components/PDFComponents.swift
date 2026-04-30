@@ -24,11 +24,11 @@ struct PDFIngestSheet: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("pdf.ingestToWiki"))
+            .navigationTitle(Localized.tr("pdf.ingestToWiki"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(L.tr("pdf.ingest")) { ingestContent() }
+                    Button(Localized.tr("pdf.ingest")) { ingestContent() }
                         .fontWeight(.semibold)
                         .disabled(targetTitle.isEmpty)
                 }
@@ -43,45 +43,45 @@ struct PDFIngestSheet: View {
     // MARK: - Target Section
     private var targetSection: some View {
         Section {
-            TextField(L.tr("pdf.pageTitle"), text: $targetTitle)
+            TextField(Localized.tr("pdf.pageTitle"), text: $targetTitle)
                 .foregroundStyle(.wikiText)
             
-            Picker(L.tr("pdf.pageType"), selection: $targetType) {
+            Picker(Localized.tr("pdf.pageType"), selection: $targetType) {
                 ForEach(PageType.allCases, id: \.self) { type in
                     Text(type.displayName).tag(type)
                 }
             }
         } header: {
-            Text(L.tr("pdf.targetPage"))
+            Text(Localized.tr("pdf.targetPage"))
         }
     }
     
     // MARK: - Range Section
     private var rangeSection: some View {
         Section {
-            Picker(L.tr("pdf.extractionMethod"), selection: $ingestMode) {
-                Text(L.tr("pdf.fullText")).tag("fullText")
-                Text(L.tr("pdf.pageRange")).tag("pageRange")
-                Text(L.tr("pdf.highlightsOnly")).tag("highlights")
+            Picker(Localized.tr("pdf.extractionMethod"), selection: $ingestMode) {
+                Text(Localized.tr("pdf.fullText")).tag("fullText")
+                Text(Localized.tr("pdf.pageRange")).tag("pageRange")
+                Text(Localized.tr("pdf.highlightsOnly")).tag("highlights")
             }
             .pickerStyle(.segmented)
             
             if ingestMode == "pageRange" {
                 HStack {
-                    Text(L.tr("pdf.fromPage"))
+                    Text(Localized.tr("pdf.fromPage"))
                     TextField("1", value: $pageStart, format: .number)
                         .keyboardType(.numberPad)
                         .frame(width: 50)
-                    Text(L.tr("pdf.toPage"))
+                    Text(Localized.tr("pdf.toPage"))
                     TextField("\(documentInfo.pageCount)", value: $pageEnd, format: .number)
                         .keyboardType(.numberPad)
                         .frame(width: 50)
-                    Text(L.tr("pdf.page"))
+                    Text(Localized.tr("pdf.page"))
                 }
                 .foregroundStyle(.wikiText)
             }
         } header: {
-            Text(L.tr("pdf.extractionRange"))
+            Text(Localized.tr("pdf.extractionRange"))
         }
     }
     
@@ -90,7 +90,7 @@ struct PDFIngestSheet: View {
     private var highlightsSection: some View {
         if ingestMode == "highlights" && documentInfo.highlights.isEmpty {
             Section {
-                Text(L.tr("pdf.noHighlights"))
+                Text(Localized.tr("pdf.noHighlights"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
             }
@@ -108,7 +108,7 @@ struct PDFIngestSheet: View {
             }
             .frame(maxHeight: 150)
         } header: {
-            Text(L.tr("pdf.contentPreview"))
+            Text(Localized.tr("pdf.contentPreview"))
         }
     }
     
@@ -116,7 +116,7 @@ struct PDFIngestSheet: View {
     private var previewText: String {
         switch ingestMode {
         case "fullText":
-            guard let pdfDoc = pdfDocument else { return L.tr("pdf.cannotLoadPDF") }
+            guard let pdfDoc = pdfDocument else { return Localized.tr("pdf.cannotLoadPDF") }
             let text = PDFService.shared.extractText(from: pdfDoc, pageRange: 0..<min(2, pdfDoc.pageCount))
             return String(text.prefix(500))
         case "pageRange":
@@ -152,7 +152,7 @@ struct PDFIngestSheet: View {
             content = documentInfo.highlights.map { h in
                 var text = "> \(h.text)"
                 if !h.note.isEmpty {
-                    text += "\n\n\(L.tr("pdf.noteLabel")) \(h.note)"
+                    text += "\n\n\(Localized.tr("pdf.noteLabel")) \(h.note)"
                 }
                 return text
             }.joined(separator: "\n\n---\n\n")
@@ -164,9 +164,9 @@ struct PDFIngestSheet: View {
             title: targetTitle,
             type: targetType,
             content: content,
-            tags: ["PDF", L.tr("logAction.ingest")]
+            tags: ["PDF", Localized.tr("logAction.ingest")]
         )
-        store.addLog(action: L.tr("logAction.importPDF"), target: targetTitle, details: L.trf("pdf.ingestModeFormat", ingestMode))
+        store.addLog(action: Localized.tr("logAction.importPDF"), target: targetTitle, details: Localized.trf("pdf.ingestModeFormat", ingestMode))
         store.saveToDisk()
         dismiss()
     }
@@ -212,11 +212,11 @@ struct PDFDocumentRow: View {
                 .lineLimit(1)
             
             HStack(spacing: 8) {
-                Label(L.trf("pdf.pageCountFormat", doc.pageCount), systemImage: "doc.text")
+                Label(Localized.trf("pdf.pageCountFormat", doc.pageCount), systemImage: "doc.text")
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                 
-                Label(L.trf("pdf.highlightCountFormat", doc.highlights.count), systemImage: "highlighter")
+                Label(Localized.trf("pdf.highlightCountFormat", doc.highlights.count), systemImage: "highlighter")
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
             }

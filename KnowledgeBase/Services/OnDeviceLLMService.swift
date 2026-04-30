@@ -57,7 +57,7 @@ final class OnDeviceLLMService: ObservableObject {
         if let modelURL = Bundle.main.url(forResource: "KMLLM", withExtension: "mlmodelc") {
             models.append(OnDeviceModel(
                 id: "bundled_wikicraft",
-                name: L.tr("ondevice.model.bundled"),
+                name: Localized.tr("ondevice.model.bundled"),
                 url: modelURL,
                 size: estimateModelSize(url: modelURL),
                 type: .bundled
@@ -87,7 +87,7 @@ final class OnDeviceLLMService: ObservableObject {
         if #available(iOS 18.1, *) {
             models.append(OnDeviceModel(
                 id: "apple_intelligence",
-                name: L.tr("ondevice.appleIntelligence"),
+                name: Localized.tr("ondevice.appleIntelligence"),
                 url: nil,
                 size: 0,
                 type: .system
@@ -223,12 +223,12 @@ final class OnDeviceLLMService: ObservableObject {
         let existingTitles = pages.map(\.title).prefix(20).joined(separator: ", ")
         
         let prompt = """
-        \(L.tr("ondevice.ingest.compileToWiki"))：\(existingTitles)
+        \(Localized.tr("ondevice.ingest.compileToWiki"))：\(existingTitles)
         
-        \(L.tr("ondevice.ingest.title"))：\(title)
-        \(L.tr("ondevice.ingest.content"))：\(content)
+        \(Localized.tr("ondevice.ingest.title"))：\(title)
+        \(Localized.tr("ondevice.ingest.content"))：\(content)
         
-        \(L.tr("ondevice.ingest.linkAndFormat"))
+        \(Localized.tr("ondevice.ingest.linkAndFormat"))
         """
         
         let generated = try await generate(prompt: prompt, maxTokens: Self.smartIngestMaxTokens)
@@ -244,7 +244,7 @@ final class OnDeviceLLMService: ObservableObject {
     
     // MARK: - Chat (On-Device)
     func chatOnDevice(query: String, pages: [WikiPage]) async throws -> String {
-        var context = L.tr("ondevice.chatContext")
+        var context = Localized.tr("ondevice.chatContext")
         
         // Add relevant page summaries
         let relevant = pages.filter { page in
@@ -256,7 +256,7 @@ final class OnDeviceLLMService: ObservableObject {
             context += "\n\n## \(page.title)\n\(String(page.content.prefix(Self.contentPreviewChars)))"
         }
         
-        let prompt = "\(context)\n\n\(L.tr("ondevice.chatQuestion")): \(query)"
+        let prompt = "\(context)\n\n\(Localized.tr("ondevice.chatQuestion")): \(query)"
         return try await generate(prompt: prompt, maxTokens: Self.chatMaxTokens)
     }
     
@@ -361,11 +361,11 @@ enum OnDeviceError: LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .modelNotFound: return L.tr("ondevice.error.modelNotFound")
-        case .modelNotLoaded: return L.tr("ondevice.error.modelNotLoaded")
-        case .notSupported: return L.tr("ondevice.error.notSupported")
-        case .inferenceFailed(let msg): return "\(L.tr("ondevice.error.inferenceFailed")): \(msg)"
-        case .compilationFailed: return L.tr("ondevice.error.compilationFailed")
+        case .modelNotFound: return Localized.tr("ondevice.error.modelNotFound")
+        case .modelNotLoaded: return Localized.tr("ondevice.error.modelNotLoaded")
+        case .notSupported: return Localized.tr("ondevice.error.notSupported")
+        case .inferenceFailed(let msg): return "\(Localized.tr("ondevice.error.inferenceFailed")): \(msg)"
+        case .compilationFailed: return Localized.tr("ondevice.error.compilationFailed")
         }
     }
 }

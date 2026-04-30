@@ -32,7 +32,7 @@ struct VoiceNoteView: View {
             .padding(.bottom, 24)
         }
         .background(Color.wikiBackground.ignoresSafeArea())
-        .navigationTitle(L.tr("speech.title"))
+        .navigationTitle(Localized.tr("speech.title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.visible, for: .navigationBar)
         .sheet(isPresented: $showSaveSheet) {
@@ -53,7 +53,7 @@ struct VoiceNoteView: View {
                     )
                 )
             
-            Text(L.tr("speech.subtitle"))
+            Text(Localized.tr("speech.subtitle"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -64,11 +64,11 @@ struct VoiceNoteView: View {
     // MARK: - Language Picker
     private var languagePicker: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("speech.language"))
+            Text(Localized.tr("speech.language"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
-            Picker(L.tr("speech.language"), selection: $speechService.selectedLanguage) {
+            Picker(Localized.tr("speech.language"), selection: $speechService.selectedLanguage) {
                 ForEach(speechService.supportedLanguages, id: \.code) { lang in
                     Text(lang.name).tag(lang.code)
                 }
@@ -99,13 +99,13 @@ struct VoiceNoteView: View {
                 .font(.title)
                 .foregroundStyle(.red)
             
-            Text(L.tr("speech.needPermission"))
+            Text(Localized.tr("speech.needPermission"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
             
             Button(action: { speechService.checkPermission() }) {
-                Text(L.tr("speech.requestPermission"))
+                Text(Localized.tr("speech.requestPermission"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 20)
@@ -148,7 +148,7 @@ struct VoiceNoteView: View {
     
     private var recordingStatusText: some View {
         VStack(spacing: 4) {
-            Text(speechService.isRecording ? L.tr("speech.tapToStop") : L.tr("speech.tapToRecord"))
+            Text(speechService.isRecording ? Localized.tr("speech.tapToStop") : Localized.tr("speech.tapToRecord"))
                 .font(.caption)
                 .foregroundStyle(.wikiSecondary)
             
@@ -165,7 +165,7 @@ struct VoiceNoteView: View {
     // MARK: - Waveform
     private var waveformSection: some View {
         VStack(spacing: 8) {
-            Text(L.tr("speech.audioLevel"))
+            Text(Localized.tr("speech.audioLevel"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
 
@@ -187,7 +187,7 @@ struct VoiceNoteView: View {
     private var transcriptionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text(L.tr("speech.result"))
+                Text(Localized.tr("speech.result"))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.wikiText)
                 
@@ -213,7 +213,7 @@ struct VoiceNoteView: View {
                 .lineLimit(10)
             
             HStack {
-                Text("\(speechService.transcribedText.count) \(L.tr("speech.characters"))")
+                Text("\(speechService.transcribedText.count) \(Localized.tr("speech.characters"))")
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                 
@@ -222,7 +222,7 @@ struct VoiceNoteView: View {
                 Button(action: { showSaveSheet = true }) {
                     HStack {
                         Image(systemName: "square.and.arrow.down.fill")
-                        Text(L.tr("speech.saveToWiki"))
+                        Text(Localized.tr("speech.saveToWiki"))
                     }
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white)
@@ -242,7 +242,7 @@ struct VoiceNoteView: View {
     private var recordingsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(L.tr("speech.history"))
+                Text(Localized.tr("speech.history"))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.wikiText)
                 

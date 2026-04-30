@@ -60,7 +60,7 @@ struct SearchView: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundStyle(.wikiSecondary)
-                    TextField(L.tr("search.placeholder"), text: $searchText)
+                    TextField(Localized.tr("search.placeholder"), text: $searchText)
                         .foregroundStyle(.wikiText)
                         .accessibilityIdentifier("searchPlaceholder")
                     
@@ -81,7 +81,7 @@ struct SearchView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         // Type filters
-                        FilterPill(title: L.tr("search.all"), isSelected: filterType == nil) {
+                        FilterPill(title: Localized.tr("search.all"), isSelected: filterType == nil) {
                             filterType = nil
                         }
                         
@@ -102,14 +102,14 @@ struct SearchView: View {
                         Menu {
                             ForEach(SortOption.allCases, id: \.self) { option in
                                 Button(action: { sortBy = option }) {
-                                    Label(L.tr(option.rawValue), systemImage: sortBy == option ? "checkmark" : "")
+                                    Label(Localized.tr(option.rawValue), systemImage: sortBy == option ? "checkmark" : "")
                                 }
                             }
                         } label: {
                             HStack(spacing: 4) {
                                 Image(systemName: "arrow.up.arrow.down")
                                     .font(.caption)
-                                Text(L.tr(sortBy.rawValue))
+                                Text(Localized.tr(sortBy.rawValue))
                                     .font(.caption)
                             }
                             .padding(.horizontal, 10)
@@ -131,7 +131,7 @@ struct SearchView: View {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.wikiSecondary)
-                            Text(L.tr("search.placeholder"))
+                            Text(Localized.tr("search.placeholder"))
                                 .font(.subheadline)
                                 .foregroundStyle(.wikiSecondary)
                         } else {
@@ -139,10 +139,10 @@ struct SearchView: View {
                             Image(systemName: "doc.text.magnifyingglass")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.wikiSecondary)
-                            Text(L.tr("search.noResults"))
+                            Text(Localized.tr("search.noResults"))
                                 .font(.subheadline)
                                 .foregroundStyle(.wikiSecondary)
-                            Text(L.tr("search.noResultsHint"))
+                            Text(Localized.tr("search.noResultsHint"))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary.opacity(0.7))
                         }
@@ -167,7 +167,7 @@ struct SearchView: View {
                 
                 // Result count
                 HStack {
-                    Text(L.trf("search.pagesCount", filteredPages.count))
+                    Text(Localized.trf("search.pagesCount", filteredPages.count))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                     Spacer()
@@ -176,7 +176,7 @@ struct SearchView: View {
                 .padding(.bottom, 8)
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("search.title"))
+            .navigationTitle(Localized.tr("search.title"))
         }
     }
 }

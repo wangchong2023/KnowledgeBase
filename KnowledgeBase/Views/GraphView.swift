@@ -1,19 +1,40 @@
 import SwiftUI
 
+/// 图形可视化容器视图
+///
+/// 以力导向图的形式展示知识库中所有页面之间的链接关系。
+///
+/// ## 主要功能
+/// - 页面节点的网络布局可视化
+/// - 节点类型筛选（按 PageType 过滤显示）
+/// - 缩放和平移交互
+/// - 节点选择和高亮
+/// - 连接线（边）的可视化
+///
+/// ## 布局引擎
+/// 底层使用 GraphLayoutEngine 进行力导向布局计算，
+/// 节点位置根据链接关系自动分布，相互链接的节点会靠近。
+///
+/// ## 节点大小
+/// 节点大小根据连接数动态计算：
+/// - 基础大小：20pt
+/// - 每增加一条连接 +3pt
+/// - 最小 24pt，最大 40pt
+/// - 选中节点固定 40pt
 struct GraphContainerView: View {
     @EnvironmentObject var store: KMStore
-    @State private var selectedNodeID: UUID?
-    @State private var nodes: [GraphNode] = []
-    @State private var edges: [GraphEdge] = []
-    @State private var graphSize: CGSize = .zero
-    @State private var scale: CGFloat = 1.0
-    @State private var lastScale: CGFloat = 1.0
-    @State private var offset: CGSize = .zero
-    @State private var lastOffset: CGSize = .zero
-    @State private var isAnimating = false
-    @State private var showLegend = false
-    @State private var filterType: PageType?
-    @StateObject private var tooltipManager = TooltipManager.shared
+    @State private var selectedNodeID: UUID?  ///< 当前选中的节点 ID
+    @State private var nodes: [GraphNode] = []  ///< 布局后的节点列表
+    @State private var edges: [GraphEdge] = []  ///< 布局后的边（连接）列表
+    @State private var graphSize: CGSize = .zero  ///< 图形画布的实际尺寸
+    @State private var scale: CGFloat = 1.0  ///< 当前缩放比例
+    @State private var lastScale: CGFloat = 1.0  ///< 上次缩放操作前的缩放值（用于增量计算）
+    @State private var offset: CGSize = .zero  ///< 当前画布偏移量（拖拽）
+    @State private var lastOffset: CGSize = .zero  ///< 上次拖拽操作前的偏移量
+    @State private var isAnimating = false  ///< 节点是否正在执行脉冲动画
+    @State private var showLegend = false  ///< 是否显示图例
+    @State private var filterType: PageType?  ///< 当前筛选的页面类型，nil 表示显示全部
+    @StateObject private var tooltipManager = TooltipManager.shared  ///< 提示管理器（单例）
     
     // MARK: - Constants
     /// Minimum node size in graph
@@ -77,11 +98,11 @@ struct GraphContainerView: View {
                     }
                 }
             }
-            .navigationTitle(L.tr("graph.title"))
+            .navigationTitle(Localized.tr("graph.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 12) {
-                        Text(L.trf("graph.nodesConnections", filteredNodes.count, filteredEdges.count))
+                        Text(Localized.trf("graph.nodesConnections", filteredNodes.count, filteredEdges.count))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                             .fixedSize()
@@ -126,16 +147,16 @@ struct GraphContainerView: View {
             .frame(height: 100)
 
             VStack(spacing: 8) {
-                Text(L.tr("graph.title"))
+                Text(Localized.tr("graph.title"))
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(.wikiText)
-                Text(L.tr("graph.emptyDesc"))
+                Text(Localized.tr("graph.emptyDesc"))
                     .font(.subheadline)
                     .foregroundStyle(.wikiSecondary)
                     .multilineTextAlignment(.center)
             }
 
-            Text(L.tr("graph.linkHint"))
+            Text(Localized.tr("graph.linkHint"))
                 .font(.caption)
                 .foregroundStyle(.wikiAccent)
                 .padding(.horizontal, 14)
@@ -250,7 +271,7 @@ struct GraphContainerView: View {
         VStack {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    FilterPill(title: L.tr("search.all"), isSelected: filterType == nil) {
+                    FilterPill(title: Localized.tr("search.all"), isSelected: filterType == nil) {
                         withAnimation { filterType = nil }
                         if !tooltipManager.isShown(.graphFilter) {
                             withAnimation { tooltipManager.activeTooltip = .graphFilter }
@@ -281,8 +302,8 @@ struct GraphContainerView: View {
                     HStack {
                         Spacer()
                         WikiTooltip(
-                            title: L.tr(tooltipManager.activeTooltip?.titleKey ?? ""),
-                            description: L.tr(tooltipManager.activeTooltip?.descriptionKey ?? ""),
+                            title: Localized.tr(tooltipManager.activeTooltip?.titleKey ?? ""),
+                            description: Localized.tr(tooltipManager.activeTooltip?.descriptionKey ?? ""),
                             icon: tooltipManager.activeTooltip?.icon ?? "questionmark",
                             arrowDirection: .bottom,
                             accentColor: .wikiAccent
@@ -317,6 +338,11 @@ struct GraphContainerView: View {
     }
 
     // MARK: - Helpers
+
+    /// 触发图形重新布局
+    ///
+    /// 当页面数据变化时（如增删改页面或链接）调用此方法重新计算布局。
+    /// 内部调用 GraphLayoutEngine.layout 获取新的节点和边数据。
     private func layoutGraph() {
         let result = GraphLayoutEngine.layout(
             pages: store.pages,

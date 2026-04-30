@@ -87,7 +87,7 @@ struct Graph3DView: View {
             }
         }
         .background(Color.wikiBackground)
-        .navigationTitle(L.tr("graph3d.title"))
+        .navigationTitle(Localized.tr("graph3d.title"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { buildScene() }
         .onChange(of: store.pages.count) { _, _ in buildScene() }
@@ -119,7 +119,7 @@ struct Graph3DView: View {
             
             // Filter
             Menu {
-                Button(L.tr("graph.all")) { filterType = nil }
+                Button(Localized.tr("graph.all")) { filterType = nil }
                 ForEach(PageType.allCases) { type in
                     Button(action: { filterType = type }) {
                         Label(type.displayName, systemImage: type.icon)
@@ -164,7 +164,7 @@ struct Graph3DView: View {
             Button(action: {
                 store.selectedPageID = page.id
             }) {
-                Text(L.tr("graph3d.viewPage"))
+                Text(Localized.tr("graph3d.viewPage"))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.wikiAccent)
                     .padding(.horizontal, 12)
@@ -185,30 +185,8 @@ struct Graph3DView: View {
         let newScene = SCNScene()
         newScene.background.contents = UIColor(Color.wikiBackground)
 
-        // Ambient light
-        let ambientLight = SCNNode()
-        ambientLight.light = SCNLight()
-        ambientLight.light?.type = .ambient
-        ambientLight.light?.color = UIColor(white: 0.3, alpha: 1)
-        newScene.rootNode.addChildNode(ambientLight)
-
-        // Omni light
-        let omniLight = SCNNode()
-        omniLight.light = SCNLight()
-        omniLight.light?.type = .omni
-        omniLight.light?.color = UIColor(white: 0.8, alpha: 1)
-        omniLight.position = SCNVector3(0, 20, 20)
-        newScene.rootNode.addChildNode(omniLight)
-
-        // Camera node for programmatic control
-        let camera = SCNNode()
-        camera.camera = SCNCamera()
-        camera.camera?.zNear = 0.1
-        camera.camera?.zFar = 200
-        camera.position = SCNVector3(0, 10, Float(cameraDistance))
-        camera.look(at: SCNVector3(0, 0, 0))
-        newScene.rootNode.addChildNode(camera)
-        cameraNode = camera
+        setupLighting(scene: newScene)
+        setupCamera(scene: newScene)
 
         // Filter pages
         let pages = filterType == nil ? store.pages : store.pages.filter { $0.type == filterType }
@@ -216,27 +194,60 @@ struct Graph3DView: View {
             scene = newScene
             return
         }
-        
+
         // Generate 3D positions (sphere distribution)
         let positions = generateSpherePositions(count: pages.count, radius: CGFloat(cameraDistance) * 0.6)
-        
+
         // Create nodes
+        let nodeMap = createPageNodes(pages: pages, positions: positions, scene: newScene)
+
+        // Create edges
+        createEdgeNodes(pages: pages, nodeMap: nodeMap, scene: newScene)
+
+        // Add grid floor
+        addGridFloor(scene: newScene)
+
+        scene = newScene
+    }
+
+    // MARK: - Setup Lighting
+    private func setupLighting(scene: SCNScene) {
+        // Ambient light
+        let ambientLight = SCNNode()
+        ambientLight.light = SCNLight()
+        ambientLight.light?.type = .ambient
+        ambientLight.light?.color = UIColor(white: 0.3, alpha: 1)
+        scene.rootNode.addChildNode(ambientLight)
+
+        // Omni light
+        let omniLight = SCNNode()
+        omniLight.light = SCNLight()
+        omniLight.light?.type = .omni
+        omniLight.light?.color = UIColor(white: 0.8, alpha: 1)
+        omniLight.position = SCNVector3(0, 20, 20)
+        scene.rootNode.addChildNode(omniLight)
+    }
+
+    // MARK: - Setup Camera
+    private func setupCamera(scene: SCNScene) {
+        let camera = SCNNode()
+        camera.camera = SCNCamera()
+        camera.camera?.zNear = 0.1
+        camera.camera?.zFar = 200
+        camera.position = SCNVector3(0, 10, Float(cameraDistance))
+        camera.look(at: SCNVector3(0, 0, 0))
+        scene.rootNode.addChildNode(camera)
+        cameraNode = camera
+    }
+
+    // MARK: - Create Page Nodes
+    private func createPageNodes(pages: [WikiPage], positions: [CGPoint3D], scene: SCNScene) -> [UUID: SCNNode] {
         var nodeMap: [UUID: SCNNode] = [:]
-        
+
         for (index, page) in pages.enumerated() {
-            let nodeSize: CGFloat = {
-                let linkCount = page.outgoingLinks.count + store.backlinks(for: page.id).count
-                return CGFloat(max(0.4, min(1.5, 0.5 + Double(linkCount) * 0.15)))
-            }()
-            
-            let sphere = SCNSphere(radius: nodeSize)
-            sphere.segmentCount = 24
-            
-            let color = UIColor(page.type.themedColor)
-            sphere.firstMaterial?.diffuse.contents = color
-            sphere.firstMaterial?.specular.contents = UIColor(white: 0.5, alpha: 1)
-            sphere.firstMaterial?.emission.contents = color.withAlphaComponent(0.3)
-            
+            let nodeSize = calculateNodeSize(for: page)
+            let sphere = createSphereGeometry(size: nodeSize, color: page.type.themedColor)
+
             let node = SCNNode(geometry: sphere)
             node.position = SCNVector3(
                 Float(positions[index].x),
@@ -244,57 +255,91 @@ struct Graph3DView: View {
                 Float(positions[index].z)
             )
             node.name = page.id.uuidString
-            
-            // Add label (text node)
-            let text = SCNText(string: page.title, extrusionDepth: 0.1)
-            text.font = UIFont.systemFont(ofSize: 1.0)
-            text.flatness = 0.3
-            text.isWrapped = false
-            
-            let textNode = SCNNode(geometry: text)
-            textNode.position = SCNVector3(Float(nodeSize + 0.3), 0, 0)
-            textNode.scale = SCNVector3(0.3, 0.3, 0.3)
-            textNode.geometry?.firstMaterial?.diffuse.contents = UIColor(Color.wikiText).withAlphaComponent(0.8)
-            textNode.geometry?.firstMaterial?.emission.contents = UIColor(Color.wikiText).withAlphaComponent(0.2)
-            
-            // Billboard constraint: always face camera
-            let billboard = SCNBillboardConstraint()
-            billboard.freeAxes = .all
-            textNode.constraints = [billboard]
-            
+
+            // Add label
+            let textNode = createLabelNode(title: page.title, nodeSize: nodeSize)
             node.addChildNode(textNode)
-            
+
             // Pulse animation for pinned pages
             if page.isPinned {
-                let pulseAction = SCNAction.customAction(duration: 2.0) { node, elapsedTime in
-                    let scale = 1.0 + 0.15 * sin(elapsedTime * .pi)
-                    node.scale = SCNVector3(scale, scale, scale)
-                }
-                node.runAction(SCNAction.repeatForever(pulseAction))
+                addPulseAnimation(to: node)
             }
-            
-            newScene.rootNode.addChildNode(node)
+
+            scene.rootNode.addChildNode(node)
             nodeMap[page.id] = node
         }
-        
-        // Create edges
+
+        return nodeMap
+    }
+
+    // MARK: - Calculate Node Size
+    private func calculateNodeSize(for page: WikiPage) -> CGFloat {
+        let linkCount = page.outgoingLinks.count + store.backlinks(for: page.id).count
+        return CGFloat(max(0.4, min(1.5, 0.5 + Double(linkCount) * 0.15)))
+    }
+
+    // MARK: - Create Sphere Geometry
+    private func createSphereGeometry(size: CGFloat, color: Color) -> SCNSphere {
+        let sphere = SCNSphere(radius: size)
+        sphere.segmentCount = 24
+
+        let uiColor = UIColor(color)
+        sphere.firstMaterial?.diffuse.contents = uiColor
+        sphere.firstMaterial?.specular.contents = UIColor(white: 0.5, alpha: 1)
+        sphere.firstMaterial?.emission.contents = uiColor.withAlphaComponent(0.3)
+
+        return sphere
+    }
+
+    // MARK: - Create Label Node
+    private func createLabelNode(title: String, nodeSize: CGFloat) -> SCNNode {
+        let text = SCNText(string: title, extrusionDepth: 0.1)
+        text.font = UIFont.systemFont(ofSize: 1.0)
+        text.flatness = 0.3
+        text.isWrapped = false
+
+        let textNode = SCNNode(geometry: text)
+        textNode.position = SCNVector3(Float(nodeSize + 0.3), 0, 0)
+        textNode.scale = SCNVector3(0.3, 0.3, 0.3)
+        textNode.geometry?.firstMaterial?.diffuse.contents = UIColor(Color.wikiText).withAlphaComponent(0.8)
+        textNode.geometry?.firstMaterial?.emission.contents = UIColor(Color.wikiText).withAlphaComponent(0.2)
+
+        // Billboard constraint: always face camera
+        let billboard = SCNBillboardConstraint()
+        billboard.freeAxes = .all
+        textNode.constraints = [billboard]
+
+        return textNode
+    }
+
+    // MARK: - Add Pulse Animation
+    private func addPulseAnimation(to node: SCNNode) {
+        let pulseAction = SCNAction.customAction(duration: 2.0) { node, elapsedTime in
+            let scale = 1.0 + 0.15 * sin(elapsedTime * .pi)
+            node.scale = SCNVector3(scale, scale, scale)
+        }
+        node.runAction(SCNAction.repeatForever(pulseAction))
+    }
+
+    // MARK: - Create Edge Nodes
+    private func createEdgeNodes(pages: [WikiPage], nodeMap: [UUID: SCNNode], scene: SCNScene) {
         for page in pages {
             for linkTitle in page.outgoingLinks {
                 if let linkedPage = store.pageByTitle(linkTitle),
                    let sourceNode = nodeMap[page.id],
                    let targetNode = nodeMap[linkedPage.id] {
                     let edge = createEdgeNode(from: sourceNode.position, to: targetNode.position)
-                    newScene.rootNode.addChildNode(edge)
+                    scene.rootNode.addChildNode(edge)
                 }
             }
         }
-        
-        // Add a subtle grid floor
+    }
+
+    // MARK: - Add Grid Floor
+    private func addGridFloor(scene: SCNScene) {
         let gridNode = createGridNode(size: 40, divisions: 20)
         gridNode.position = SCNVector3(0, -Float(cameraDistance) * 0.5, 0)
-        newScene.rootNode.addChildNode(gridNode)
-        
-        scene = newScene
+        scene.rootNode.addChildNode(gridNode)
     }
     
     // MARK: - Sphere Position Distribution (Fibonacci)

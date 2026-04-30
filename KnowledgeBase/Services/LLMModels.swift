@@ -10,9 +10,9 @@ enum LLMProvider: String, Codable, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .openAI: return L.tr("llm.provider.openAI")
-        case .deepSeek: return L.tr("llm.provider.deepSeek")
-        case .custom: return L.tr("llm.provider.custom")
+        case .openAI: return Localized.tr("llm.provider.openAI")
+        case .deepSeek: return Localized.tr("llm.provider.deepSeek")
+        case .custom: return Localized.tr("llm.provider.custom")
         }
     }
     
@@ -93,21 +93,21 @@ enum LLMError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .notConfigured:
-            return L.tr("llm.error.notConfigured")
+            return Localized.tr("llm.error.notConfigured")
         case .invalidURL:
-            return L.tr("llm.error.invalidURL")
+            return Localized.tr("llm.error.invalidURL")
         case .invalidResponse:
-            return L.tr("llm.error.invalidResponse")
+            return Localized.tr("llm.error.invalidResponse")
         case .unauthorized:
-            return L.tr("llm.error.unauthorized")
+            return Localized.tr("llm.error.unauthorized")
         case .rateLimited:
-            return L.tr("llm.error.rateLimited")
+            return Localized.tr("llm.error.rateLimited")
         case .httpError(let code):
-            return "\(L.tr("llm.error.httpError")): \(code)"
+            return "\(Localized.tr("llm.error.httpError")): \(code)"
         case .apiError(let message):
-            return "\(L.tr("llm.error.apiError")): \(message)"
+            return "\(Localized.tr("llm.error.apiError")): \(message)"
         case .cancelled:
-            return L.tr("llm.error.cancelled")
+            return Localized.tr("llm.error.cancelled")
         }
     }
 }

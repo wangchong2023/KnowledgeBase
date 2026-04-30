@@ -1,19 +1,13 @@
 import Foundation
 
 // MARK: - Page Store Protocol
-/// Abstraction layer allowing both PageStore (JSON) and SQLiteStore (SQL) to serve as data sources.
+/// Abstraction layer allowing different store implementations to serve as data sources.
+/// SQLiteStore is the sole implementation; PageStore was removed (JSON-based, unused).
 protocol AnyPageStore {
     var pages: [WikiPage] { get }
     @discardableResult
     func createPage(title: String, type: PageType, content: String, tags: [String]) -> WikiPage
     func updatePage(_ page: WikiPage)
-}
-
-// MARK: - Conform PageStore to protocol
-extension PageStore: AnyPageStore {
-    func createPage(title: String, type: PageType, content: String = "", tags: [String] = []) -> WikiPage {
-        createPage(title: title, type: type, customIcon: nil, content: content, tags: tags)
-    }
 }
 // Note: SQLiteStore conformance is declared in SQLiteStore.swift to avoid circular dependency
 

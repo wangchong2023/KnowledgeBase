@@ -17,12 +17,12 @@ struct LLMSettingsView: View {
             // Enable/Disable
             Section {
                 Toggle(isOn: $llmService.isEnabled) {
-                    Label(L.tr("llm.enableAssistant"), systemImage: "brain.head.profile.fill")
+                    Label(Localized.tr("llm.enableAssistant"), systemImage: "brain.head.profile.fill")
                         .foregroundStyle(.wikiText)
                 }
                 .tint(.wikiAccent)
             } header: {
-                Text(L.tr("llm.status"))
+                Text(Localized.tr("llm.status"))
             }
             
             // Provider
@@ -51,14 +51,14 @@ struct LLMSettingsView: View {
                     }
                 }
             } header: {
-                Text(L.tr("llm.provider"))
+                Text(Localized.tr("llm.provider"))
             }
             
             // Configuration
             Section {
                 // API Key
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(L.tr("llm.apiKey"))
+                    Text(Localized.tr("llm.apiKey"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     
@@ -87,7 +87,7 @@ struct LLMSettingsView: View {
                 
                 // Base URL
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(L.tr("llm.apiAddress"))
+                    Text(Localized.tr("llm.apiAddress"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     TextField("https://api.openai.com/v1", text: $llmService.baseURL)
@@ -103,7 +103,7 @@ struct LLMSettingsView: View {
                 
                 // Model
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(L.tr("llm.model"))
+                    Text(Localized.tr("llm.model"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     TextField("gpt-4o-mini", text: $llmService.model)
@@ -134,7 +134,7 @@ struct LLMSettingsView: View {
                     }
                 }
             } header: {
-                Text(L.tr("llm.configuration"))
+                Text(Localized.tr("llm.configuration"))
             }
             
             // Test Connection
@@ -148,7 +148,7 @@ struct LLMSettingsView: View {
                             Image(systemName: "bolt.horizontal.fill")
                                 .foregroundStyle(.wikiAccent)
                         }
-                        Text(testing ? L.tr("llm.testing") : L.tr("llm.testConnection"))
+                        Text(testing ? Localized.tr("llm.testing") : Localized.tr("llm.testConnection"))
                             .foregroundStyle(.wikiText)
                     }
                 }
@@ -160,7 +160,7 @@ struct LLMSettingsView: View {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
-                            Text(L.tr("llm.connectionSuccess"))
+                            Text(Localized.tr("llm.connectionSuccess"))
                                 .font(.subheadline)
                                 .foregroundStyle(.green)
                         }
@@ -175,44 +175,44 @@ struct LLMSettingsView: View {
                     }
                 }
             } header: {
-                Text(L.tr("llm.validation"))
+                Text(Localized.tr("llm.validation"))
             }
             
             // Chat History
             Section {
                 HStack {
-                    Label(L.tr("llm.chatHistory"), systemImage: "bubble.left.and.bubble.right")
+                    Label(Localized.tr("llm.chatHistory"), systemImage: "bubble.left.and.bubble.right")
                         .foregroundStyle(.wikiText)
                     Spacer()
-                    Text("\(llmService.chatHistory.count) \(L.tr("llm.messages"))")
+                    Text("\(llmService.chatHistory.count) \(Localized.tr("llm.messages"))")
                         .foregroundStyle(.wikiSecondary)
                 }
                 
                 Button(role: .destructive, action: {
                     llmService.clearChatHistory()
                 }) {
-                    Label(L.tr("llm.clearHistory"), systemImage: "trash")
+                    Label(Localized.tr("llm.clearHistory"), systemImage: "trash")
                 }
             } header: {
-                Text(L.tr("llm.chatSection"))
+                Text(Localized.tr("llm.chatSection"))
             }
             
             // Info
             Section {
                 VStack(alignment: .leading, spacing: 10) {
-                    InfoRow(icon: "lock.shield", text: L.tr("llm.info.localKey"))
-                    InfoRow(icon: "doc.text", text: L.tr("llm.info.contextSent"))
-                    InfoRow(icon: "network", text: L.tr("llm.info.openAICompatible"))
-                    InfoRow(icon: "arrow.down.doc", text: L.tr("llm.info.smartIngest"))
+                    InfoRow(icon: "lock.shield", text: Localized.tr("llm.info.localKey"))
+                    InfoRow(icon: "doc.text", text: Localized.tr("llm.info.contextSent"))
+                    InfoRow(icon: "network", text: Localized.tr("llm.info.openAICompatible"))
+                    InfoRow(icon: "arrow.down.doc", text: Localized.tr("llm.info.smartIngest"))
                 }
             } header: {
-                Text(L.tr("llm.info"))
+                Text(Localized.tr("llm.info"))
             }
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle(L.tr("llm.title"))
+        .navigationTitle(Localized.tr("llm.title"))
         .navigationBarTitleDisplayMode(.inline)
     }
     
@@ -236,7 +236,7 @@ struct LLMSettingsView: View {
                 let valid = try await llmService.validateAPIKey()
                 await MainActor.run {
                     testing = false
-                    testResult = valid ? .success : .failure(L.tr("llm.validationFailed"))
+                    testResult = valid ? .success : .failure(Localized.tr("llm.validationFailed"))
                 }
             } catch {
                 await MainActor.run {

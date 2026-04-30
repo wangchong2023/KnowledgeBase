@@ -191,7 +191,7 @@ struct GraphSelectedNodeCard: View {
                     Text(page.title)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.wikiText)
-                    Text("\(page.type.displayName) · \(page.wordCount) \(L.tr("page.wordCountUnit")) · \(page.outgoingLinks.count) \(L.tr("page.outLinkUnit"))")
+                    Text("\(page.type.displayName) · \(page.wordCount) \(Localized.tr("page.wordCountUnit")) · \(page.outgoingLinks.count) \(Localized.tr("page.outLinkUnit"))")
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }

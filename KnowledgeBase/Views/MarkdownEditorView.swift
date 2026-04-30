@@ -1,7 +1,16 @@
 import SwiftUI
 import UIKit
 
-/// 表示待执行的编辑器操作。
+/// 待执行的编辑器操作
+///
+/// 用于 toolbar 和 representable 之间的通信。
+/// 当用户点击工具栏按钮时，将操作类型写入此枚举，
+/// 由 representable 消费并执行具体的文本操作（插入、包裹等）。
+///
+/// - insert: 在光标位置插入前缀和可选后缀
+/// - wrap: 用指定字符串包裹选区
+/// - insertMultiline: 在光标位置插入多行文本
+/// - wikilink: 打开页面链接选择器
 enum EditorPendingAction: Equatable {
     case insert(prefix: String, suffix: String?)
     case wrap(wrapper: String)
@@ -9,19 +18,40 @@ enum EditorPendingAction: Equatable {
     case wikilink
 }
 
+/// Markdown 富文本编辑器视图
+///
+/// 支持编辑知识库页面的 Markdown 内容，包括标题、标签、别名和正文。
+///
+/// ## 主要功能
+/// - 页面标题编辑
+/// - 标签管理（添加、删除）
+/// - 别名管理（添加、删除）
+/// - Markdown 内容编辑（支持富文本工具栏）
+/// - Wiki 链接插入
+///
+/// ## 状态管理
+/// - `editorContent`: 编辑器中的实际文本内容
+/// - `pendingAction`: 待执行的工具栏操作（由 toolbar 写入，representable 消费）
+/// - `cursorState`: 光标状态，包含对 UITextView 的引用用于执行文本操作
+///
+/// ## 工具栏操作流程
+/// 1. 用户点击工具栏按钮 → 写入 `pendingAction`
+/// 2. `onChange(of: pendingAction)` 监听到变化
+/// 3. 调用 `executeAction()` 执行实际操作
+/// 4. 将 `pendingAction` 置为 nil
 struct MarkdownEditorView: View {
-    @Binding var page: WikiPage
-    @Binding var isEditing: Bool
-    @EnvironmentObject var store: KMStore
-    @State private var showLinkPicker = false
-    @State private var editorContent: String = ""
-    @State private var showTagInput = false
-    @State private var newTagText = ""
-    @State private var showAliasInput = false
-    @State private var newAliasText = ""
-    @State private var cursorPosition: Int = 0
-    @State private var selectedRange: NSRange = NSRange(location: 0, length: 0)
-    @State private var cursorState = CursorState()
+    @Binding var page: WikiPage  ///< 绑定的页面对象，编辑结果直接写回此对象
+    @Binding var isEditing: Bool  ///< 绑定外部的编辑状态
+    @EnvironmentObject var store: KMStore  ///< 全局知识库存储
+    @State private var showLinkPicker = false  ///< 是否显示 WikiLink 页面选择器
+    @State private var editorContent: String = ""  ///< 编辑器文本内容（与 page.content 同步）
+    @State private var showTagInput = false  ///< 是否显示标签输入框
+    @State private var newTagText = ""  ///< 新标签输入框内容
+    @State private var showAliasInput = false  ///< 是否显示别名输入框
+    @State private var newAliasText = ""  ///< 新别名输入框内容
+    @State private var cursorPosition: Int = 0  ///< 当前光标位置（字符偏移）
+    @State private var selectedRange: NSRange = NSRange(location: 0, length: 0)  ///< 当前文本选区
+    @State private var cursorState = CursorState()  ///< 光标状态（包含 UITextView executor 引用）
     /// 待执行的编辑器操作（由 toolbar 写入，由 representable 消费）
     @State private var pendingAction: EditorPendingAction?
 
@@ -64,7 +94,7 @@ struct MarkdownEditorView: View {
     // MARK: - Title Editor
     private var titleEditor: some View {
         HStack {
-            TextField(L.tr("editor.pageTitlePlaceholder"), text: $page.title)
+            TextField(Localized.tr("editor.pageTitlePlaceholder"), text: $page.title)
                 .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(.wikiText)
                 .padding()
@@ -85,7 +115,7 @@ struct MarkdownEditorView: View {
                 Button(action: { withAnimation { showTagInput.toggle() } }) {
                     HStack(spacing: 2) {
                         Image(systemName: "plus.circle.fill").font(.caption)
-                        Text(L.tr("editor.addTag")).font(.caption)
+                        Text(Localized.tr("editor.addTag")).font(.caption)
                     }
                     .foregroundStyle(.wikiSecondary)
                     .padding(.horizontal, 8)
@@ -112,7 +142,7 @@ struct MarkdownEditorView: View {
                 Button(action: { withAnimation { showAliasInput.toggle() } }) {
                     HStack(spacing: 2) {
                         Image(systemName: "plus.circle.fill").font(.caption)
-                        Text(L.tr("editor.addAlias")).font(.caption)
+                        Text(Localized.tr("editor.addAlias")).font(.caption)
                     }
                     .foregroundStyle(.wikiSecondary)
                     .padding(.horizontal, 8)

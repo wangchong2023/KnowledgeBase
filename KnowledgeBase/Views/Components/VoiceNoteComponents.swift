@@ -20,25 +20,25 @@ struct SaveVoiceNoteSheet: View {
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("speech.saveTitle"))
+            .navigationTitle(Localized.tr("speech.saveTitle"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
     
     private var titleField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("speech.noteTitle"))
+            Text(Localized.tr("speech.noteTitle"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
-            TextField(L.tr("speech.noteTitlePlaceholder"), text: $title)
+            TextField(Localized.tr("speech.noteTitlePlaceholder"), text: $title)
                 .textFieldStyle(.roundedBorder)
         }
     }
     
     private var typePicker: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("ocr.pageType"))
+            Text(Localized.tr("ocr.pageType"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
@@ -53,7 +53,7 @@ struct SaveVoiceNoteSheet: View {
     
     private var previewSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("pdf.contentPreview"))
+            Text(Localized.tr("pdf.contentPreview"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
@@ -70,7 +70,7 @@ struct SaveVoiceNoteSheet: View {
     
     private var saveButton: some View {
         Button(action: saveNote) {
-            Text(L.tr("speech.saveToWiki"))
+            Text(Localized.tr("speech.saveToWiki"))
                 .font(.headline)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
@@ -82,13 +82,13 @@ struct SaveVoiceNoteSheet: View {
     
     private func saveNote() {
         let noteTitle = title.isEmpty
-            ? "\(L.tr("speech.voiceNote")) \(Date().formatted(.dateTime.month().day().hour().minute()))"
+            ? "\(Localized.tr("speech.voiceNote")) \(Date().formatted(.dateTime.month().day().hour().minute()))"
             : title
         _ = store.createPage(
             title: noteTitle,
             type: selectedType,
             content: speechService.transcribedText,
-            tags: [L.tr("speech.voiceTag")]
+            tags: [Localized.tr("speech.voiceTag")]
         )
         
         let _ = speechService.saveRecording(title: noteTitle)

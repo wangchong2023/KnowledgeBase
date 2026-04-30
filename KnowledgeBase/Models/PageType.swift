@@ -13,12 +13,12 @@ enum PageType: String, Codable, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .entity: return L.tr("type.entity")
-        case .concept: return L.tr("type.concept")
-        case .source: return L.tr("type.source")
-        case .comparison: return L.tr("type.comparison")
-        case .map: return L.tr("type.map")
-        case .raw: return L.tr("type.raw")
+        case .entity: return Localized.tr("type.entity")
+        case .concept: return Localized.tr("type.concept")
+        case .source: return Localized.tr("type.source")
+        case .comparison: return Localized.tr("type.comparison")
+        case .map: return Localized.tr("type.map")
+        case .raw: return Localized.tr("type.raw")
         }
     }
     
@@ -54,10 +54,10 @@ enum PageStatus: String, Codable, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .active: return L.tr("status.active")
-        case .stub: return L.tr("status.stub")
-        case .needsUpdate: return L.tr("status.needsUpdate")
-        case .deprecated: return L.tr("status.deprecated")
+        case .active: return Localized.tr("status.active")
+        case .stub: return Localized.tr("status.stub")
+        case .needsUpdate: return Localized.tr("status.needsUpdate")
+        case .deprecated: return Localized.tr("status.deprecated")
         }
     }
     
@@ -79,9 +79,9 @@ enum Confidence: String, Codable, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .high: return L.tr("confidence.high")
-        case .medium: return L.tr("confidence.medium")
-        case .low: return L.tr("confidence.low")
+        case .high: return Localized.tr("confidence.high")
+        case .medium: return Localized.tr("confidence.medium")
+        case .low: return Localized.tr("confidence.low")
         }
     }
     

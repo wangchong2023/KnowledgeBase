@@ -120,7 +120,7 @@ final class EditorActionExecutor {
         } else {
             let pos = min(coordinator.cursorState.cursorPosition, (tv.text as NSString).length)
             tv.selectedRange = NSRange(location: pos, length: 0)
-            tv.insertText(wrapper + L.tr("editor.selectedText") + wrapper)
+            tv.insertText(wrapper + Localized.tr("editor.selectedText") + wrapper)
         }
     }
 
@@ -157,37 +157,37 @@ struct MarkdownEditorToolbar: View {
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: L.tr("editor.bold"), icon: "bold") {
+                EditorToolbarButton(title: Localized.tr("editor.bold"), icon: "bold") {
                     onWrap("**")
                 }
-                EditorToolbarButton(title: L.tr("editor.italic"), icon: "italic") {
+                EditorToolbarButton(title: Localized.tr("editor.italic"), icon: "italic") {
                     onWrap("*")
                 }
-                EditorToolbarButton(title: L.tr("editor.code"), icon: "chevron.left.forwardslash.chevron.right") {
+                EditorToolbarButton(title: Localized.tr("editor.code"), icon: "chevron.left.forwardslash.chevron.right") {
                     onWrap("`")
                 }
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: L.tr("editor.link"), icon: "link") {
+                EditorToolbarButton(title: Localized.tr("editor.link"), icon: "link") {
                     onInsert("[[", "]]")
                 }
-                EditorToolbarButton(title: L.tr("editor.list"), icon: "list.bullet") {
+                EditorToolbarButton(title: Localized.tr("editor.list"), icon: "list.bullet") {
                     onInsert("- ", nil)
                 }
-                EditorToolbarButton(title: L.tr("editor.quote"), icon: "text.quote") {
+                EditorToolbarButton(title: Localized.tr("editor.quote"), icon: "text.quote") {
                     onInsert("> ", nil)
                 }
-                EditorToolbarButton(title: L.tr("editor.table"), icon: "tablecells") {
-                    onInsertMultiline("\n| \(L.tr("editor.tableColumn1")) | \(L.tr("editor.tableColumn2")) | \(L.tr("editor.tableColumn3")) |\n|------|------|------|\n| \(L.tr("editor.tableContent")) | \(L.tr("editor.tableContent")) | \(L.tr("editor.tableContent")) |\n")
+                EditorToolbarButton(title: Localized.tr("editor.table"), icon: "tablecells") {
+                    onInsertMultiline("\n| \(Localized.tr("editor.tableColumn1")) | \(Localized.tr("editor.tableColumn2")) | \(Localized.tr("editor.tableColumn3")) |\n|------|------|------|\n| \(Localized.tr("editor.tableContent")) | \(Localized.tr("editor.tableContent")) | \(Localized.tr("editor.tableContent")) |\n")
                 }
-                EditorToolbarButton(title: L.tr("editor.divider"), icon: "minus") {
+                EditorToolbarButton(title: Localized.tr("editor.divider"), icon: "minus") {
                     onInsertMultiline("\n---\n")
                 }
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: L.tr("editor.wikiLink"), icon: "link.circle.fill") {
+                EditorToolbarButton(title: Localized.tr("editor.wikiLink"), icon: "link.circle.fill") {
                     onShowLinkPicker()
                 }
             }

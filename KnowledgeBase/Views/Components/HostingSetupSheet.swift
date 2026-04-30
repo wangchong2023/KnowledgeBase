@@ -19,7 +19,7 @@ struct HostingSetupSheet: View {
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("collab.hostSession"))
+            .navigationTitle(Localized.tr("collab.hostSession"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -31,31 +31,31 @@ struct HostingSetupSheet: View {
     }
     
     private var titleText: some View {
-        Text(L.tr("collab.hostSetup"))
+        Text(Localized.tr("collab.hostSetup"))
             .font(.headline)
             .foregroundStyle(.wikiText)
     }
     
     private var roomNameField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("collab.roomName"))
+            Text(Localized.tr("collab.roomName"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
-            TextField(L.tr("collab.roomNamePlaceholder"), text: $roomName)
+            TextField(Localized.tr("collab.roomNamePlaceholder"), text: $roomName)
                 .textFieldStyle(.roundedBorder)
         }
     }
     
     private var infoSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(L.tr("collab.howItWorks"))
+            Text(Localized.tr("collab.howItWorks"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
-            CollabInfoRow(icon: "wifi", text: L.tr("collab.info.local"))
-            CollabInfoRow(icon: "lock.shield.fill", text: L.tr("collab.info.encrypted"))
-            CollabInfoRow(icon: "person.2.fill", text: L.tr("collab.info.maxPeers"))
+            CollabInfoRow(icon: "wifi", text: Localized.tr("collab.info.local"))
+            CollabInfoRow(icon: "lock.shield.fill", text: Localized.tr("collab.info.encrypted"))
+            CollabInfoRow(icon: "person.2.fill", text: Localized.tr("collab.info.maxPeers"))
         }
         .padding()
         .background(Color.wikiCard)
@@ -64,11 +64,11 @@ struct HostingSetupSheet: View {
     
     private var startButton: some View {
         Button(action: {
-            let name = roomName.isEmpty ? L.tr("collab.room") : roomName
+            let name = roomName.isEmpty ? Localized.tr("collab.room") : roomName
             collabService.startHosting(roomName: name)
             dismiss()
         }) {
-            Text(L.tr("collab.startHosting"))
+            Text(Localized.tr("collab.startHosting"))
                 .font(.headline)
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)

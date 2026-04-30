@@ -11,11 +11,11 @@ enum iCloudSyncError: LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .iCloudNotAvailable: return L.tr("icloud.error.notAvailable")
-        case .cloudKitError(let error): return "\(L.tr("icloud.error.cloudKit"))：\(error.localizedDescription)"
-        case .encodingError: return L.tr("icloud.error.encoding")
-        case .decodingError: return L.tr("icloud.error.decoding")
-        case .conflictResolutionFailed: return L.tr("icloud.error.conflictResolution")
+        case .iCloudNotAvailable: return Localized.tr("icloud.error.notAvailable")
+        case .cloudKitError(let error): return "\(Localized.tr("icloud.error.cloudKit"))：\(error.localizedDescription)"
+        case .encodingError: return Localized.tr("icloud.error.encoding")
+        case .decodingError: return Localized.tr("icloud.error.decoding")
+        case .conflictResolutionFailed: return Localized.tr("icloud.error.conflictResolution")
         }
     }
 }
@@ -34,10 +34,10 @@ enum SyncStatus: Equatable {
     
     var label: String {
         switch self {
-        case .idle: return L.tr("sync.idle")
-        case .syncing: return L.tr("sync.syncing")
-        case .synced: return L.tr("sync.synced")
-        case .error(let msg): return "\(L.tr("sync.error"))：\(msg)"
+        case .idle: return Localized.tr("sync.idle")
+        case .syncing: return Localized.tr("sync.syncing")
+        case .synced: return Localized.tr("sync.synced")
+        case .error(let msg): return "\(Localized.tr("sync.error"))：\(msg)"
         }
     }
 }
@@ -73,7 +73,7 @@ class iCloudSyncService: ObservableObject {
         container = nil
         database = nil
         iCloudAvailable = false
-        syncStatus = .error(L.tr("icloud.notAvailable"))
+        syncStatus = .error(Localized.tr("icloud.notAvailable"))
         #else
         let token = FileManager.default.ubiquityIdentityToken
         cloudKitAvailable = token != nil
@@ -86,7 +86,7 @@ class iCloudSyncService: ObservableObject {
             container = nil
             database = nil
             iCloudAvailable = false
-            syncStatus = .error(L.tr("icloud.notAvailable"))
+            syncStatus = .error(Localized.tr("icloud.notAvailable"))
         }
         #endif
     }
@@ -98,7 +98,7 @@ class iCloudSyncService: ObservableObject {
             DispatchQueue.main.async {
                 self?.iCloudAvailable = (status == .available)
                 if status != .available {
-                    self?.syncStatus = .error(L.tr("icloud.notAvailable"))
+                    self?.syncStatus = .error(Localized.tr("icloud.notAvailable"))
                 }
             }
         }
@@ -197,86 +197,32 @@ class iCloudSyncService: ObservableObject {
         guard iCloudAvailable, let database else {
             throw iCloudSyncError.iCloudNotAvailable
         }
-        
+
         await MainActor.run { syncStatus = .syncing }
-        
+
         do {
             try await ensureZoneExists()
-            
-            let recordID = CKRecord.ID(recordName: "wikicraft_main", zoneID: zoneID)
-            let _ = try JSONEncoder().encode(localPages)
-            let _ = try JSONEncoder().encode(localLogs)
-            
-            // Try to fetch existing remote record
-            var remotePages: [WikiPage] = []
-            var remoteLogs: [LogEntry] = []
-            var record: CKRecord
-            
-            do {
-                let existing = try await database.record(for: recordID)
-                record = existing
-                
-                if let pagesData = existing["pagesData"] as? Data,
-                   let logsData = existing["logEntriesData"] as? Data {
-                    remotePages = try JSONDecoder().decode([WikiPage].self, from: pagesData)
-                    remoteLogs = try JSONDecoder().decode([LogEntry].self, from: logsData)
-                }
-            } catch {
-                record = CKRecord(recordType: recordType, recordID: recordID)
-            }
-            
-            // Conflict detection: if remote has newer data
-            var finalPages = localPages
-            var finalLogs = localLogs
-            
-            if !remotePages.isEmpty {
-                let remoteDate = record["lastModified"] as? Date ?? Date.distantPast
-                
-                // Check if there's a conflict (both sides have been modified)
-                let hasLocalChanges = lastSyncDate.map { remoteDate > $0 } ?? false
-                let hasRemoteChanges = !remotePages.isEmpty
-                
-                if hasLocalChanges && hasRemoteChanges {
-                    // Conflict — apply resolution strategy
-                    let resolution = await resolveConflict(
-                        localPages: localPages,
-                        localLogs: localLogs,
-                        remotePages: remotePages,
-                        remoteLogs: remoteLogs
-                    )
-                    
-                    switch resolution {
-                    case .keepLocal:
-                        break // finalPages/finalLogs already set to local
-                    case .keepRemote:
-                        finalPages = remotePages
-                        finalLogs = remoteLogs
-                    case .merge:
-                        finalPages = mergePages(local: localPages, remote: remotePages)
-                        finalLogs = mergeLogs(local: localLogs, remote: remoteLogs)
-                    }
-                } else if hasRemoteChanges && lastSyncDate != nil {
-                    // Remote is newer, no local changes
-                    finalPages = remotePages
-                    finalLogs = remoteLogs
-                }
-            }
-            
+
+            // Fetch remote data
+            let (remotePages, remoteLogs, record) = try await fetchRemoteData(database: database)
+
+            // Resolve conflicts
+            let (finalPages, finalLogs) = try await resolveSyncConflict(
+                localPages: localPages,
+                localLogs: localLogs,
+                remotePages: remotePages,
+                remoteLogs: remoteLogs,
+                record: record
+            )
+
             // Push merged data
-            let mergedPagesData = try JSONEncoder().encode(finalPages)
-            let mergedLogsData = try JSONEncoder().encode(finalLogs)
-            
-            record["pagesData"] = mergedPagesData as CKRecordValue
-            record["logEntriesData"] = mergedLogsData as CKRecordValue
-            record["lastModified"] = Date() as CKRecordValue
-            
-            _ = try await database.save(record)
-            
+            try await pushToCloud(database: database, record: record, pages: finalPages, logs: finalLogs)
+
             await MainActor.run {
                 lastSyncDate = Date()
                 syncStatus = .synced
             }
-            
+
             return (finalPages, finalLogs)
         } catch {
             await MainActor.run {
@@ -284,6 +230,90 @@ class iCloudSyncService: ObservableObject {
             }
             throw iCloudSyncError.cloudKitError(error)
         }
+    }
+
+    // MARK: - Fetch Remote Data
+    private func fetchRemoteData(database: CKDatabase) async throws -> ([WikiPage], [LogEntry], CKRecord) {
+        let recordID = CKRecord.ID(recordName: "wikicraft_main", zoneID: zoneID)
+        let _ = try JSONEncoder().encode([WikiPage]())
+        let _ = try JSONEncoder().encode([LogEntry]())
+
+        var remotePages: [WikiPage] = []
+        var remoteLogs: [LogEntry] = []
+        var record: CKRecord
+
+        do {
+            let existing = try await database.record(for: recordID)
+            record = existing
+
+            if let pagesData = existing["pagesData"] as? Data,
+               let logsData = existing["logEntriesData"] as? Data {
+                remotePages = try JSONDecoder().decode([WikiPage].self, from: pagesData)
+                remoteLogs = try JSONDecoder().decode([LogEntry].self, from: logsData)
+            }
+        } catch {
+            record = CKRecord(recordType: recordType, recordID: recordID)
+        }
+
+        return (remotePages, remoteLogs, record)
+    }
+
+    // MARK: - Resolve Sync Conflict
+    private func resolveSyncConflict(
+        localPages: [WikiPage],
+        localLogs: [LogEntry],
+        remotePages: [WikiPage],
+        remoteLogs: [LogEntry],
+        record: CKRecord
+    ) async throws -> ([WikiPage], [LogEntry]) {
+        var finalPages = localPages
+        var finalLogs = localLogs
+
+        guard !remotePages.isEmpty else {
+            return (finalPages, finalLogs)
+        }
+
+        let remoteDate = record["lastModified"] as? Date ?? Date.distantPast
+        let hasLocalChanges = lastSyncDate.map { remoteDate > $0 } ?? false
+
+        if hasLocalChanges {
+            // Conflict — apply resolution strategy
+            let resolution = await resolveConflict(
+                localPages: localPages,
+                localLogs: localLogs,
+                remotePages: remotePages,
+                remoteLogs: remoteLogs
+            )
+
+            switch resolution {
+            case .keepLocal:
+                break
+            case .keepRemote:
+                finalPages = remotePages
+                finalLogs = remoteLogs
+            case .merge:
+                finalPages = mergePages(local: localPages, remote: remotePages)
+                finalLogs = mergeLogs(local: localLogs, remote: remoteLogs)
+            }
+        } else if lastSyncDate != nil {
+            // Remote is newer, no local changes
+            finalPages = remotePages
+            finalLogs = remoteLogs
+        }
+
+        return (finalPages, finalLogs)
+    }
+
+    // MARK: - Push to Cloud
+    private func pushToCloud(database: CKDatabase, record: CKRecord, pages: [WikiPage], logs: [LogEntry]) async throws {
+        let mergedPagesData = try JSONEncoder().encode(pages)
+        let mergedLogsData = try JSONEncoder().encode(logs)
+
+        record["pagesData"] = mergedPagesData as CKRecordValue
+        record["logEntriesData"] = mergedLogsData as CKRecordValue
+        record["lastModified"] = Date() as CKRecordValue
+
+        _ = try await database.save(record)
     }
     
     // MARK: - Subscribe to Remote Changes
@@ -383,9 +413,9 @@ enum ConflictResolution: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .keepLocal: return L.tr("icloud.keepLocal")
-        case .keepRemote: return L.tr("icloud.keepRemote")
-        case .merge: return L.tr("icloud.merge")
+        case .keepLocal: return Localized.tr("icloud.keepLocal")
+        case .keepRemote: return Localized.tr("icloud.keepRemote")
+        case .merge: return Localized.tr("icloud.merge")
         }
     }
 }

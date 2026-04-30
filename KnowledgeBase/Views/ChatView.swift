@@ -22,16 +22,16 @@ struct ChatView: View {
                 chatInputBar
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("chat.title"))
+            .navigationTitle(Localized.tr("chat.title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button(action: { llmService.clearChatHistory() }) {
-                            Label(L.tr("chat.clearHistory"), systemImage: "trash")
+                            Label(Localized.tr("chat.clearHistory"), systemImage: "trash")
                         }
                         
                         NavigationLink(destination: LLMSettingsView()) {
-                            Label(L.tr("chat.llmSettings"), systemImage: "gearshape")
+                            Label(Localized.tr("chat.llmSettings"), systemImage: "gearshape")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -40,8 +40,8 @@ struct ChatView: View {
                     .accessibilityIdentifier("menu")
                 }
             }
-            .alert(L.tr("misc.error"), isPresented: $showError) {
-                Button(L.tr("misc.ok")) { errorMessage = nil }
+            .alert(Localized.tr("misc.error"), isPresented: $showError) {
+                Button(Localized.tr("misc.ok")) { errorMessage = nil }
             } message: {
                 Text(errorMessage ?? "")
             }
@@ -54,7 +54,7 @@ struct ChatView: View {
             HStack(spacing: 10) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
-                Text(L.tr("chat.configureFirst"))
+                Text(Localized.tr("chat.configureFirst"))
                     .font(.subheadline)
                     .foregroundStyle(.wikiText)
                 Spacer()
@@ -120,11 +120,11 @@ struct ChatView: View {
                     .shadow(color: .wikiAccent.opacity(0.3), radius: 12, x: 0, y: 6)
             }
 
-            Text(L.tr("chat.welcomeTitle"))
+            Text(Localized.tr("chat.welcomeTitle"))
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.wikiText)
 
-            Text(L.tr("chat.welcomeDesc"))
+            Text(Localized.tr("chat.welcomeDesc"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -158,17 +158,17 @@ struct ChatView: View {
         
         if conceptCount > 0 {
             return [
-                L.tr("chat.suggested.summarize"),
-                L.tr("chat.suggested.connections"),
-                L.tr("chat.suggested.gaps"),
-                L.tr("chat.suggested.compare")
+                Localized.tr("chat.suggested.summarize"),
+                Localized.tr("chat.suggested.connections"),
+                Localized.tr("chat.suggested.gaps"),
+                Localized.tr("chat.suggested.compare")
             ]
         } else {
             return [
-                L.tr("chat.suggested.whatContent"),
-                L.tr("chat.suggested.organize"),
-                L.tr("chat.suggested.recommend"),
-                L.tr("chat.suggested.explain")
+                Localized.tr("chat.suggested.whatContent"),
+                Localized.tr("chat.suggested.organize"),
+                Localized.tr("chat.suggested.recommend"),
+                Localized.tr("chat.suggested.explain")
             ]
         }
     }
@@ -213,7 +213,7 @@ struct ChatView: View {
             Divider()
             
             HStack(alignment: .bottom, spacing: 12) {
-                TextField(L.tr("chat.inputPlaceholder"), text: $inputText, axis: .vertical)
+                TextField(Localized.tr("chat.inputPlaceholder"), text: $inputText, axis: .vertical)
                     .font(.subheadline)
                     .lineLimit(1...5)
                     .focused($isInputFocused)

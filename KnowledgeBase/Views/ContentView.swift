@@ -18,11 +18,11 @@ struct ContentView: View {
         
         var displayTitle: String {
             switch self {
-            case .wiki: return L.tr("tab.wiki")
-            case .graph: return L.tr("tab.graph")
-            case .search: return L.tr("tab.search")
-            case .ingest: return L.tr("tab.ingest")
-            case .settings: return L.tr("tab.settings")
+            case .wiki: return Localized.tr("tab.wiki")
+            case .graph: return Localized.tr("tab.graph")
+            case .search: return Localized.tr("tab.search")
+            case .ingest: return Localized.tr("tab.ingest")
+            case .settings: return Localized.tr("tab.settings")
             }
         }
         

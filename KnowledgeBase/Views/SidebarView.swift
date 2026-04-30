@@ -26,13 +26,13 @@ struct SidebarView: View {
             // ── 导航：总索引、操作日志、常用知识 ──
             Section {
                 Button(action: { showIndexView = true }) {
-                    Label(L.tr("sidebar.masterIndex"), systemImage: "list.bullet.indent")
+                    Label(Localized.tr("sidebar.masterIndex"), systemImage: "list.bullet.indent")
                         .foregroundStyle(.wikiAccent)
                 }
                 .accessibilityIdentifier("masterIndex")
 
                 Button(action: { showLogView = true }) {
-                    Label(L.tr("sidebar.operationLog"), systemImage: "clock.arrow.circlepath")
+                    Label(Localized.tr("sidebar.operationLog"), systemImage: "clock.arrow.circlepath")
                         .foregroundStyle(.wikiSecondary)
                 }
                 .accessibilityIdentifier("operationLog")
@@ -47,7 +47,7 @@ struct SidebarView: View {
                                         .foregroundStyle(page.type.themedColor)
                                     Text(page.title)
                                     Spacer()
-                                    Text("\(page.outgoingLinks.count)\(L.tr("sidebar.linkUnit"))")
+                                    Text("\(page.outgoingLinks.count)\(Localized.tr("sidebar.linkUnit"))")
                                         .foregroundStyle(.wikiSecondary)
                                 }
                             }
@@ -56,7 +56,7 @@ struct SidebarView: View {
                         HStack {
                             Image(systemName: "flame.fill")
                                 .foregroundStyle(.orange)
-                            Text(L.tr("sidebar.frequentKnowledge"))
+                            Text(Localized.tr("sidebar.frequentKnowledge"))
                                 .foregroundStyle(.wikiText)
                             Spacer()
                             Image(systemName: "chevron.up.chevron.down")
@@ -67,7 +67,7 @@ struct SidebarView: View {
                     .tint(.orange)
                 }
             } header: {
-                Text(L.tr("sidebar.navigation"))
+                Text(Localized.tr("sidebar.navigation"))
                     .foregroundStyle(.wikiSecondary)
             }
 
@@ -80,7 +80,7 @@ struct SidebarView: View {
                             .tag(page.id)
                     }
                 } header: {
-                    Label(L.tr("pinned"), systemImage: "pin.fill")
+                    Label(Localized.tr("pinned"), systemImage: "pin.fill")
                         .foregroundStyle(.wikiComparison)
                 }
             }
@@ -91,7 +91,7 @@ struct SidebarView: View {
                     HStack {
                         Image(systemName: "stethoscope")
                             .foregroundStyle(store.lintIssues.isEmpty ? .green : .orange)
-                        Text(L.tr("sidebar.healthCheck"))
+                        Text(Localized.tr("sidebar.healthCheck"))
                             .foregroundStyle(.wikiText)
                         Spacer()
                         if !store.lintIssues.isEmpty {
@@ -107,7 +107,7 @@ struct SidebarView: View {
                 }
                 .accessibilityIdentifier("healthCheck")
             } header: {
-                Text(L.tr("sidebar.tools"))
+                Text(Localized.tr("sidebar.tools"))
                     .foregroundStyle(.wikiSecondary)
             }
 
@@ -151,7 +151,7 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle(L.tr("tab.wiki"))
+        .navigationTitle(Localized.tr("tab.wiki"))
         .sheet(isPresented: $showLogView) {
             LogView()
         }
@@ -219,7 +219,7 @@ struct PageSidebarRow: View {
                             .lineLimit(1)
 
                         if page.isStub {
-                            Text(L.tr("status.stub"))
+                            Text(Localized.tr("status.stub"))
                                 .font(.system(size: 9))
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 1)

@@ -124,7 +124,7 @@ struct ChatContentView: View {
             renderText(displayText)
             
             if text.count > 600 && !expanded {
-                Button(L.tr("chat.expandFull")) {
+                Button(Localized.tr("chat.expandFull")) {
                     withAnimation { expanded = true }
                 }
                 .font(.caption)

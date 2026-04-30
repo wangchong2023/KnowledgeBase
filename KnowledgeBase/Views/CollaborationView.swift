@@ -34,7 +34,7 @@ struct CollaborationView: View {
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("collab.title"))
+            .navigationTitle(Localized.tr("collab.title"))
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showHostingSheet) {
                 HostingSetupSheet(collabService: collabService, roomName: $roomName)
@@ -58,7 +58,7 @@ struct CollaborationView: View {
                     )
                 )
             
-            Text(L.tr("collab.subtitle"))
+            Text(Localized.tr("collab.subtitle"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -72,7 +72,7 @@ struct CollaborationView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
             
-            Text(L.tr("collab.simulatorWarning"))
+            Text(Localized.tr("collab.simulatorWarning"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
         }
@@ -121,14 +121,14 @@ struct CollaborationView: View {
     
     private var usernameField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("collab.username"))
+            Text(Localized.tr("collab.username"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
             HStack {
                 Image(systemName: "person.fill")
                     .foregroundStyle(.wikiAccent)
-                TextField(L.tr("collab.usernamePlaceholder"), text: $userName)
+                TextField(Localized.tr("collab.usernamePlaceholder"), text: $userName)
                     .textFieldStyle(.plain)
                     .font(.subheadline)
                     .onChange(of: userName) { _, newValue in
@@ -145,7 +145,7 @@ struct CollaborationView: View {
         Button(action: { showHostingSheet = true }) {
             HStack {
                 Image(systemName: "antenna.radiowaves.left.and.right")
-                Text(L.tr("collab.hostSession"))
+                Text(Localized.tr("collab.hostSession"))
             }
             .font(.headline)
             .foregroundStyle(.white)
@@ -165,7 +165,7 @@ struct CollaborationView: View {
         }) {
             HStack {
                 Image(systemName: "magnifyingglass")
-                Text(L.tr("collab.joinSession"))
+                Text(Localized.tr("collab.joinSession"))
             }
             .font(.headline)
             .foregroundStyle(.wikiAccent)
@@ -183,7 +183,7 @@ struct CollaborationView: View {
             showBrowsing = false
             collabService.stop()
         }) {
-            Text(L.tr("collab.stopSearching"))
+            Text(Localized.tr("collab.stopSearching"))
                 .font(.subheadline)
                 .foregroundStyle(.red)
         }
@@ -192,14 +192,14 @@ struct CollaborationView: View {
     // MARK: - Discovered Rooms
     private var discoveredRoomsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L.tr("collab.nearbyRooms"))
+            Text(Localized.tr("collab.nearbyRooms"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
             
             if collabService.discoveredRooms.isEmpty {
                 HStack {
                     ProgressView()
-                    Text(L.tr("collab.searching"))
+                    Text(Localized.tr("collab.searching"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -241,7 +241,7 @@ struct CollaborationView: View {
         Button(action: { collabService.stop() }) {
             HStack {
                 Image(systemName: "xmark.circle.fill")
-                Text(L.tr("collab.leaveSession"))
+                Text(Localized.tr("collab.leaveSession"))
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(.red)
@@ -255,7 +255,7 @@ struct CollaborationView: View {
     // MARK: - Peers
     private var peersSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L.tr("collab.connectedUsers"))
+            Text(Localized.tr("collab.connectedUsers"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
             
@@ -284,12 +284,12 @@ struct CollaborationView: View {
     // MARK: - Recent Edits
     private var editsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L.tr("collab.recentEdits"))
+            Text(Localized.tr("collab.recentEdits"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
             
             if recentEditsSnapshot.isEmpty {
-                Text(L.tr("collab.noEdits"))
+                Text(Localized.tr("collab.noEdits"))
                     .font(.subheadline)
                     .foregroundStyle(.wikiSecondary)
                     .padding()

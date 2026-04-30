@@ -19,8 +19,8 @@ final class LintService {
                 issues.append(LintIssue(
                     severity: .warning,
                     pageID: page.id,
-                    message: String(format: L.tr("lint.orphanPage"), page.title),
-                    suggestion: String(format: L.tr("lint.orphanSuggestion"), page.title)
+                    message: String(format: Localized.tr("lint.orphanPage"), page.title),
+                    suggestion: String(format: Localized.tr("lint.orphanSuggestion"), page.title)
                 ))
             }
         }
@@ -32,8 +32,8 @@ final class LintService {
                     issues.append(LintIssue(
                         severity: .error,
                         pageID: page.id,
-                        message: String(format: L.tr("lint.brokenLink"), page.title, link),
-                        suggestion: String(format: L.tr("lint.brokenLinkSuggestion"), link)
+                        message: String(format: Localized.tr("lint.brokenLink"), page.title, link),
+                        suggestion: String(format: Localized.tr("lint.brokenLinkSuggestion"), link)
                     ))
                 }
             }
@@ -44,8 +44,8 @@ final class LintService {
             issues.append(LintIssue(
                 severity: .info,
                 pageID: page.id,
-                message: String(format: L.tr("lint.stubContent"), page.title),
-                suggestion: L.tr("lint.stubSuggestion")
+                message: String(format: Localized.tr("lint.stubContent"), page.title),
+                suggestion: Localized.tr("lint.stubSuggestion")
             ))
         }
 
@@ -55,8 +55,8 @@ final class LintService {
             issues.append(LintIssue(
                 severity: .info,
                 pageID: page.id,
-                message: String(format: L.tr("lint.outdated"), page.title),
-                suggestion: L.tr("lint.outdatedSuggestion")
+                message: String(format: Localized.tr("lint.outdated"), page.title),
+                suggestion: Localized.tr("lint.outdatedSuggestion")
             ))
         }
 

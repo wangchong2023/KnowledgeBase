@@ -23,21 +23,21 @@ final class LLMContextBuilder {
     // MARK: - System Prompt
     func buildSystemPrompt(pages: [WikiPage]) -> String {
         var prompt = """
-        \(L.tr("llm.prompt.role"))
+        \(Localized.tr("llm.prompt.role"))
         
-        \(L.tr("chat.welcomeDesc"))：
-        \(L.tr("llm.prompt.duty1"))
-        \(L.tr("llm.prompt.duty2"))
-        \(L.tr("llm.prompt.duty3"))
-        \(L.tr("llm.prompt.duty4"))
+        \(Localized.tr("chat.welcomeDesc"))：
+        \(Localized.tr("llm.prompt.duty1"))
+        \(Localized.tr("llm.prompt.duty2"))
+        \(Localized.tr("llm.prompt.duty3"))
+        \(Localized.tr("llm.prompt.duty4"))
         
-        \(L.tr("ingest.compileRules"))
-        \(L.tr("llm.prompt.rule1"))
-        \(L.tr("llm.prompt.rule2"))
-        \(L.tr("llm.prompt.rule3"))
-        \(L.tr("llm.prompt.rule4"))
+        \(Localized.tr("ingest.compileRules"))
+        \(Localized.tr("llm.prompt.rule1"))
+        \(Localized.tr("llm.prompt.rule2"))
+        \(Localized.tr("llm.prompt.rule3"))
+        \(Localized.tr("llm.prompt.rule4"))
         
-        \(L.tr("llm.prompt.overview"))
+        \(Localized.tr("llm.prompt.overview"))
         """
         
         // Summarize wiki content for context
@@ -47,17 +47,17 @@ final class LLMContextBuilder {
         let concepts = activePages.filter { $0.type == .concept }
         let sources = activePages.filter { $0.type == .source }
         
-        prompt += "\n- \(L.tr("llm.prompt.totalPages")): \(totalPages)"
-        prompt += "\n- \(L.tr("llm.prompt.entityCount")): \(entities.count), \(L.tr("llm.prompt.conceptCount")): \(concepts.count), \(L.tr("llm.prompt.sourceCount")): \(sources.count)"
-        prompt += "\n\n\(L.tr("llm.prompt.entityList"))"
+        prompt += "\n- \(Localized.tr("llm.prompt.totalPages")): \(totalPages)"
+        prompt += "\n- \(Localized.tr("llm.prompt.entityCount")): \(entities.count), \(Localized.tr("llm.prompt.conceptCount")): \(concepts.count), \(Localized.tr("llm.prompt.sourceCount")): \(sources.count)"
+        prompt += "\n\n\(Localized.tr("llm.prompt.entityList"))"
         for entity in entities.prefix(Self.maxEntityOverview) {
             prompt += "\n- [[\(entity.title)]]: \(String(entity.content.prefix(Self.contentPreviewLength)))"
         }
-        prompt += "\n\n\(L.tr("llm.prompt.conceptList"))"
+        prompt += "\n\n\(Localized.tr("llm.prompt.conceptList"))"
         for concept in concepts.prefix(Self.maxConceptOverview) {
             prompt += "\n- [[\(concept.title)]]: \(String(concept.content.prefix(Self.contentPreviewLength)))"
         }
-        prompt += "\n\n\(L.tr("llm.prompt.sourceList"))"
+        prompt += "\n\n\(Localized.tr("llm.prompt.sourceList"))"
         for source in sources.prefix(Self.maxSourceOverview) {
             prompt += "\n- [[\(source.title)]]"
         }
@@ -65,7 +65,7 @@ final class LLMContextBuilder {
         // Add recent changes
         let recent = activePages.sorted { $0.updated > $1.updated }.prefix(Self.maxRecentOverview)
         if !recent.isEmpty {
-            prompt += "\n\n\(L.tr("llm.prompt.recentUpdates"))"
+            prompt += "\n\n\(Localized.tr("llm.prompt.recentUpdates"))"
             for page in recent {
                 prompt += "\n- \(page.title) (\(page.updated.formatted(.dateTime.month().day())))"
             }
@@ -104,9 +104,9 @@ final class LLMContextBuilder {
         }
         let allRelevant = pages.filter { extendedIDs.contains($0.id) }
         
-        var context = "\(L.tr("llm.prompt.relevantPages"))\n"
+        var context = "\(Localized.tr("llm.prompt.relevantPages"))\n"
         for page in allRelevant.prefix(Self.maxContextPages) {
-            context += "\n---\n## \(page.title)\n\(L.tr("llm.prompt.typeLabel")): \(page.type.displayName) | \(L.tr("llm.prompt.statusLabel")): \(page.status.displayName)\n\n"
+            context += "\n---\n## \(page.title)\n\(Localized.tr("llm.prompt.typeLabel")): \(page.type.displayName) | \(Localized.tr("llm.prompt.statusLabel")): \(page.status.displayName)\n\n"
             context += String(page.content.prefix(Self.contextPreviewLength))
             if page.content.count > Self.contextPreviewLength { context += "..." }
             context += "\n"
@@ -120,30 +120,30 @@ final class LLMContextBuilder {
         let existingTitles = pages.map(\.title).joined(separator: ", ")
         
         return """
-        \(L.tr("llm.ingest.compileInstruction"))
+        \(Localized.tr("llm.ingest.compileInstruction"))
         
-        \(L.tr("llm.ingest.compileRules"))
-        \(L.tr("llm.ingest.rule1"))
-        \(L.tr("llm.ingest.rule2"))
-        \(L.tr("llm.ingest.rule3"))
-        \(L.tr("llm.ingest.rule4"))
-        \(L.tr("llm.ingest.rule5"))
-        \(L.tr("llm.ingest.rule6"))
+        \(Localized.tr("llm.ingest.compileRules"))
+        \(Localized.tr("llm.ingest.rule1"))
+        \(Localized.tr("llm.ingest.rule2"))
+        \(Localized.tr("llm.ingest.rule3"))
+        \(Localized.tr("llm.ingest.rule4"))
+        \(Localized.tr("llm.ingest.rule5"))
+        \(Localized.tr("llm.ingest.rule6"))
         
-        \(L.tr("llm.ingest.existingPages"))：\(existingTitles)
+        \(Localized.tr("llm.ingest.existingPages"))：\(existingTitles)
         
-        \(L.tr("llm.ingest.rawTitle"))：\(title)
+        \(Localized.tr("llm.ingest.rawTitle"))：\(title)
         
-        \(L.tr("llm.ingest.rawContent"))
+        \(Localized.tr("llm.ingest.rawContent"))
         \(rawContent)
         
-        \(L.tr("llm.ingest.jsonFormat"))
+        \(Localized.tr("llm.ingest.jsonFormat"))
         {
-          "compiledContent": "\(L.tr("llm.ingest.jsonCompiledContent"))",
-          "suggestedTags": ["\(L.tr("llm.ingest.jsonSuggestedTags"))1", "\(L.tr("llm.ingest.jsonSuggestedTags"))2"],
+          "compiledContent": "\(Localized.tr("llm.ingest.jsonCompiledContent"))",
+          "suggestedTags": ["\(Localized.tr("llm.ingest.jsonSuggestedTags"))1", "\(Localized.tr("llm.ingest.jsonSuggestedTags"))2"],
           "suggestedType": "entity|concept|source|comparison|map",
           "relatedTitles": [],
-          "summary": "\(L.tr("llm.ingest.jsonSummary"))"
+          "summary": "\(Localized.tr("llm.ingest.jsonSummary"))"
         }
         """
     }

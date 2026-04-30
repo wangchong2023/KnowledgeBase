@@ -8,7 +8,7 @@ struct SettingsView: View {
     @State private var showImportSuccess = false
     @State private var importedCount = 0
     @StateObject private var syncService = iCloudSyncService()
-    @State private var selectedLanguage: LanguageMode = L.languageMode
+    @State private var selectedLanguage: LanguageMode = Localized.languageMode
     @Binding var languageForceUpdate: Bool
     
     var body: some View {
@@ -22,7 +22,7 @@ struct SettingsView: View {
                                 .tag(mode)
                         }
                     } label: {
-                        Label(L.tr("settings.appearanceMode"), systemImage: "paintbrush.fill")
+                        Label(Localized.tr("settings.appearanceMode"), systemImage: "paintbrush.fill")
                             .foregroundStyle(.wikiText)
                     }
                     .tint(.wikiAccent)
@@ -37,26 +37,26 @@ struct SettingsView: View {
                                 .tag(mode)
                         }
                     } label: {
-                        Label(L.tr("settings.language"), systemImage: "globe")
+                        Label(Localized.tr("settings.language"), systemImage: "globe")
                             .foregroundStyle(.wikiText)
                     }
                     .tint(.wikiAccent)
                     .onChange(of: selectedLanguage) { _, newValue in
-                        L.languageMode = newValue
+                        Localized.languageMode = newValue
                         languageForceUpdate.toggle()
                     }
                     .id(languageForceUpdate)
                 } header: {
-                    Text(L.tr("settings.section.appearance"))
+                    Text(Localized.tr("settings.section.appearance"))
                 }
                 
                 // ── AI 配置 ──
                 Section {
-                    SettingsNavigationRow(icon: "brain.head.profile.fill", title: L.tr("tab.chat"), identifier: "AI-Chat") {
+                    SettingsNavigationRow(icon: "brain.head.profile.fill", title: Localized.tr("tab.chat"), identifier: "AI-Chat") {
                         ChatView()
                     }
 
-                    SettingsNavigationRow(icon: "wrench.and.screwdriver.fill", title: L.tr("settings.llmConfig"), identifier: "AI-LLM设置") {
+                    SettingsNavigationRow(icon: "wrench.and.screwdriver.fill", title: Localized.tr("settings.llmConfig"), identifier: "AI-LLM设置") {
                         LLMSettingsView()
                     } trailing: {
                         if llmService.isEnabled {
@@ -64,22 +64,22 @@ struct SettingsView: View {
                                 .foregroundStyle(.green)
                                 .font(.caption)
                         } else {
-                            Text(L.tr("settings.llmNotConfigured"))
+                            Text(Localized.tr("settings.llmNotConfigured"))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
 
-                    SettingsNavigationRow(icon: "cpu.fill", title: L.tr("settings.onDeviceLLM"), identifier: "AI-端侧LLM") {
+                    SettingsNavigationRow(icon: "cpu.fill", title: Localized.tr("settings.onDeviceLLM"), identifier: "AI-端侧LLM") {
                         OnDeviceLLMSettingsView()
                     }
                 } header: {
-                    Text(L.tr("settings.section.ai"))
+                    Text(Localized.tr("settings.section.ai"))
                 }
                 
                 // ── 数据管理 ──
                 Section {
-                    SettingsNavigationRow(icon: "icloud", title: L.tr("settings.iCloudSync"), identifier: "数据-iCloud同步") {
+                    SettingsNavigationRow(icon: "icloud", title: Localized.tr("settings.iCloudSync"), identifier: "数据-iCloud同步") {
                         iCloudSyncView(syncService: syncService, store: store)
                     } trailing: {
                         if syncService.iCloudAvailable {
@@ -87,18 +87,18 @@ struct SettingsView: View {
                                 .fill(syncService.syncStatus == .synced ? Color.wikiAccent : Color.wikiSecondary)
                                 .frame(width: 8, height: 8)
                         } else {
-                            Text(L.tr("settings.unavailable"))
+                            Text(Localized.tr("settings.unavailable"))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
 
-                    SettingsNavigationRow(icon: "externaldrive.fill", title: L.tr("backup.title"), identifier: "数据-备份") {
+                    SettingsNavigationRow(icon: "externaldrive.fill", title: Localized.tr("backup.title"), identifier: "数据-备份") {
                         BackupView()
                     }
                     
                     ShareLink(item: exportAllAsMarkdown()) {
-                        Label(L.tr("settings.exportMarkdown"), systemImage: "square.and.arrow.up")
+                        Label(Localized.tr("settings.exportMarkdown"), systemImage: "square.and.arrow.up")
                             .foregroundStyle(.wikiText)
                     }
                     
@@ -109,10 +109,10 @@ struct SettingsView: View {
                                 .foregroundStyle(.wikiSecondary)
                                 .frame(width: 24)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(L.tr("settings.importClipboard"))
+                                Text(Localized.tr("settings.importClipboard"))
                                     .font(.body)
                                     .foregroundStyle(.wikiText)
-                                Text(L.tr("settings.importClipboardHint"))
+                                Text(Localized.tr("settings.importClipboardHint"))
                                     .font(.caption)
                                     .foregroundStyle(.wikiSecondary)
                             }
@@ -121,68 +121,68 @@ struct SettingsView: View {
                     }
                     .buttonStyle(.plain)
                 } header: {
-                    Text(L.tr("settings.section.data"))
+                    Text(Localized.tr("settings.section.data"))
                 }
                 
                 // ── 更多功能 ──
                 Section {
-                    SettingsNavigationRow(icon: "waveform", title: L.tr("tab.voice"), subtitle: L.tr("settings.voiceNote"), identifier: "功能-语音笔记") {
+                    SettingsNavigationRow(icon: "waveform", title: Localized.tr("tab.voice"), subtitle: Localized.tr("settings.voiceNote"), identifier: "功能-语音笔记") {
                         VoiceNoteView()
                     }
 
-                    SettingsNavigationRow(icon: "doc.richtext", title: L.tr("tab.pdf"), subtitle: L.tr("settings.pdfManager") ) {
+                    SettingsNavigationRow(icon: "doc.richtext", title: Localized.tr("tab.pdf"), subtitle: Localized.tr("settings.pdfManager") ) {
                         PDFLibraryView()
                     }
 
-                    SettingsNavigationRow(icon: "person.2.fill", title: L.tr("tab.collab"), subtitle: L.tr("settings.collaboration")) {
+                    SettingsNavigationRow(icon: "person.2.fill", title: Localized.tr("tab.collab"), subtitle: Localized.tr("settings.collaboration")) {
                         CollaborationView()
                     }
 
-                    SettingsNavigationRow(icon: "cube.transparent.fill", title: L.tr("settings.graph3D"), subtitle: L.tr("settings.graph3DHint")) {
+                    SettingsNavigationRow(icon: "cube.transparent.fill", title: Localized.tr("settings.graph3D"), subtitle: Localized.tr("settings.graph3DHint")) {
                         Graph3DView()
                     }
 
-                    SettingsNavigationRow(icon: "visionpro", title: L.tr("settings.spatialComputing"), subtitle: L.tr("settings.spatialComputingHint")) {
+                    SettingsNavigationRow(icon: "visionpro", title: Localized.tr("settings.spatialComputing"), subtitle: Localized.tr("settings.spatialComputingHint")) {
                         VisionProSpatialView()
                     }
                 } header: {
-                    Text(L.tr("settings.section.moreFeatures"))
+                    Text(Localized.tr("settings.section.moreFeatures"))
                 }
                 
                 // ── 知识库统计 ──
                 Section {
-                    SettingsStatRow(icon: "doc.richtext.fill", label: L.tr("settings.totalPages"), value: "\(store.totalPages)")
-                    SettingsStatRow(icon: "text.word.spacing", label: L.tr("settings.totalWords"), value: "\(store.totalWords)")
+                    SettingsStatRow(icon: "doc.richtext.fill", label: Localized.tr("settings.totalPages"), value: "\(store.totalPages)")
+                    SettingsStatRow(icon: "text.word.spacing", label: Localized.tr("settings.totalWords"), value: "\(store.totalWords)")
                     
-                    SettingsStatRow(icon: "exclamationmark.triangle", label: L.tr("settings.stubPages"), value: "\(store.stubCount)")
-                    Text(L.tr("settings.stubPagesHint"))
+                    SettingsStatRow(icon: "exclamationmark.triangle", label: Localized.tr("settings.stubPages"), value: "\(store.stubCount)")
+                    Text(Localized.tr("settings.stubPagesHint"))
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary.opacity(0.7))
                     
-                    SettingsStatRow(icon: "clock", label: L.tr("settings.operationLog"), value: "\(store.logEntries.count)")
+                    SettingsStatRow(icon: "clock", label: Localized.tr("settings.operationLog"), value: "\(store.logEntries.count)")
                 } header: {
-                    Text(L.tr("settings.section.stats"))
+                    Text(Localized.tr("settings.section.stats"))
                 }
                 
                 // ── 维护 ──
                 Section {
-                    SettingsNavigationRow(icon: "tag", title: L.tr("settings.tagManager"), subtitle: L.tr("settings.tagManagerHint"), identifier: "维护-标签管理") {
+                    SettingsNavigationRow(icon: "tag", title: Localized.tr("settings.tagManager"), subtitle: Localized.tr("settings.tagManagerHint"), identifier: "维护-标签管理") {
                         TagCloudView()
                     }
 
-                    SettingsNavigationRow(icon: "stethoscope", title: L.tr("settings.healthCheck"), identifier: "维护-健康检查") {
+                    SettingsNavigationRow(icon: "stethoscope", title: Localized.tr("settings.healthCheck"), identifier: "维护-健康检查") {
                         LintView()
                     }
 
-                    SettingsNavigationRow(icon: "list.bullet.indent", title: L.tr("settings.masterIndex"), identifier: "维护-总索引") {
+                    SettingsNavigationRow(icon: "list.bullet.indent", title: Localized.tr("settings.masterIndex"), identifier: "维护-总索引") {
                         IndexView()
                     }
 
-                    SettingsNavigationRow(icon: "gauge.with.dots.needle.bottom.50percent", title: L.tr("perf.title")) {
+                    SettingsNavigationRow(icon: "gauge.with.dots.needle.bottom.50percent", title: Localized.tr("perf.title")) {
                         PerformanceDashboardView(service: store.performanceService)
                     }
                 } header: {
-                    Text(L.tr("settings.section.maintenance"))
+                    Text(Localized.tr("settings.section.maintenance"))
                 }
                 
                 // ── 关于 ──
@@ -192,47 +192,47 @@ struct SettingsView: View {
                             Image(systemName: "books.vertical.circle.fill")
                                 .font(.title2)
                                 .foregroundStyle(.wikiAccent)
-                            Text(L.tr("settings.aboutApp"))
+                            Text(Localized.tr("settings.aboutApp"))
                                 .font(.title3.weight(.bold))
                                 .foregroundStyle(.wikiText)
                         }
                         
-                        Text(L.tr("settings.aboutAppDesc"))
+                        Text(Localized.tr("settings.aboutAppDesc"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     }
                     .padding(.vertical, 4)
                 } header: {
-                    Text(L.tr("settings.section.about"))
+                    Text(Localized.tr("settings.section.about"))
                 }
                 
                 // ── 危险操作 ──
                 Section {
                     Button(role: .destructive, action: { showResetConfirmation = true }) {
-                        Label(L.tr("settings.reset"), systemImage: "trash")
+                        Label(Localized.tr("settings.reset"), systemImage: "trash")
                     }
                     .accessibilityIdentifier("危险-重置知识库")
                 } header: {
-                    Text(L.tr("settings.section.danger"))
+                    Text(Localized.tr("settings.section.danger"))
                 }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("settings.settings"))
-            .confirmationDialog(L.tr("settings.confirmReset"), isPresented: $showResetConfirmation) {
-                Button(L.tr("settings.resetAllData"), role: .destructive) {
+            .navigationTitle(Localized.tr("settings.settings"))
+            .confirmationDialog(Localized.tr("settings.confirmReset"), isPresented: $showResetConfirmation) {
+                Button(Localized.tr("settings.resetAllData"), role: .destructive) {
                     store.resetAllData()
                     store.seedDefaultContent()
                 }
-                Button(L.tr("settings.cancel"), role: .cancel) {}
+                Button(Localized.tr("settings.cancel"), role: .cancel) {}
             } message: {
-                Text(L.tr("settings.resetWarning"))
+                Text(Localized.tr("settings.resetWarning"))
             }
-            .alert(L.tr("settings.importComplete"), isPresented: $showImportSuccess) {
-                Button(L.tr("settings.ok")) {}
+            .alert(Localized.tr("settings.importComplete"), isPresented: $showImportSuccess) {
+                Button(Localized.tr("settings.ok")) {}
             } message: {
-                Text(L.trf("settings.importSuccess", Int(importedCount)))
+                Text(Localized.trf("settings.importSuccess", Int(importedCount)))
             }
         }
     }
@@ -262,7 +262,7 @@ struct SettingsView: View {
                     .replacingOccurrences(of: "^#+\\s*", with: "", options: .regularExpression)
                     .trimmingCharacters(in: .whitespaces)
                 
-                if title.isEmpty { title = L.trf("settings.importedPageTitle", count + 1) }
+                if title.isEmpty { title = Localized.trf("settings.importedPageTitle", count + 1) }
                 if store.pageByTitle(title) != nil { continue }
                 
                 let content = section.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -270,7 +270,7 @@ struct SettingsView: View {
                     title: title,
                     type: .concept,
                     content: content,
-                    tags: [L.tr("settings.importTag")]
+                    tags: [Localized.tr("settings.importTag")]
                 )
                 _ = page
                 count += 1
@@ -285,9 +285,9 @@ struct SettingsView: View {
     }
     
     private func exportAllAsMarkdown() -> String {
-        var output = "# \(L.tr("export.header"))\n\n"
-        output += "\(L.tr("export.exportTime")): \(Date().formatted())\n"
-        output += "\(L.tr("export.totalPages")): \(store.totalPages)\n\n---\n\n"
+        var output = "# \(Localized.tr("export.header"))\n\n"
+        output += "\(Localized.tr("export.exportTime")): \(Date().formatted())\n"
+        output += "\(Localized.tr("export.totalPages")): \(store.totalPages)\n\n---\n\n"
         
         for type in PageType.allCases {
             let typePages = store.pages.filter { $0.type == type }
@@ -298,17 +298,17 @@ struct SettingsView: View {
             for page in typePages.sorted(by: { $0.title < $1.title }) {
                 output += "---\n\n"
                 output += "### \(page.title)\n\n"
-                output += "- \(L.tr("export.type")): \(page.type.displayName)\n"
-                output += "- \(L.tr("export.status")): \(page.status.displayName)\n"
-                output += "- \(L.tr("export.confidence")): \(page.confidence.displayName)\n"
+                output += "- \(Localized.tr("export.type")): \(page.type.displayName)\n"
+                output += "- \(Localized.tr("export.status")): \(page.status.displayName)\n"
+                output += "- \(Localized.tr("export.confidence")): \(page.confidence.displayName)\n"
                 if !page.tags.isEmpty {
-                    output += "- \(L.tr("export.tags")): \(page.tags.joined(separator: ", "))\n"
+                    output += "- \(Localized.tr("export.tags")): \(page.tags.joined(separator: ", "))\n"
                 }
                 if !page.aliases.isEmpty {
-                    output += "- \(L.tr("export.aliases")): \(page.aliases.joined(separator: ", "))\n"
+                    output += "- \(Localized.tr("export.aliases")): \(page.aliases.joined(separator: ", "))\n"
                 }
-                output += "- \(L.tr("export.created")): \(page.created.formatted())\n"
-                output += "- \(L.tr("export.updated")): \(page.updated.formatted())\n\n"
+                output += "- \(Localized.tr("export.created")): \(page.created.formatted())\n"
+                output += "- \(Localized.tr("export.updated")): \(page.updated.formatted())\n\n"
                 output += page.content
                 output += "\n\n"
             }

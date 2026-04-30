@@ -89,7 +89,7 @@ final class BackupService: ObservableObject {
             // Clean old backups
             cleanOldBackups()
         } catch {
-            print(String(format: L.tr("backup.log.createFailed"), error.localizedDescription))
+            print(String(format: Localized.tr("backup.log.createFailed"), error.localizedDescription))
         }
     }
     
@@ -103,7 +103,7 @@ final class BackupService: ObservableObject {
             let data = try Data(contentsOf: url)
             return try decoder.decode([WikiPage].self, from: data)
         } catch {
-            print(String(format: L.tr("backup.log.restoreFailed"), error.localizedDescription))
+            print(String(format: Localized.tr("backup.log.restoreFailed"), error.localizedDescription))
             return nil
         }
     }
@@ -123,7 +123,7 @@ final class BackupService: ObservableObject {
         let dirtyFlag = docs.appendingPathComponent(".wikicraft_dirty")
         
         if FileManager.default.fileExists(atPath: dirtyFlag.path) {
-            print(L.tr("backup.log.crashRecovery"))
+            print(Localized.tr("backup.log.crashRecovery"))
             // The dirty flag means the app crashed before completing a save
             // BackupService will make the latest backup available for recovery
             try? FileManager.default.removeItem(at: dirtyFlag)
@@ -167,7 +167,7 @@ final class BackupService: ObservableObject {
             let url = Self.backupDirectory.appendingPathComponent("backup_index.json")
             try data.write(to: url, options: .atomicWrite)
         } catch {
-            print(String(format: L.tr("backup.log.saveIndexFailed"), error.localizedDescription))
+            print(String(format: Localized.tr("backup.log.saveIndexFailed"), error.localizedDescription))
         }
     }
     

@@ -61,9 +61,9 @@ struct IngestView: View {
                 .padding(.bottom, 40)
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("ingest.title"))
-            .alert(L.tr("ingest.error"), isPresented: $showError) {
-                Button(L.tr("ingest.ok")) { errorMessage = nil }
+            .navigationTitle(Localized.tr("ingest.title"))
+            .alert(Localized.tr("ingest.error"), isPresented: $showError) {
+                Button(Localized.tr("ingest.ok")) { errorMessage = nil }
             } message: {
                 Text(errorMessage ?? "")
             }
@@ -150,7 +150,7 @@ struct IngestView: View {
         updatedPage.relatedPageIDs = relatedIDs
         store.updatePage(updatedPage)
 
-        store.addLog(action: L.tr("logAction.smartIngest"), target: newTitle, details: L.trf("ingest.smartIngestDoneDesc", type.displayName))
+        store.addLog(action: Localized.tr("logAction.smartIngest"), target: newTitle, details: Localized.trf("ingest.smartIngestDoneDesc", type.displayName))
 
         smartResult = nil
         ingestSuccess = true

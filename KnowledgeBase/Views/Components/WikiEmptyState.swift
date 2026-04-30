@@ -142,8 +142,8 @@ struct WikiEmptyState: View {
     private func buildAccessibilityLabel() -> String {
         var label = "\(title)。"
         if let description = description { label += " \(description)。" }
-        if let hint = hint { label += " \(L.tr("empty.hint"))：\(hint)" }
-        if action != nil { label += " \(L.tr("empty.actionHint"))。" }
+        if let hint = hint { label += " \(Localized.tr("empty.hint"))：\(hint)" }
+        if action != nil { label += " \(Localized.tr("empty.actionHint"))。" }
         return label
     }
 }

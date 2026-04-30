@@ -3,6 +3,29 @@ import Vision
 import PhotosUI
 
 // MARK: - OCR Service
+
+/// OCR 文字识别服务
+///
+/// 利用 Vision 框架对图像进行文字识别，支持中文（简体/繁体）、英文、日文、韩文等多种语言。
+/// 采用 accurate 识别级别和语言纠正，以获得更高的识别准确率。
+///
+/// ## 主要功能
+/// - 从 UIImage 中提取文字
+/// - 支持异步回调和 async/await 两种调用方式
+/// - 多语言自动检测（简体中文、繁体中文、英文、日文、韩文）
+///
+/// ## 使用方式
+/// ```swift
+/// // 异步回调方式
+/// ocrService.recognizeText(from: image) { result in
+///     if case .success(let text) = result {
+///         print(text)
+///     }
+/// }
+///
+/// // async/await 方式
+/// let text = try await ocrService.recognizeText(from: image)
+/// ```
 class OCRService {
     static let shared = OCRService()
     
@@ -62,6 +85,12 @@ class OCRService {
 }
 
 // MARK: - OCR Error
+
+/// OCR 服务错误类型
+///
+/// - invalidImage: 无法从 UIImage 获取有效的 CGImage
+/// - noResults: 识别请求未返回任何结果
+/// - cameraUnavailable: 相机不可用（当前未使用，保留扩展）
 enum OCRError: LocalizedError {
     case invalidImage
     case noResults
@@ -69,9 +98,9 @@ enum OCRError: LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .invalidImage: return L.tr("ocr.error.invalidImage")
-        case .noResults: return L.tr("ocr.error.noResults")
-        case .cameraUnavailable: return L.tr("ocr.error.cameraUnavailable")
+        case .invalidImage: return Localized.tr("ocr.error.invalidImage")
+        case .noResults: return Localized.tr("ocr.error.noResults")
+        case .cameraUnavailable: return Localized.tr("ocr.error.cameraUnavailable")
         }
     }
 }

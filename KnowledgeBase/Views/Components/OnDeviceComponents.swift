@@ -19,7 +19,7 @@ struct OnDeviceTestView: View {
             }
             .padding()
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("ondevice.test"))
+            .navigationTitle(Localized.tr("ondevice.test"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -27,7 +27,7 @@ struct OnDeviceTestView: View {
     // MARK: - Prompt Input
     private var promptInputSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("ondevice.testPrompt"))
+            Text(Localized.tr("ondevice.testPrompt"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
             
@@ -52,7 +52,7 @@ struct OnDeviceTestView: View {
                     ProgressView()
                         .tint(.white)
                 }
-                Text(isGenerating ? L.tr("ondevice.generating") : L.tr("ondevice.generate"))
+                Text(isGenerating ? Localized.tr("ondevice.generating") : Localized.tr("ondevice.generate"))
             }
             .font(.headline)
             .foregroundStyle(.white)
@@ -79,7 +79,7 @@ struct OnDeviceTestView: View {
         if !result.isEmpty {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text(L.tr("ondevice.result"))
+                    Text(Localized.tr("ondevice.result"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     Spacer()
@@ -114,7 +114,7 @@ struct OnDeviceTestView: View {
                 let generated = try await onDeviceService.generate(prompt: prompt, maxTokens: 128)
                 result = generated
             } catch {
-                result = "\(L.tr("misc.error")): \(error.localizedDescription)"
+                result = "\(Localized.tr("misc.error")): \(error.localizedDescription)"
             }
             isGenerating = false
         }
@@ -143,7 +143,7 @@ struct OnDeviceModelRow: View {
                         Text(model.sizeLabel)
                             .font(.caption2)
                     }
-                    Text(model.type == .system ? L.tr("ondevice.system") : L.tr("ondevice.local"))
+                    Text(model.type == .system ? Localized.tr("ondevice.system") : Localized.tr("ondevice.local"))
                         .font(.caption2)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)

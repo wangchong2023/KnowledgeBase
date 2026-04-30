@@ -193,8 +193,8 @@ extension View {
         self.overlay(alignment: .bottom) {
             if isPresented.wrappedValue {
                 WikiTooltip(
-                    title: L.tr(type.titleKey),
-                    description: L.tr(type.descriptionKey),
+                    title: Localized.tr(type.titleKey),
+                    description: Localized.tr(type.descriptionKey),
                     icon: type.icon,
                     arrowDirection: .top,
                     accentColor: .wikiAccent

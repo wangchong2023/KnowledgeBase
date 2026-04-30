@@ -138,7 +138,7 @@ class KMStore: ObservableObject {
         sqliteStore.replaceAllPages(previous)
         deepLinkService.indexPages(sqliteStore.pages)
         performanceService.updatePageMetrics(pages: sqliteStore.pages)
-        logService.addLog(action: L.tr("logAction.undo"), target: L.tr("logAction.undo"), details: "")
+        logService.addLog(action: Localized.tr("logAction.undo"), target: Localized.tr("logAction.undo"), details: "")
     }
     
     func redo() {
@@ -146,7 +146,7 @@ class KMStore: ObservableObject {
         sqliteStore.replaceAllPages(next)
         deepLinkService.indexPages(sqliteStore.pages)
         performanceService.updatePageMetrics(pages: sqliteStore.pages)
-        logService.addLog(action: L.tr("logAction.redo"), target: L.tr("logAction.redo"), details: "")
+        logService.addLog(action: Localized.tr("logAction.redo"), target: Localized.tr("logAction.redo"), details: "")
     }
 
     // MARK: - Link Resolution (delegates to LinkService)
@@ -198,7 +198,7 @@ class KMStore: ObservableObject {
             lintService.runLint(pages: sqliteStore.pages, linkService: linkService)
         }
         lintIssues = result
-        logService.addLog(action: L.tr("logAction.lint"), target: L.tr("logAction.healthCheck"), details: String(format: L.tr("logAction.lintIssuesFound"), lintIssues.count))
+        logService.addLog(action: Localized.tr("logAction.lint"), target: Localized.tr("logAction.healthCheck"), details: String(format: Localized.tr("logAction.lintIssuesFound"), lintIssues.count))
     }
 
     // MARK: - Ingest (delegates to IngestService)
@@ -229,9 +229,9 @@ class KMStore: ObservableObject {
         undoService.clear()
         // Remove SQLite database file
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        try? FileManager.default.removeItem(at: docs.appendingPathComponent("wikicraft.sqlite3"))
-        try? FileManager.default.removeItem(at: docs.appendingPathComponent("wikicraft.sqlite3-wal"))
-        try? FileManager.default.removeItem(at: docs.appendingPathComponent("wikicraft.sqlite3-shm"))
+        try? FileManager.default.removeItem(at: docs.appendingPathComponent("km.sqlite3"))
+        try? FileManager.default.removeItem(at: docs.appendingPathComponent("km.sqlite3-wal"))
+        try? FileManager.default.removeItem(at: docs.appendingPathComponent("km.sqlite3-shm"))
         // Also clean JSON/UserDefaults fallbacks for migration completeness
         try? FileManager.default.removeItem(at: docs.appendingPathComponent("wikicraft_pages.json"))
         try? FileManager.default.removeItem(at: docs.appendingPathComponent("wikicraft_logs.json"))

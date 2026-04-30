@@ -39,7 +39,7 @@ final class LogService: ObservableObject {
             let data = try encoder.encode(logEntries)
             try data.write(to: logsFileURL, options: .atomicWrite)
         } catch {
-            print(String(format: L.tr("log.error.saveFailed"), error.localizedDescription))
+            print(String(format: Localized.tr("log.error.saveFailed"), error.localizedDescription))
         }
     }
 

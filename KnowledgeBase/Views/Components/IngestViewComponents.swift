@@ -13,10 +13,10 @@ struct IngestHeroSection: View {
                         endPoint: .bottomTrailing
                     )
                 )
-            Text(L.tr("ingest.hero.title"))
+            Text(Localized.tr("ingest.hero.title"))
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.wikiText)
-            Text(L.tr("ingest.hero.subtitle"))
+            Text(Localized.tr("ingest.hero.subtitle"))
                 .font(.caption)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -35,8 +35,8 @@ struct IngestEntryCardsSection: View {
             // OCR entry card (navigation)
             NavigationLink(destination: OCRScanView()) {
                 entryCardContent(
-                    title: L.tr("ingest.ocrScan"),
-                    subtitle: L.tr("ingest.ocrScanHint"),
+                    title: Localized.tr("ingest.ocrScan"),
+                    subtitle: Localized.tr("ingest.ocrScanHint"),
                     icon: "text.viewfinder",
                     color: .wikiAccent
                 )
@@ -54,8 +54,8 @@ struct IngestEntryCardsSection: View {
                 }
             }) {
                 entryCardContent(
-                    title: L.tr("ingest.manualEntry"),
-                    subtitle: L.tr("ingest.manualEntryHint"),
+                    title: Localized.tr("ingest.manualEntry"),
+                    subtitle: Localized.tr("ingest.manualEntryHint"),
                     icon: "pencil.and.list.clipboard",
                     color: .wikiSource
                 )
@@ -105,14 +105,14 @@ struct IngestManualFormSection: View {
     var body: some View {
         VStack(spacing: 16) {
             // Section header
-            WikiSectionHeader(title: L.tr("ingest.manualTitle"), icon: "pencil.and.list.clipboard")
+            WikiSectionHeader(title: Localized.tr("ingest.manualTitle"), icon: "pencil.and.list.clipboard")
 
             // Title field
             VStack(alignment: .leading, spacing: 6) {
-                Text(L.tr("ingest.field.title"))
+                Text(Localized.tr("ingest.field.title"))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.wikiSecondary)
-                WikiTextField(placeholder: L.tr("ingest.field.titlePlaceholder"), text: $newTitle)
+                WikiTextField(placeholder: Localized.tr("ingest.field.titlePlaceholder"), text: $newTitle)
                     .accessibilityIdentifier("输入页面标题")
             }
 
@@ -124,15 +124,15 @@ struct IngestManualFormSection: View {
 
             // Tags field
             VStack(alignment: .leading, spacing: 6) {
-                Text(L.tr("ingest.field.tags"))
+                Text(Localized.tr("ingest.field.tags"))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.wikiSecondary)
-                WikiTagField(placeholder: L.tr("ingest.field.tagsPlaceholder"), text: $newTags)
+                WikiTagField(placeholder: Localized.tr("ingest.field.tagsPlaceholder"), text: $newTags)
             }
 
             // Content editor
             VStack(alignment: .leading, spacing: 6) {
-                Text(L.tr("ingest.field.content"))
+                Text(Localized.tr("ingest.field.content"))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.wikiSecondary)
                 WikiMonospacedEditor(text: $newContent, minHeight: 200)
@@ -153,7 +153,7 @@ struct IngestManualFormSection: View {
 
         // Submit button
         WikiPrimaryButton(
-            title: isIngesting ? L.tr("ingest.submitting") : L.tr("ingest.submit"),
+            title: isIngesting ? Localized.tr("ingest.submitting") : Localized.tr("ingest.submit"),
             icon: "tray.and.arrow.down.fill",
             isLoading: isIngesting
         ) {
@@ -165,7 +165,7 @@ struct IngestManualFormSection: View {
 
         // Success banner
         if ingestSuccess {
-            WikiSuccessBanner(message: L.tr("ingest.success"))
+            WikiSuccessBanner(message: Localized.tr("ingest.success"))
                 .padding(.horizontal)
         }
     }
@@ -176,7 +176,7 @@ struct IngestManualFormSection: View {
                 HStack(spacing: 6) {
                     Image(systemName: "brain.head.profile.fill")
                         .foregroundStyle(.wikiAccent)
-                    Text(L.tr("ingest.smartToggle"))
+                    Text(Localized.tr("ingest.smartToggle"))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.wikiText)
                 }
@@ -185,7 +185,7 @@ struct IngestManualFormSection: View {
             .accessibilityIdentifier("智能导入")
 
             if useSmartIngest {
-                Text(L.tr("ingest.smartToggleHint"))
+                Text(Localized.tr("ingest.smartToggleHint"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
             }
@@ -196,7 +196,7 @@ struct IngestManualFormSection: View {
 
     private var pageTypeSelector: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L.tr("ingest.field.type"))
+            Text(Localized.tr("ingest.field.type"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
 
@@ -220,7 +220,7 @@ struct IngestManualFormSection: View {
 
     private var iconPickerSection: some View {
         HStack(spacing: 10) {
-            Text(L.tr("ingest.field.icon"))
+            Text(Localized.tr("ingest.field.icon"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
 
@@ -232,7 +232,7 @@ struct IngestManualFormSection: View {
                         .frame(width: 20, height: 20)
                         .background((newCustomIcon != nil ? Color.wikiAccent : newType.themedColor).opacity(0.15))
                         .clipShape(RoundedRectangle(cornerRadius: WikiUI.tinyRadius))
-                    Text(newCustomIcon != nil ? L.tr("ingest.iconCustom") : L.tr("ingest.iconDefault"))
+                    Text(newCustomIcon != nil ? Localized.tr("ingest.iconCustom") : Localized.tr("ingest.iconDefault"))
                         .font(.caption)
                         .foregroundStyle(newCustomIcon != nil ? .wikiAccent : .wikiSecondary)
                     Image(systemName: "chevron.up.chevron.down")
@@ -253,7 +253,7 @@ struct IngestManualFormSection: View {
 
             if newCustomIcon != nil {
                 Button(action: { newCustomIcon = nil }) {
-                    Text(L.tr("ingest.iconReset"))
+                    Text(Localized.tr("ingest.iconReset"))
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
                         .padding(.horizontal, 8)
@@ -280,16 +280,16 @@ struct SmartIngestPreview: View {
             HStack {
                 Image(systemName: "sparkles")
                     .foregroundStyle(.wikiAccent)
-                Text(L.tr("ingest.preview"))
+                Text(Localized.tr("ingest.preview"))
                     .font(.headline)
                     .foregroundStyle(.wikiText)
                 Spacer()
                 Button(action: onConfirm) {
-                    WikiCapsuleButton(title: L.tr("ingest.previewConfirm"), icon: "checkmark", isPrimary: true, color: .wikiAccent)
+                    WikiCapsuleButton(title: Localized.tr("ingest.previewConfirm"), icon: "checkmark", isPrimary: true, color: .wikiAccent)
                 }
                 .buttonStyle(.plain)
                 Button(action: onDiscard) {
-                    WikiCapsuleButton(title: L.tr("ingest.previewDiscard"), icon: nil, isPrimary: false)
+                    WikiCapsuleButton(title: Localized.tr("ingest.previewDiscard"), icon: nil, isPrimary: false)
                 }
                 .buttonStyle(.plain)
             }
@@ -326,7 +326,7 @@ struct SmartIngestPreview: View {
             // Related titles
             if !result.relatedTitles.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(L.tr("ingest.suggestLinks"))
+                    Text(Localized.tr("ingest.suggestLinks"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
 
@@ -350,15 +350,15 @@ struct SmartIngestPreview: View {
 struct IngestTipsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L.tr("ingest.tips"))
+            Text(Localized.tr("ingest.tips"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
 
-            WikiStepRow(number: 1, text: L.tr("ingest.tip1"))
-            WikiStepRow(number: 2, text: L.tr("ingest.tip2"))
-            WikiStepRow(number: 3, text: L.tr("ingest.tip3"))
-            WikiStepRow(number: 4, text: L.tr("ingest.tip4"))
-            WikiStepRow(number: 5, text: L.tr("ingest.tip5"))
+            WikiStepRow(number: 1, text: Localized.tr("ingest.tip1"))
+            WikiStepRow(number: 2, text: Localized.tr("ingest.tip2"))
+            WikiStepRow(number: 3, text: Localized.tr("ingest.tip3"))
+            WikiStepRow(number: 4, text: Localized.tr("ingest.tip4"))
+            WikiStepRow(number: 5, text: Localized.tr("ingest.tip5"))
         }
         .wikiCard()
         .padding(.horizontal)

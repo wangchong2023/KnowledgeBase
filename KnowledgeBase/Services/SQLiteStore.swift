@@ -19,7 +19,7 @@ final class SQLiteStore: ObservableObject {
     init() {
         let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        let dbPath = docsDir.appendingPathComponent("wikicraft.sqlite3")
+        let dbPath = docsDir.appendingPathComponent("km.sqlite3")
 
         self.core = SQLiteStoreCore(dbPath: dbPath)
         self.migrator = SQLiteMigrator(core: core, docsDir: docsDir)
@@ -49,7 +49,7 @@ final class SQLiteStore: ObservableObject {
         core.insertPage(page)
         pages.append(page)
 
-        onLog?(L.tr("logAction.create"), title, "\(L.tr("detail.pageType")): \(type.displayName)")
+        onLog?(Localized.tr("logAction.create"), title, "\(Localized.tr("detail.pageType")): \(type.displayName)")
         return page
     }
 
@@ -59,7 +59,7 @@ final class SQLiteStore: ObservableObject {
             updated.updated = Date()
             pages[index] = updated
             core.updatePage(updated)
-            onLog?(L.tr("logAction.update"), page.title, "")
+            onLog?(Localized.tr("logAction.update"), page.title, "")
         }
     }
 
@@ -78,7 +78,7 @@ final class SQLiteStore: ObservableObject {
         _ = clearSelectionIfNeeded(page.id)
         pages.removeAll { $0.id == page.id }
 
-        onLog?(L.tr("logAction.delete"), page.title, "")
+        onLog?(Localized.tr("logAction.delete"), page.title, "")
     }
 
     // MARK: - Lookup
@@ -167,30 +167,19 @@ final class SQLiteStore: ObservableObject {
     }
 
     // MARK: - Seed Default Content
+    /// Creates a single welcome page on first launch.
+    /// All subsequent data comes from normal user usage (CRUD → database).
     func seedDefaultContent(logAction: (String, String, String) -> Void) {
-        for data in KMSeedData.pages {
-            _ = createPage(
-                title: data.title,
-                type: data.type,
-                content: data.content,
-                tags: data.tags
-            )
-        }
+        _ = createPage(
+            title: Localized.tr("page.firstPageTitle"),
+            type: .concept,
+            content: """
+            # \(Localized.tr("page.firstPageTitle"))
 
-        // Set up related page IDs after all pages are created
-        for i in pages.indices {
-            let page = pages[i]
-            var relatedIDs: [UUID] = []
-            for link in page.outgoingLinks {
-                if let linked = pageByTitle(link), !relatedIDs.contains(linked.id) {
-                    relatedIDs.append(linked.id)
-                }
-            }
-            if !relatedIDs.isEmpty {
-                pages[i].relatedPageIDs = relatedIDs
-                core.updatePage(pages[i])
-            }
-        }
+            \(Localized.tr("page.firstPageContent"))
+            """,
+            tags: []
+        )
     }
 }
 

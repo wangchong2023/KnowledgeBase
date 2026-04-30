@@ -28,8 +28,8 @@ struct WikiNavigationView: View {
                             Spacer()
                             VStack(alignment: .trailing, spacing: 8) {
                                 WikiTooltip(
-                                    title: L.tr(tooltipManager.activeTooltip?.titleKey ?? ""),
-                                    description: L.tr(tooltipManager.activeTooltip?.descriptionKey ?? ""),
+                                    title: Localized.tr(tooltipManager.activeTooltip?.titleKey ?? ""),
+                                    description: Localized.tr(tooltipManager.activeTooltip?.descriptionKey ?? ""),
                                     icon: tooltipManager.activeTooltip?.icon ?? "questionmark",
                                     arrowDirection: .bottom,
                                     accentColor: .wikiAccent
@@ -37,7 +37,7 @@ struct WikiNavigationView: View {
                                 Button(action: {
                                     withAnimation { tooltipManager.activeTooltip = nil }
                                 }) {
-                                    Text(L.tr("misc.gotIt"))
+                                    Text(Localized.tr("misc.gotIt"))
                                         .font(.caption.weight(.medium))
                                         .foregroundStyle(.wikiSecondary)
                                         .padding(.horizontal, 12)
@@ -62,14 +62,14 @@ struct WikiNavigationView: View {
                     Button {
                         store.undo()
                     } label: {
-                        Label(L.tr("undo.undo"), systemImage: "arrow.uturn.backward")
+                        Label(Localized.tr("undo.undo"), systemImage: "arrow.uturn.backward")
                     }
                     .disabled(!store.undoService.canUndo)
 
                     Button {
                         store.redo()
                     } label: {
-                        Label(L.tr("undo.redo"), systemImage: "arrow.uturn.forward")
+                        Label(Localized.tr("undo.redo"), systemImage: "arrow.uturn.forward")
                     }
                     .disabled(!store.undoService.canRedo)
                 } label: {

@@ -8,9 +8,9 @@ enum ColorSchemeMode: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .system: return L.tr("settings.theme.system")
-        case .light: return L.tr("settings.theme.light")
-        case .dark: return L.tr("settings.theme.dark")
+        case .system: return Localized.tr("settings.theme.system")
+        case .light: return Localized.tr("settings.theme.light")
+        case .dark: return Localized.tr("settings.theme.dark")
         }
     }
 

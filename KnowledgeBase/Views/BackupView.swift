@@ -15,12 +15,12 @@ struct BackupView: View {
                 // Auto Backup Toggle
                 Section {
                     Toggle(isOn: $backupService.isAutoBackupEnabled) {
-                        Label(L.tr("backup.autoBackup"), systemImage: "clock.arrow.circlepath")
+                        Label(Localized.tr("backup.autoBackup"), systemImage: "clock.arrow.circlepath")
                     }
                     
                     if let lastDate = backupService.lastBackupDate {
                         HStack {
-                            Text(L.tr("backup.lastBackup"))
+                            Text(Localized.tr("backup.lastBackup"))
                                 .foregroundStyle(.wikiSecondary)
                             Spacer()
                             Text(lastDate, style: .relative)
@@ -28,7 +28,7 @@ struct BackupView: View {
                         }
                     }
                 } header: {
-                    Text(L.tr("backup.settings")
+                    Text(Localized.tr("backup.settings")
                     )
                 }
                 
@@ -38,17 +38,17 @@ struct BackupView: View {
                         backupService.createBackup(pages: store.pages)
                         AccessibilityService.playHaptic(.medium)
                     } label: {
-                        Label(L.tr("backup.createNow"), systemImage: "plus.circle.fill")
+                        Label(Localized.tr("backup.createNow"), systemImage: "plus.circle.fill")
                     }
                     
                     Button {
                         store.saveToDisk()
                         backupService.markClean()
                     } label: {
-                        Label(L.tr("backup.exportCurrent"), systemImage: "square.and.arrow.up")
+                        Label(Localized.tr("backup.exportCurrent"), systemImage: "square.and.arrow.up")
                     }
                 } header: {
-                    Text(L.tr("backup.actions")
+                    Text(Localized.tr("backup.actions")
                     )
                 }
                 
@@ -56,9 +56,9 @@ struct BackupView: View {
                 Section {
                     if backupService.backupEntries.isEmpty {
                         ContentUnavailableView(
-                            L.tr("backup.noBackups"),
+                            Localized.tr("backup.noBackups"),
                             systemImage: "archivebox",
-                            description: Text(L.tr("backup.noBackupsDesc")
+                            description: Text(Localized.tr("backup.noBackupsDesc")
                             )
                         )
                     } else {
@@ -72,21 +72,21 @@ struct BackupView: View {
                         }
                     }
                 } header: {
-                    Text(L.tr("backup.history")
+                    Text(Localized.tr("backup.history")
                     )
                 }
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("backup.title")
+            .navigationTitle(Localized.tr("backup.title")
             )
             .navigationBarTitleDisplayMode(.inline)
-            .alert(L.tr("backup.restoreTitle"), isPresented: $showRestoreConfirmation) {
-                Button(L.tr("backup.restore"), role: .destructive) {
+            .alert(Localized.tr("backup.restoreTitle"), isPresented: $showRestoreConfirmation) {
+                Button(Localized.tr("backup.restore"), role: .destructive) {
                     restoreFromBackup()
                 }
-                Button(L.tr("misc.cancel"), role: .cancel) {}
+                Button(Localized.tr("misc.cancel"), role: .cancel) {}
             } message: {
-                Text(L.tr("backup.restoreMessage")
+                Text(Localized.tr("backup.restoreMessage")
                 )
             }
         }
@@ -126,8 +126,8 @@ struct BackupEntryRow: View {
                     .foregroundStyle(.wikiText)
                 
                 HStack(spacing: 12) {
-                    Label("\(entry.pageCount) " + L.tr("backup.pages"), systemImage: "doc.richtext.fill")
-                    Label("\(entry.totalWords) " + L.tr("backup.words"), systemImage: "textformat")
+                    Label("\(entry.pageCount) " + Localized.tr("backup.pages"), systemImage: "doc.richtext.fill")
+                    Label("\(entry.totalWords) " + Localized.tr("backup.words"), systemImage: "textformat")
                     Label(entry.fileSize, systemImage: "externaldrive")
                 }
                 .font(.caption)
@@ -149,7 +149,7 @@ struct BackupEntryRow: View {
             Button(role: .destructive) {
                 onDelete()
             } label: {
-                Label(L.tr("misc.delete"), systemImage: "trash")
+                Label(Localized.tr("misc.delete"), systemImage: "trash")
             }
         }
     }

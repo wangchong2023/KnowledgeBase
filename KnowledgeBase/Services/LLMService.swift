@@ -230,7 +230,7 @@ final class LLMService: ObservableObject {
         }
         
         let prompt = contextBuilder.buildIngestPrompt(title: title, rawContent: rawContent, pages: pages)
-        let systemPrompt = L.tr("llm.ingest.systemPrompt")
+        let systemPrompt = Localized.tr("llm.ingest.systemPrompt")
         
         let requestBody: [String: Any] = [
             "model": model,

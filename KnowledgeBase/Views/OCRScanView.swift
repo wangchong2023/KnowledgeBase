@@ -12,7 +12,7 @@ struct OCRScanView: View {
     @State private var targetTitle = ""
     @State private var targetType: PageType = .source
     @State private var targetCustomIcon: String? = nil
-    @State private var targetTags: [String] = ["OCR", L.tr("ocr.scanTag")]
+    @State private var targetTags: [String] = ["OCR", Localized.tr("ocr.scanTag")]
     @State private var showIconPicker = false
     @State private var showOCRError = false
     @State private var ocrErrorMessage = ""
@@ -41,7 +41,7 @@ struct OCRScanView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("ocr.title"))
+            .navigationTitle(Localized.tr("ocr.title"))
             .navigationBarTitleDisplayMode(.inline)
             .onChange(of: selectedPhoto) { _, newValue in
                 loadImage(from: newValue)
@@ -49,22 +49,22 @@ struct OCRScanView: View {
             .sheet(isPresented: $showIconPicker) {
                 IconPickerView(selectedIcon: $targetCustomIcon)
             }
-            .alert(L.tr("ocr.scanFailed"), isPresented: $showOCRError) {
-                Button(L.tr("misc.ok"), role: .cancel) {}
+            .alert(Localized.tr("ocr.scanFailed"), isPresented: $showOCRError) {
+                Button(Localized.tr("misc.ok"), role: .cancel) {}
             } message: {
                 Text(ocrErrorMessage)
             }
-            .alert(L.tr("editor.addTag"), isPresented: $showAddTagInput) {
-                TextField(L.tr("editor.enterTag"), text: $newTagText)
+            .alert(Localized.tr("editor.addTag"), isPresented: $showAddTagInput) {
+                TextField(Localized.tr("editor.enterTag"), text: $newTagText)
                     .accessibilityIdentifier("enterTagName")
-                Button(L.tr("ocr.addTag")) {
+                Button(Localized.tr("ocr.addTag")) {
                     commitNewTag()
                 }
-                Button(L.tr("misc.cancel"), role: .cancel) {
+                Button(Localized.tr("misc.cancel"), role: .cancel) {
                     newTagText = ""
                 }
             } message: {
-                Text(L.tr("editor.enterTag"))
+                Text(Localized.tr("editor.enterTag"))
             }
         }
     }
@@ -93,7 +93,7 @@ struct OCRScanView: View {
                             Image(systemName: "text.viewfinder")
                                 .font(.system(size: 40))
                                 .foregroundStyle(.wikiSecondary)
-                            Text(L.tr("ocr.selectImage"))
+                            Text(Localized.tr("ocr.selectImage"))
                                 .font(.subheadline)
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -108,7 +108,7 @@ struct OCRScanView: View {
             // Photo picker
             HStack(spacing: 16) {
                 PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                    Label(L.tr("ocr.fromAlbum"), systemImage: "photo.on.rectangle")
+                    Label(Localized.tr("ocr.fromAlbum"), systemImage: "photo.on.rectangle")
                         .font(.subheadline)
                         .foregroundStyle(.wikiAccent)
                         .padding(.horizontal, 16)
@@ -124,7 +124,7 @@ struct OCRScanView: View {
                                     .tint(.white)
                                     .scaleEffect(0.8)
                             }
-                            Text(isProcessing ? L.tr("ocr.processing") : L.tr("ocr.recognize"))
+                            Text(isProcessing ? Localized.tr("ocr.processing") : Localized.tr("ocr.recognize"))
                         }
                         .font(.subheadline)
                         .foregroundStyle(.white)
@@ -142,14 +142,14 @@ struct OCRScanView: View {
     private var recognizedTextArea: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label(L.tr("ocr.result"), systemImage: "doc.text")
+                Label(Localized.tr("ocr.result"), systemImage: "doc.text")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.wikiText)
                 
                 Spacer()
                 
                 Button(action: copyToClipboard) {
-                    Label(L.tr("ocr.copy"), systemImage: "doc.on.doc")
+                    Label(Localized.tr("ocr.copy"), systemImage: "doc.on.doc")
                         .font(.caption)
                         .foregroundStyle(.wikiAccent)
                 }
@@ -171,7 +171,7 @@ struct OCRScanView: View {
             )
             
             HStack {
-                Text(L.trf("ocr.charCountFormat", recognizedText.count))
+                Text(Localized.trf("ocr.charCountFormat", recognizedText.count))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                 
@@ -183,11 +183,11 @@ struct OCRScanView: View {
     // MARK: - Save to Wiki Section
     private var saveToWikiSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(L.tr("ocr.saveToWiki"))
+            Text(Localized.tr("ocr.saveToWiki"))
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.wikiText)
             
-            TextField(L.tr("ocr.pageTitle"), text: $targetTitle)
+            TextField(Localized.tr("ocr.pageTitle"), text: $targetTitle)
                 .font(.subheadline)
                 .foregroundStyle(.wikiText)
                 .padding(10)
@@ -197,7 +197,7 @@ struct OCRScanView: View {
                         .stroke(Color.wikiBorder, lineWidth: 1)
                 )
             
-            Picker(L.tr("ocr.pageType"), selection: $targetType) {
+            Picker(Localized.tr("ocr.pageType"), selection: $targetType) {
                 ForEach(PageType.allCases, id: \.self) { type in
                     Label(type.displayName, systemImage: type.icon).tag(type)
                 }
@@ -206,7 +206,7 @@ struct OCRScanView: View {
 
             // Icon picker row
             HStack {
-                Text(L.tr("page.icon"))
+                Text(Localized.tr("page.icon"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
 
@@ -221,7 +221,7 @@ struct OCRScanView: View {
                             .background((targetCustomIcon != nil ? Color.wikiAccent : targetType.themedColor).opacity(0.15))
                             .clipShape(RoundedRectangle(cornerRadius: WikiUI.microRadius))
 
-                        Text(targetCustomIcon != nil ? L.tr("ocr.changeIcon") : L.tr("ocr.customIcon"))
+                        Text(targetCustomIcon != nil ? Localized.tr("ocr.changeIcon") : Localized.tr("ocr.customIcon"))
                             .font(.caption)
                             .foregroundStyle(.wikiAccent)
 
@@ -254,7 +254,7 @@ struct OCRScanView: View {
             }
             
             Button(action: saveToWiki) {
-                Label(L.tr("ocr.saveToWiki"), systemImage: "square.and.arrow.down")
+                Label(Localized.tr("ocr.saveToWiki"), systemImage: "square.and.arrow.down")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -316,7 +316,7 @@ struct OCRScanView: View {
             content: recognizedText,
             tags: targetTags
         )
-        store.addLog(action: L.tr("logAction.ocrRecognize"), target: targetTitle, details: L.trf("ocr.charCountFormat", recognizedText.count))
+        store.addLog(action: Localized.tr("logAction.ocrRecognize"), target: targetTitle, details: Localized.trf("ocr.charCountFormat", recognizedText.count))
         store.saveToDisk()
         dismiss()
     }

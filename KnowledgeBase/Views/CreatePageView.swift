@@ -12,7 +12,7 @@ struct CreatePageView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField(L.tr("create.pageTitle"), text: $title)
+                    TextField(Localized.tr("create.pageTitle"), text: $title)
                         .font(.body)
                         .accessibilityIdentifier("pageTitle")
                     
@@ -42,9 +42,9 @@ struct CreatePageView: View {
                         }
                     }
                     
-                    TextField(L.tr("create.tagsPlaceholder"), text: $tags)
+                    TextField(Localized.tr("create.tagsPlaceholder"), text: $tags)
                 } header: {
-                    Text(L.tr("create.basicInfo"))
+                    Text(Localized.tr("create.basicInfo"))
                 }
                 
                 Section {
@@ -53,9 +53,9 @@ struct CreatePageView: View {
                         .frame(minHeight: 150)
                 } header: {
                     HStack {
-                        Text(L.tr("create.content"))
+                        Text(Localized.tr("create.content"))
                         Spacer()
-                        Text(L.tr("editor.bidirectionalLinks"))
+                        Text(Localized.tr("editor.bidirectionalLinks"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -64,25 +64,25 @@ struct CreatePageView: View {
                 // Quick templates
                 Section {
                     Button(action: applyEntityTemplate) {
-                        Label(L.tr("create.entityTemplate"), systemImage: "person.text.rectangle.fill")
+                        Label(Localized.tr("create.entityTemplate"), systemImage: "person.text.rectangle.fill")
                     }
                     Button(action: applyConceptTemplate) {
-                        Label(L.tr("create.conceptTemplate"), systemImage: "lightbulb.fill")
+                        Label(Localized.tr("create.conceptTemplate"), systemImage: "lightbulb.fill")
                     }
                     Button(action: applyComparisonTemplate) {
-                        Label(L.tr("create.comparisonTemplate"), systemImage: "arrow.left.arrow.right.circle.fill")
+                        Label(Localized.tr("create.comparisonTemplate"), systemImage: "arrow.left.arrow.right.circle.fill")
                     }
                 } header: {
-                    Text(L.tr("create.quickTemplates"))
+                    Text(Localized.tr("create.quickTemplates"))
                 }
             }
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("create.title"))
+            .navigationTitle(Localized.tr("create.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L.tr("create.create")) {
+                    Button(Localized.tr("create.create")) {
                         createPage()
                     }
                     .disabled(title.isEmpty)
@@ -112,13 +112,13 @@ struct CreatePageView: View {
         content = """
         # \(title)
         
-        ## \(L.tr("create.overview"))
+        ## \(Localized.tr("create.overview"))
         
-        ## \(L.tr("create.coreContributions"))
+        ## \(Localized.tr("create.coreContributions"))
         
-        ## \(L.tr("create.keyIdeas"))
+        ## \(Localized.tr("create.keyIdeas"))
         
-        ## \(L.tr("create.relatedLinks"))
+        ## \(Localized.tr("create.relatedLinks"))
         
         """
     }
@@ -127,15 +127,15 @@ struct CreatePageView: View {
         content = """
         # \(title)
 
-        ## \(L.tr("create.definition"))
+        ## \(Localized.tr("create.definition"))
 
-        ## \(L.tr("create.corePoints"))
+        ## \(Localized.tr("create.corePoints"))
 
-        | \(L.tr("create.dimension")) | \(L.tr("create.description")) |
+        | \(Localized.tr("create.dimension")) | \(Localized.tr("create.description")) |
         |------|------|
         |  |  |
 
-        ## \(L.tr("create.relatedLinks"))
+        ## \(Localized.tr("create.relatedLinks"))
 
         """
     }
@@ -144,15 +144,15 @@ struct CreatePageView: View {
         content = """
         # \(title)
 
-        ## \(L.tr("create.comparisonDimensions"))
+        ## \(Localized.tr("create.comparisonDimensions"))
 
-        | \(L.tr("create.dimension")) | A | B |
+        | \(Localized.tr("create.dimension")) | A | B |
         |------|---|---|
         |  |  |  |
 
-        ## \(L.tr("create.conclusion"))
+        ## \(Localized.tr("create.conclusion"))
 
-        ## \(L.tr("create.relatedLinks"))
+        ## \(Localized.tr("create.relatedLinks"))
 
         """
     }

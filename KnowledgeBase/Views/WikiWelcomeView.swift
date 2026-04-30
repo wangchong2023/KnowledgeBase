@@ -37,11 +37,11 @@ struct WikiWelcomeView: View {
                     }
                     .frame(height: 100)
 
-                    Text(L.tr("page.wiki"))
+                    Text(Localized.tr("page.wiki"))
                         .font(.system(size: 36, weight: .bold, design: .rounded))
                         .foregroundStyle(.wikiText)
 
-                    Text(L.tr("welcome.subtitle"))
+                    Text(Localized.tr("welcome.subtitle"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -49,10 +49,10 @@ struct WikiWelcomeView: View {
                 
                 // Stats
                 HStack(spacing: 20) {
-                    StatCard(title: L.tr("stat.totalPages"), value: "\(store.totalPages)", icon: "doc.richtext.fill", color: .wikiAccent)
-                    StatCard(title: L.tr("stat.entities"), value: "\(store.entityCount)", icon: "person.text.rectangle.fill", color: .wikiEntity)
-                    StatCard(title: L.tr("stat.concepts"), value: "\(store.conceptCount)", icon: "lightbulb.fill", color: .wikiConcept)
-                    StatCard(title: L.tr("stat.sources"), value: "\(store.sourceCount)", icon: "doc.plaintext.fill", color: .wikiSource)
+                    StatCard(title: Localized.tr("stat.totalPages"), value: "\(store.totalPages)", icon: "doc.richtext.fill", color: .wikiAccent)
+                    StatCard(title: Localized.tr("stat.entities"), value: "\(store.entityCount)", icon: "person.text.rectangle.fill", color: .wikiEntity)
+                    StatCard(title: Localized.tr("stat.concepts"), value: "\(store.conceptCount)", icon: "lightbulb.fill", color: .wikiConcept)
+                    StatCard(title: Localized.tr("stat.sources"), value: "\(store.sourceCount)", icon: "doc.plaintext.fill", color: .wikiSource)
                 }
                 .padding(.horizontal)
 
@@ -64,16 +64,16 @@ struct WikiWelcomeView: View {
                             Image(systemName: "sparkles")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(.wikiAccent)
-                            Text(L.tr("welcome.quickStart"))
+                            Text(Localized.tr("welcome.quickStart"))
                                 .font(.headline)
                                 .foregroundStyle(.wikiText)
                             Spacer()
                         }
 
-                        GuideStepRow(number: 1, text: L.tr("welcome.guide.createPage"), icon: "doc.badge.plus")
-                        GuideStepRow(number: 2, text: L.tr("welcome.guide.wikiLink"), icon: "link")
-                        GuideStepRow(number: 3, text: L.tr("welcome.guide.browseGraph"), icon: "circle.hexagongrid.fill")
-                        GuideStepRow(number: 4, text: L.tr("welcome.guide.search"), icon: "magnifyingglass")
+                        GuideStepRow(number: 1, text: Localized.tr("welcome.guide.createPage"), icon: "doc.badge.plus")
+                        GuideStepRow(number: 2, text: Localized.tr("welcome.guide.wikiLink"), icon: "link")
+                        GuideStepRow(number: 3, text: Localized.tr("welcome.guide.browseGraph"), icon: "circle.hexagongrid.fill")
+                        GuideStepRow(number: 4, text: Localized.tr("welcome.guide.search"), icon: "magnifyingglass")
                     }
                     .padding(20)
                     .background(Color.wikiCard)
@@ -87,7 +87,7 @@ struct WikiWelcomeView: View {
                     HStack(spacing: 12) {
                         WikiGlow(icon: "lightbulb.fill", color: .wikiConcept, size: 24)
 
-                        Text(L.tr("welcome.wikilinkHint"))
+                        Text(Localized.tr("welcome.wikilinkHint"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                         Spacer()
@@ -105,23 +105,23 @@ struct WikiWelcomeView: View {
                         Image(systemName: "bolt.fill")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(.wikiAccent)
-                        Text(L.tr("quickStart"))
+                        Text(Localized.tr("quickStart"))
                             .font(.headline)
                             .foregroundStyle(.wikiText)
                         Spacer()
                     }
                     .padding(.horizontal)
                     
-                    QuickActionRow(icon: "plus.circle.fill", title: L.tr("action.createPage"), subtitle: L.tr("action.createPage.subtitle"), color: .wikiAccent) {
+                    QuickActionRow(icon: "plus.circle.fill", title: Localized.tr("action.createPage"), subtitle: Localized.tr("action.createPage.subtitle"), color: .wikiAccent) {
                         showCreateSheet = true
                     }
-                    QuickActionRow(icon: "tray.and.arrow.down.fill", title: L.tr("action.ingestKnowledge"), subtitle: L.tr("action.ingestKnowledge.subtitle"), color: .wikiSource) {
+                    QuickActionRow(icon: "tray.and.arrow.down.fill", title: Localized.tr("action.ingestKnowledge"), subtitle: Localized.tr("action.ingestKnowledge.subtitle"), color: .wikiSource) {
                         selectedTab = .ingest
                     }
-                    QuickActionRow(icon: "circle.hexagongrid.fill", title: L.tr("action.browseGraph"), subtitle: L.tr("action.browseGraph.subtitle"), color: .wikiConcept) {
+                    QuickActionRow(icon: "circle.hexagongrid.fill", title: Localized.tr("action.browseGraph"), subtitle: Localized.tr("action.browseGraph.subtitle"), color: .wikiConcept) {
                         selectedTab = .graph
                     }
-                    QuickActionRow(icon: "stethoscope", title: L.tr("action.healthCheck"), subtitle: L.tr("action.healthCheck.subtitle"), color: .wikiComparison) {
+                    QuickActionRow(icon: "stethoscope", title: Localized.tr("action.healthCheck"), subtitle: Localized.tr("action.healthCheck.subtitle"), color: .wikiComparison) {
                         selectedTab = .settings
                     }
                 }
@@ -134,7 +134,7 @@ struct WikiWelcomeView: View {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(.wikiAccent)
-                            Text(L.tr("recentUpdates"))
+                            Text(Localized.tr("recentUpdates"))
                                 .font(.headline)
                                 .foregroundStyle(.wikiText)
                             Spacer()
@@ -154,7 +154,7 @@ struct WikiWelcomeView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 8) {
                             WikiGlow(icon: "pin.fill", color: .wikiAccent, size: 20)
-                            Label(L.tr("pinned"), systemImage: "pin.fill")
+                            Label(Localized.tr("pinned"), systemImage: "pin.fill")
                                 .font(.headline)
                                 .foregroundStyle(.wikiAccent)
                             Spacer()

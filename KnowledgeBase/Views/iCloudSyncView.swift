@@ -41,7 +41,7 @@ struct iCloudSyncView: View {
                             .foregroundStyle(.wikiText)
                         
                         if let date = syncService.lastSyncDate {
-                            Text(L.trf("icloud.lastSyncFormat", date.formatted(.dateTime.year().month().day().hour().minute())))
+                            Text(Localized.trf("icloud.lastSyncFormat", date.formatted(.dateTime.year().month().day().hour().minute())))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -55,14 +55,14 @@ struct iCloudSyncView: View {
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text(L.tr("icloud.syncStatus"))
+                Text(Localized.tr("icloud.syncStatus"))
             }
             
             // MARK: - Actions Section
             Section {
                 // Push to iCloud
                 Button(action: pushToCloud) {
-                    Label(L.tr("icloud.pushToCloud"), systemImage: "icloud.and.arrow.up")
+                    Label(Localized.tr("icloud.pushToCloud"), systemImage: "icloud.and.arrow.up")
                         .foregroundStyle(.wikiAccent)
                 }
                 .accessibilityIdentifier("push-to-icloud")
@@ -70,7 +70,7 @@ struct iCloudSyncView: View {
 
                 // Pull from iCloud
                 Button(action: { showPullConfirmation = true }) {
-                    Label(L.tr("icloud.pullFromCloud"), systemImage: "icloud.and.arrow.down")
+                    Label(Localized.tr("icloud.pullFromCloud"), systemImage: "icloud.and.arrow.down")
                         .foregroundStyle(.wikiAccent)
                 }
                 .accessibilityIdentifier("pull-from-icloud")
@@ -78,17 +78,17 @@ struct iCloudSyncView: View {
                 
                 // Bidirectional sync
                 Button(action: bidirectionalSync) {
-                    Label(L.tr("icloud.bidirectionalSync"), systemImage: "arrow.triangle.2.circlepath.icloud")
+                    Label(Localized.tr("icloud.bidirectionalSync"), systemImage: "arrow.triangle.2.circlepath.icloud")
                         .foregroundStyle(.wikiAccent)
                 }
                 .disabled(!syncService.iCloudAvailable || isSyncing)
             } header: {
-                Text(L.tr("icloud.syncActions"))
+                Text(Localized.tr("icloud.syncActions"))
             }
             
             // MARK: - Settings Section
             Section {
-                Toggle(L.tr("icloud.autoSync"), isOn: $autoSync)
+                Toggle(Localized.tr("icloud.autoSync"), isOn: $autoSync)
                     .foregroundStyle(.wikiText)
                     .accessibilityIdentifier("auto-sync")
                     .onChange(of: autoSync) { _, newValue in
@@ -102,7 +102,7 @@ struct iCloudSyncView: View {
                     }
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(L.tr("icloud.conflictPolicy"))
+                    Text(Localized.tr("icloud.conflictPolicy"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiText)
                     
@@ -117,20 +117,20 @@ struct iCloudSyncView: View {
                     }
                 }
             } header: {
-                Text(L.tr("icloud.syncSettings"))
+                Text(Localized.tr("icloud.syncSettings"))
             }
             
             // MARK: - Info Section
             Section {
                 VStack(alignment: .leading, spacing: 12) {
-                    SyncInfoRow(icon: "1.circle.fill", text: L.tr("icloud.info1"))
-                    SyncInfoRow(icon: "2.circle.fill", text: L.tr("icloud.info2"))
-                    SyncInfoRow(icon: "3.circle.fill", text: L.tr("icloud.info3"))
-                    SyncInfoRow(icon: "4.circle.fill", text: L.tr("icloud.info4"))
+                    SyncInfoRow(icon: "1.circle.fill", text: Localized.tr("icloud.info1"))
+                    SyncInfoRow(icon: "2.circle.fill", text: Localized.tr("icloud.info2"))
+                    SyncInfoRow(icon: "3.circle.fill", text: Localized.tr("icloud.info3"))
+                    SyncInfoRow(icon: "4.circle.fill", text: Localized.tr("icloud.info4"))
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text(L.tr("icloud.aboutSync"))
+                Text(Localized.tr("icloud.aboutSync"))
             }
             
             // MARK: - Danger Section
@@ -138,7 +138,7 @@ struct iCloudSyncView: View {
                 Button(role: .destructive) {
                     clearCloudData()
                 } label: {
-                    Label(L.tr("icloud.clearCloudData"), systemImage: "trash.icloud")
+                    Label(Localized.tr("icloud.clearCloudData"), systemImage: "trash.icloud")
                         .foregroundStyle(.red)
                 }
                 .disabled(isSyncing)
@@ -147,13 +147,13 @@ struct iCloudSyncView: View {
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle(L.tr("icloud.title"))
-        .alert(L.tr("icloud.syncError"), isPresented: $showError) {
-            Button(L.tr("misc.ok"), role: .cancel) {}
+        .navigationTitle(Localized.tr("icloud.title"))
+        .alert(Localized.tr("icloud.syncError"), isPresented: $showError) {
+            Button(Localized.tr("misc.ok"), role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
-        .alert(L.tr("icloud.conflictDetected"), isPresented: $showConflictAlert) {
+        .alert(Localized.tr("icloud.conflictDetected"), isPresented: $showConflictAlert) {
             Button(ConflictResolution.merge.displayName) {
                 conflictResolution = .merge
                 UserDefaults.standard.set(ConflictResolution.merge.rawValue, forKey: "wikicraft_conflict_resolution")
@@ -166,20 +166,20 @@ struct iCloudSyncView: View {
                 conflictResolution = .keepRemote
                 UserDefaults.standard.set(ConflictResolution.keepRemote.rawValue, forKey: "wikicraft_conflict_resolution")
             }
-            Button(L.tr("misc.cancel"), role: .cancel) {}
+            Button(Localized.tr("misc.cancel"), role: .cancel) {}
         } message: {
-            Text(L.tr("icloud.conflictMessage"))
+            Text(Localized.tr("icloud.conflictMessage"))
         }
-        .alert(L.tr("icloud.pullWillOverwrite"), isPresented: $showPullConfirmation) {
-            Button(L.tr("icloud.download"), role: .destructive) {
+        .alert(Localized.tr("icloud.pullWillOverwrite"), isPresented: $showPullConfirmation) {
+            Button(Localized.tr("icloud.download"), role: .destructive) {
                 performActualPull()
             }
-            Button(L.tr("misc.cancel"), role: .cancel) {}
+            Button(Localized.tr("misc.cancel"), role: .cancel) {}
         } message: {
-            Text(L.tr("icloud.pullOverwriteMessage"))
+            Text(Localized.tr("icloud.pullOverwriteMessage"))
         }
-        .alert(L.tr("icloud.autoSyncFailed"), isPresented: $showAutoSyncError) {
-            Button(L.tr("misc.ok"), role: .cancel) {}
+        .alert(Localized.tr("icloud.autoSyncFailed"), isPresented: $showAutoSyncError) {
+            Button(Localized.tr("misc.ok"), role: .cancel) {}
         } message: {
             Text(autoSyncErrorMessage)
         }

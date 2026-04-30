@@ -28,9 +28,9 @@ enum CollabRole: String, Codable {
 
     var displayName: String {
         switch self {
-        case .owner: return L.tr("collab.role.owner")
-        case .editor: return L.tr("collab.role.editor")
-        case .viewer: return L.tr("collab.role.viewer")
+        case .owner: return Localized.tr("collab.role.owner")
+        case .editor: return Localized.tr("collab.role.editor")
+        case .viewer: return Localized.tr("collab.role.viewer")
         }
     }
 

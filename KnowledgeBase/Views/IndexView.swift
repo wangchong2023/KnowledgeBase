@@ -9,14 +9,14 @@ struct IndexView: View {
                 // Summary
                 Section {
                     HStack {
-                        IndexStatView(label: L.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
-                        IndexStatView(label: L.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
-                        IndexStatView(label: L.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
-                        IndexStatView(label: L.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
+                        IndexStatView(label: Localized.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
+                        IndexStatView(label: Localized.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
+                        IndexStatView(label: Localized.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
+                        IndexStatView(label: Localized.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
                     }
                     .padding(.vertical, 4)
                 } header: {
-                    Text(L.tr("index.overview"))
+                    Text(Localized.tr("index.overview"))
                 }
                 
                 // Entities
@@ -29,7 +29,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label(L.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
+                        Label(Localized.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
                             .foregroundStyle(.wikiEntity)
                     }
                 }
@@ -44,7 +44,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label(L.trf("index.conceptCount", concepts.count), systemImage: "lightbulb.fill")
+                        Label(Localized.trf("index.conceptCount", concepts.count), systemImage: "lightbulb.fill")
                             .foregroundStyle(.wikiConcept)
                     }
                 }
@@ -59,7 +59,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label(L.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
+                        Label(Localized.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
                             .foregroundStyle(.wikiSource)
                     }
                 }
@@ -74,7 +74,7 @@ struct IndexView: View {
                             }
                         }
                     } header: {
-                        Label(L.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
+                        Label(Localized.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
                             .foregroundStyle(.wikiComparison)
                     }
                 }
@@ -82,7 +82,7 @@ struct IndexView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("sidebar.masterIndex"))
+            .navigationTitle(Localized.tr("sidebar.masterIndex"))
         }
     }
 }
@@ -126,7 +126,7 @@ struct IndexRowView: View {
                     .lineLimit(1)
                 
                 HStack(spacing: 6) {
-                    Text(L.trf("index.wordCount", page.wordCount))
+                    Text(Localized.trf("index.wordCount", page.wordCount))
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
                     

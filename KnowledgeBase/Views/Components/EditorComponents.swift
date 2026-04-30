@@ -21,7 +21,7 @@ struct WikilinkPickerSheet: View {
                 pageList
             }
             .background(Color.wikiBackground)
-            .navigationTitle(L.tr("editor.insertWikiLink"))
+            .navigationTitle(Localized.tr("editor.insertWikiLink"))
             .navigationBarTitleDisplayMode(.inline)
         }
     }
@@ -30,7 +30,7 @@ struct WikilinkPickerSheet: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.wikiSecondary)
-            TextField(L.tr("editor.searchPages"), text: $searchText)
+            TextField(Localized.tr("editor.searchPages"), text: $searchText)
                 .foregroundStyle(.wikiText)
             if !searchText.isEmpty {
                 Button(action: { searchText = "" }) {
@@ -161,7 +161,7 @@ struct InlineTagInput: View {
     
     var body: some View {
         HStack(spacing: 8) {
-            TextField(L.tr("editor.enterTag"), text: $text)
+            TextField(Localized.tr("editor.enterTag"), text: $text)
                 .font(.caption)
                 .textFieldStyle(.plain)
                 .padding(.horizontal, 10)

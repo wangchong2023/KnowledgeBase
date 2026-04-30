@@ -8,11 +8,11 @@ struct AccentColorPicker: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Label(L.tr("settings.accentColor"), systemImage: "paintpalette.fill")
+            Label(Localized.tr("settings.accentColor"), systemImage: "paintpalette.fill")
                 .foregroundStyle(.wikiText)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-                .id(L.languageMode)
+                .id(Localized.languageMode)
 
             Spacer()
             
