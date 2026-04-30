@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """
 清理并重建干净的测试数据库
+用法:
+    python3 test_seed_data_clean.py --clean      # 仅清空
+    python3 test_seed_data_clean.py --rebuild     # 清空后插入数据（默认）
+    python3 test_seed_data_clean.py              # 等同于 --rebuild
 """
 import sqlite3
 import uuid
 import datetime
 import json
 import sys
+import argparse
+import re
 
-DB_PATH = "/Users/constantine/Library/Developer/CoreSimulator/Devices/446F21F6-4EEF-4B07-B0DB-A6DF967C347B/data/Containers/Data/Application/7C3586FF-30A1-4377-BA5E-364ED7A9BFDB/Documents/wikicraft.sqlite3"
+# 数据库路径（需要根据实际模拟器 UUID 修改）
+DB_PATH = "/Users/constantine/Library/Developer/CoreSimulator/Devices/446F21F6-4EEF-4B07-B0DB-A6DF967C347B/data/Containers/Data/Application/C04A704F-1A3A-4D70-9A85-1C09EA1F6056/Documents/km.sqlite3"
 
 # PageType 映射 (SQLite 存储为 TEXT rawValue)
 PAGE_TYPE_MAP = {"entity": "entity", "concept": "concept", "source": "source", "comparison": "comparison", "map": "map", "raw": "raw"}
@@ -233,31 +240,21 @@ LLM Wiki 认为在中等规模（~100篇/40万字）下，无需向量数据库�
 ]
 
 
-def main():
-    print("=" * 60)
-    print("KMSeedData 清理测试")
-    print("=" * 60)
-
-    try:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-    except Exception as e:
-        print(f"❌ 无法连接数据库: {e}")
-        sys.exit(1)
-
-    # 1. 清理所有页面
+def clean_database(conn):
+    """清空所有页面"""
+    cur = conn.cursor()
     cur.execute("DELETE FROM pages")
-    print(f"🗑️  已清理所有页面")
+    conn.commit()
 
-    # 2. 插入 10 个测试页面
+
+def insert_seed_data(conn):
+    """插入 10 个测试页面"""
+    cur = conn.cursor()
     now_ts = datetime.datetime.now().timestamp()
-    type_names = {"entity": "entity", "concept": "concept", "source": "source", "comparison": "comparison", "map": "map", "raw": "raw"}
 
-    print(f"\n🔧 插入 {len(SEED_PAGES)} 个测试页面...")
     for page in SEED_PAGES:
         page_id = str(uuid.uuid4())
-        page_type = PAGE_TYPE_MAP.get(page["type"], 1)
+        page_type = PAGE_TYPE_MAP.get(page["type"], "concept")
         tags_json = json.dumps(page["tags"])
 
         cur.execute("""
@@ -266,15 +263,15 @@ def main():
                 status, confidence, sources, related_page_ids, is_pinned, created, updated
             ) VALUES (?, ?, ?, NULL, ?, '[]', ?, 'active', 'medium', '[]', '[]', 0, ?, ?)
         """, (page_id, page["title"], page_type, page["content"], tags_json, now_ts, now_ts))
-        print(f"   ✅ [{page['type']:^10}] {page['title']}")
 
-    conn.commit()
 
-    # 3. 验证最终结果
+def verify_and_print(conn):
+    """验证并打印数据库状态"""
+    cur = conn.cursor()
+
     cur.execute("SELECT id, title, type, tags, LENGTH(content) as content_len FROM pages ORDER BY title")
     all_pages = cur.fetchall()
 
-    # 统计 wikilink
     cur.execute("SELECT COUNT(*) FROM pages WHERE content LIKE '%[[%'")
     wikilink_count = cur.fetchone()[0]
 
@@ -282,18 +279,16 @@ def main():
     print(f"{'#':>3}  {'类型':^10}  {'标题':<25}  {'内容长度':>8}")
     print("-" * 55)
     for i, p in enumerate(all_pages, 1):
-        type_name = p["type"]  # type is stored as string
+        type_name = p["type"]
         print(f"  {i:>2}  {type_name:^10}  {p['title']:<25}  {p['content_len']:>8} chars")
 
     print(f"\n🔗 包含 [[wikilink]] 的页面: {wikilink_count}")
 
     # 验证 wikilink 引用关系
     print("\n🔍 Wikilink 引用验证:")
-    import re
     wikilink_pattern = re.compile(r'\[\[([^\]|]+)(?:\|[^\]]+)?\]\]')
     page_titles = {p["title"] for p in all_pages}
 
-    # Get content for wikilink check
     cur.execute("SELECT title, content FROM pages")
     for row in cur.fetchall():
         links = wikilink_pattern.findall(row["content"])
@@ -301,8 +296,45 @@ def main():
             status = "✅" if link_title in page_titles else "⚠️  断链"
             print(f"   {row['title']} → [[{link_title}]] {status}")
 
+
+def main():
+    parser = argparse.ArgumentParser(description="清理并重建测试数据库")
+    parser.add_argument("--clean", action="store_true", help="仅清空数据，不插入测试页面")
+    parser.add_argument("--rebuild", action="store_true", help="清空后插入测试数据（默认）")
+    args = parser.parse_args()
+
+    mode = "clean" if args.clean else "rebuild"
+    mode_text = "仅清空" if mode == "clean" else "清空 + 重建"
+
+    print("=" * 60)
+    print(f"KMSeedData 测试 ({mode_text})")
+    print("=" * 60)
+
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+    except Exception as e:
+        print(f"❌ 无法连接数据库: {e}")
+        sys.exit(1)
+
+    # 清空
+    clean_database(conn)
+    print(f"🗑️  已清理所有页面")
+
+    # 插入
+    if mode == "rebuild":
+        print(f"\n🔧 插入 {len(SEED_PAGES)} 个测试页面...")
+        insert_seed_data(conn)
+        conn.commit()
+
+        for page in SEED_PAGES:
+            print(f"   ✅ [{page['type']:^10}] {page['title']}")
+
+    # 验证
+    verify_and_print(conn)
+
     conn.close()
-    print("\n✅ 清理测试完成，数据已就绪")
+    print(f"\n✅ 完成（模式：{mode_text}）")
 
 
 if __name__ == "__main__":
