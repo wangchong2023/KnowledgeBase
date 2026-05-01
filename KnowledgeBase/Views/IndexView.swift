@@ -1,89 +1,97 @@
 import SwiftUI
 
+// MARK: - Index View (entry point with NavigationStack)
 struct IndexView: View {
-    @EnvironmentObject var store: KMStore
-    
     var body: some View {
         NavigationStack {
-            List {
-                // Summary
+            IndexViewContent()
+        }
+    }
+}
+
+// MARK: - Index View Content (for use inside parent NavigationStack)
+struct IndexViewContent: View {
+    @EnvironmentObject var store: KMStore
+
+    var body: some View {
+        List {
+            // Summary
+            Section {
+                HStack {
+                    IndexStatView(label: Localized.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
+                    IndexStatView(label: Localized.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
+                    IndexStatView(label: Localized.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
+                    IndexStatView(label: Localized.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
+                }
+                .padding(.vertical, 4)
+            } header: {
+                Text(Localized.tr("index.overview"))
+            }
+
+            // Entities
+            let entities = store.pages.filter { $0.type == .entity }.sorted { $0.title < $1.title }
+            if !entities.isEmpty {
                 Section {
-                    HStack {
-                        IndexStatView(label: Localized.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
-                        IndexStatView(label: Localized.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
-                        IndexStatView(label: Localized.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
-                        IndexStatView(label: Localized.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
+                    ForEach(entities) { page in
+                        NavigationLink(destination: PageDetailView(page: page)) {
+                            IndexRowView(page: page)
+                        }
                     }
-                    .padding(.vertical, 4)
                 } header: {
-                    Text(Localized.tr("index.overview"))
-                }
-                
-                // Entities
-                let entities = store.pages.filter { $0.type == .entity }.sorted { $0.title < $1.title }
-                if !entities.isEmpty {
-                    Section {
-                        ForEach(entities) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
-                                IndexRowView(page: page)
-                            }
-                        }
-                    } header: {
-                        Label(Localized.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
-                            .foregroundStyle(.wikiEntity)
-                    }
-                }
-                
-                // Concepts
-                let concepts = store.pages.filter { $0.type == .concept }.sorted { $0.title < $1.title }
-                if !concepts.isEmpty {
-                    Section {
-                        ForEach(concepts) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
-                                IndexRowView(page: page)
-                            }
-                        }
-                    } header: {
-                        Label(Localized.trf("index.conceptCount", concepts.count), systemImage: "lightbulb.fill")
-                            .foregroundStyle(.wikiConcept)
-                    }
-                }
-                
-                // Sources
-                let sources = store.pages.filter { $0.type == .source }.sorted { $0.title < $1.title }
-                if !sources.isEmpty {
-                    Section {
-                        ForEach(sources) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
-                                IndexRowView(page: page)
-                            }
-                        }
-                    } header: {
-                        Label(Localized.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
-                            .foregroundStyle(.wikiSource)
-                    }
-                }
-                
-                // Comparisons
-                let comparisons = store.pages.filter { $0.type == .comparison }.sorted { $0.title < $1.title }
-                if !comparisons.isEmpty {
-                    Section {
-                        ForEach(comparisons) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
-                                IndexRowView(page: page)
-                            }
-                        }
-                    } header: {
-                        Label(Localized.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
-                            .foregroundStyle(.wikiComparison)
-                    }
+                    Label(Localized.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
+                        .foregroundStyle(.wikiEntity)
                 }
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("sidebar.masterIndex"))
+
+            // Concepts
+            let concepts = store.pages.filter { $0.type == .concept }.sorted { $0.title < $1.title }
+            if !concepts.isEmpty {
+                Section {
+                    ForEach(concepts) { page in
+                        NavigationLink(destination: PageDetailView(page: page)) {
+                            IndexRowView(page: page)
+                        }
+                    }
+                } header: {
+                    Label(Localized.trf("index.conceptCount", concepts.count), systemImage: "lightbulb.fill")
+                        .foregroundStyle(.wikiConcept)
+                }
+            }
+
+            // Sources
+            let sources = store.pages.filter { $0.type == .source }.sorted { $0.title < $1.title }
+            if !sources.isEmpty {
+                Section {
+                    ForEach(sources) { page in
+                        NavigationLink(destination: PageDetailView(page: page)) {
+                            IndexRowView(page: page)
+                        }
+                    }
+                } header: {
+                    Label(Localized.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
+                        .foregroundStyle(.wikiSource)
+                }
+            }
+
+            // Comparisons
+            let comparisons = store.pages.filter { $0.type == .comparison }.sorted { $0.title < $1.title }
+            if !comparisons.isEmpty {
+                Section {
+                    ForEach(comparisons) { page in
+                        NavigationLink(destination: PageDetailView(page: page)) {
+                            IndexRowView(page: page)
+                        }
+                    }
+                } header: {
+                    Label(Localized.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
+                        .foregroundStyle(.wikiComparison)
+                }
+            }
         }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.wikiBackground)
+        .navigationTitle(Localized.tr("sidebar.masterIndex"))
     }
 }
 
@@ -92,7 +100,7 @@ struct IndexStatView: View {
     let label: String
     let value: String
     let color: Color
-    
+
     var body: some View {
         VStack(spacing: 4) {
             Text(value)
@@ -110,7 +118,7 @@ struct IndexStatView: View {
 struct IndexRowView: View {
     let page: WikiPage
     @EnvironmentObject var store: KMStore
-    
+
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: page.displayIcon)
@@ -118,18 +126,18 @@ struct IndexRowView: View {
                 .frame(width: 28, height: 28)
                 .background(page.type.themedColor.opacity(0.15))
                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.microRadius))
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(page.title)
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.wikiText)
                     .lineLimit(1)
-                
+
                 HStack(spacing: 6) {
                     Text(Localized.trf("index.wordCount", page.wordCount))
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
-                    
+
                     if !page.tags.isEmpty {
                         Text("·")
                             .font(.caption2)
@@ -140,9 +148,9 @@ struct IndexRowView: View {
                     }
                 }
             }
-            
+
             Spacer()
-            
+
             // Confidence indicator
             Circle()
                 .fill(page.confidence.color)

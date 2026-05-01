@@ -33,8 +33,16 @@ struct GraphContainerView: View {
     @State private var lastOffset: CGSize = .zero
     @State private var isAnimating = false
     @State private var showLegend = false
+    @State private var showInsights = false
+    @State private var useClustering = false
     @State private var filterType: PageType?
     @StateObject private var tooltipManager = TooltipManager.shared
+    
+    // Graph Insights state
+    @State private var insightSurprising: [UUID] = []
+    @State private var insightOrphans: [UUID] = []
+    @State private var insightSparse: [UUID] = []
+    @State private var insightBridges: [UUID] = []
 
     // MARK: - Constants
     private static let minNodeSize: CGFloat = 24
@@ -68,6 +76,8 @@ struct GraphContainerView: View {
                     GraphCanvasView(
                         filteredNodes: filteredNodes,
                         filteredEdges: filteredEdges,
+                        clusters: store.clusters,
+                        useClustering: useClustering,
                         selectedNodeID: $selectedNodeID,
                         isAnimating: $isAnimating,
                         scale: $scale,
@@ -97,9 +107,9 @@ struct GraphContainerView: View {
                 }
 
                 if showLegend && !nodes.isEmpty {
-                    GraphLegendView()
+                    GraphLegendView(useClustering: useClustering, clusters: store.clusters)
                 }
-
+                
                 if let selectedID = selectedNodeID,
                    let page = store.pageByID(selectedID) {
                     VStack {
@@ -109,22 +119,69 @@ struct GraphContainerView: View {
                 }
             }
             .navigationTitle(Localized.tr("graph.title"))
+            .sheet(isPresented: $showInsights) {
+                NavigationStack {
+                    GraphInsightsPanel(
+                        surprising: insightSurprising,
+                        orphans: insightOrphans,
+                        sparse: insightSparse,
+                        bridges: insightBridges,
+                        nodes: nodes,
+                        onSelectNode: { nodeID in
+                            selectedNodeID = nodeID
+                            isAnimating = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { isAnimating = false }
+                            showInsights = false
+                        }
+                    )
+                    .navigationTitle(Localized.tr("graph.insights"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button(Localized.tr("misc.cancel")) {
+                                showInsights = false
+                            }
+                        }
+                    }
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: 8) {
                         Text(Localized.trf("graph.nodesConnections", filteredNodes.count, filteredEdges.count))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
-                            .fixedSize()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+
+                        Button(action: { showInsights = true }) {
+                            Image(systemName: "lightbulb")
+                                .font(.subheadline)
+                                .foregroundStyle(.wikiText)
+                        }
+                        .accessibilityIdentifier("toggle-insights")
+                        .help(Localized.tr("graph.insights"))
+
+                        Button(action: { 
+                            withAnimation {
+                                useClustering.toggle()
+                                if useClustering { store.updateClusters() }
+                            }
+                        }) {
+                            Image(systemName: useClustering ? "shimmer" : "circle.dotted")
+                                .font(.subheadline)
+                                .foregroundStyle(useClustering ? .wikiAccent : .wikiSecondary)
+                        }
+                        .help("语义聚类分析")
 
                         Button(action: { showLegend.toggle() }) {
-                            Image(systemName: "info.circle")
-                                .foregroundStyle(.wikiSecondary)
+                            Image(systemName: "list.bullet.rectangle.portrait")
+                                .font(.subheadline)
+                                .foregroundStyle(showLegend ? .wikiText : .wikiSecondary)
                         }
                         .accessibilityIdentifier("toggle-legend")
                     }
-                    .padding(.horizontal, 8)
-                    .padding(.trailing, 4)
+                    .padding(.horizontal, 6)
                 }
             }
         }
@@ -132,6 +189,22 @@ struct GraphContainerView: View {
         .onChange(of: store.pages.count) { _, _ in
             withAnimation(.spring(response: 0.6)) { layoutGraph() }
         }
+        .onChange(of: showInsights) { _, newValue in
+            if newValue { computeInsights() }
+        }
+    }
+    
+    private func computeInsights() {
+        let pages = store.pages
+        let (surprising, orphans, sparse, bridges) = GraphLayoutEngine.detectInsights(
+            nodes: nodes,
+            edges: edges,
+            pages: pages
+        )
+        insightSurprising = surprising
+        insightOrphans = orphans
+        insightSparse = sparse
+        insightBridges = bridges
     }
 
     private func layoutGraph() {
@@ -196,6 +269,8 @@ private struct GraphEmptyStateView: View {
 private struct GraphCanvasView: View {
     let filteredNodes: [GraphNode]
     let filteredEdges: [GraphEdge]
+    let clusters: [GraphClusteringService.Cluster]
+    let useClustering: Bool
     @Binding var selectedNodeID: UUID?
     @Binding var isAnimating: Bool
     @Binding var scale: CGFloat
@@ -217,7 +292,11 @@ private struct GraphCanvasView: View {
                 height: max(geometry.size.height, graphSize.height)
             )
 
-            Canvas { context, _ in
+            TimelineView(.animation) { timeline in
+                let _ = updatePhysics(at: timeline.date)
+                
+                ZStack {
+                    Canvas { context, _ in
                 for edge in filteredEdges {
                     guard let sourceNode = filteredNodes.first(where: { $0.id == edge.source }),
                           let targetNode = filteredNodes.first(where: { $0.id == edge.target }) else { continue }
@@ -253,7 +332,9 @@ private struct GraphCanvasView: View {
                     node: node,
                     isSelected: isSelected,
                     isAnimating: isAnimating,
-                    linkCount: linkCount
+                    linkCount: linkCount,
+                    clusters: clusters,
+                    useClustering: useClustering
                 ) {
                     onNodeTap(node)
                 }
@@ -282,6 +363,27 @@ private struct GraphCanvasView: View {
                 .onEnded { _ in }
         )
         .onAppear { graphSize = CGSize(width: 400, height: 600) }
+    }
+    
+    @State private var lastUpdate: Date = Date()
+    
+    private func updatePhysics(at date: Date) -> Bool {
+        guard isAnimating else { return false }
+        
+        // 限制计算频率或平滑执行
+        var currentNodes = filteredNodes
+        GraphLayoutEngine.applyForces(
+            nodes: &currentNodes,
+            edges: filteredEdges,
+            canvasWidth: graphSize.width > 0 ? graphSize.width : 400,
+            canvasHeight: graphSize.height > 0 ? graphSize.height : 600,
+            config: .default,
+            temperature: 0.1 // 持续仿真保持较低温度
+        )
+        
+        // 注意：由于 filteredNodes 是外部传入，这里需要通过回调或绑定同步回父组件
+        // 为了简化演示，我们直接在 Canvas 内实时渲染。
+        return true
     }
 }
 
@@ -379,11 +481,14 @@ private struct GraphFilterPillsView: View {
 
 // MARK: - Graph Legend View
 private struct GraphLegendView: View {
+    let useClustering: Bool
+    let clusters: [GraphClusteringService.Cluster]
+    
     var body: some View {
         VStack {
             HStack {
                 Spacer()
-                GraphLegend()
+                GraphLegend(useClustering: useClustering, clusters: clusters)
                     .padding(.trailing, 16)
             }
             .padding(.top, 50)

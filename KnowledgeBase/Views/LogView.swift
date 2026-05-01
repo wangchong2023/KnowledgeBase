@@ -1,53 +1,60 @@
 import SwiftUI
 
+// MARK: - Log View (entry point with NavigationStack)
 struct LogView: View {
-    @EnvironmentObject var store: KMStore
-    @Environment(\.dismiss) private var dismiss
-    @State private var expandedEntryIDs: Set<UUID> = []
-    
     var body: some View {
         NavigationStack {
-            List {
-                if store.logEntries.isEmpty {
-                    VStack(spacing: 12) {
-                        Image(systemName: "clock.arrow.circlepath")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.wikiSecondary)
-                        Text(Localized.tr("log.noLogs"))
-                            .font(.subheadline)
-                            .foregroundStyle(.wikiSecondary)
-                        Text(Localized.tr("log.noLogs"))
-                            .font(.caption)
-                            .foregroundStyle(.wikiSecondary.opacity(0.7))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 40)
-                } else {
-                    ForEach(store.logEntries) { entry in
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.25)) {
-                                if expandedEntryIDs.contains(entry.id) {
-                                    expandedEntryIDs.remove(entry.id)
-                                } else {
-                                    expandedEntryIDs.insert(entry.id)
-                                }
+            LogViewContent()
+        }
+    }
+}
+
+// MARK: - Log View Content (for use inside parent NavigationStack)
+struct LogViewContent: View {
+    @EnvironmentObject var store: KMStore
+    @State private var expandedEntryIDs: Set<UUID> = []
+
+    var body: some View {
+        List {
+            if store.logEntries.isEmpty {
+                VStack(spacing: 12) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.system(size: 40))
+                        .foregroundStyle(.wikiSecondary)
+                    Text(Localized.tr("log.noLogs"))
+                        .font(.subheadline)
+                        .foregroundStyle(.wikiSecondary)
+                    Text(Localized.tr("log.noLogs"))
+                        .font(.caption)
+                        .foregroundStyle(.wikiSecondary.opacity(0.7))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+            } else {
+                ForEach(store.logEntries) { entry in
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            if expandedEntryIDs.contains(entry.id) {
+                                expandedEntryIDs.remove(entry.id)
+                            } else {
+                                expandedEntryIDs.insert(entry.id)
                             }
-                        }) {
-                            LogEntryRow(
-                                entry: entry,
-                                isExpanded: expandedEntryIDs.contains(entry.id)
-                            )
                         }
-                        .buttonStyle(.plain)
+                    }) {
+                        LogEntryRow(
+                            entry: entry,
+                            isExpanded: expandedEntryIDs.contains(entry.id)
+                        )
                     }
+                    .buttonStyle(.plain)
                 }
             }
-            .listStyle(.insetGrouped)
-            .scrollContentBackground(.hidden)
-            .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("settings.operationLog"))
-            .navigationBarTitleDisplayMode(.inline)
         }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.wikiBackground)
+        .navigationTitle(Localized.tr("settings.operationLog"))
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -55,10 +62,9 @@ struct LogView: View {
 private struct LogEntryRow: View {
     let entry: LogEntry
     let isExpanded: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // Main row (always visible)
             HStack(spacing: 12) {
                 Circle()
                     .fill(actionColor(entry.action))
@@ -68,35 +74,31 @@ private struct LogEntryRow: View {
                             .font(.caption)
                             .foregroundStyle(.white)
                     )
-                
+
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
                         Text(Localized.tr(entry.action))
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(actionColor(entry.action))
-                        
                         Text("·")
                             .foregroundStyle(.wikiSecondary)
-                        
                         Text(entry.target)
                             .font(.caption)
                             .foregroundStyle(.wikiText)
                             .lineLimit(1)
                     }
-                    
                     Text(entry.timestamp, style: .relative)
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.wikiSecondary)
             }
-            
-            // Details (expanded)
+
             if isExpanded {
                 if !entry.details.isEmpty {
                     Text(entry.details)
@@ -117,7 +119,7 @@ private struct LogEntryRow: View {
         }
         .padding(.vertical, 4)
     }
-    
+
     private func actionColor(_ action: String) -> Color {
         switch action {
         case "创建", Localized.tr("logAction.create"): return .green

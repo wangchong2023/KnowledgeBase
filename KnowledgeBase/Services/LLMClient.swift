@@ -48,16 +48,16 @@ final class LLMClient {
             throw LLMError.invalidResponse
         }
         
-        if httpResponse.statusCode == 401 { throw LLMError.unauthorized }
-        if httpResponse.statusCode == 429 { throw LLMError.rateLimited }
+        if httpResponse.statusCode == 401 { throw APIError(statusCode: 401, message: "Unauthorized: Invalid API Key") }
+        if httpResponse.statusCode == 429 { throw APIError(statusCode: 429, message: "Rate Limited: Too many requests") }
         
         guard httpResponse.statusCode == 200 else {
             if let errorBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                let error = errorBody["error"] as? [String: Any],
                let message = error["message"] as? String {
-                throw LLMError.apiError(message)
+                throw APIError(statusCode: httpResponse.statusCode, message: message)
             }
-            throw LLMError.httpError(httpResponse.statusCode)
+            throw APIError(statusCode: httpResponse.statusCode, message: "HTTP Error \(httpResponse.statusCode)")
         }
         
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
@@ -110,6 +110,12 @@ final class LLMClient {
     func cancel() {
         currentTask?.cancel()
         currentTask = nil
+    }
+
+    // MARK: - Error Types
+    struct APIError: Error {
+        let statusCode: Int
+        let message: String
     }
 }
 

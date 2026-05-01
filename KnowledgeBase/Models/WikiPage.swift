@@ -32,8 +32,13 @@ struct WikiPage: Identifiable, Codable, Hashable {
     var sources: [String]  // references to raw source IDs
     var relatedPageIDs: [UUID]
     var isPinned: Bool
+    var contentHash: String?
     var created: Date
     var updated: Date
+    
+    // MARK: - 溯源字段 (Karpathy 模式)
+    var sourceURL: String?      // 原始资料链接 (网页或 YouTube)
+    var rawTextSnippet: String? // 原始资料片段，用于校验
 
     /// Display icon: customIcon if set, otherwise type.icon
     var displayIcon: String {
@@ -53,6 +58,9 @@ struct WikiPage: Identifiable, Codable, Hashable {
         sources: [String] = [],
         relatedPageIDs: [UUID] = [],
         isPinned: Bool = false,
+        contentHash: String? = nil,
+        sourceURL: String? = nil,
+        rawTextSnippet: String? = nil,
         created: Date = Date(),
         updated: Date = Date()
     ) {
@@ -68,6 +76,9 @@ struct WikiPage: Identifiable, Codable, Hashable {
         self.sources = sources
         self.relatedPageIDs = relatedPageIDs
         self.isPinned = isPinned
+        self.contentHash = contentHash
+        self.sourceURL = sourceURL
+        self.rawTextSnippet = rawTextSnippet
         self.created = created
         self.updated = updated
     }

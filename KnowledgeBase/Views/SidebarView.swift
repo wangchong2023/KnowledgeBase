@@ -1,71 +1,78 @@
 import SwiftUI
 
+enum SidebarSelection: Hashable {
+    case page(UUID)
+    case tool(KMStore.ToolItem)
+}
+
 struct SidebarView: View {
     @EnvironmentObject var store: KMStore
-    @State private var expandedTypes: Set<PageType> = Set(PageType.allCases)
-    @State private var showLogView = false
-    @State private var showIndexView = false
-    @State private var showLintView = false
-    // MARK: - 常用知识清单（按关联密度 + 内容量综合评分，最多 5 条）
-    private var frequentPages: [WikiPage] {
-        let pinnedIDs = Set(store.pages.filter { $0.isPinned }.map { $0.id })
-        return store.pages
-            .filter { !pinnedIDs.contains($0.id) && !$0.content.isEmpty }
-            .sorted {
-                let scoreA = $0.outgoingLinks.count * 2 + $0.wordCount / 50
-                let scoreB = $1.outgoingLinks.count * 2 + $1.wordCount / 50
-                if scoreA != scoreB { return scoreA > scoreB }
-                return $0.updated > $1.updated   // 同分时取最近修改
+    var heroNamespace: Namespace.ID
+
+    /// iPad 两栏布局时当前选中的类型过滤器
+    @State private var selectedType: PageType? = nil
+
+    private var selectionBinding: Binding<SidebarSelection?> {
+        Binding(
+            get: {
+                if let tool = store.selectedTool { return .tool(tool) }
+                if let id = store.selectedPageID { return .page(id) }
+                return nil
+            },
+            set: { newValue in
+                switch newValue {
+                case .page(let id):
+                    store.selectedTool = nil
+                    store.selectedPageID = id
+                case .tool(let tool):
+                    store.selectedPageID = nil
+                    store.selectedTool = tool
+                case .none:
+                    store.selectedPageID = nil
+                    store.selectedTool = nil
+                }
             }
-            .prefix(5)
-            .map { $0 }
+        )
     }
 
     var body: some View {
-        List(selection: $store.selectedPageID) {
-            // ── 导航：总索引、操作日志、常用知识 ──
+        List(selection: selectionBinding) {
+            // ══ 页面列表：顶部横向 FilterChips + 扁平列表 ══
+            embeddedFilterSection
+
+            // ── 导航：总索引、AI 助手、操作日志 ──
             Section {
-                Button(action: { showIndexView = true }) {
-                    Label(Localized.tr("sidebar.masterIndex"), systemImage: "list.bullet.indent")
-                        .foregroundStyle(.wikiAccent)
+                NavigationLink(value: SidebarSelection.tool(.index)) {
+                    Label(Localized.tr("sidebar.masterIndex"), systemImage: "list.dash")
+                        .foregroundStyle(.wikiText)
                 }
                 .accessibilityIdentifier("masterIndex")
 
-                Button(action: { showLogView = true }) {
+                NavigationLink(value: SidebarSelection.tool(.chat)) {
+                    Label(Localized.tr("tab.chat"), systemImage: "bubble.left.and.bubble.right.fill")
+                        .foregroundStyle(.wikiText)
+                }
+                .accessibilityIdentifier("AI-Chat")
+
+                NavigationLink(value: SidebarSelection.tool(.log)) {
                     Label(Localized.tr("sidebar.operationLog"), systemImage: "clock.arrow.circlepath")
-                        .foregroundStyle(.wikiSecondary)
+                        .foregroundStyle(.wikiText)
                 }
                 .accessibilityIdentifier("operationLog")
 
-                // 常用知识：显示前 3 条，点击直接跳转
-                if !frequentPages.isEmpty {
-                    Menu {
-                        ForEach(frequentPages) { page in
-                            Button(action: { store.selectedPageID = page.id }) {
-                                HStack {
-                                    Image(systemName: page.displayIcon)
-                                        .foregroundStyle(page.type.themedColor)
-                                    Text(page.title)
-                                    Spacer()
-                                    Text("\(page.outgoingLinks.count)\(Localized.tr("sidebar.linkUnit"))")
-                                        .foregroundStyle(.wikiSecondary)
-                                }
-                            }
-                        }
-                    } label: {
-                        HStack {
-                            Image(systemName: "flame.fill")
-                                .foregroundStyle(.orange)
-                            Text(Localized.tr("sidebar.frequentKnowledge"))
-                                .foregroundStyle(.wikiText)
-                            Spacer()
-                            Image(systemName: "chevron.up.chevron.down")
-                                .font(.system(size: 9))
-                                .foregroundStyle(.wikiSecondary)
+                NavigationLink(value: SidebarSelection.tool(.taskCenter)) {
+                    HStack {
+                        Label("AI 任务中控", systemImage: "cpu.fill")
+                            .foregroundStyle(.wikiText)
+                        Spacer()
+                        if !AITaskCenter.shared.tasks.filter({ if case .running = $0.status { return true }; return false }).isEmpty {
+                            Circle()
+                                .fill(.wikiAccent)
+                                .frame(width: 6, height: 6)
                         }
                     }
-                    .tint(.orange)
                 }
+                .accessibilityIdentifier("taskCenter")
             } header: {
                 Text(Localized.tr("sidebar.navigation"))
                     .foregroundStyle(.wikiSecondary)
@@ -76,21 +83,22 @@ struct SidebarView: View {
             if !pinnedPages.isEmpty {
                 Section {
                     ForEach(pinnedPages) { page in
-                        PageSidebarRow(page: page)
-                            .tag(page.id)
+                        NavigationLink(value: SidebarSelection.page(page.id)) {
+                            PageSidebarRow(page: page, heroNamespace: heroNamespace)
+                        }
                     }
                 } header: {
                     Label(Localized.tr("pinned"), systemImage: "pin.fill")
-                        .foregroundStyle(.wikiComparison)
+                        .foregroundStyle(.wikiText)
                 }
             }
 
             // ── 工具 ──
             Section {
-                Button(action: { showLintView = true }) {
+                NavigationLink(value: SidebarSelection.tool(.lint)) {
                     HStack {
                         Image(systemName: "stethoscope")
-                            .foregroundStyle(store.lintIssues.isEmpty ? .green : .orange)
+                            .foregroundStyle(.wikiText)
                         Text(Localized.tr("sidebar.healthCheck"))
                             .foregroundStyle(.wikiText)
                         Spacer()
@@ -99,74 +107,96 @@ struct SidebarView: View {
                                 .font(.caption2)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(Color.orange.opacity(0.2))
+                                .background(Color.wikiAccent.opacity(0.2))
                                 .clipShape(Capsule())
-                                .foregroundStyle(.orange)
+                                .foregroundStyle(.wikiAccent)
                         }
                     }
                 }
                 .accessibilityIdentifier("healthCheck")
+
+                NavigationLink(value: SidebarSelection.tool(.tagCloud)) {
+                    HStack {
+                        Image(systemName: "tag.fill")
+                            .foregroundStyle(.wikiText)
+                        Text(Localized.tr("sidebar.tagManager"))
+                            .foregroundStyle(.wikiText)
+                        Spacer()
+                    }
+                }
+                .accessibilityIdentifier("tagCloud")
+
+                NavigationLink(value: SidebarSelection.tool(.collab)) {
+                    HStack {
+                        Image(systemName: "person.2.fill")
+                            .foregroundStyle(.wikiText)
+                        Text(Localized.tr("tab.collab"))
+                            .foregroundStyle(.wikiText)
+                        Spacer()
+                    }
+                }
+                .accessibilityIdentifier("collab")
             } header: {
                 Text(Localized.tr("sidebar.tools"))
                     .foregroundStyle(.wikiSecondary)
             }
 
-            // ── 按类型分组（可折叠） ──
-            ForEach(PageType.allCases) { type in
-                let typePages = store.pages.filter { $0.type == type }
-                if !typePages.isEmpty {
-                    Section {
-                        if expandedTypes.contains(type) {
-                            ForEach(typePages) { page in
-                                PageSidebarRow(page: page)
-                                    .tag(page.id)
-                            }
+        }
+        .listStyle(.sidebar)
+        .navigationTitle(Localized.tr("app.name"))
+
+    }
+
+    // MARK: - Embedded Filter Chips (iPad two-column layout)
+    @ViewBuilder
+    private var embeddedFilterSection: some View {
+        Section {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    FilterChip(
+                        title: Localized.tr("sidebar.allPages"),
+                        isSelected: selectedType == nil,
+                        action: { selectedType = nil }
+                    )
+                    .accessibilityIdentifier("filterAll")
+
+                    ForEach(PageType.allCases) { type in
+                        let count = store.pages.filter { $0.type == type }.count
+                        if count > 0 {
+                            FilterChip(
+                                title: type.displayName,
+                                icon: type.icon,
+                                count: count,
+                                isSelected: selectedType == type,
+                                action: { selectedType = type }
+                            )
+                            .accessibilityIdentifier("filter\(type.rawValue.capitalized)")
                         }
-                    } header: {
-                        Button(action: {
-                            withAnimation {
-                                if expandedTypes.contains(type) {
-                                    expandedTypes.remove(type)
-                                } else {
-                                    expandedTypes.insert(type)
-                                }
-                            }
-                        }) {
-                            HStack {
-                                Image(systemName: expandedTypes.contains(type) ? "chevron.down" : "chevron.right")
-                                    .font(.caption2)
-                                    .foregroundStyle(.wikiSecondary)
-                                Image(systemName: type.icon)
-                                    .foregroundStyle(type.themedColor)
-                                Text(type.displayName)
-                                    .foregroundStyle(.wikiText)
-                                Text("\(typePages.count)")
-                                    .font(.caption)
-                                    .foregroundStyle(.wikiSecondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
                     }
+                }
+                .padding(.vertical, 4)
+            }
+            .listRowInsets(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12))
+
+            // ── 扁平页面列表（不再按类型折叠，由 FilterChips 过滤） ──
+            let filteredPages = selectedType == nil
+                ? store.pages
+                : store.pages.filter { $0.type == selectedType }
+
+            ForEach(filteredPages) { page in
+                NavigationLink(value: SidebarSelection.page(page.id)) {
+                    PageListRow(page: page, heroNamespace: heroNamespace)
                 }
             }
         }
-        .listStyle(.sidebar)
-        .navigationTitle(Localized.tr("tab.wiki"))
-        .sheet(isPresented: $showLogView) {
-            LogView()
-        }
-        .sheet(isPresented: $showIndexView) {
-            IndexView()
-        }
-        .sheet(isPresented: $showLintView) {
-            LintView()
-        }
     }
+
 }
 
 // MARK: - Page Sidebar Row
 struct PageSidebarRow: View {
     let page: WikiPage
+    var heroNamespace: Namespace.ID
     @EnvironmentObject var store: KMStore
 
     /// 内容摘要：取正文第一行非空文字（去掉 Markdown 标记符）
@@ -192,13 +222,13 @@ struct PageSidebarRow: View {
     }
 
     var body: some View {
-        Button(action: { store.selectedPageID = page.id }) {
-            HStack(spacing: 10) {
-                // 左侧：类型图标 + 状态色点
+        HStack(spacing: 10) {
+            // 左侧：类型图标 + 状态色点
                 ZStack(alignment: .bottomTrailing) {
                     Image(systemName: page.displayIcon)
                         .font(.system(size: 15))
                         .foregroundStyle(page.type.themedColor)
+                        .matchedGeometryEffect(id: page.id, in: heroNamespace)
                         .frame(width: 30, height: 30)
                         .background(page.type.themedColor.opacity(0.12))
                         .clipShape(RoundedRectangle(cornerRadius: WikiUI.sidebarRadius))
@@ -257,7 +287,7 @@ struct PageSidebarRow: View {
                         if linkCount > 0 {
                             Label("\(linkCount)", systemImage: "link")
                                 .font(.system(size: 10))
-                                .foregroundStyle(.wikiAccent.opacity(0.8))
+                                .foregroundStyle(.wikiSecondary.opacity(0.8))
                         }
 
                         // 最多显示 2 个标签
@@ -266,9 +296,9 @@ struct PageSidebarRow: View {
                                 .font(.system(size: 9))
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 2)
-                                .background(Color.wikiAccent.opacity(0.08))
+                                .background(Color.wikiSecondary.opacity(0.08))
                                 .clipShape(Capsule())
-                                .foregroundStyle(.wikiAccent.opacity(0.7))
+                                .foregroundStyle(.wikiSecondary.opacity(0.7))
                         }
                     }
                 }
@@ -276,7 +306,134 @@ struct PageSidebarRow: View {
                 Spacer(minLength: 0)
             }
             .padding(.vertical, 2)
+            .contentShape(Rectangle())
+    }
+}
+
+// MARK: - Filter Chip
+struct FilterChip: View {
+    let title: String
+    var icon: String? = nil
+    var count: Int? = nil
+    let isSelected: Bool
+    let action: () -> Void
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下标题字号从 15pt 提升到 17pt
+    private var titleFont: Font {
+        horizontalSizeClass == .regular ? .body : .subheadline
+    }
+
+    /// iPad 大屏幕下计数徽章从 10pt 提升到 12pt
+    private var countFont: Font {
+        horizontalSizeClass == .regular ? .caption : .caption2
+    }
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.caption)
+                }
+                Text(title)
+                    .font(titleFont)
+                if let count = count {
+                    Text("\(count)")
+                        .font(countFont)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(isSelected ? Color.white.opacity(0.2) : Color.wikiAccent.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(isSelected ? Color.wikiAccent : Color.wikiCard)
+            .foregroundStyle(isSelected ? .white : .wikiText)
+            .clipShape(Capsule())
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Page List Row (for embedded page list in SidebarView on iPad)
+struct PageListRow: View {
+    let page: WikiPage
+    var heroNamespace: Namespace.ID
+    @EnvironmentObject var store: KMStore
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var wordCountLabel: String {
+        let n = page.wordCount
+        return n >= 1000 ? String(format: "%.1fk", Double(n) / 1000) : "\(n)"
+    }
+
+    /// iPad 大屏幕下元数据行字号从 10pt 升到 12pt
+    private var metaFont: Font {
+        horizontalSizeClass == .regular ? .system(size: 12) : .system(size: 10)
+    }
+
+    /// iPad 大屏幕下 Stub 标签从 9pt 升到 10pt
+    private var stubFont: Font {
+        horizontalSizeClass == .regular ? .system(size: 10) : .system(size: 9)
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // Type icon
+                Image(systemName: page.displayIcon)
+                    .font(.system(size: 18))
+                    .foregroundStyle(page.type.themedColor)
+                    .matchedGeometryEffect(id: page.id, in: heroNamespace)
+                    .frame(width: 36, height: 36)
+                    .background(page.type.themedColor.opacity(0.12))
+                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+
+                // Title and metadata
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Text(page.title)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.wikiText)
+                            .lineLimit(1)
+
+                        if page.isStub {
+                            Text(Localized.tr("status.stub"))
+                                .font(stubFont)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 1)
+                                .background(Color.yellow.opacity(0.2))
+                                .clipShape(Capsule())
+                                .foregroundStyle(.yellow)
+                        }
+                    }
+
+                    HStack(spacing: 8) {
+                        Label(wordCountLabel, systemImage: "text.alignleft")
+                            .font(metaFont)
+                            .foregroundStyle(.wikiSecondary.opacity(0.8))
+
+                        if page.outgoingLinks.count > 0 {
+                            Label("\(page.outgoingLinks.count)", systemImage: "link")
+                                .font(metaFont)
+                                .foregroundStyle(.wikiSecondary.opacity(0.8))
+                        }
+
+                        Text(page.type.displayName)
+                            .font(metaFont)
+                            .foregroundStyle(page.type.themedColor.opacity(0.8))
+                    }
+                }
+
+                Spacer()
+
+                // Status indicator
+                Circle()
+                    .fill(page.status.color)
+                    .frame(width: 8, height: 8)
+            }
+            .padding(.vertical, 4)
+            .contentShape(Rectangle())
     }
 }

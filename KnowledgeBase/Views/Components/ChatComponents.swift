@@ -5,6 +5,7 @@ struct ChatBubbleView: View {
     let message: ChatMessage
     let pages: [WikiPage]
     @EnvironmentObject var store: KMStore
+    @State private var referencesExpanded = false
     
     var body: some View {
         switch message.role {
@@ -51,7 +52,7 @@ struct ChatBubbleView: View {
     
     private var assistantBubble: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "brain.head.profile.fill")
+            Image(systemName: "sparkles")
                 .font(.subheadline)
                 .foregroundStyle(.wikiAccent)
                 .frame(width: 28, height: 28)
@@ -64,8 +65,9 @@ struct ChatBubbleView: View {
                     .background(Color.wikiCard)
                     .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
                 
+                // Collapsible References Panel
                 if !message.relatedPageIDs.isEmpty {
-                    relatedPagesChips
+                    referencesPanel
                 }
                 
                 Text(message.timestamp, style: .time)
@@ -77,29 +79,79 @@ struct ChatBubbleView: View {
         }
     }
     
-    private var relatedPagesChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                ForEach(message.relatedPageIDs, id: \.self) { pageID in
-                    if let page = pages.first(where: { $0.id == pageID }) {
-                        Button(action: { store.selectedPageID = page.id }) {
+    /// Collapsible references panel showing cited wiki pages grouped by type
+    private var referencesPanel: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Header with expand/collapse toggle
+            Button(action: { withAnimation { referencesExpanded.toggle() } }) {
+                HStack(spacing: 6) {
+                    Image(systemName: referencesExpanded ? "chevron.down" : "chevron.right")
+                        .font(.caption2)
+                        .foregroundStyle(.wikiSecondary)
+                    Text(referencesExpanded ? Localized.tr("chat.referencesExpanded") : Localized.tr("chat.referencesCollapsed"))
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.wikiSecondary)
+                    Spacer()
+                    Text("\(message.relatedPageIDs.count)")
+                        .font(.caption2)
+                        .foregroundStyle(.wikiAccent)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color.wikiAccent.opacity(0.1))
+                        .clipShape(Capsule())
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("references-toggle")
+            
+            // Expanded references grouped by page type
+            if referencesExpanded {
+                let grouped = Dictionary(grouping: message.relatedPageIDs.compactMap { id in pages.first { $0.id == id } }) { $0.type }
+                ForEach(PageType.allCases.filter { grouped[$0] != nil }, id: \.self) { type in
+                    if let pagesOfType = grouped[type], !pagesOfType.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            // Type header
                             HStack(spacing: 4) {
-                                Image(systemName: page.displayIcon)
+                                Image(systemName: type.icon)
                                     .font(.caption2)
-                                Text(page.title)
-                                    .font(.caption2)
+                                Text(type.displayName)
+                                    .font(.caption.weight(.medium))
                             }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(page.type.themedColor.opacity(0.15))
-                            .clipShape(Capsule())
-                            .foregroundStyle(page.type.themedColor)
+                            .foregroundStyle(type.themedColor)
+                            .padding(.top, 4)
+                            
+                            // Page chips
+                            FlowLayout(spacing: 6) {
+                                ForEach(pagesOfType, id: \.id) { page in
+                                    Button(action: { store.selectedPageID = page.id }) {
+                                        HStack(spacing: 3) {
+                                            Image(systemName: page.displayIcon)
+                                                .font(.caption2)
+                                            Text(page.title)
+                                                .font(.caption)
+                                        }
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(type.themedColor.opacity(0.15))
+                                        .clipShape(Capsule())
+                                        .foregroundStyle(type.themedColor)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
         }
+        .padding(10)
+        .background(Color.wikiCard.opacity(0.7))
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: WikiUI.smallRadius)
+                .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
+        )
     }
     
     private var systemBubble: some View {

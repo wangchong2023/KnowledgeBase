@@ -1,7 +1,16 @@
 import SwiftUI
 
-// MARK: - Chat View
+// MARK: - Chat View (entry point with NavigationStack)
 struct ChatView: View {
+    var body: some View {
+        NavigationStack {
+            ChatViewContent()
+        }
+    }
+}
+
+// MARK: - Chat View Content (for use inside parent NavigationStack)
+struct ChatViewContent: View {
     @EnvironmentObject var store: KMStore
     @EnvironmentObject var llmService: LLMService
     @State private var inputText = ""
@@ -9,42 +18,40 @@ struct ChatView: View {
     @State private var errorMessage: String?
     @State private var showError = false
     @FocusState private var isInputFocused: Bool
-    
+
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                if !llmService.isEnabled || llmService.apiKey.isEmpty {
-                    notConfiguredBanner
-                }
-                
-                chatMessageList
-                
-                chatInputBar
+        VStack(spacing: 0) {
+            if !llmService.isEnabled || llmService.apiKey.isEmpty {
+                notConfiguredBanner
             }
-            .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("chat.title"))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button(action: { llmService.clearChatHistory() }) {
-                            Label(Localized.tr("chat.clearHistory"), systemImage: "trash")
-                        }
-                        
-                        NavigationLink(destination: LLMSettingsView()) {
-                            Label(Localized.tr("chat.llmSettings"), systemImage: "gearshape")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
-                            .foregroundStyle(.wikiSecondary)
+
+            chatMessageList
+
+            chatInputBar
+        }
+        .background(Color.wikiBackground)
+        .navigationTitle(Localized.tr("chat.title"))
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button(action: { llmService.clearChatHistory() }) {
+                        Label(Localized.tr("chat.clearHistory"), systemImage: "trash")
                     }
-                    .accessibilityIdentifier("menu")
+
+                    NavigationLink(destination: LLMSettingsView()) {
+                        Label(Localized.tr("chat.llmSettings"), systemImage: "gearshape")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .foregroundStyle(.wikiSecondary)
                 }
+                .accessibilityIdentifier("menu")
             }
-            .alert(Localized.tr("misc.error"), isPresented: $showError) {
-                Button(Localized.tr("misc.ok")) { errorMessage = nil }
-            } message: {
-                Text(errorMessage ?? "")
-            }
+        }
+        .alert(Localized.tr("misc.error"), isPresented: $showError) {
+            Button(Localized.tr("misc.ok")) { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
         }
     }
     
@@ -176,7 +183,7 @@ struct ChatView: View {
     // MARK: - Streaming Bubble
     private var streamingBubble: some View {
         HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "brain.head.profile.fill")
+            Image(systemName: "sparkles")
                 .font(.subheadline)
                 .foregroundStyle(.wikiAccent)
                 .frame(width: 28, height: 28)

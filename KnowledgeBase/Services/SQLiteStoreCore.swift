@@ -1,21 +1,47 @@
 import Foundation
 import SQLite3
 
-// MARK: - SQLite Store Core (Database Layer)
-/// Core SQLite operations: database lifecycle, CRUD, indexing, and query helpers.
-/// Separated from persistence layer concerns (migration, seeding) for clarity.
+// MARK: - SQLite 存储核心 (数据库层)
+/// 核心 SQLite 操作：处理数据库生命周期、CRUD、索引和查询辅助方法。
+/// 与持久化层关注点（迁移、植入数据）分离，确保职责清晰。
 final class SQLiteStoreCore {
     private(set) var db: OpaquePointer?
     let dbPath: URL
+
+    // MARK: - 字段定义 (集中管理，避免硬编码)
+    enum Columns {
+        static let id = "id"
+        static let title = "title"
+        static let type = "type"
+        static let icon = "custom_icon"
+        static let content = "content"
+        static let aliases = "aliases"
+        static let tags = "tags"
+        static let status = "status"
+        static let confidence = "confidence"
+        static let sources = "sources"
+        static let relatedIDs = "related_page_ids"
+        static let isPinned = "is_pinned"
+        static let hash = "content_hash"
+        static let sourceURL = "source_url"
+        static let rawSnippet = "raw_snippet"
+        static let created = "created"
+        static let updated = "updated"
+        
+        // Embeddings Table
+        static let embeddingTable = "page_embeddings"
+        static let embeddingBlob = "vector_blob"
+        static let embeddingModel = "model_name"
+    }
 
     init(dbPath: URL) {
         self.dbPath = dbPath
     }
 
-    // MARK: - Database Lifecycle
+    // MARK: - 数据库生命周期
     func open() {
         guard sqlite3_open(dbPath.path, &db) == SQLITE_OK else {
-            print("[SQLiteStore] Failed to open database: \(String(cString: sqlite3_errmsg(db)))")
+            print("[SQLiteStore] 无法打开数据库: \(String(cString: sqlite3_errmsg(db)))")
             return
         }
         applyPerformancePragmas()
@@ -26,50 +52,101 @@ final class SQLiteStoreCore {
         db = nil
     }
 
+    /// 应用性能优化参数
     private func applyPerformancePragmas() {
-        executeSQL("PRAGMA journal_mode=WAL")
-        executeSQL("PRAGMA synchronous=NORMAL")
-        executeSQL("PRAGMA cache_size=-4096")
+        executeSQL("PRAGMA journal_mode=WAL") // 启用预写日志模式，提高并发性能
+        executeSQL("PRAGMA synchronous=NORMAL") // 兼顾安全与速度的同步模式
+        executeSQL("PRAGMA cache_size=-4096") // 设置缓存大小为 4MB
     }
 
-    // MARK: - Schema
+    // MARK: - 架构
     func createTables() {
-        let createPagesTable = """
-        CREATE TABLE IF NOT EXISTS pages (
-            id TEXT PRIMARY KEY,
-            title TEXT NOT NULL,
-            type TEXT NOT NULL DEFAULT 'concept',
-            custom_icon TEXT,
-            content TEXT DEFAULT '',
-            aliases TEXT DEFAULT '[]',
-            tags TEXT DEFAULT '[]',
-            status TEXT NOT NULL DEFAULT 'active',
-            confidence TEXT NOT NULL DEFAULT 'medium',
-            sources TEXT DEFAULT '[]',
-            related_page_ids TEXT DEFAULT '[]',
-            is_pinned INTEGER NOT NULL DEFAULT 0,
-            created REAL NOT NULL,
-            updated REAL NOT NULL
-        );
-        """
+        // 1. 定义完整 Schema 描述
+        let schema = [
+            "\(Columns.id) TEXT PRIMARY KEY",
+            "\(Columns.title) TEXT NOT NULL",
+            "\(Columns.type) TEXT NOT NULL DEFAULT 'concept'",
+            "\(Columns.icon) TEXT",
+            "\(Columns.content) TEXT DEFAULT ''",
+            "\(Columns.aliases) TEXT DEFAULT '[]'",
+            "\(Columns.tags) TEXT DEFAULT '[]'",
+            "\(Columns.status) TEXT NOT NULL DEFAULT 'active'",
+            "\(Columns.confidence) TEXT NOT NULL DEFAULT 'medium'",
+            "\(Columns.sources) TEXT DEFAULT '[]'",
+            "\(Columns.relatedIDs) TEXT DEFAULT '[]'",
+            "\(Columns.isPinned) INTEGER NOT NULL DEFAULT 0",
+            "\(Columns.hash) TEXT",
+            "\(Columns.sourceURL) TEXT",
+            "\(Columns.rawSnippet) TEXT",
+            "\(Columns.created) REAL NOT NULL",
+            "\(Columns.updated) REAL NOT NULL"
+        ]
+        
+        let createPagesTable = "CREATE TABLE IF NOT EXISTS pages (\(schema.joined(separator: ", ")));"
         executeSQL(createPagesTable)
 
-        let indexes = [
-            "CREATE INDEX IF NOT EXISTS idx_pages_title ON pages(title);",
-            "CREATE INDEX IF NOT EXISTS idx_pages_type ON pages(type);",
-            "CREATE INDEX IF NOT EXISTS idx_pages_status ON pages(status);",
-            "CREATE INDEX IF NOT EXISTS idx_pages_updated ON pages(updated DESC);",
-            "CREATE INDEX IF NOT EXISTS idx_pages_is_pinned ON pages(is_pinned);",
-            "CREATE INDEX IF NOT EXISTS idx_pages_tags ON pages(tags);",
-        ]
-        indexes.forEach { executeSQL($0) }
+        // 2. 定义需要索引的字段列表，自动生成索引语句
+        let indexedColumns = [Columns.title, Columns.type, Columns.status, Columns.updated, Columns.isPinned, Columns.tags]
+        indexedColumns.forEach { col in
+            executeSQL("CREATE INDEX IF NOT EXISTS idx_pages_\(col) ON pages(\(col)\(col == Columns.updated ? " DESC" : ""));")
+        }
+
+        // --- 全文搜索增强 (FTS5) ---
+        createFTSTables()
+        
+        // --- 向量存储表 ---
+        let createEmbeddingsTable = """
+        CREATE TABLE IF NOT EXISTS \(Columns.embeddingTable) (
+            \(Columns.id) TEXT PRIMARY KEY,
+            \(Columns.embeddingBlob) BLOB NOT NULL,
+            \(Columns.embeddingModel) TEXT NOT NULL,
+            \(Columns.updated) REAL NOT NULL,
+            FOREIGN KEY (\(Columns.id)) REFERENCES pages (\(Columns.id)) ON DELETE CASCADE
+        );
+        """
+        executeSQL(createEmbeddingsTable)
+
+        // 4. Page Chunks Table (For Long Document RAG)
+        let createChunksTable = """
+        CREATE TABLE IF NOT EXISTS page_chunks (
+            id TEXT PRIMARY KEY,
+            page_id TEXT NOT NULL,
+            content TEXT NOT NULL,
+            embedding BLOB,
+            start_index INTEGER,
+            FOREIGN KEY(page_id) REFERENCES pages(id) ON DELETE CASCADE
+        );
+        """
+        executeSQL(createChunksTable)
+        executeSQL("CREATE INDEX IF NOT EXISTS idx_chunks_page_id ON page_chunks(page_id)")
     }
 
-    // MARK: - CRUD (Raw SQL)
+    /// 优雅地创建 FTS5 虚拟表及同步触发器
+    private func createFTSTables() {
+        // 1. 定义需要索引的字段列表（未来增加搜索字段只需在此修改）
+        let ftsColumns = [Columns.title, Columns.content, Columns.tags, Columns.aliases]
+        let colList = ftsColumns.joined(separator: ", ")
+        let oldColList = ftsColumns.map { "old.\($0)" }.joined(separator: ", ")
+        let newColList = ftsColumns.map { "new.\($0)" }.joined(separator: ", ")
+
+        // 2. 创建虚拟表
+        let createFTS = "CREATE VIRTUAL TABLE IF NOT EXISTS pages_fts USING fts5(\(colList), content='pages', content_rowid='rowid');"
+        executeSQL(createFTS)
+
+        // 3. 定义触发器模板（通过动态字段列表填充）
+        let triggers = [
+            "CREATE TRIGGER IF NOT EXISTS pages_ai AFTER INSERT ON pages BEGIN INSERT INTO pages_fts(rowid, \(colList)) VALUES (new.rowid, \(newColList)); END;",
+            "CREATE TRIGGER IF NOT EXISTS pages_ad AFTER DELETE ON pages BEGIN INSERT INTO pages_fts(pages_fts, rowid, \(colList)) VALUES('delete', old.rowid, \(oldColList)); END;",
+            "CREATE TRIGGER IF NOT EXISTS pages_au AFTER UPDATE ON pages BEGIN INSERT INTO pages_fts(pages_fts, rowid, \(colList)) VALUES('delete', old.rowid, \(oldColList)); INSERT INTO pages_fts(rowid, \(colList)) VALUES (new.rowid, \(newColList)); END;"
+        ]
+        
+        triggers.forEach { executeSQL($0) }
+    }
+
+    // MARK: - CRUD 操作 (原始 SQL)
     
-    /// Returns the four array fields of a WikiPage as a tuple of raw [String] arrays.
-    /// The JSON encoding is done by bindJSONString to avoid duplication.
-    /// Returns: .0=aliases, .1=tags, .2=sources, .3=relatedIDs
+    /// 获取 WikiPage 的四个数组字段作为原始 [String] 数组元组。
+    /// JSON 编码由 bindJSONString 处理以避免重复。
     private func pageArrayFields(_ page: WikiPage) -> ([String], [String], [String], [String]) {
         (page.aliases, page.tags, page.sources, page.relatedPageIDs.map(\.uuidString))
     }
@@ -77,9 +154,10 @@ final class SQLiteStoreCore {
     func insertPage(_ page: WikiPage) {
         let sql = """
         INSERT OR REPLACE INTO pages (
-            id, title, type, custom_icon, content, aliases, tags,
-            status, confidence, sources, related_page_ids, is_pinned, created, updated
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            \(Columns.id), \(Columns.title), \(Columns.type), \(Columns.icon), \(Columns.content), \(Columns.aliases), \(Columns.tags),
+            \(Columns.status), \(Columns.confidence), \(Columns.sources), \(Columns.relatedIDs), \(Columns.isPinned), \(Columns.hash),
+            \(Columns.sourceURL), \(Columns.rawSnippet), \(Columns.created), \(Columns.updated)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """
 
         var stmt: OpaquePointer?
@@ -100,21 +178,28 @@ final class SQLiteStoreCore {
         bindJSONString(stmt, 10, arrays.2)
         bindJSONString(stmt, 11, arrays.3)
         sqlite3_bind_int(stmt, 12, page.isPinned ? 1 : 0)
-        sqlite3_bind_double(stmt, 13, page.created.timeIntervalSince1970)
-        sqlite3_bind_double(stmt, 14, page.updated.timeIntervalSince1970)
+        if let hash = page.contentHash {
+            sqlite3_bind_text(stmt, 13, hash, -1, transient())
+        } else {
+            sqlite3_bind_null(stmt, 13)
+        }
+        sqlite3_bind_text(stmt, 14, page.sourceURL ?? "", -1, transient())
+        sqlite3_bind_text(stmt, 15, page.rawTextSnippet ?? "", -1, transient())
+        sqlite3_bind_double(stmt, 16, page.created.timeIntervalSince1970)
+        sqlite3_bind_double(stmt, 17, page.updated.timeIntervalSince1970)
 
         if sqlite3_step(stmt) != SQLITE_DONE {
-            print("[SQLiteStore] Insert failed: \(String(cString: sqlite3_errmsg(db)))")
+            print("[SQLiteStore] 插入失败: \(String(cString: sqlite3_errmsg(db)))")
         }
     }
 
     func updatePage(_ page: WikiPage) {
         let sql = """
         UPDATE pages SET
-            title=?, type=?, custom_icon=?, content=?, aliases=?,
-            tags=?, status=?, confidence=?, sources=?, related_page_ids=?,
-            is_pinned=?, updated=?
-        WHERE id=?;
+            \(Columns.title)=?, \(Columns.type)=?, \(Columns.icon)=?, \(Columns.content)=?, \(Columns.aliases)=?,
+            \(Columns.tags)=?, \(Columns.status)=?, \(Columns.confidence)=?, \(Columns.sources)=?, \(Columns.relatedIDs)=?,
+            \(Columns.isPinned)=?, \(Columns.hash)=?, \(Columns.sourceURL)=?, \(Columns.rawSnippet)=?, \(Columns.updated)=?
+        WHERE \(Columns.id)=?;
         """
 
         var stmt: OpaquePointer?
@@ -134,19 +219,87 @@ final class SQLiteStoreCore {
         bindJSONString(stmt, 9, arrays.2)
         bindJSONString(stmt, 10, arrays.3)
         sqlite3_bind_int(stmt, 11, page.isPinned ? 1 : 0)
-        sqlite3_bind_double(stmt, 12, page.updated.timeIntervalSince1970)
-        sqlite3_bind_text(stmt, 13, page.id.uuidString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+        if let hash = page.contentHash {
+            sqlite3_bind_text(stmt, 12, hash, -1, transient())
+        } else {
+            sqlite3_bind_null(stmt, 12)
+        }
+        sqlite3_bind_text(stmt, 13, page.sourceURL ?? "", -1, transient())
+        sqlite3_bind_text(stmt, 14, page.rawTextSnippet ?? "", -1, transient())
+        sqlite3_bind_double(stmt, 15, page.updated.timeIntervalSince1970)
+        sqlite3_bind_text(stmt, 16, page.id.uuidString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
 
         sqlite3_step(stmt)
     }
 
     func deletePage(id: UUID) {
         var stmt: OpaquePointer?
-        let sql = "DELETE FROM pages WHERE id = ?;"
+        let sql = "DELETE FROM pages WHERE \(Columns.id) = ?;"
         guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }
         defer { sqlite3_finalize(stmt) }
         sqlite3_bind_text(stmt, 1, id.uuidString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
         sqlite3_step(stmt)
+        
+        // 同时清理向量数据
+        executeSQL("DELETE FROM \(Columns.embeddingTable) WHERE \(Columns.id) = '\(id.uuidString)';")
+    }
+
+    // MARK: - Embedding Operations
+    
+    func saveEmbedding(id: UUID, embedding: [Float], model: String) {
+        let sql = "INSERT OR REPLACE INTO \(Columns.embeddingTable) (\(Columns.id), \(Columns.embeddingBlob), \(Columns.embeddingModel), \(Columns.updated)) VALUES (?, ?, ?, ?);"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }
+        defer { sqlite3_finalize(stmt) }
+        
+        let data = Data(bytes: embedding, count: embedding.count * MemoryLayout<Float>.size)
+        
+        sqlite3_bind_text(stmt, 1, id.uuidString, -1, transient())
+        sqlite3_bind_blob(stmt, 2, (data as NSData).bytes, Int32(data.count), transient())
+        sqlite3_bind_text(stmt, 3, model, -1, transient())
+        sqlite3_bind_double(stmt, 4, Date().timeIntervalSince1970)
+        
+        if sqlite3_step(stmt) != SQLITE_DONE {
+            print("[SQLiteStore] Embedding 保存失败: \(String(cString: sqlite3_errmsg(db)))")
+        }
+    }
+    
+    func getEmbedding(id: UUID) -> [Float]? {
+        let sql = "SELECT \(Columns.embeddingBlob) FROM \(Columns.embeddingTable) WHERE \(Columns.id) = ?;"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return nil }
+        defer { sqlite3_finalize(stmt) }
+        
+        sqlite3_bind_text(stmt, 1, id.uuidString, -1, transient())
+        
+        if sqlite3_step(stmt) == SQLITE_ROW {
+            if let blob = sqlite3_column_blob(stmt, 0) {
+                let count = Int(sqlite3_column_bytes(stmt, 0)) / MemoryLayout<Float>.size
+                let pointer = blob.assumingMemoryBound(to: Float.self)
+                return Array(UnsafeBufferPointer(start: pointer, count: count))
+            }
+        }
+        return nil
+    }
+    
+    func selectAllEmbeddings() -> [UUID: [Float]] {
+        let sql = "SELECT \(Columns.id), \(Columns.embeddingBlob) FROM \(Columns.embeddingTable);"
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [:] }
+        defer { sqlite3_finalize(stmt) }
+        
+        var result: [UUID: [Float]] = [:]
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            let idStr = String(cString: sqlite3_column_text(stmt, 0))
+            if let uuid = UUID(uuidString: idStr),
+               let blob = sqlite3_column_blob(stmt, 1) {
+                let count = Int(sqlite3_column_bytes(stmt, 1)) / MemoryLayout<Float>.size
+                let pointer = blob.assumingMemoryBound(to: Float.self)
+                let vector = Array(UnsafeBufferPointer(start: pointer, count: count))
+                result[uuid] = vector
+            }
+        }
+        return result
     }
 
     func deleteAllPages() {
@@ -179,15 +332,65 @@ final class SQLiteStoreCore {
         return decodePage(stmt)
     }
 
-    func countPages() -> Int {
+    /// 执行高性能 FTS5 全文搜索
+    func searchPagesFTS(query: String) -> [WikiPage] {
+        // 使用 MATCH 操作符进行模糊匹配，按相关度排序
+        let sql = """
+        SELECT pages.* FROM pages 
+        JOIN pages_fts ON pages.rowid = pages_fts.rowid 
+        WHERE pages_fts MATCH ? 
+        ORDER BY rank;
+        """
+        
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM pages;", -1, &stmt, nil) == SQLITE_OK,
+        // SQLite FTS5 的模糊查询通常需要 query + "*" 来匹配前缀
+        let searchQuery = query.contains("*") ? query : "\(query)*"
+        
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        defer { sqlite3_finalize(stmt) }
+        
+        sqlite3_bind_text(stmt, 1, searchQuery, -1, transient())
+        
+        var result: [WikiPage] = []
+        while sqlite3_step(stmt) == SQLITE_ROW {
+            if let page = decodePage(stmt) {
+                result.append(page)
+            }
+        }
+        return result
+    }
+
+    // MARK: - 高效统计方法
+    
+    /// 获取页面总数
+    func countPages() -> Int {
+        countByQuery("SELECT COUNT(*) FROM pages;")
+    }
+    
+    /// 按类型获取页面数量
+    func countPages(type: String) -> Int {
+        countByQuery("SELECT COUNT(*) FROM pages WHERE type = '\(type)';")
+    }
+    
+    /// 获取待完善（Stub）页面数量
+    func countStubPages() -> Int {
+        countByQuery("SELECT COUNT(*) FROM pages WHERE status = 'stub';")
+    }
+    
+    /// 获取活跃（Active）页面数量
+    func countActivePages() -> Int {
+        countByQuery("SELECT COUNT(*) FROM pages WHERE status = 'active';")
+    }
+    
+    private func countByQuery(_ sql: String) -> Int {
+        var stmt: OpaquePointer?
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK,
               sqlite3_step(stmt) == SQLITE_ROW else { return 0 }
         defer { sqlite3_finalize(stmt) }
         return Int(sqlite3_column_int(stmt, 0))
     }
 
-    // MARK: - Row Decoding
+    // MARK: - 行解码
     private func decodePage(_ stmt: OpaquePointer?) -> WikiPage? {
         guard let stmt = stmt else { return nil }
 
@@ -203,8 +406,11 @@ final class SQLiteStoreCore {
         let sources = columnJSONArray(stmt, 9)
         let relatedIDStrings = columnJSONArray(stmt, 10)
         let isPinned = sqlite3_column_int(stmt, 11) != 0
-        let created = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 12))
-        let updated = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 13))
+        let contentHash = columnOptionalText(stmt, 12)
+        let sourceURL = columnOptionalText(stmt, 13)
+        let rawSnippet = columnOptionalText(stmt, 14)
+        let created = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 15))
+        let updated = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 16))
 
         guard let uuid = UUID(uuidString: idString),
               let type = PageType(rawValue: typeRaw),
@@ -226,17 +432,20 @@ final class SQLiteStoreCore {
             sources: sources,
             relatedPageIDs: relatedIDStrings.compactMap { UUID(uuidString: $0) },
             isPinned: isPinned,
+            contentHash: contentHash.isEmpty ? nil : contentHash,
+            sourceURL: sourceURL.isEmpty ? nil : sourceURL,
+            rawTextSnippet: rawSnippet.isEmpty ? nil : rawSnippet,
             created: created,
             updated: updated
         )
     }
 
-    // MARK: - SQL Helpers
+    // MARK: - SQL 辅助方法
     func executeSQL(_ sql: String) {
         var errMsg: UnsafeMutablePointer<CChar>?
         guard sqlite3_exec(db, sql, nil, nil, &errMsg) != SQLITE_OK else { return }
         if let msg = errMsg {
-            print("[SQLiteStore] SQL error: \(String(cString: msg))")
+            print("[SQLiteStore] SQL 错误: \(String(cString: msg))")
             sqlite3_free(errMsg)
         }
     }
@@ -249,7 +458,7 @@ final class SQLiteStoreCore {
         sqlite3_exec(db, "COMMIT TRANSACTION", nil, nil, nil)
     }
 
-    // MARK: - Binding Helpers
+    // MARK: - 绑定辅助方法
     private func transient() -> sqlite3_destructor_type {
         unsafeBitCast(-1, to: sqlite3_destructor_type.self)
     }
@@ -287,5 +496,45 @@ final class SQLiteStoreCore {
             return []
         }
         return arr
+    
+    // MARK: - Chunks & RAG Support
+    
+    func saveChunks(pageID: UUID, chunks: [RecursiveChunker.Chunk], embeddings: [[Float]]) {
+        guard let db = db else { return }
+        do {
+            try db.transaction {
+                // 清理旧分块
+                try db.run("DELETE FROM page_chunks WHERE page_id = ?", pageID.uuidString)
+                
+                let stmt = try db.prepare("INSERT INTO page_chunks (id, page_id, content, embedding, start_index) VALUES (?, ?, ?, ?, ?)")
+                for (i, chunk) in chunks.enumerated() {
+                    let vectorData = Data(bytes: embeddings[i], count: embeddings[i].count * MemoryLayout<Float>.size)
+                    try stmt.run(UUID().uuidString, pageID.uuidString, chunk.text, vectorData, chunk.startIndex)
+                }
+            }
+        } catch {
+            print("[SQLiteCore] Save chunks error: \(error)")
+        }
+    }
+    
+    func fetchChunks(pageID: UUID) -> [(content: String, embedding: [Float])] {
+        guard let db = db else { return [] }
+        var results: [(content: String, embedding: [Float])] = []
+        do {
+            for row in try db.prepare("SELECT content, embedding FROM page_chunks WHERE page_id = ?", pageID.uuidString) {
+                let content = row[0] as? String ?? ""
+                if let data = row[1] as? Data {
+                    let count = data.count / MemoryLayout<Float>.size
+                    var vector = [Float](repeating: 0, count: count)
+                    data.withUnsafeBytes { buffer in
+                        _ = memcpy(&vector, buffer.baseAddress!, data.count)
+                    }
+                    results.append((content, vector))
+                }
+            }
+        } catch {
+            print("[SQLiteCore] Fetch chunks error: \(error)")
+        }
+        return results
     }
 }

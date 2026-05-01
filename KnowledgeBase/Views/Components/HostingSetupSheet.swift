@@ -44,6 +44,7 @@ struct HostingSetupSheet: View {
             
             TextField(Localized.tr("collab.roomNamePlaceholder"), text: $roomName)
                 .textFieldStyle(.roundedBorder)
+                .accessibilityIdentifier("hosting-room-name-field")
         }
     }
     
@@ -76,5 +77,6 @@ struct HostingSetupSheet: View {
                 .background(Color.wikiAccent)
                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
         }
+        .accessibilityIdentifier("hosting-start-button")
     }
 }

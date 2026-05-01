@@ -24,13 +24,13 @@ struct CollabInfoRow: View {
 struct DiscoveredRoomRow: View {
     let room: DiscoveredRoom
     let onJoin: () -> Void
-    
+
     var body: some View {
         Button(action: onJoin) {
             HStack {
                 Image(systemName: "bubble.left.and.bubble.right.fill")
                     .foregroundStyle(.wikiAccent)
-                
+
                 VStack(alignment: .leading) {
                     Text(room.roomName)
                         .font(.subheadline.weight(.medium))
@@ -39,9 +39,9 @@ struct DiscoveredRoomRow: View {
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "arrow.right.circle.fill")
                     .foregroundStyle(.wikiAccent)
             }
@@ -50,6 +50,7 @@ struct DiscoveredRoomRow: View {
             .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("collab-discovered-room-\(room.id)")
     }
 }
 
@@ -59,7 +60,7 @@ struct ConnectedPeerRow: View {
     let peer: CollabUser
     var showRole: Bool = false
     var roleDisplayName: String? = nil
-    
+
     var body: some View {
         HStack {
             Image(systemName: "person.fill")
@@ -81,6 +82,7 @@ struct ConnectedPeerRow: View {
         .padding()
         .background(Color.wikiCard)
         .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
+        .accessibilityIdentifier("collab-connected-peer-\(peer.id)")
     }
 }
 
@@ -88,12 +90,12 @@ struct ConnectedPeerRow: View {
 /// 最近编辑记录行。
 struct RecentEditRow: View {
     let edit: CollabEdit
-    
+
     var body: some View {
         HStack {
             Image(systemName: "pencil.circle.fill")
                 .foregroundStyle(.wikiConcept)
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(edit.userID.components(separatedBy: "|").first ?? edit.userID)
                     .font(.caption.weight(.medium))
@@ -103,9 +105,9 @@ struct RecentEditRow: View {
                     .foregroundStyle(.wikiSecondary)
                     .lineLimit(1)
             }
-            
+
             Spacer()
-            
+
             Text(edit.timestamp, style: .time)
                 .font(.caption2)
                 .foregroundStyle(.wikiSecondary)
@@ -113,6 +115,7 @@ struct RecentEditRow: View {
         .padding()
         .background(Color.wikiCard)
         .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
+        .accessibilityIdentifier("collab-edit-row-\(edit.id)")
     }
 }
 

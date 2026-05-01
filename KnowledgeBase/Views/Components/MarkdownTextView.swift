@@ -145,6 +145,7 @@ struct MarkdownEditorToolbar: View {
     let onWrap: (String) -> Void
     let onInsertMultiline: (String) -> Void
     let onShowLinkPicker: () -> Void
+    let onOCR: () -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -193,6 +194,12 @@ struct MarkdownEditorToolbar: View {
 
                 EditorToolbarButton(title: Localized.tr("editor.wikiLink"), icon: "link.circle.fill") {
                     onShowLinkPicker()
+                }
+
+                Divider().frame(height: 24).background(Color.wikiBorder)
+
+                EditorToolbarButton(title: "OCR 扫描", icon: "text.viewfinder") {
+                    onOCR()
                 }
             }
             .padding(.horizontal, 12)

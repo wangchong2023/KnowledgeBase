@@ -8,8 +8,8 @@ struct LLMSettingsView: View {
     @State private var showAPIKey = false
     
     enum TestResult {
-        case success
-        case failure(String)
+        case success(latency: Int)
+        case failure(code: String, message: String, latency: Int?)
     }
     
     var body: some View {
@@ -17,7 +17,7 @@ struct LLMSettingsView: View {
             // Enable/Disable
             Section {
                 Toggle(isOn: $llmService.isEnabled) {
-                    Label(Localized.tr("llm.enableAssistant"), systemImage: "brain.head.profile.fill")
+                    Label(Localized.tr("llm.enableAssistant"), systemImage: "sparkles")
                         .foregroundStyle(.wikiText)
                 }
                 .tint(.wikiAccent)
@@ -25,10 +25,32 @@ struct LLMSettingsView: View {
                 Text(Localized.tr("llm.status"))
             }
             
+            // Karpathy Mode
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("AI 维护助理 (Karpathy 模式)")
+                        .font(.headline)
+                        .foregroundStyle(.wikiText)
+                    Text("开启后，AI 会在维护中心为您提供页面重构建议（合并/拆分）并自动发现潜在的知识关联链接。")
+                        .font(.caption)
+                        .foregroundStyle(.wikiSecondary)
+                }
+                .padding(.vertical, 4)
+                
+                Toggle("启用自动扫描建议", isOn: .constant(true)) // 后续可绑定到持久化设置
+                    .tint(.wikiAccent)
+                
+                Toggle("在编译时自动执行重构", isOn: .constant(false))
+                    .tint(.wikiAccent)
+            } header: {
+                Text("高级维护设置")
+            }
+            
             // Provider
             Section {
                 ForEach(LLMProvider.allCases) { provider in
                     Button(action: {
+                        testResult = nil
                         llmService.provider = provider
                         if !provider.defaultBaseURL.isEmpty {
                             llmService.baseURL = provider.defaultBaseURL
@@ -90,7 +112,7 @@ struct LLMSettingsView: View {
                     Text(Localized.tr("llm.apiAddress"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
-                    TextField("https://api.openai.com/v1", text: $llmService.baseURL)
+                    TextField("https://api.example.com/v1", text: $llmService.baseURL)
                         .textFieldStyle(.plain)
                         .font(.system(.body, design: .monospaced))
                         .foregroundStyle(.wikiText)
@@ -106,7 +128,7 @@ struct LLMSettingsView: View {
                     Text(Localized.tr("llm.model"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
-                    TextField("gpt-4o-mini", text: $llmService.model)
+                    TextField("model-name", text: $llmService.model)
                         .textFieldStyle(.plain)
                         .font(.system(.body, design: .monospaced))
                         .foregroundStyle(.wikiText)
@@ -152,27 +174,46 @@ struct LLMSettingsView: View {
                             .foregroundStyle(.wikiText)
                     }
                 }
-                .disabled(testing || llmService.apiKey.isEmpty)
+                .disabled(testing || llmService.apiKey.isEmpty || llmService.baseURL.isEmpty)
+                .opacity(llmService.apiKey.isEmpty || llmService.baseURL.isEmpty ? 0.6 : 1.0)
                 
                 if let result = testResult {
-                    switch result {
-                    case .success:
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                            Text(Localized.tr("llm.connectionSuccess"))
-                                .font(.subheadline)
-                                .foregroundStyle(.green)
-                        }
-                    case .failure(let message):
-                        HStack {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.red)
-                            Text(message)
-                                .font(.subheadline)
-                                .foregroundStyle(.red)
+                    VStack(alignment: .leading, spacing: 8) {
+                        switch result {
+                        case .success(let latency):
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                Text("连通正常")
+                                    .font(.subheadline.bold())
+                                    .foregroundStyle(.green)
+                                Spacer()
+                                Text("\(latency) ms")
+                                    .font(.caption.monospaced())
+                                    .foregroundStyle(.wikiSecondary)
+                            }
+                        case .failure(let code, let message, let latency):
+                            HStack(alignment: .top) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.red)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("连通异常 (Error: \(code))")
+                                        .font(.subheadline.bold())
+                                        .foregroundStyle(.red)
+                                    Text(message)
+                                        .font(.caption)
+                                        .foregroundStyle(.wikiSecondary)
+                                }
+                                Spacer()
+                                if let l = latency {
+                                    Text("\(l) ms")
+                                        .font(.caption.monospaced())
+                                        .foregroundStyle(.wikiSecondary)
+                                }
+                            }
                         }
                     }
+                    .padding(.vertical, 4)
                 }
             } header: {
                 Text(Localized.tr("llm.validation"))
@@ -217,14 +258,7 @@ struct LLMSettingsView: View {
     }
     
     private var suggestedModels: [String] {
-        switch llmService.provider {
-        case .openAI:
-            return ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
-        case .deepSeek:
-            return ["deepseek-chat", "deepseek-reasoner"]
-        case .custom:
-            return ["default"]
-        }
+        llmService.provider.suggestedModels
     }
     
     private func testConnection() {
@@ -233,15 +267,19 @@ struct LLMSettingsView: View {
         
         Task {
             do {
-                let valid = try await llmService.validateAPIKey()
+                let res = try await llmService.validateAPIKey()
                 await MainActor.run {
                     testing = false
-                    testResult = valid ? .success : .failure(Localized.tr("llm.validationFailed"))
+                    if res.isSuccess {
+                        testResult = .success(latency: res.latencyMS)
+                    } else {
+                        testResult = .failure(code: res.errorCode ?? "ERR", message: res.errorMessage ?? "Unknown Error", latency: res.latencyMS)
+                    }
                 }
             } catch {
                 await MainActor.run {
                     testing = false
-                    testResult = .failure(error.localizedDescription)
+                    testResult = .failure(code: "CATCH", message: error.localizedDescription, latency: nil)
                 }
             }
         }

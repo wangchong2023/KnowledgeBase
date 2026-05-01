@@ -7,6 +7,8 @@ struct GraphNodeView: View {
     let isSelected: Bool
     let isAnimating: Bool
     let linkCount: Int
+    let clusters: [GraphClusteringService.Cluster]
+    let useClustering: Bool
     let onSelect: () -> Void
 
     private var nodeSize: CGFloat {
@@ -15,10 +17,12 @@ struct GraphNodeView: View {
 
     var body: some View {
         ZStack {
+            let baseColor = useClustering ? (clusters.first(where: { $0.pageIDs.contains(node.id) })?.color ?? node.type.themedColor) : node.type.themedColor
+            
             // 选中时的脉冲
             if isSelected {
                 Circle()
-                    .fill(node.type.themedColor.opacity(0.15))
+                    .fill(baseColor.opacity(0.15))
                     .frame(width: nodeSize + 20, height: nodeSize + 20)
                     .scaleEffect(isAnimating ? 1.2 : 1.0)
                     .animation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isAnimating)
@@ -27,22 +31,24 @@ struct GraphNodeView: View {
             // 发光
             if isSelected {
                 Circle()
-                    .fill(node.type.themedColor.opacity(0.3))
+                    .fill(baseColor.opacity(0.3))
                     .frame(width: nodeSize + 12, height: nodeSize + 12)
                     .blur(radius: 4)
             }
 
             // 节点圆
+            let baseColor = useClustering ? (clusters.first(where: { $0.pageIDs.contains(node.id) })?.color ?? node.type.themedColor) : node.type.themedColor
+            
             Circle()
                 .fill(
                     LinearGradient(
-                        colors: [node.type.themedColor.opacity(0.8), node.type.themedColor],
+                        colors: [baseColor.opacity(0.8), baseColor],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
                 .frame(width: nodeSize, height: nodeSize)
-                .shadow(color: node.type.themedColor.opacity(isSelected ? 0.6 : 0.3), radius: isSelected ? 10 : 4)
+                .shadow(color: baseColor.opacity(isSelected ? 0.6 : 0.3), radius: isSelected ? 10 : 4)
 
             // 类型图标
             Image(systemName: node.type.icon)
@@ -55,18 +61,24 @@ struct GraphNodeView: View {
 }
 
 // MARK: - Graph Node Label
-/// 节点标题标签。
+/// 节点标题标签。iPad 大屏幕下字号适当放大。
 struct GraphNodeLabel: View {
     let node: GraphNode
     let isSelected: Bool
     let nodeSize: CGFloat
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// 大屏幕下字号从 10pt 提升到 12pt
+    private var fontSize: CGFloat {
+        horizontalSizeClass == .regular ? 12 : 10
+    }
 
     var body: some View {
         Text(node.title)
-            .font(.system(size: 10, weight: isSelected ? .semibold : .medium))
+            .font(.system(size: fontSize, weight: isSelected ? .semibold : .medium))
             .foregroundStyle(isSelected ? .wikiText : .wikiSecondary)
             .lineLimit(1)
-            .position(x: node.position.x, y: node.position.y + nodeSize / 2 + 12)
+            .position(x: node.position.x, y: node.position.y + nodeSize / 2 + 14)
     }
 }
 
@@ -147,18 +159,44 @@ struct GraphZoomControls: View {
 }
 
 // MARK: - Graph Legend
-/// 图谱图例。
+/// 图谱图例，支持类型与聚类两种模式。
 struct GraphLegend: View {
+    let useClustering: Bool
+    let clusters: [GraphClusteringService.Cluster]
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ForEach(PageType.allCases) { type in
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(type.themedColor)
-                        .frame(width: 10, height: 10)
-                    Text(type.displayName)
-                        .font(.caption2)
-                        .foregroundStyle(.wikiSecondary)
+            HStack(spacing: 6) {
+                Image(systemName: "list.bullet.rectangle.portrait")
+                    .font(.caption)
+                    .foregroundStyle(.wikiAccent)
+                Text(Localized.tr("graph.legend"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.wikiText)
+            }
+            .padding(.bottom, 2)
+            
+            if useClustering {
+                ForEach(clusters) { cluster in
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(cluster.color)
+                            .frame(width: 10, height: 10)
+                        Text(cluster.name)
+                            .font(.caption2)
+                            .foregroundStyle(.wikiSecondary)
+                    }
+                }
+            } else {
+                ForEach(PageType.allCases) { type in
+                    HStack(spacing: 6) {
+                        Circle()
+                            .fill(type.themedColor)
+                            .frame(width: 10, height: 10)
+                        Text(type.displayName)
+                            .font(.caption2)
+                            .foregroundStyle(.wikiSecondary)
+                    }
                 }
             }
         }
@@ -209,5 +247,152 @@ struct GraphSelectedNodeCard: View {
         .buttonStyle(.plain)
         .padding(.horizontal, 16)
         .padding(.bottom, 16)
+    }
+}
+
+// MARK: - Graph Insights Panel
+/// 图谱洞察面板，显示知识库的发现结果：意外关联、孤立页面、稀疏社区、桥接节点。
+struct GraphInsightsPanel: View {
+    let surprising: [UUID]
+    let orphans: [UUID]
+    let sparse: [UUID]
+    let bridges: [UUID]
+    let nodes: [GraphNode]
+    let onSelectNode: (UUID) -> Void
+    
+    @State private var expandedSections: Set<String> = ["surprising", "orphans", "sparse", "bridges"]
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                    insightSection(
+                        id: "surprising",
+                        icon: "link Badge",
+                        title: Localized.tr("graph.insightSurprising"),
+                        count: surprising.count,
+                        description: Localized.tr("graph.insightSurprisingDesc"),
+                        color: .wikiComparison
+                    )
+                    
+                    insightSection(
+                        id: "orphans",
+                        icon: "questionmark.circle",
+                        title: Localized.tr("graph.insightOrphans"),
+                        count: orphans.count,
+                        description: Localized.tr("graph.insightOrphansDesc"),
+                        color: .wikiSecondary
+                    )
+                    
+                    insightSection(
+                        id: "sparse",
+                        icon: "chart.bar.xaxis",
+                        title: Localized.tr("graph.insightSparse"),
+                        count: sparse.count,
+                        description: Localized.tr("graph.insightSparseDesc"),
+                        color: .orange
+                    )
+                    
+                    insightSection(
+                        id: "bridges",
+                        icon: "arrow.triangle.branch",
+                        title: Localized.tr("graph.insightBridges"),
+                        count: bridges.count,
+                        description: Localized.tr("graph.insightBridgesDesc"),
+                        color: .wikiAccent
+                    )
+                }
+                .padding()
+            }
+            .background(Color.wikiBackground)
+        }
+    
+    private func insightSection(id: String, icon: String, title: String, count: Int, description: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Section header
+            Button(action: {
+                withAnimation { 
+                    if expandedSections.contains(id) {
+                        expandedSections.remove(id)
+                    } else {
+                        expandedSections.insert(id)
+                    }
+                }
+            }) {
+                HStack(spacing: 8) {
+                    Image(systemName: icon)
+                        .font(.caption)
+                        .foregroundStyle(color)
+                        .frame(width: 20)
+                    
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.wikiText)
+                    
+                    Text("\(count)")
+                        .font(.caption2)
+                        .foregroundStyle(color)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(color.opacity(0.15))
+                        .clipShape(Capsule())
+                    
+                    Spacer()
+                    
+                    Image(systemName: expandedSections.contains(id) ? "chevron.down" : "chevron.right")
+                        .font(.caption2)
+                        .foregroundStyle(.wikiSecondary)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("insight-\(id)")
+            
+            if expandedSections.contains(id) {
+                Text(description)
+                    .font(.caption2)
+                    .foregroundStyle(.wikiSecondary)
+                    .padding(.leading, 28)
+                
+                // Node chips
+                let nodeIDs = getNodeIDs(for: id)
+                if !nodeIDs.isEmpty {
+                    FlowLayout(spacing: 6) {
+                        ForEach(nodeIDs, id: \.self) { nodeID in
+                            if let node = nodes.first(where: { $0.id == nodeID }) {
+                                Button(action: { onSelectNode(nodeID) }) {
+                                    HStack(spacing: 3) {
+                                        Image(systemName: node.type.icon)
+                                            .font(.caption2)
+                                        Text(node.title)
+                                            .font(.caption2)
+                                            .lineLimit(1)
+                                    }
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(color.opacity(0.15))
+                                    .clipShape(Capsule())
+                                    .foregroundStyle(color)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                    .padding(.leading, 28)
+                }
+            }
+        }
+        .padding(10)
+        .background(color.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+    }
+    
+    private func getNodeIDs(for section: String) -> [UUID] {
+        switch section {
+        case "surprising": return surprising
+        case "orphans": return orphans
+        case "sparse": return sparse
+        case "bridges": return bridges
+        default: return []
+        }
     }
 }

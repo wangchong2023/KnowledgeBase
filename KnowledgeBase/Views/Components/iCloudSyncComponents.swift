@@ -66,7 +66,7 @@ struct SyncActionsSection: View {
             // Push to iCloud
             Button(action: onPush) {
                 Label(Localized.tr("icloud.pushToCloud"), systemImage: "icloud.and.arrow.up")
-                    .foregroundStyle(.wikiAccent)
+                    .foregroundStyle(.wikiText)
             }
             .accessibilityIdentifier("push-to-icloud")
             .disabled(!syncService.iCloudAvailable || isSyncing)
@@ -74,7 +74,7 @@ struct SyncActionsSection: View {
             // Pull from iCloud
             Button(action: onPullRequest) {
                 Label(Localized.tr("icloud.pullFromCloud"), systemImage: "icloud.and.arrow.down")
-                    .foregroundStyle(.wikiAccent)
+                    .foregroundStyle(.wikiText)
             }
             .accessibilityIdentifier("pull-from-icloud")
             .disabled(!syncService.iCloudAvailable || isSyncing)
@@ -82,7 +82,7 @@ struct SyncActionsSection: View {
             // Bidirectional sync
             Button(action: onBidirectional) {
                 Label(Localized.tr("icloud.bidirectionalSync"), systemImage: "arrow.triangle.2.circlepath.icloud")
-                    .foregroundStyle(.wikiAccent)
+                    .foregroundStyle(.wikiText)
             }
             .disabled(!syncService.iCloudAvailable || isSyncing)
         } header: {
@@ -140,7 +140,7 @@ struct SyncInfoRow: View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundStyle(.wikiAccent)
+                .foregroundStyle(.wikiText)
                 .frame(width: 20)
 
             Text(text)

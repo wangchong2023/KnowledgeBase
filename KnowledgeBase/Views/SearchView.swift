@@ -6,6 +6,10 @@ struct SearchView: View {
     @State private var filterType: PageType?
     @State private var filterStatus: PageStatus?
     @State private var sortBy: SortOption = .updated
+    @State private var previewPage: WikiPage?
+    @State private var advancedResults: [WikiPage] = []
+    @State private var useAdvancedSearch = false
+    @State private var showDiagnostics = false
     
     enum SortOption: String, CaseIterable {
         case updated = "search.sort.recentlyUpdated"
@@ -15,6 +19,10 @@ struct SearchView: View {
     }
     
     var filteredPages: [WikiPage] {
+        if useAdvancedSearch && !advancedResults.isEmpty {
+            return advancedResults
+        }
+        
         var result = store.pages
         
         // Text search
@@ -63,9 +71,13 @@ struct SearchView: View {
                     TextField(Localized.tr("search.placeholder"), text: $searchText)
                         .foregroundStyle(.wikiText)
                         .accessibilityIdentifier("searchPlaceholder")
-                    
+
                     if !searchText.isEmpty {
-                        Button(action: { searchText = "" }) {
+                        Button(action: { 
+                            searchText = ""
+                            useAdvancedSearch = false
+                            advancedResults = []
+                        }) {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -76,7 +88,7 @@ struct SearchView: View {
                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
                 .padding(.horizontal)
                 .padding(.top)
-                
+
                 // Filters
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
@@ -85,7 +97,7 @@ struct SearchView: View {
                             HapticManager.selection()
                             filterType = nil
                         }
-                        
+
                         ForEach(PageType.allCases) { type in
                             FilterPill(
                                 title: type.displayName,
@@ -98,9 +110,9 @@ struct SearchView: View {
                                 filterType = type
                             }
                         }
-                        
+
                         Divider().frame(height: 24).background(Color.wikiBorder)
-                        
+
                         // Sort options
                         Menu {
                             ForEach(SortOption.allCases, id: \.self) { option in
@@ -126,8 +138,55 @@ struct SearchView: View {
                     .padding(.vertical, 10)
                 }
                 
+                if store.llmService.isEnabled && !searchText.isEmpty {
+                    Button(action: runAdvancedSearch) {
+                        HStack {
+                            if store.isAdvancedSearching {
+                                ProgressView().scaleEffect(0.8).tint(.purple)
+                            } else {
+                                Image(systemName: "sparkles")
+                            }
+                            Text(useAdvancedSearch ? "显示全部结果" : "AI 深度语义搜索")
+                                .font(.caption.bold())
+                        }
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(useAdvancedSearch ? Color.purple.opacity(0.1) : Color.wikiAccent.opacity(0.1))
+                        .foregroundStyle(useAdvancedSearch ? .purple : .wikiAccent)
+                        .clipShape(Capsule())
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                    .transition(.opacity)
+                }
+                
+                if useAdvancedSearch && store.lastSearchDiagnostic != nil {
+                    Button(action: { showDiagnostics = true }) {
+                        Label("查看检索诊断 (QA)", systemImage: "doc.text.magnifyingglass")
+                            .font(.caption2)
+                            .foregroundStyle(.purple.opacity(0.8))
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 4)
+                }
+
                 // Results
-                if filteredPages.isEmpty {
+                if store.isAdvancedSearching {
+                    VStack(spacing: 12) {
+                        ForEach(0..<5) { _ in
+                            HStack(spacing: 12) {
+                                SkeletonBox(width: 40, height: 40)
+                                VStack(alignment: .leading, spacing: 6) {
+                                    SkeletonBox(width: 150, height: 16)
+                                    SkeletonBox(width: 250, height: 12)
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
+                    .padding(.top)
+                } else if filteredPages.isEmpty {
                     VStack(spacing: 12) {
                         if searchText.isEmpty {
                             // 未搜索状态
@@ -159,6 +218,20 @@ struct SearchView: View {
                             }
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
+                            .contextMenu {
+                                Button {
+                                    HapticManager.selection()
+                                    previewPage = page
+                                } label: {
+                                    Label("快速预览", systemImage: "eye")
+                                }
+                                
+                                Button {
+                                    UIPasteboard.general.string = "[[\(page.title)]]"
+                                } label: {
+                                    Label("复制 WikiLink", systemImage: "link")
+                                }
+                            }
                         }
                     }
                     .listStyle(.plain)
@@ -171,7 +244,7 @@ struct SearchView: View {
                         PageDetailView(page: destination)
                     }
                 }
-                
+
                 // Result count
                 HStack {
                     Text(Localized.trf("search.pagesCount", filteredPages.count))
@@ -184,7 +257,82 @@ struct SearchView: View {
             }
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("search.title"))
+            .sheet(item: $previewPage) { page in
+                PagePreviewSheet(page: page)
+            }
         }
+        .sheet(isPresented: $showDiagnostics) {
+            if let diag = store.lastSearchDiagnostic {
+                SearchDiagnosticSheet(info: diag)
+            }
+        }
+    }
+    
+    private func runAdvancedSearch() {
+        if useAdvancedSearch {
+            withAnimation {
+                useAdvancedSearch = false
+                advancedResults = []
+            }
+            return
+        }
+        
+        HapticManager.selection()
+        Task {
+            let results = await store.performAdvancedSearch(query: store.searchText)
+            await MainActor.run {
+                withAnimation {
+                    self.advancedResults = results
+                    self.useAdvancedSearch = true
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Quick Preview Sheet
+struct PagePreviewSheet: View {
+    let page: WikiPage
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        WikiIconChip(icon: page.type.icon, text: page.type.displayName, color: page.type.themedColor, isSelected: true)
+                        Spacer()
+                        Text(page.updated, style: .date)
+                            .font(.caption)
+                            .foregroundStyle(.wikiSecondary)
+                    }
+                    
+                    Text(page.title)
+                        .font(.title2.bold())
+                        .foregroundStyle(.wikiText)
+                    
+                    Divider()
+                    
+                    Text(page.content)
+                        .font(.subheadline)
+                        .foregroundStyle(.wikiText)
+                        .lineLimit(20)
+                    
+                    Spacer(minLength: 40)
+                }
+                .padding()
+            }
+            .background(Color.wikiBackground)
+            .navigationTitle("预览")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("关闭") { dismiss() }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 }
 
@@ -196,7 +344,13 @@ struct FilterPill: View {
     var accessibilityIdentifier: String? = nil
     let isSelected: Bool
     let action: () -> Void
-    
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// 大屏幕下使用 subheadline 字体（约 15pt），小屏幕用 caption（约 12pt）
+    private var pillFont: Font {
+        horizontalSizeClass == .regular ? .subheadline : .caption
+    }
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
@@ -205,7 +359,7 @@ struct FilterPill: View {
                         .font(.caption2)
                 }
                 Text(title)
-                    .font(.caption.weight(isSelected ? .semibold : .regular))
+                    .font(pillFont.weight(isSelected ? .semibold : .regular))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -219,5 +373,66 @@ struct FilterPill: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier(accessibilityIdentifier ?? title)
+    }
+}
+
+// MARK: - Search Diagnostic Sheet
+struct SearchDiagnosticSheet: View {
+    let info: SearchDiagnosticInfo
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("查询改写 (Rewrite)") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        LabeledContent("原始查询", value: info.query)
+                        LabeledContent("AI 改写结果", value: info.rewrittenQuery)
+                            .foregroundStyle(.purple)
+                    }
+                    .font(.subheadline)
+                }
+                
+                Section("RRF 融合排名详情 (Top 10)") {
+                    ForEach(info.rrfTopResults) { res in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(res.title)
+                                .font(.headline)
+                            
+                            HStack {
+                                SearchBadgeView(label: "FTS 排名: \(res.ftsRank > 0 ? "\(res.ftsRank)" : "未命")", color: res.ftsRank > 0 ? .blue : .gray)
+                                SearchBadgeView(label: "向量排名: \(res.vectorRank > 0 ? "\(res.vectorRank)" : "未命")", color: res.vectorRank > 0 ? .green : .gray)
+                                Spacer()
+                                Text(String(format: "得分: %.4f", res.finalScore))
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.wikiSecondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+            }
+            .navigationTitle("检索诊断报告")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("关闭") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+struct SearchBadgeView: View {
+    let label: String
+    let color: Color
+    var body: some View {
+        Text(label)
+            .font(.system(size: 9, weight: .bold))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(color.opacity(0.1))
+            .foregroundStyle(color)
+            .clipShape(Capsule())
     }
 }

@@ -1,56 +1,5 @@
 import SwiftUI
 
-// MARK: - Accent Color Picker
-/// 主题色选择器，水平滚动的色圈列表。
-struct AccentColorPicker: View {
-    @EnvironmentObject var themeManager: ThemeManager
-    let colors: [String]
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Label(Localized.tr("settings.accentColor"), systemImage: "paintpalette.fill")
-                .foregroundStyle(.wikiText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .id(Localized.languageMode)
-
-            Spacer()
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(colors, id: \.self) { color in
-                        let isSelected = themeManager.accentColorRaw == color
-                        Button(action: { themeManager.setAccentColor(color) }) {
-                            Circle()
-                                .fill(themeManager.colorForName(color))
-                                .frame(width: 28, height: 28)
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(.white, lineWidth: isSelected ? 2 : 0)
-                                )
-                                .overlay(
-                                    Circle()
-                                        .strokeBorder(.wikiBorder, lineWidth: isSelected ? 2 : 0)
-                                )
-                                .overlay(
-                                    Group {
-                                        if isSelected {
-                                            Image(systemName: "checkmark")
-                                                .font(.caption2.weight(.bold))
-                                                .foregroundStyle(.white)
-                                        }
-                                    }
-                                )
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("accent-color-\(color)")
-                    }
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Settings Navigation Row
 /// 设置页导航行，支持可选副标题和尾部视图。
 struct SettingsNavigationRow<Destination: View, Trailing: View>: View {
@@ -144,7 +93,7 @@ struct InfoRow: View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.subheadline)
-                .foregroundStyle(.wikiAccent)
+                .foregroundStyle(.wikiText)
                 .frame(width: 24)
             Text(text)
                 .font(.subheadline)

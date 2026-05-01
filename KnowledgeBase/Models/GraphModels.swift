@@ -30,6 +30,8 @@ struct GraphNode: Identifiable {
     let type: PageType
     var position: CGPoint
     var isHighlighted: Bool = false
+    var communityID: Int? = nil
+    var communityCohesion: Double? = nil
 }
 
 // MARK: - Graph Edge

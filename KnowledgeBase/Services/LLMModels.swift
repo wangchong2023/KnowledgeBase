@@ -1,43 +1,92 @@
 import Foundation
 
+// MARK: - LLM Provider Metadata
+struct LLMProviderMetadata: Codable {
+    let id: String
+    let nameKey: String
+    let baseURL: String
+    let defaultModel: String
+    let suggestedModels: [String]
+    let icon: String
+}
+
+// MARK: - LLM Registry
+final class LLMRegistry {
+    static let shared = LLMRegistry()
+    private var providers: [String: LLMProviderMetadata] = [:]
+    
+    private init() {
+        loadProviders()
+    }
+    
+    private func loadProviders() {
+        // 首先尝试从 Bundle 加载（Apple 推荐方式）
+        if let url = Bundle.main.url(forResource: "LLMProviders", withExtension: "json"),
+           let data = try? Data(contentsOf: url),
+           let list = try? JSONDecoder().decode([LLMProviderMetadata].self, from: data) {
+            for item in list {
+                providers[item.id] = item
+            }
+            return
+        }
+        
+        // 兜底方案：如果 JSON 未能加载（如尚未打包），使用硬编码数据
+        let fallbacks: [LLMProviderMetadata] = [
+            .init(id: "zhipu", nameKey: "llm.provider.zhipu", baseURL: "https://open.bigmodel.cn/api/paas/v4", defaultModel: "glm-4-flash", suggestedModels: ["glm-4-flash", "glm-4", "glm-4v"], icon: "sparkles"),
+            .init(id: "minimax", nameKey: "llm.provider.minimax", baseURL: "https://api.minimax.chat/v1", defaultModel: "abab6.5-chat", suggestedModels: ["abab6.5-chat", "abab5.5-chat"], icon: "cpu"),
+            .init(id: "qwen", nameKey: "llm.provider.qwen", baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1", defaultModel: "qwen-plus", suggestedModels: ["qwen-plus", "qwen-max", "qwen-turbo"], icon: "cloud.fill"),
+            .init(id: "deepseek", nameKey: "llm.provider.deepSeek", baseURL: "https://api.deepseek.com/v1", defaultModel: "deepseek-v4-pro", suggestedModels: ["deepseek-v4-pro", "deepseek-v4-lite"], icon: "wave.3.forward"),
+            .init(id: "kimi", nameKey: "llm.provider.kimi", baseURL: "https://api.moonshot.cn/v1", defaultModel: "moonshot-v1-8k", suggestedModels: ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"], icon: "moon.fill"),
+            .init(id: "siliconflow", nameKey: "llm.provider.siliconflow", baseURL: "https://api.siliconflow.cn/v1", defaultModel: "deepseek-ai/DeepSeek-V3", suggestedModels: ["deepseek-ai/DeepSeek-V3", "deepseek-ai/DeepSeek-V2.5", "Qwen/Qwen2.5-72B-Instruct"], icon: "bolt.fill"),
+            .init(id: "custom", nameKey: "llm.provider.custom", baseURL: "", defaultModel: "", suggestedModels: ["default"], icon: "server.rack")
+        ]
+        for item in fallbacks {
+            providers[item.id] = item
+        }
+    }
+    
+    func metadata(for id: String) -> LLMProviderMetadata? {
+        providers[id]
+    }
+}
+
 // MARK: - LLM Provider
 enum LLMProvider: String, Codable, CaseIterable, Identifiable {
-    case openAI = "openai"
+    case zhipu = "zhipu"
+    case minimax = "minimax"
+    case qwen = "qwen"
     case deepSeek = "deepseek"
+    case kimi = "kimi"
+    case siliconflow = "siliconflow"
     case custom = "custom"
     
     var id: String { rawValue }
     
+    private var metadata: LLMProviderMetadata? {
+        LLMRegistry.shared.metadata(for: rawValue)
+    }
+    
     var displayName: String {
-        switch self {
-        case .openAI: return Localized.tr("llm.provider.openAI")
-        case .deepSeek: return Localized.tr("llm.provider.deepSeek")
-        case .custom: return Localized.tr("llm.provider.custom")
+        if let key = metadata?.nameKey {
+            return Localized.tr(key)
         }
+        return rawValue.capitalized
     }
     
     var defaultBaseURL: String {
-        switch self {
-        case .openAI: return "https://api.openai.com/v1"
-        case .deepSeek: return "https://api.deepseek.com/v1"
-        case .custom: return ""
-        }
+        metadata?.baseURL ?? ""
     }
     
     var defaultModel: String {
-        switch self {
-        case .openAI: return "gpt-4o-mini"
-        case .deepSeek: return "deepseek-chat"
-        case .custom: return ""
-        }
+        metadata?.defaultModel ?? ""
+    }
+    
+    var suggestedModels: [String] {
+        metadata?.suggestedModels ?? ["default"]
     }
     
     var icon: String {
-        switch self {
-        case .openAI: return "brain.head.profile.fill"
-        case .deepSeek: return "wave.3.forward"
-        case .custom: return "server.rack"
-        }
+        metadata?.icon ?? "server.rack"
     }
 }
 
@@ -150,10 +199,10 @@ final class LLMConfigStore: ObservableObject {
             self.model = config.model
             self.isEnabled = config.isEnabled
         } else {
-            self.provider = .openAI
+            self.provider = .deepSeek
             self.apiKey = ""
-            self.baseURL = LLMProvider.openAI.defaultBaseURL
-            self.model = LLMProvider.openAI.defaultModel
+            self.baseURL = LLMProvider.deepSeek.defaultBaseURL
+            self.model = LLMProvider.deepSeek.defaultModel
             self.isEnabled = false
         }
     }

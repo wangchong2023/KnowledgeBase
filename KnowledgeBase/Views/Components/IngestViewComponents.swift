@@ -1,5 +1,10 @@
 import SwiftUI
 
+// MARK: - Notification Names
+extension Notification.Name {
+    static let importFromClipboard = Notification.Name("importFromClipboard")
+}
+
 // MARK: - Ingest Hero Section
 struct IngestHeroSection: View {
     var body: some View {
@@ -8,7 +13,7 @@ struct IngestHeroSection: View {
                 .font(.system(size: 48))
                 .foregroundStyle(
                     LinearGradient(
-                        colors: [.wikiSource, .wikiAccent],
+                        colors: [.wikiSource, .wikiText],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -21,46 +26,120 @@ struct IngestHeroSection: View {
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
         }
-        .padding(.top)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
     }
 }
 
 // MARK: - Ingest Entry Cards Section
 struct IngestEntryCardsSection: View {
     @Binding var showManualForm: Bool
+    @Binding var showOCRScan: Bool
     @Binding var newType: PageType
+    @Binding var showFileImporter: Bool
+    @Binding var showVoiceNote: Bool
+    @Binding var showURLImport: Bool
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下副标题从 10pt 升到 12pt
+    private var subtitleFont: Font {
+        horizontalSizeClass == .regular ? .caption : .caption2
+    }
+
+    /// 响应式列配置：iPhone 2列，iPad 自适应多列
+    private var columns: [GridItem] {
+        if horizontalSizeClass == .regular {
+            Array(repeating: GridItem(.flexible(minimum: 80, maximum: 180), spacing: 12), count: 5)
+        } else {
+            [GridItem(.flexible()), GridItem(.flexible())]
+        }
+    }
 
     var body: some View {
-        HStack(spacing: 12) {
-            // OCR entry card (navigation)
-            NavigationLink(destination: OCRScanView()) {
+        LazyVGrid(columns: columns, spacing: 12) {
+            // OCR entry card
+            Button(action: {
+                showOCRScan = true
+            }) {
                 entryCardContent(
                     title: Localized.tr("ingest.ocrScan"),
                     subtitle: Localized.tr("ingest.ocrScanHint"),
                     icon: "text.viewfinder",
-                    color: .wikiAccent
+                    color: .wikiText
                 )
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("OCR扫描")
-            .simultaneousGesture(TapGesture().onEnded {
-                showManualForm = false
-            })
 
             // Manual entry card (toggle)
             Button(action: {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    showManualForm.toggle()
-                }
+                showManualForm = true
             }) {
                 entryCardContent(
                     title: Localized.tr("ingest.manualEntry"),
                     subtitle: Localized.tr("ingest.manualEntryHint"),
                     icon: "pencil.and.list.clipboard",
-                    color: .wikiSource
+                    color: .wikiText
                 )
             }
             .buttonStyle(.plain)
+
+            // File import card
+            Button(action: {
+                showFileImporter = true
+            }) {
+                entryCardContent(
+                    title: Localized.tr("ingest.fileImport"),
+                    subtitle: Localized.tr("ingest.fileImportHint"),
+                    icon: "doc.badge.plus",
+                    color: .wikiText
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("文件导入")
+
+            // Voice note card
+            Button(action: {
+                showVoiceNote = true
+            }) {
+                entryCardContent(
+                    title: Localized.tr("ingest.voiceNote"),
+                    subtitle: Localized.tr("ingest.voiceNoteHint"),
+                    icon: "waveform",
+                    color: .wikiText
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("语音笔记")
+
+            // Clipboard import card
+            Button(action: {
+                // Trigger clipboard import via notification to parent
+                NotificationCenter.default.post(name: .importFromClipboard, object: nil)
+            }) {
+                entryCardContent(
+                    title: Localized.tr("ingest.clipboardImport"),
+                    subtitle: Localized.tr("ingest.clipboardImportHint"),
+                    icon: "doc.on.clipboard",
+                    color: .wikiText
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("剪贴板导入")
+
+            // URL import card
+            Button(action: {
+                showURLImport = true
+            }) {
+                entryCardContent(
+                    title: "URL 导入",
+                    subtitle: "抓取网页内容",
+                    icon: "link.badge.plus",
+                    color: .wikiText
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("URL导入")
         }
         .padding(.horizontal)
     }
@@ -75,7 +154,7 @@ struct IngestEntryCardsSection: View {
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.wikiText)
                 Text(subtitle)
-                    .font(.caption2)
+                    .font(subtitleFont)
                     .foregroundStyle(.wikiSecondary)
             }
         }
@@ -96,11 +175,18 @@ struct IngestManualFormSection: View {
     @Binding var ingestSuccess: Bool
     @Binding var errorMessage: String?
     @Binding var showError: Bool
+    @Binding var useDeepScan: Bool
 
     let llmService: LLMService
     let store: KMStore
     let onPerformIngest: () -> Void
     let onConfirmSmartIngest: () -> Void
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下表单字段标签从 12pt 升到 15pt
+    private var fieldLabelFont: Font {
+        horizontalSizeClass == .regular ? .subheadline.weight(.medium) : .caption.weight(.medium)
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -110,7 +196,7 @@ struct IngestManualFormSection: View {
             // Title field
             VStack(alignment: .leading, spacing: 6) {
                 Text(Localized.tr("ingest.field.title"))
-                    .font(.caption.weight(.medium))
+                    .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
                 WikiTextField(placeholder: Localized.tr("ingest.field.titlePlaceholder"), text: $newTitle)
                     .accessibilityIdentifier("输入页面标题")
@@ -125,7 +211,7 @@ struct IngestManualFormSection: View {
             // Tags field
             VStack(alignment: .leading, spacing: 6) {
                 Text(Localized.tr("ingest.field.tags"))
-                    .font(.caption.weight(.medium))
+                    .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
                 WikiTagField(placeholder: Localized.tr("ingest.field.tagsPlaceholder"), text: $newTags)
             }
@@ -133,7 +219,7 @@ struct IngestManualFormSection: View {
             // Content editor
             VStack(alignment: .leading, spacing: 6) {
                 Text(Localized.tr("ingest.field.content"))
-                    .font(.caption.weight(.medium))
+                    .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
                 WikiMonospacedEditor(text: $newContent, minHeight: 200)
             }
@@ -144,6 +230,8 @@ struct IngestManualFormSection: View {
         if llmService.isEnabled && !llmService.apiKey.isEmpty {
             smartIngestToggle
         }
+        
+        deepScanToggle
 
         // Smart preview
         if let result = smartResult {
@@ -174,7 +262,7 @@ struct IngestManualFormSection: View {
         VStack(alignment: .leading, spacing: 8) {
             Toggle(isOn: $useSmartIngest) {
                 HStack(spacing: 6) {
-                    Image(systemName: "brain.head.profile.fill")
+                    Image(systemName: "sparkles")
                         .foregroundStyle(.wikiAccent)
                     Text(Localized.tr("ingest.smartToggle"))
                         .font(.subheadline.weight(.medium))
@@ -186,18 +274,39 @@ struct IngestManualFormSection: View {
 
             if useSmartIngest {
                 Text(Localized.tr("ingest.smartToggleHint"))
-                    .font(.caption)
+                    .font(horizontalSizeClass == .regular ? .subheadline : .caption)
                     .foregroundStyle(.wikiSecondary)
             }
         }
-        .wikiCard()
+        .padding(.horizontal)
+    }
+
+    private var deepScanToggle: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle(isOn: $useDeepScan) {
+                HStack(spacing: 6) {
+                    Image(systemName: "cpu")
+                        .foregroundStyle(.wikiSource)
+                    Text("开启深度扫描 (RAG)")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.wikiText)
+                }
+            }
+            .tint(.wikiSource)
+            
+            if useDeepScan {
+                Text("将文档进行语义分块并生成向量索引，大幅提升长文档的检索精度。")
+                    .font(horizontalSizeClass == .regular ? .subheadline : .caption)
+                    .foregroundStyle(.wikiSecondary)
+            }
+        }
         .padding(.horizontal)
     }
 
     private var pageTypeSelector: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(Localized.tr("ingest.field.type"))
-                .font(.caption.weight(.medium))
+                .font(fieldLabelFont)
                 .foregroundStyle(.wikiSecondary)
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -221,7 +330,7 @@ struct IngestManualFormSection: View {
     private var iconPickerSection: some View {
         HStack(spacing: 10) {
             Text(Localized.tr("ingest.field.icon"))
-                .font(.caption.weight(.medium))
+                .font(fieldLabelFont)
                 .foregroundStyle(.wikiSecondary)
 
             Button(action: { showIconPicker = true }) {
@@ -233,7 +342,7 @@ struct IngestManualFormSection: View {
                         .background((newCustomIcon != nil ? Color.wikiAccent : newType.themedColor).opacity(0.15))
                         .clipShape(RoundedRectangle(cornerRadius: WikiUI.tinyRadius))
                     Text(newCustomIcon != nil ? Localized.tr("ingest.iconCustom") : Localized.tr("ingest.iconDefault"))
-                        .font(.caption)
+                        .font(horizontalSizeClass == .regular ? .subheadline : .caption)
                         .foregroundStyle(newCustomIcon != nil ? .wikiAccent : .wikiSecondary)
                     Image(systemName: "chevron.up.chevron.down")
                         .font(.system(size: 9))
@@ -254,7 +363,7 @@ struct IngestManualFormSection: View {
             if newCustomIcon != nil {
                 Button(action: { newCustomIcon = nil }) {
                     Text(Localized.tr("ingest.iconReset"))
-                        .font(.caption2)
+                        .font(horizontalSizeClass == .regular ? .caption : .caption2)
                         .foregroundStyle(.wikiSecondary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 5)
@@ -274,6 +383,12 @@ struct SmartIngestPreview: View {
     let result: SmartIngestResult
     let onConfirm: () -> Void
     let onDiscard: () -> Void
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下从 12pt 升到 15pt
+    private var previewFont: Font {
+        horizontalSizeClass == .regular ? .subheadline : .caption
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -306,7 +421,7 @@ struct SmartIngestPreview: View {
 
             if !result.summary.isEmpty {
                 Text(result.summary)
-                    .font(.caption)
+                    .font(previewFont)
                     .foregroundStyle(.wikiSecondary)
                     .italic()
             }
@@ -327,7 +442,7 @@ struct SmartIngestPreview: View {
             if !result.relatedTitles.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(Localized.tr("ingest.suggestLinks"))
-                        .font(.caption.weight(.medium))
+                        .font(previewFont.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
 
                     ForEach(result.relatedTitles, id: \.self) { title in
@@ -335,32 +450,66 @@ struct SmartIngestPreview: View {
                             Image(systemName: "link")
                                 .font(.caption2)
                             Text("[[\(title)]]")
-                                .font(.caption)
+                                .font(previewFont)
                         }
                         .foregroundStyle(.wikiAccent)
                     }
                 }
             }
         }
-        .wikiCard()
+        .padding()
+        .background(Color.wikiCard)
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
     }
 }
 
 // MARK: - Ingest Tips Section
 struct IngestTipsSection: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             Text(Localized.tr("ingest.tips"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
 
-            WikiStepRow(number: 1, text: Localized.tr("ingest.tip1"))
-            WikiStepRow(number: 2, text: Localized.tr("ingest.tip2"))
-            WikiStepRow(number: 3, text: Localized.tr("ingest.tip3"))
-            WikiStepRow(number: 4, text: Localized.tr("ingest.tip4"))
-            WikiStepRow(number: 5, text: Localized.tr("ingest.tip5"))
+            // Three import method cards
+            HStack(spacing: 10) {
+                importMethodCard(
+                    icon: "doc.badge.plus",
+                    title: Localized.tr("ingest.method.file"),
+                    desc: Localized.tr("ingest.method.fileDesc")
+                )
+                importMethodCard(
+                    icon: "text.viewfinder",
+                    title: Localized.tr("ingest.method.ocr"),
+                    desc: Localized.tr("ingest.method.ocrDesc")
+                )
+                importMethodCard(
+                    icon: "pencil.and.list.clipboard",
+                    title: Localized.tr("ingest.method.manual"),
+                    desc: Localized.tr("ingest.method.manualDesc")
+                )
+            }
         }
-        .wikiCard()
         .padding(.horizontal)
+    }
+
+    private func importMethodCard(icon: String, title: String, desc: String) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(.wikiAccent)
+                .frame(maxWidth: .infinity)
+            Text(title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.wikiText)
+            Text(desc)
+                .font(.caption2)
+                .foregroundStyle(.wikiSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(10)
+        .background(Color.wikiCard)
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
     }
 }

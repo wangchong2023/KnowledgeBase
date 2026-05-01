@@ -119,6 +119,12 @@ struct WikiLabeledRow: View {
 struct WikiStepRow: View {
     let number: Int
     let text: String
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下从 12pt 升到 15pt
+    private var stepFont: Font {
+        horizontalSizeClass == .regular ? .subheadline : .caption
+    }
 
     var body: some View {
         HStack(spacing: 10) {
@@ -129,7 +135,7 @@ struct WikiStepRow: View {
                 .background(Circle().fill(Color.wikiAccent))
 
             Text(text)
-                .font(.caption)
+                .font(stepFont)
                 .foregroundStyle(.wikiText)
         }
     }
@@ -141,10 +147,16 @@ struct WikiChip: View {
     let text: String
     var color: Color = .wikiAccent
     var backgroundOpacity: Double = 0.15
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下从 10pt 升到 12pt
+    private var chipFont: Font {
+        horizontalSizeClass == .regular ? .caption : .caption2
+    }
 
     var body: some View {
         Text(text)
-            .font(.caption2)
+            .font(chipFont)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(color.opacity(backgroundOpacity))
@@ -160,13 +172,19 @@ struct WikiIconChip: View {
     let text: String
     var color: Color = .wikiAccent
     var isSelected: Bool = false
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下从 12pt 升到 15pt
+    private var chipFont: Font {
+        horizontalSizeClass == .regular ? .subheadline : .caption
+    }
 
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
                 .font(.caption)
             Text(text)
-                .font(.caption)
+                .font(chipFont)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -241,13 +259,19 @@ struct WikiCapsuleButton: View {
 /// 成功提示横幅。
 struct WikiSuccessBanner: View {
     let message: String
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    /// iPad 大屏幕下从 12pt 升到 15pt
+    private var bannerFont: Font {
+        horizontalSizeClass == .regular ? .subheadline : .caption
+    }
 
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundStyle(.green)
             Text(message)
-                .font(.caption)
+                .font(bannerFont)
                 .foregroundStyle(.green)
         }
         .padding()

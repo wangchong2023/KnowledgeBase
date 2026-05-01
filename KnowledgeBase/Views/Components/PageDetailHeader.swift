@@ -4,6 +4,8 @@ import SwiftUI
 /// Page detail header displaying type/status/confidence badges, title, aliases, tags, and meta info.
 struct PageDetailHeader: View {
     let page: WikiPage
+    var heroNamespace: Namespace.ID
+    @ObservedObject private var taskCenter = AITaskCenter.shared
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -32,6 +34,23 @@ struct PageDetailHeader: View {
             Text(page.type.displayName)
                 .font(.caption2)
                 .foregroundStyle(page.type.themedColor)
+            
+            // AI Status Indicator
+            if taskCenter.tasks.contains(where: { if case .running = $0.status { return true }; return false }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "cpu.fill")
+                        .font(.system(size: 10))
+                    Text("AI 运行中")
+                        .font(.system(size: 8, weight: .bold))
+                }
+                .foregroundStyle(.wikiAccent)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.wikiAccent.opacity(0.1))
+                .clipShape(Capsule())
+                .transition(.opacity.combined(with: .scale))
+            }
+
             if page.isPinned {
                 Spacer()
                 Image(systemName: "pin.fill")
@@ -45,7 +64,7 @@ struct PageDetailHeader: View {
     private var typeStatusConfidenceRow: some View {
         HStack(spacing: 10) {
             // Type badge
-            TypeBadge(page: page)
+            TypeBadge(page: page, heroNamespace: heroNamespace)
             
             // Status badge
             StatusBadge(page: page)
@@ -131,11 +150,13 @@ struct PageDetailHeader: View {
 // MARK: - Type Badge
 private struct TypeBadge: View {
     let page: WikiPage
+    var heroNamespace: Namespace.ID
     
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: page.displayIcon)
                 .font(.caption)
+                .matchedGeometryEffect(id: page.id, in: heroNamespace)
             Text(page.type.displayName)
                 .font(.caption.weight(.medium))
         }

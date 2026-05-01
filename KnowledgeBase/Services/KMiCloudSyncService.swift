@@ -67,8 +67,20 @@ class iCloudSyncService: ObservableObject {
     
     init() {
         // Check if iCloud is available BEFORE touching CKContainer
-        // CKContainer.default() can SIGTRAP on simulator or without proper entitlements
+        // CKContainer.default() can SIGTRAP on simulator or Mac Catalyst without proper entitlements
+        //
+        // Note: targetEnvironment(simulator) only matches iOS Simulator (iphonesimulator SDK).
+        // Mac Catalyst uses iphoneos SDK, so we also check for Mac Catalyst via compiler flag.
+        // We use canImport to detect macOS and wrap CloudKit access safely.
         #if targetEnvironment(simulator)
+        cloudKitAvailable = false
+        container = nil
+        database = nil
+        iCloudAvailable = false
+        syncStatus = .error(Localized.tr("icloud.notAvailable"))
+        #elseif canImport(AppKit)
+        // Mac Catalyst or macOS: CloudKit may not work without proper entitlements
+        // Gracefully disable rather than crash
         cloudKitAvailable = false
         container = nil
         database = nil
@@ -77,7 +89,7 @@ class iCloudSyncService: ObservableObject {
         #else
         let token = FileManager.default.ubiquityIdentityToken
         cloudKitAvailable = token != nil
-        
+
         if cloudKitAvailable {
             let ckr = CKContainer.default()
             container = ckr

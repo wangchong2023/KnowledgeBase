@@ -16,6 +16,7 @@ enum EditorPendingAction: Equatable {
     case wrap(wrapper: String)
     case insertMultiline(text: String)
     case wikilink
+    case ocr
 }
 
 /// Markdown 富文本编辑器视图
@@ -54,6 +55,9 @@ struct MarkdownEditorView: View {
     @State private var cursorState = CursorState()  ///< 光标状态（包含 UITextView executor 引用）
     /// 待执行的编辑器操作（由 toolbar 写入，由 representable 消费）
     @State private var pendingAction: EditorPendingAction?
+    @State private var showPhotosPicker = false
+    @State private var isProcessingOCR = false
+    @EnvironmentObject var ocrService: OCRService
 
     var body: some View {
         VStack(spacing: 0) {
@@ -79,6 +83,9 @@ struct MarkdownEditorView: View {
             Divider().background(Color.wikiBorder)
             contentEditor
         }
+        .ocrPicker(isPresented: $showPhotosPicker) { recognizedText in
+            cursorState.executor?.insertMultilineAtCursor(text: recognizedText)
+        }
         .background(Color.wikiBackground)
         .onAppear { editorContent = page.content }
         .onDisappear {
@@ -89,6 +96,7 @@ struct MarkdownEditorView: View {
         .sheet(isPresented: $showLinkPicker) {
             WikilinkPickerSheet(page: $page, editorContent: $editorContent)
         }
+    }
     }
 
     // MARK: - Title Editor
@@ -211,6 +219,9 @@ struct MarkdownEditorView: View {
             },
             onShowLinkPicker: {
                 showLinkPicker = true
+            },
+            onOCR: {
+                pendingAction = .ocr
             }
         )
     }
@@ -227,6 +238,45 @@ struct MarkdownEditorView: View {
             cursorState.executor?.insertMultilineAtCursor(text: text)
         case .wikilink:
             showLinkPicker = true
+        case .ocr:
+            // 弹出 PhotosPicker 的逻辑在 iOS 16+ 中通常配合 PhotosPicker 组件
+            // 这里我们手动触发一个隐藏的状态控制
+            showPhotosPicker = true
         }
+    }
+}
+
+// MARK: - PhotosPicker 包装（用于在编辑器中直接调起）
+import PhotosUI
+extension View {
+    func ocrPicker(isPresented: Binding<Bool>, onResult: @escaping (String) -> Void) -> some View {
+        self.modifier(OCRPickerModifier(isPresented: isPresented, onResult: onResult))
+    }
+}
+
+struct OCRPickerModifier: ViewModifier {
+    @Binding var isPresented: Bool
+    let onResult: (String) -> Void
+    @State private var selectedItem: PhotosPickerItem?
+    @EnvironmentObject var ocrService: OCRService
+
+    func body(content: Content) -> some View {
+        content
+            .photosPicker(isPresented: $isPresented, selection: $selectedItem, matching: .images)
+            .onChange(of: selectedItem) { _, newItem in
+                guard let newItem = newItem else { return }
+                Task {
+                    if let data = try? await newItem.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data) {
+                        do {
+                            let text = try await ocrService.recognizeText(from: image)
+                            await MainActor.run { onResult(text) }
+                        } catch {
+                            print("OCR Failed: \(error)")
+                        }
+                    }
+                    selectedItem = nil
+                }
+            }
     }
 }

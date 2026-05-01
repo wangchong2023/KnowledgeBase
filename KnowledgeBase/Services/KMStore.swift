@@ -1,12 +1,12 @@
 import SwiftUI
 import Combine
 
-// MARK: - KM Store (Facade)
-/// Coordinating facade that composes SQLiteStore (persistence), LinkService, LintService, IngestService,
-/// LogService, UndoService, BackupService, DeepLinkService, AccessibilityService, and PerformanceService.
-/// Views still reference `store` — internal logic is delegated to specialized services.
+// MARK: - KM 存储中心 (门面模式)
+/// 协调门面，组合了 SQLiteStore (持久化), LinkService, LintService, IngestService,
+/// LogService, UndoService, BackupService, DeepLinkService, AccessibilityService 和 PerformanceService。
+/// 视图层统一引用 `store` —— 内部逻辑委派给各个专项服务处理。
 class KMStore: ObservableObject {
-    // MARK: - Services
+    // MARK: - 专项服务
     let sqliteStore = SQLiteStore()
     let linkService = LinkService()
     let lintService = LintService()
@@ -17,12 +17,42 @@ class KMStore: ObservableObject {
     let deepLinkService = DeepLinkService()
     let accessibilityService = AccessibilityService()
     let performanceService = PerformanceService()
+    let llmService = LLMService()
+    let snapshotService = SnapshotService()
+    let insightService = KnowledgeInsightService()
+    private let clusteringService = GraphClusteringService()
+    
+    @Published var clusters: [GraphClusteringService.Cluster] = []
 
     // MARK: - UI State
     @Published var searchText: String = ""
     @Published var selectedPageID: UUID?
     @Published var lintIssues: [LintIssue] = []
     @Published var navigationPath = NavigationPath()
+    @Published var showPerfDashboard = false
+    
+    // MARK: - AI 维护状态 (Karpathy 模式)
+    // MARK: - AI 维护状态 (Karpathy 模式)
+    @Published var refactorSuggestions: [RefactorSuggestion] = []
+    @Published var potentialLinks: [PotentialLinkSuggestion] = []
+    @Published var isScanningAI = false
+    @Published var isAdvancedSearching = false
+    @Published var lastSearchDiagnostic: SearchDiagnosticInfo?
+    @Published var weeklyInsight: KnowledgeInsightService.WeeklyInsight?
+
+    /// 当前选中的工具视图（用于驱动 NavigationSplitView 三级结构中的中间列内容）
+    @Published var selectedTool: ToolItem?
+
+    /// 工具视图枚举，用于三级 NavigationSplitView 导航
+    enum ToolItem: Hashable {
+        case index
+        case chat
+        case log
+        case lint
+        case tagCloud
+        case collab
+        case taskCenter
+    }
 
     // MARK: - Convenience Accessors (forward to SQLiteStore)
     var pages: [WikiPage] { sqliteStore.pages }
@@ -36,18 +66,34 @@ class KMStore: ObservableObject {
     var activeCount: Int { sqliteStore.activeCount }
     var totalWords: Int { sqliteStore.totalWords }
 
-    // MARK: - Init
+    // MARK: - 初始化
     init() {
-        // Wire up SQLiteStore callbacks
+        setupServiceBindings()
+        seedInitialDataIfNeeded()
+        updateInitialMetrics()
+    }
+
+    /// 设置各个服务之间的联动绑定
+    private func setupServiceBindings() {
+        // 配置 SQLiteStore 回调
         sqliteStore.onLog = { [weak self] action, target, details in
             self?.logService.addLog(action: action, target: target, details: details)
         }
         sqliteStore.onSaveNeeded = { [weak self] in
-            // Trigger objectWillChange so SwiftUI picks up any side effects
+            // 触发 objectWillChange 以确保 SwiftUI 捕捉到副作用
             self?.objectWillChange.send()
         }
 
-        // Forward SQLiteStore changes to KMStore's objectWillChange
+        // 将子服务的变更转发给 KMStore
+        let servicesToObserve: [AnyObject] = [sqliteStore, logService, undoService, backupService, deepLinkService, llmService]
+        
+        // 监听 LLM 状态变更
+        llmService.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+        
+        // 监听存储层的页面变更
         sqliteStore.$pages
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
@@ -58,7 +104,6 @@ class KMStore: ObservableObject {
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
 
-        // Forward UndoService changes
         undoService.$canUndo
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
@@ -69,32 +114,30 @@ class KMStore: ObservableObject {
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
         
-        // Forward BackupService changes
         backupService.$backupEntries
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
         
-        // Forward DeepLinkService changes
         deepLinkService.$pendingDeepLink
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+    }
 
-        // Seed default content if empty
+    /// 如果数据库为空，植入默认欢迎内容
+    private func seedInitialDataIfNeeded() {
         if sqliteStore.pages.isEmpty {
             sqliteStore.seedDefaultContent { [weak self] action, target, details in
                 self?.logService.addLog(action: action, target: target, details: details)
             }
         }
-        
-        // Update performance metrics
+    }
+
+    /// 更新初始指标和索引
+    private func updateInitialMetrics() {
         if !sqliteStore.pages.isEmpty {
             performanceService.updatePageMetrics(pages: sqliteStore.pages)
-        }
-        
-        // Index pages for Spotlight
-        if !sqliteStore.pages.isEmpty {
             deepLinkService.indexPages(sqliteStore.pages)
         }
     }
@@ -103,17 +146,21 @@ class KMStore: ObservableObject {
 
     // MARK: - CRUD (delegates to SQLiteStore, with undo + backup support)
     @discardableResult
-    func createPage(title: String, type: PageType, customIcon: String? = nil, content: String = "", tags: [String] = []) -> WikiPage {
+    func createPage(title: String, type: PageType, customIcon: String? = nil, content: String = "", tags: [String] = [], forceDeepScan: Bool = false) -> WikiPage {
         undoService.pushSnapshot(sqliteStore.pages)
-        let page = sqliteStore.createPage(title: title, type: type, customIcon: customIcon, content: content, tags: tags)
+        let page = sqliteStore.createPage(title: title, type: type, customIcon: customIcon, content: content, tags: tags, forceDeepScan: forceDeepScan)
         backupService.markDirty()
         performanceService.updatePageMetrics(pages: sqliteStore.pages)
         return page
     }
 
-    func updatePage(_ page: WikiPage) {
+    func updatePage(_ page: WikiPage, forceDeepScan: Bool = false) {
+        // 在更新前保存物理快照
+        if let current = pageByID(page.id) {
+            snapshotService.saveSnapshot(for: current)
+        }
         undoService.pushSnapshot(sqliteStore.pages)
-        sqliteStore.updatePage(page)
+        sqliteStore.updatePage(page, forceDeepScan: forceDeepScan)
         backupService.markDirty()
         deepLinkService.indexPages(sqliteStore.pages)
     }
@@ -164,12 +211,80 @@ class KMStore: ObservableObject {
 
     // MARK: - Search (delegates to LinkService)
     var searchResults: [WikiPage] {
-        linkService.search(query: searchText, in: sqliteStore.pages)
+        linkService.search(query: searchText, in: pages)
+    }
+
+    /// 执行 AI 驱动的高级混合检索 (QR -> Hybrid Recall -> Rerank)
+    func performAdvancedSearch(query: String) async -> [WikiPage] {
+        guard !query.isEmpty else { return pages }
+        
+        await MainActor.run { 
+            isAdvancedSearching = true 
+            lastSearchDiagnostic = nil
+        }
+        
+        // 1. 查询改写 (Query Rewrite)
+        let rewrittenQuery = await llmService.rewriteQuery(query)
+        
+        // 2. 混合召回 (Hybrid Recall with RRF) - 使用带诊断信息的版本
+        let hybridResult = linkService.hybridSearchWithDiagnostics(
+            query: rewrittenQuery, 
+            in: pages, 
+            embeddingManager: sqliteStore.embeddingManager
+        )
+        let candidates = hybridResult.results
+        
+        // 记录初步诊断信息
+        await MainActor.run {
+            self.lastSearchDiagnostic = SearchDiagnosticInfo(
+                query: query,
+                rewrittenQuery: rewrittenQuery,
+                ftsCount: candidates.count, // 这里简化
+                vectorCount: hybridResult.diagnostics.count,
+                rrfTopResults: hybridResult.diagnostics
+            )
+        }
+        
+        // 3. AI 智能重排 (AI Rerank) - 仅对 Top 10 进行精排以平衡性能
+        let topCandidates = Array(candidates.prefix(10))
+        let remaining = candidates.count > 10 ? Array(candidates.dropFirst(10)) : []
+        
+        do {
+            let reranked = try await llmService.rerank(query: query, candidates: topCandidates)
+            
+            await MainActor.run { isAdvancedSearching = false }
+            return reranked + remaining
+        } catch {
+            print("[Advanced Search] Rerank failed: \(error)")
+            await MainActor.run { isAdvancedSearching = false }
+            return candidates
+        }
     }
 
     // MARK: - Tag Aggregation (delegates to LinkService)
     var allTags: [(tag: String, count: Int)] {
         linkService.allTags(in: sqliteStore.pages)
+    }
+
+    /// 重命名页面：更新标题并同步所有双向链接引用
+    func renamePage(_ page: WikiPage, to newTitle: String) {
+        let oldTitle = page.title
+        var updated = page
+        updated.title = newTitle
+        sqliteStore.updatePage(updated)
+        
+        // 同步更新所有引用该页面的链接
+        for i in sqliteStore.pages.indices {
+            let p = sqliteStore.pages[i]
+            if p.content.contains("[[\(oldTitle)]]") {
+                var refPage = p
+                refPage.content = refPage.content.replacingOccurrences(of: "[[\(oldTitle)]]", with: "[[\(newTitle)]]")
+                sqliteStore.updatePage(refPage)
+            }
+        }
+        
+        backupService.markDirty()
+        objectWillChange.send()
     }
 
     /// 重命名标签：将所有页面中的 oldTag 替换为 newTag
@@ -192,6 +307,85 @@ class KMStore: ObservableObject {
         backupService.markDirty()
     }
 
+    /// 批量删除多个标签
+    func deleteTags(_ tags: Set<String>) {
+        sqliteStore.core.beginTransaction()
+        for tag in tags {
+            deleteTag(tag)
+        }
+        sqliteStore.core.commitTransaction()
+        objectWillChange.send()
+    }
+
+    // MARK: - AI 维护操作
+    
+    /// 运行 AI 扫描，发现重构机会和潜在链接
+    func runAIScan() async {
+        guard llmService.isEnabled else { return }
+        
+        await MainActor.run { isScanningAI = true }
+        
+        do {
+            // 1. 获取重构建议（随机抽取一部分页面进行分析，避免 Token 过载）
+            let samplePages = Array(sqliteStore.pages.prefix(10))
+            let suggestions = try await llmService.analyzeForRefactoring(pages: samplePages)
+            
+            // 2. 发现潜在链接（针对最近活跃的页面）
+            var links: [PotentialLinkSuggestion] = []
+            let activePages = sqliteStore.pages.sorted(by: { $0.updated > $1.updated }).prefix(5)
+            let existingTitles = sqliteStore.pages.map { $0.title }
+            
+            for page in activePages {
+                let found = try await llmService.discoverPotentialLinks(content: page.content, existingTitles: existingTitles)
+                for title in found {
+                    links.append(PotentialLinkSuggestion(sourcePageID: page.id, sourceTitle: page.title, targetTitle: title))
+                }
+            }
+            
+            await MainActor.run {
+                self.refactorSuggestions = suggestions
+                self.potentialLinks = links
+                self.isScanningAI = false
+            }
+        } catch {
+            print("[AI Scan] Error: \(error)")
+            await MainActor.run { isScanningAI = false }
+        }
+    }
+    
+    /// 应用重构建议
+    func applyRefactorSuggestion(_ suggestion: RefactorSuggestion) {
+        // 根据类型执行具体操作 (示例：重命名)
+        if suggestion.type == "rename", let page = sqliteStore.pages.first(where: { $0.title == suggestion.target }) {
+            renamePage(page, to: suggestion.suggestion)
+        }
+        refactorSuggestions.removeAll { $0.id == suggestion.id }
+    }
+    
+    /// 应用潜在链接建议
+    func applyPotentialLink(_ suggestion: PotentialLinkSuggestion) {
+        if let index = sqliteStore.pages.firstIndex(where: { $0.id == suggestion.sourcePageID }) {
+            var page = sqliteStore.pages[index]
+            // 简单追加链接到末尾
+            page.content += "\n\n相关链接: [[\(suggestion.targetTitle)]]"
+            updatePage(page)
+        }
+        potentialLinks.removeAll { $0.id == suggestion.id }
+    }
+    
+    /// 生成知识周报
+    func generateWeeklyInsight() async {
+        guard llmService.isEnabled else { return }
+        do {
+            let insight = try await insightService.generateWeeklyInsight(pages: sqliteStore.pages, llmService: llmService)
+            await MainActor.run {
+                self.weeklyInsight = insight
+            }
+        } catch {
+            print("[Weekly Insight] Error: \(error)")
+        }
+    }
+
     // MARK: - Lint (delegates to LintService)
     func runLint() {
         let result = performanceService.measure("lint") {
@@ -202,17 +396,70 @@ class KMStore: ObservableObject {
     }
 
     // MARK: - Ingest (delegates to IngestService)
-    func ingestRawContent(title: String, content: String, type: PageType = .source) -> WikiPage {
+    /// 带智能折叠的摄入：如果标题已存在，则融合内容；否则创建新页面
+    func ingestWithFolding(title: String, content: String, type: PageType = .source, forceDeepScan: Bool = false) async throws -> WikiPage {
+        if let existingPage = sqliteStore.pageByTitle(title) {
+            // 触发折叠流程 (Folding)前保存快照
+            snapshotService.saveSnapshot(for: existingPage)
+            
+            let mergedContent = try await llmService.foldContent(
+                existingContent: existingPage.content,
+                newContent: content,
+                title: title
+            )
+            
+            var updatedPage = existingPage
+            updatedPage.content = mergedContent
+            updatedPage.updated = Date()
+            sqliteStore.updatePage(updatedPage, forceDeepScan: forceDeepScan)
+            
+            await MainActor.run {
+                self.loadFromDisk()
+            }
+            logService.addLog(action: "增量折叠", target: title, details: "新资料已融入现有页面")
+            return updatedPage
+        } else {
+            // 常规摄入
+            let page = ingestRawContent(title: title, content: content, type: type, forceDeepScan: forceDeepScan)
+            return page
+        }
+    }
+
+    func ingestRawContent(title: String, content: String, type: PageType = .source, forceDeepScan: Bool = false) -> WikiPage {
         undoService.pushSnapshot(sqliteStore.pages)
         let page = ingestService.ingestRawContent(
             title: title,
             content: content,
             type: type,
+            forceDeepScan: forceDeepScan,
+            llmService: llmService,
             pageStore: sqliteStore  // SQLiteStore conforms to same interface as PageStore
         )
         backupService.markDirty()
         deepLinkService.indexPages(sqliteStore.pages)
         performanceService.updatePageMetrics(pages: sqliteStore.pages)
+        return page
+    }
+
+    func ingestURL(_ urlString: String, forceDeepScan: Bool = true) async throws -> WikiPage {
+        let page = try await ingestService.ingestURL(urlString: urlString, forceDeepScan: forceDeepScan, llmService: llmService, pageStore: sqliteStore)
+        await MainActor.run {
+            self.loadFromDisk()
+        }
+        return page
+    }
+
+    func ingestDocument(at url: URL) -> WikiPage? {
+        undoService.pushSnapshot(sqliteStore.pages)
+        let page = ingestService.ingestDocument(
+            at: url,
+            pageStore: sqliteStore
+        )
+        if page != nil {
+            backupService.markDirty()
+            deepLinkService.indexPages(sqliteStore.pages)
+            performanceService.updatePageMetrics(pages: sqliteStore.pages)
+        }
         return page
     }
 
@@ -246,6 +493,15 @@ class KMStore: ObservableObject {
         newPage.id = UUID()
         sqliteStore.pages.append(newPage)
         deepLinkService.indexPages(sqliteStore.pages)
+    }
+
+    /// Insert a page received from a remote collaboration peer.
+    /// Does NOT push undo snapshot since this is a remote change.
+    func insertRemotePage(_ page: WikiPage) {
+        if !sqliteStore.pages.contains(where: { $0.id == page.id }) {
+            sqliteStore.pages.append(page)
+            deepLinkService.indexPages(sqliteStore.pages)
+        }
     }
 
     func seedDefaultContent() {
@@ -294,5 +550,121 @@ class KMStore: ObservableObject {
         case .ingest, .graph, .chat:
             break // Tab navigation handled by ContentView
         }
+    }
+    
+    // MARK: - File System Sync (Karpathy Pattern)
+    func exportToFolder(at url: URL) throws {
+        let syncService = FileSystemSyncService()
+        try syncService.exportToMarkdown(pages: sqliteStore.pages, destinationURL: url)
+        logService.addLog(action: "物理同步", target: "全库导出", details: "知识库已同步至 \(url.lastPathComponent)")
+    }
+    
+    func runPartialAIScan(for page: WikiPage) {
+        // Logic to trigger AI link suggestions only for this page
+        // For now, it could just refresh the global suggestions and filter
+        Task {
+            await runAIScan()
+        }
+    }
+    
+    // MARK: - Stats & Insights
+    
+    struct KnowledgeGrowthPoint: Identifiable {
+        let id = UUID()
+        let date: Date
+        let count: Int
+    }
+    
+    var growthSeries: [KnowledgeGrowthPoint] {
+        let allPages = sqliteStore.pages.sorted { $0.created < $1.created }
+        guard !allPages.isEmpty else { return [] }
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        var series: [KnowledgeGrowthPoint] = []
+        
+        // 计算过去 30 天的每日累计总数
+        for daysAgo in (0...30).reversed() {
+            if let date = calendar.date(byAdding: .day, value: -daysAgo, to: today) {
+                let count = allPages.filter { $0.created <= date }.count
+                series.append(KnowledgeGrowthPoint(date: date, count: count))
+            }
+        }
+        return series
+    }
+    
+    // MARK: - Clustering
+    
+    func updateClusters(k: Int = 5) {
+        // 获取所有有向量的页面
+        let embeddings = sqliteStore.embeddingManager.vectorizeChunks(chunks: pages.map { $0.title }) // 这里简化，实际应用页面向量
+        // 实际上我们应该从数据库中获取已有的页面向量
+        let allEmbeddings = sqliteStore.core.selectAllEmbeddings()
+        clusters = clusteringService.cluster(pages: pages, embeddings: allEmbeddings, k: k)
+    }
+    
+    /// 寻找语义相似的页面 (Semantic Recommendation)
+    func findSimilarPages(for page: WikiPage, limit: Int = 3) -> [WikiPage] {
+        // 获取当前页面的向量（优先从数据库查询）
+        guard let pageEmbedding = sqliteStore.core.selectEmbedding(for: page.id) else {
+            return []
+        }
+        
+        // 过滤掉当前页面
+        let candidates = sqliteStore.pages.filter { $0.id != page.id }
+        
+        let scored = candidates.compactMap { candidate -> (WikiPage, Float)? in
+            guard let candidateEmbedding = sqliteStore.core.selectEmbedding(for: candidate.id) else {
+                return nil
+            }
+            let score = EmbeddingManager.cosineSimilarity(pageEmbedding, candidateEmbedding)
+            return (candidate, score)
+        }
+        
+        return scored
+            .filter { $0.1 > 0.65 } // 相似度阈值
+            .sorted { $0.1 > $1.1 }
+            .prefix(limit)
+            .map { $0.0 }
+    }
+    
+    /// 挂载外部文件夹 (External Vault)
+    func mountVault(at url: URL) {
+        // 请求文件夹访问权限 (macOS/iOS Scoped URL)
+        guard url.startAccessingSecurityScopedResource() else {
+            addLog(action: "外部同步", target: url.lastPathComponent, details: "获取权限失败")
+            return
+        }
+        defer { url.stopAccessingSecurityScopedResource() }
+        
+        let externalPages = VaultService.shared.scan(directory: url)
+        
+        undoService.pushSnapshot(sqliteStore.pages)
+        var newCount = 0
+        var updateCount = 0
+        
+        for extPage in externalPages {
+            // 根据标题判断是否存在
+            if let existingIndex = sqliteStore.pages.firstIndex(where: { $0.title == extPage.title }) {
+                // 如果外部内容更新，则更新本地内容
+                if sqliteStore.pages[existingIndex].content != extPage.content {
+                    sqliteStore.pages[existingIndex].content = extPage.content
+                    updateCount += 1
+                }
+            } else {
+                // 创建新页面
+                let newPage = WikiPage(
+                    title: extPage.title,
+                    content: extPage.content,
+                    type: .source,
+                    sourceURL: extPage.url.path
+                )
+                sqliteStore.pages.append(newPage)
+                newCount += 1
+            }
+        }
+        
+        addLog(action: "外部同步", target: url.lastPathComponent, details: "新增 \(newCount) 页，更新 \(updateCount) 页")
+        saveToDisk()
     }
 }

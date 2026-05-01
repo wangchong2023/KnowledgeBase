@@ -69,7 +69,7 @@ struct WikilinkPickerSheet: View {
                         Spacer()
                         
                         Image(systemName: "plus.circle")
-                            .foregroundStyle(.wikiAccent)
+                            .foregroundStyle(.wikiText)
                     }
                 }
                 .buttonStyle(.plain)

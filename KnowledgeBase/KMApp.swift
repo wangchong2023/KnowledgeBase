@@ -9,17 +9,14 @@ struct KMApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // ContentView 已在 body 内读取 themeManager.accentColorRaw 触发重建
-            // KMApp 这里的 .tint 依赖 ContentView 的 environment 传递即可
             ZStack {
                 ContentView()
                     .environmentObject(store)
                     .environmentObject(themeManager)
                     .environmentObject(llmService)
                     .preferredColorScheme(themeManager.colorSchemeMode.preferredColorScheme)
-                    // 将主题色注入 environment，使所有子视图通过 @Environment(\.wikiAccentColor) 获取最新值
                     .environment(\.wikiAccentColor, themeManager.accentColor)
-                
+
                 if !hasSeenSplash {
                     SplashView(onDismiss: {
                         withAnimation(.easeInOut(duration: 0.6)) {
@@ -31,6 +28,15 @@ struct KMApp: App {
                 }
             }
             .animation(.easeInOut(duration: 0.6), value: hasSeenSplash)
+        }
+        // Register keyboard shortcuts for Mac Catalyst
+        .commands {
+            CommandGroup(replacing: .newItem) {
+                Button("New Page") {
+                    NotificationCenter.default.post(name: .createNewPage, object: nil)
+                }
+                .keyboardShortcut("n", modifiers: .command)
+            }
         }
     }
 }

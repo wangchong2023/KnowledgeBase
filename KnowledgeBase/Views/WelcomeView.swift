@@ -1,10 +1,15 @@
 import SwiftUI
+import Charts
 
 // MARK: - Welcome View
 struct WelcomeView: View {
     @EnvironmentObject var store: KMStore
     @Binding var selectedTab: ContentView.AppTab
     @State private var showCreateSheet = false
+    
+    private let columns = [
+        GridItem(.adaptive(minimum: 160, maximum: .infinity), spacing: 20)
+    ]
     
     var body: some View {
         ScrollView {
@@ -48,13 +53,85 @@ struct WelcomeView: View {
                 .padding(.top, 40)
                 
                 // Stats
-                HStack(spacing: 20) {
+                LazyVGrid(columns: columns, spacing: 20) {
                     StatCard(title: Localized.tr("stat.totalPages"), value: "\(store.totalPages)", icon: "doc.richtext.fill", color: .wikiAccent)
                     StatCard(title: Localized.tr("stat.entities"), value: "\(store.entityCount)", icon: "person.text.rectangle.fill", color: .wikiEntity)
                     StatCard(title: Localized.tr("stat.concepts"), value: "\(store.conceptCount)", icon: "lightbulb.fill", color: .wikiConcept)
                     StatCard(title: Localized.tr("stat.sources"), value: "\(store.sourceCount)", icon: "doc.plaintext.fill", color: .wikiSource)
+                    
+                    StatCard(title: Localized.tr("stat.totalWords"), value: formatNumber(store.totalWords), icon: "text.word.spacing", color: .wikiEntity)
+                    StatCard(title: Localized.tr("stat.stubPages"), value: "\(store.stubCount)", icon: "exclamationmark.triangle", color: .wikiComparison)
+                    
+                    Button(action: {
+                        store.performanceService.updateMemoryUsage()
+                        store.showPerfDashboard = true
+                    }) {
+                        StatCard(title: Localized.tr("stat.performance"), value: String(format: "%.1f MB", store.performanceService.metrics.memoryUsageMB), icon: "speedometer", color: .blue)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal)
+
+                if !store.pages.isEmpty {
+                    WeeklyInsightCard()
+                        .padding(.horizontal)
+                }
+
+                // Knowledge Growth Chart
+                if !store.pages.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "chart.line.uptrend.xyaxis")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.wikiText)
+                            Text("知识库增长趋势")
+                                .font(.headline)
+                                .foregroundStyle(.wikiText)
+                            Spacer()
+                        }
+                        
+                        Chart(store.growthSeries) { point in
+                            AreaMark(
+                                x: .value("日期", point.date),
+                                y: .value("页面数", point.count)
+                            )
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.wikiAccent.opacity(0.3), .wikiAccent.opacity(0.05)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                            .interpolationMethod(.catmullRom)
+                            
+                            LineMark(
+                                x: .value("日期", point.date),
+                                y: .value("页面数", point.count)
+                            )
+                            .foregroundStyle(.wikiAccent)
+                            .interpolationMethod(.catmullRom)
+                            .lineStyle(StrokeStyle(lineWidth: 3))
+                        }
+                        .frame(height: 120)
+                        .chartXAxis {
+                            AxisMarks(values: .stride(by: .day, count: 7)) { value in
+                                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4, 4]))
+                                AxisValueLabel(format: .dateTime.month().day())
+                            }
+                        }
+                        .chartYAxis {
+                            AxisMarks { value in
+                                AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5, dash: [4, 4]))
+                                AxisValueLabel()
+                            }
+                        }
+                    }
+                    .padding(20)
+                    .background(Color.wikiCard)
+                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.medium))
+                    .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 4)
+                    .padding(.horizontal)
+                }
 
                 // 空知识库引导
                 if store.pages.isEmpty {
@@ -63,7 +140,7 @@ struct WelcomeView: View {
                         HStack {
                             Image(systemName: "sparkles")
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(.wikiAccent)
+                                .foregroundStyle(.wikiText)
                             Text(Localized.tr("welcome.quickStart"))
                                 .font(.headline)
                                 .foregroundStyle(.wikiText)
@@ -104,7 +181,7 @@ struct WelcomeView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "bolt.fill")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(.wikiAccent)
+                            .foregroundStyle(.wikiText)
                         Text(Localized.tr("quickStart"))
                             .font(.headline)
                             .foregroundStyle(.wikiText)
@@ -133,7 +210,7 @@ struct WelcomeView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.caption.weight(.semibold))
-                                .foregroundStyle(.wikiAccent)
+                                .foregroundStyle(.wikiText)
                             Text(Localized.tr("recentUpdates"))
                                 .font(.headline)
                                 .foregroundStyle(.wikiText)
@@ -156,7 +233,7 @@ struct WelcomeView: View {
                             WikiGlow(icon: "pin.fill", color: .wikiAccent, size: 20)
                             Label(Localized.tr("pinned"), systemImage: "pin.fill")
                                 .font(.headline)
-                                .foregroundStyle(.wikiAccent)
+                                .foregroundStyle(.wikiText)
                             Spacer()
                         }
                         .padding(.horizontal)
@@ -174,5 +251,14 @@ struct WelcomeView: View {
         .sheet(isPresented: $showCreateSheet) {
             CreatePageView()
         }
+    }
+
+    private func formatNumber(_ n: Int) -> String {
+        if n >= 10000 {
+            return String(format: "%.1f万", Double(n) / 10000.0)
+        } else if n >= 1000 {
+            return String(format: "%.1fk", Double(n) / 1000.0)
+        }
+        return "\(n)"
     }
 }

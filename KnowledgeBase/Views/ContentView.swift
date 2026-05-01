@@ -6,7 +6,6 @@ struct ContentView: View {
     @StateObject private var tooltipManager = TooltipManager.shared
     @State private var selectedTab: AppTab = .wiki
     @State private var showCreateSheet = false
-    @State private var showPerfDashboard = false
     @State private var languageForceUpdate: Bool = false
     
     enum AppTab: String, CaseIterable {
@@ -42,7 +41,53 @@ struct ContentView: View {
         // 不能放到计算属性里，否则 SwiftUI diff 不会感知变化
         let tintColor = ThemeManager.colorForName(themeManager.accentColorRaw)
         
-        return TabView(selection: $selectedTab) {
+        if #available(iOS 18, *) {
+            modernTabView(tintColor: tintColor)
+        } else {
+            legacyTabView(tintColor: tintColor)
+        }
+    }
+    
+    // MARK: - iOS 18+ Modern TabView (Bottom TabBar — consistent on iPhone & iPad)
+    @available(iOS 18, *)
+    @ViewBuilder
+    private func modernTabView(tintColor: Color) -> some View {
+        TabView(selection: $selectedTab) {
+            Tab(AppTab.wiki.displayTitle, systemImage: AppTab.wiki.icon, value: AppTab.wiki) {
+                wikiTabContent
+            }
+
+            Tab(AppTab.graph.displayTitle, systemImage: AppTab.graph.icon, value: AppTab.graph) {
+                graphTabContent
+            }
+
+            Tab(AppTab.search.displayTitle, systemImage: AppTab.search.icon, value: AppTab.search) {
+                searchTabContent
+            }
+
+            Tab(AppTab.ingest.displayTitle, systemImage: AppTab.ingest.icon, value: AppTab.ingest) {
+                ingestTabContent
+            }
+
+            Tab(AppTab.settings.displayTitle, systemImage: AppTab.settings.icon, value: AppTab.settings) {
+                SettingsView(languageForceUpdate: $languageForceUpdate)
+            }
+        }
+        .tint(tintColor)
+        .onOpenURL { url in
+            if store.handleDeepLink(url) {
+                store.consumeDeepLink()
+            }
+        }
+        .sheet(isPresented: $store.showPerfDashboard) {
+            PerformanceDashboardView(service: store.performanceService)
+        }
+    }
+    
+    // MARK: - iOS 17 Legacy TabView (Bottom TabBar)
+    @ViewBuilder
+    private func legacyTabView(tintColor: Color) -> some View {
+        TabView(selection: $selectedTab) {
             wikiTabContent
                 .accessibilityIdentifier("Wiki")
                 .tabItem {
@@ -84,7 +129,7 @@ struct ContentView: View {
                 store.consumeDeepLink()
             }
         }
-        .sheet(isPresented: $showPerfDashboard) {
+        .sheet(isPresented: $store.showPerfDashboard) {
             PerformanceDashboardView(service: store.performanceService)
         }
     }

@@ -137,7 +137,14 @@ final class LLMContextBuilder {
         \(Localized.tr("llm.ingest.rawContent"))
         \(rawContent)
         
-        \(Localized.tr("llm.ingest.jsonFormat"))
+        ---
+        ## 结构化规范 (Schema Rules)
+        对于识别出的不同类型，请务必遵守以下内容结构和提取要求：
+        
+        1. **实体 (entity)**: 提取明确定义，列出核心属性。必须发现并建立与其他实体的双向链接。
+        2. **概念 (concept)**: 重点解释底层原理和应用场景。内容要求高度概括且专业。
+        
+        请严格按照以下 JSON 格式输出结果：
         {
           "compiledContent": "\(Localized.tr("llm.ingest.jsonCompiledContent"))",
           "suggestedTags": ["\(Localized.tr("llm.ingest.jsonSuggestedTags"))1", "\(Localized.tr("llm.ingest.jsonSuggestedTags"))2"],
@@ -145,6 +152,24 @@ final class LLMContextBuilder {
           "relatedTitles": [],
           "summary": "\(Localized.tr("llm.ingest.jsonSummary"))"
         }
+        """
+    }
+    
+    // MARK: - Query Rewrite Builder
+    func buildRewritePrompt(query: String) -> String {
+        """
+        你是一位知识检索专家。请分析以下“用户原始查询”，并将其改写为一组更专业的“结构化检索词”。
+        
+        要求：
+        1. 识别查询中的核心概念、实体和技术术语。
+        2. 补全缩写（如“AI”改为“人工智能”，“Karpathy”改为“Andrej Karpathy”）。
+        3. 扩展相关的近义词或相关领域词。
+        4. 如果查询带有时间属性（如“最近”），请考虑上下文含义。
+        
+        用户原始查询：\(query)
+        
+        请直接输出改写后的检索字符串，各关键词以逗号分隔，不要返回任何解释。
+        检索集合：
         """
     }
 }

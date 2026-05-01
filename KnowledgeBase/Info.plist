@@ -23,13 +23,15 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
-		<false/>
+		<true/>
 	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
@@ -77,5 +79,7 @@
 	<false/>
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 KnowledgeBase. All rights reserved.</string>
 </dict>
 </plist>
