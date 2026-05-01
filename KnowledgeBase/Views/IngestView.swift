@@ -53,7 +53,7 @@ struct IngestView: View {
                             onPerformIngest: performIngest,
                             onConfirmSmartIngest: confirmSmartIngest
                         )
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                        .transition(.opacity)
                     }
 
                     IngestTipsSection()
@@ -119,6 +119,7 @@ struct IngestView: View {
 
                 isIngesting = false
                 ingestSuccess = true
+                HapticManager.success()
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     resetForm()
@@ -154,6 +155,7 @@ struct IngestView: View {
 
         smartResult = nil
         ingestSuccess = true
+        HapticManager.success()
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             resetForm()

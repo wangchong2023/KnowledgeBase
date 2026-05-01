@@ -22,7 +22,7 @@ struct AccentColorPicker: View {
                         let isSelected = themeManager.accentColorRaw == color
                         Button(action: { themeManager.setAccentColor(color) }) {
                             Circle()
-                                .fill(Color.wikiNamed(color))
+                                .fill(themeManager.colorForName(color))
                                 .frame(width: 28, height: 28)
                                 .overlay(
                                     Circle()
@@ -154,20 +154,3 @@ struct InfoRow: View {
     }
 }
 
-// MARK: - Color Extension
-extension Color {
-    /// 按名称获取预定义颜色。
-    static func wikiNamed(_ name: String) -> Color {
-        switch name {
-        case "blue": return .blue
-        case "purple": return .purple
-        case "green": return .green
-        case "orange": return .orange
-        case "pink": return .pink
-        case "red": return .red
-        case "teal": return .teal
-        case "indigo": return .indigo
-        default: return .blue
-        }
-    }
-}

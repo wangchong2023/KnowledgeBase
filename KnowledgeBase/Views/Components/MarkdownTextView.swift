@@ -73,9 +73,13 @@ struct MarkdownTextViewRepresentable: UIViewRepresentable {
                 uiView.selectedRange = currentSelected
             }
         }
-        // 同步 cursorState → binding
-        cursorPosition = cursorState.cursorPosition
-        selectedRange = cursorState.selectedRange
+        // 同步 cursorState → binding，推迟到下一个 run loop 避免在 view update 期间修改 state
+        let pos = cursorState.cursorPosition
+        let range = cursorState.selectedRange
+        DispatchQueue.main.async {
+            cursorPosition = pos
+            selectedRange = range
+        }
     }
 
     func makeCoordinator() -> MarkdownTextViewCoordinator {

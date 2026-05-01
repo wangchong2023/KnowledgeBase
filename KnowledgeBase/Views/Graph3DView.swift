@@ -1,58 +1,5 @@
 import SwiftUI
 import SceneKit
-import UIKit
-
-// MARK: - Tappable Scene View Representable
-struct TappableSceneView: UIViewRepresentable {
-    let scene: SCNScene?
-    let onNodeTap: (UUID) -> Void
-
-    func makeUIView(context: Context) -> SCNView {
-        let scnView = SCNView()
-        scnView.scene = scene
-        scnView.allowsCameraControl = true
-        scnView.autoenablesDefaultLighting = true
-        scnView.backgroundColor = .clear
-        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap(_:)))
-        scnView.addGestureRecognizer(tapGesture)
-        return scnView
-    }
-
-    func updateUIView(_ uiView: SCNView, context: Context) {
-        uiView.scene = scene
-    }
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onNodeTap: onNodeTap)
-    }
-
-    class Coordinator: NSObject {
-        let onNodeTap: (UUID) -> Void
-
-        init(onNodeTap: @escaping (UUID) -> Void) {
-            self.onNodeTap = onNodeTap
-        }
-
-        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            guard let scnView = gesture.view as? SCNView,
-                  scnView.scene != nil else { return }
-            let location = gesture.location(in: scnView)
-            let hitResults = scnView.hitTest(location, options: [SCNHitTestOption.searchMode: SCNHitTestSearchMode.all.rawValue])
-            for result in hitResults {
-                if let name = result.node.name, let uuid = UUID(uuidString: name) {
-                    onNodeTap(uuid)
-                    return
-                }
-                // Check parent node (text labels are children of the sphere)
-                if let parentName = result.node.parent?.name,
-                   let uuid = UUID(uuidString: parentName) {
-                    onNodeTap(uuid)
-                    return
-                }
-            }
-        }
-    }
-}
 
 // MARK: - Graph 3D View
 /// 3D knowledge graph visualization using SceneKit.
@@ -96,88 +43,19 @@ struct Graph3DView: View {
     
     // MARK: - Controls Overlay
     private var controlsOverlay: some View {
-        VStack(spacing: 8) {
-            // Auto-rotate toggle
-            Button(action: { autoRotate.toggle(); updateAutoRotation() }) {
-                Image(systemName: autoRotate ? "rotate.3d.fill" : "rotate.3d")
-                    .font(.title3)
-                    .foregroundStyle(.wikiText)
-                    .padding(10)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-            }
-            
-            // Reset camera
-            Button(action: { resetCamera() }) {
-                Image(systemName: "scope")
-                    .font(.title3)
-                    .foregroundStyle(.wikiText)
-                    .padding(10)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-            }
-            
-            // Filter
-            Menu {
-                Button(Localized.tr("graph.all")) { filterType = nil }
-                ForEach(PageType.allCases) { type in
-                    Button(action: { filterType = type }) {
-                        Label(type.displayName, systemImage: type.icon)
-                    }
-                }
-            } label: {
-                Image(systemName: "line.3.horizontal.decrease.circle")
-                    .font(.title3)
-                    .foregroundStyle(.wikiText)
-                    .padding(10)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-            }
-        }
-        .padding(.trailing, 16)
-        .padding(.top, 8)
+        Graph3DControlsOverlay(
+            autoRotate: $autoRotate,
+            filterType: $filterType,
+            onAutoRotateToggle: { autoRotate.toggle(); updateAutoRotation() },
+            onResetCamera: { resetCamera() }
+        )
     }
-    
+
     // MARK: - Node Info Bar
     private func nodeInfoBar(page: WikiPage) -> some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(page.type.themedColor)
-                .frame(width: 36, height: 36)
-                .overlay {
-                    Image(systemName: page.displayIcon)
-                        .font(.caption)
-                        .foregroundStyle(.white)
-                }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(page.title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.wikiText)
-                Text(page.type.displayName)
-                    .font(.caption)
-                    .foregroundStyle(.wikiSecondary)
-            }
-            
-            Spacer()
-            
-            Button(action: {
-                store.selectedPageID = page.id
-            }) {
-                Text(Localized.tr("graph3d.viewPage"))
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.wikiAccent)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.wikiAccent.opacity(0.15))
-                    .clipShape(Capsule())
-            }
+        Graph3DNodeInfoBar(page: page) {
+            store.selectedPageID = page.id
         }
-        .padding()
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: WikiUI.largeRadius))
-        .padding(.horizontal)
-        .padding(.bottom, 8)
     }
     
     // MARK: - Build Scene
@@ -462,11 +340,4 @@ struct Graph3DView: View {
             scene.rootNode.removeAllActions()
         }
     }
-}
-
-// MARK: - Helper
-private struct CGPoint3D {
-    let x: CGFloat
-    let y: CGFloat
-    let z: CGFloat
 }

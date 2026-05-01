@@ -156,7 +156,7 @@ struct PageRowView: View {
                     .foregroundStyle(page.type.themedColor)
                     .frame(width: 32, height: 32)
                     .background(page.type.themedColor.opacity(0.15))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
                 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(page.title)
@@ -198,7 +198,7 @@ struct PageRowView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(Color.wikiCard)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
         }
         .buttonStyle(.plain)
     }

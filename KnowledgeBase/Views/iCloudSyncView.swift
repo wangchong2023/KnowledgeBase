@@ -30,95 +30,33 @@ struct iCloudSyncView: View {
         List {
             // MARK: - Status Section
             Section {
-                HStack {
-                    Image(systemName: statusIcon)
-                        .foregroundStyle(statusColor)
-                        .font(.title3)
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(syncService.syncStatus.label)
-                            .font(.subheadline)
-                            .foregroundStyle(.wikiText)
-                        
-                        if let date = syncService.lastSyncDate {
-                            Text(Localized.trf("icloud.lastSyncFormat", date.formatted(.dateTime.year().month().day().hour().minute())))
-                                .font(.caption)
-                                .foregroundStyle(.wikiSecondary)
-                        }
-                    }
-                    
-                    Spacer()
-                    
-                    if syncService.syncStatus.isSyncing {
-                        ProgressView()
-                    }
-                }
-                .padding(.vertical, 4)
+                SyncStatusRow(syncService: syncService)
             } header: {
                 Text(Localized.tr("icloud.syncStatus"))
             }
-            
-            // MARK: - Actions Section
-            Section {
-                // Push to iCloud
-                Button(action: pushToCloud) {
-                    Label(Localized.tr("icloud.pushToCloud"), systemImage: "icloud.and.arrow.up")
-                        .foregroundStyle(.wikiAccent)
-                }
-                .accessibilityIdentifier("push-to-icloud")
-                .disabled(!syncService.iCloudAvailable || isSyncing)
 
-                // Pull from iCloud
-                Button(action: { showPullConfirmation = true }) {
-                    Label(Localized.tr("icloud.pullFromCloud"), systemImage: "icloud.and.arrow.down")
-                        .foregroundStyle(.wikiAccent)
-                }
-                .accessibilityIdentifier("pull-from-icloud")
-                .disabled(!syncService.iCloudAvailable || isSyncing)
-                
-                // Bidirectional sync
-                Button(action: bidirectionalSync) {
-                    Label(Localized.tr("icloud.bidirectionalSync"), systemImage: "arrow.triangle.2.circlepath.icloud")
-                        .foregroundStyle(.wikiAccent)
-                }
-                .disabled(!syncService.iCloudAvailable || isSyncing)
-            } header: {
-                Text(Localized.tr("icloud.syncActions"))
-            }
-            
+            // MARK: - Actions Section
+            SyncActionsSection(
+                syncService: syncService,
+                isSyncing: isSyncing,
+                onPush: pushToCloud,
+                onPullRequest: { showPullConfirmation = true },
+                onBidirectional: bidirectionalSync
+            )
+
             // MARK: - Settings Section
-            Section {
-                Toggle(Localized.tr("icloud.autoSync"), isOn: $autoSync)
-                    .foregroundStyle(.wikiText)
-                    .accessibilityIdentifier("auto-sync")
-                    .onChange(of: autoSync) { _, newValue in
-                        UserDefaults.standard.set(newValue, forKey: "wikicraft_auto_sync")
-                        if newValue {
-                            startAutoSyncIfNeeded()
-                        } else {
-                            autoSyncTimer?.invalidate()
-                            autoSyncTimer = nil
-                        }
-                    }
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(Localized.tr("icloud.conflictPolicy"))
-                        .font(.subheadline)
-                        .foregroundStyle(.wikiText)
-                    
-                    Picker("", selection: $conflictResolution) {
-                        ForEach(ConflictResolution.allCases, id: \.self) { option in
-                            Text(option.displayName).tag(option)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: conflictResolution) { _, newValue in
-                        UserDefaults.standard.set(newValue.rawValue, forKey: "wikicraft_conflict_resolution")
+            SyncSettingsSection(
+                autoSync: $autoSync,
+                conflictResolution: $conflictResolution,
+                onAutoSyncChange: { enabled in
+                    if enabled {
+                        startAutoSyncIfNeeded()
+                    } else {
+                        autoSyncTimer?.invalidate()
+                        autoSyncTimer = nil
                     }
                 }
-            } header: {
-                Text(Localized.tr("icloud.syncSettings"))
-            }
+            )
             
             // MARK: - Info Section
             Section {
@@ -235,25 +173,6 @@ struct iCloudSyncView: View {
         isSyncing = false
     }
     
-    // MARK: - Computed
-    private var statusIcon: String {
-        switch syncService.syncStatus {
-        case .idle: return "icloud"
-        case .syncing: return "icloud.and.arrow.up.and.down"
-        case .synced: return "checkmark.icloud"
-        case .error: return "exclamationmark.icloud"
-        }
-    }
-    
-    private var statusColor: Color {
-        switch syncService.syncStatus {
-        case .idle: return .wikiSecondary
-        case .syncing: return .wikiAccent
-        case .synced: return .green
-        case .error: return .red
-        }
-    }
-    
     // MARK: - Actions
     private func pushToCloud() {
         isSyncing = true
@@ -346,25 +265,6 @@ struct iCloudSyncView: View {
                 }
             }
             await MainActor.run { isSyncing = false }
-        }
-    }
-}
-
-// MARK: - Sync Info Row
-private struct SyncInfoRow: View {
-    let icon: String
-    let text: String
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: icon)
-                .font(.caption)
-                .foregroundStyle(.wikiAccent)
-                .frame(width: 20)
-            
-            Text(text)
-                .font(.caption)
-                .foregroundStyle(.wikiSecondary)
         }
     }
 }

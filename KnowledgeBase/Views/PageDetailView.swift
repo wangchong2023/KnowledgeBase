@@ -41,6 +41,7 @@ struct PageDetailView: View {
                 
                 Divider()
                     .background(Color.wikiBorder)
+                    .padding(.horizontal)
                 
                 // Content
                 if isEditing {

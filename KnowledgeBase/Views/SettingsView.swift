@@ -108,14 +108,9 @@ struct SettingsView: View {
                                 .font(.body)
                                 .foregroundStyle(.wikiSecondary)
                                 .frame(width: 24)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(Localized.tr("settings.importClipboard"))
-                                    .font(.body)
-                                    .foregroundStyle(.wikiText)
-                                Text(Localized.tr("settings.importClipboardHint"))
-                                    .font(.caption)
-                                    .foregroundStyle(.wikiSecondary)
-                            }
+                            Text(Localized.tr("settings.importClipboard"))
+                                .font(.body)
+                                .foregroundStyle(.wikiText)
                             Spacer()
                         }
                     }
@@ -126,23 +121,23 @@ struct SettingsView: View {
                 
                 // ── 更多功能 ──
                 Section {
-                    SettingsNavigationRow(icon: "waveform", title: Localized.tr("tab.voice"), subtitle: Localized.tr("settings.voiceNote"), identifier: "功能-语音笔记") {
+                    SettingsNavigationRow(icon: "waveform", title: Localized.tr("tab.voice"), identifier: "功能-语音笔记") {
                         VoiceNoteView()
                     }
 
-                    SettingsNavigationRow(icon: "doc.richtext", title: Localized.tr("tab.pdf"), subtitle: Localized.tr("settings.pdfManager") ) {
+                    SettingsNavigationRow(icon: "doc.richtext", title: Localized.tr("tab.pdf"), identifier: "功能-PDF") {
                         PDFLibraryView()
                     }
 
-                    SettingsNavigationRow(icon: "person.2.fill", title: Localized.tr("tab.collab"), subtitle: Localized.tr("settings.collaboration")) {
+                    SettingsNavigationRow(icon: "person.2.fill", title: Localized.tr("tab.collab"), identifier: "功能-协作") {
                         CollaborationView()
                     }
 
-                    SettingsNavigationRow(icon: "cube.transparent.fill", title: Localized.tr("settings.graph3D"), subtitle: Localized.tr("settings.graph3DHint")) {
+                    SettingsNavigationRow(icon: "cube.transparent.fill", title: Localized.tr("settings.graph3D"), identifier: "功能-3D图谱") {
                         Graph3DView()
                     }
 
-                    SettingsNavigationRow(icon: "visionpro", title: Localized.tr("settings.spatialComputing"), subtitle: Localized.tr("settings.spatialComputingHint")) {
+                    SettingsNavigationRow(icon: "visionpro", title: Localized.tr("settings.spatialComputing"), identifier: "功能-空间计算") {
                         VisionProSpatialView()
                     }
                 } header: {
@@ -155,9 +150,6 @@ struct SettingsView: View {
                     SettingsStatRow(icon: "text.word.spacing", label: Localized.tr("settings.totalWords"), value: "\(store.totalWords)")
                     
                     SettingsStatRow(icon: "exclamationmark.triangle", label: Localized.tr("settings.stubPages"), value: "\(store.stubCount)")
-                    Text(Localized.tr("settings.stubPagesHint"))
-                        .font(.caption2)
-                        .foregroundStyle(.wikiSecondary.opacity(0.7))
                     
                     SettingsStatRow(icon: "clock", label: Localized.tr("settings.operationLog"), value: "\(store.logEntries.count)")
                 } header: {
@@ -166,7 +158,7 @@ struct SettingsView: View {
                 
                 // ── 维护 ──
                 Section {
-                    SettingsNavigationRow(icon: "tag", title: Localized.tr("settings.tagManager"), subtitle: Localized.tr("settings.tagManagerHint"), identifier: "维护-标签管理") {
+                    SettingsNavigationRow(icon: "tag", title: Localized.tr("settings.tagManager"), identifier: "维护-标签管理") {
                         TagCloudView()
                     }
 
@@ -187,19 +179,15 @@ struct SettingsView: View {
                 
                 // ── 关于 ──
                 Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Image(systemName: "books.vertical.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(.wikiAccent)
-                            Text(Localized.tr("settings.aboutApp"))
-                                .font(.title3.weight(.bold))
-                                .foregroundStyle(.wikiText)
-                        }
-                        
-                        Text(Localized.tr("settings.aboutAppDesc"))
-                            .font(.caption)
-                            .foregroundStyle(.wikiSecondary)
+                    HStack(spacing: 12) {
+                        Image(systemName: "books.vertical.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.wikiAccent)
+                            .frame(width: 32)
+                        Text(Localized.tr("settings.aboutApp"))
+                            .font(.body)
+                            .foregroundStyle(.wikiText)
+                        Spacer()
                     }
                     .padding(.vertical, 4)
                 } header: {

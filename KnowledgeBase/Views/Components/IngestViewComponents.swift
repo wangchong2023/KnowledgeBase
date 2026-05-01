@@ -49,7 +49,7 @@ struct IngestEntryCardsSection: View {
 
             // Manual entry card (toggle)
             Button(action: {
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     showManualForm.toggle()
                 }
             }) {
@@ -66,7 +66,7 @@ struct IngestEntryCardsSection: View {
     }
 
     private func entryCardContent(title: String, subtitle: String, icon: String, color: Color) -> some View {
-        WikiBorderedCard(cornerRadius: 12, borderColor: color.opacity(0.3)) {
+        WikiBorderedCard(borderColor: color.opacity(0.3)) {
             VStack(spacing: 10) {
                 Image(systemName: icon)
                     .font(.title)

@@ -53,4 +53,9 @@ class ThemeManager: ObservableObject {
         default: return .blue
         }
     }
+
+    /// Instance method wrapper for convenience.
+    func colorForName(_ name: String) -> Color {
+        Self.colorForName(name)
+    }
 }

@@ -81,7 +81,8 @@ struct SearchView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         // Type filters
-                        FilterPill(title: Localized.tr("search.all"), isSelected: filterType == nil) {
+                        FilterPill(title: Localized.tr("search.all"), accessibilityIdentifier: "filter-all", isSelected: filterType == nil) {
+                            HapticManager.selection()
                             filterType = nil
                         }
                         
@@ -90,8 +91,10 @@ struct SearchView: View {
                                 title: type.displayName,
                                 icon: type.icon,
                                 color: type.themedColor,
+                                accessibilityIdentifier: "filter-\(type.rawValue)",
                                 isSelected: filterType == type
                             ) {
+                                HapticManager.selection()
                                 filterType = type
                             }
                         }
@@ -160,6 +163,10 @@ struct SearchView: View {
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
+                    .refreshable {
+                        // 本地数据无需刷新，仅提供视觉反馈
+                        try? await Task.sleep(nanoseconds: 500_000_000)
+                    }
                     .navigationDestination(for: WikiPage.self) { destination in
                         PageDetailView(page: destination)
                     }
@@ -186,6 +193,7 @@ struct FilterPill: View {
     let title: String
     var icon: String? = nil
     var color: Color = .wikiAccent
+    var accessibilityIdentifier: String? = nil
     let isSelected: Bool
     let action: () -> Void
     
@@ -199,8 +207,8 @@ struct FilterPill: View {
                 Text(title)
                     .font(.caption.weight(isSelected ? .semibold : .regular))
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .background(isSelected ? color.opacity(0.25) : Color.wikiCard)
             .clipShape(Capsule())
             .foregroundStyle(isSelected ? color : .wikiSecondary)
@@ -210,5 +218,6 @@ struct FilterPill: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(accessibilityIdentifier ?? title)
     }
 }

@@ -23,37 +23,26 @@ import SwiftUI
 /// - 选中节点固定 40pt
 struct GraphContainerView: View {
     @EnvironmentObject var store: KMStore
-    @State private var selectedNodeID: UUID?  ///< 当前选中的节点 ID
-    @State private var nodes: [GraphNode] = []  ///< 布局后的节点列表
-    @State private var edges: [GraphEdge] = []  ///< 布局后的边（连接）列表
-    @State private var graphSize: CGSize = .zero  ///< 图形画布的实际尺寸
-    @State private var scale: CGFloat = 1.0  ///< 当前缩放比例
-    @State private var lastScale: CGFloat = 1.0  ///< 上次缩放操作前的缩放值（用于增量计算）
-    @State private var offset: CGSize = .zero  ///< 当前画布偏移量（拖拽）
-    @State private var lastOffset: CGSize = .zero  ///< 上次拖拽操作前的偏移量
-    @State private var isAnimating = false  ///< 节点是否正在执行脉冲动画
-    @State private var showLegend = false  ///< 是否显示图例
-    @State private var filterType: PageType?  ///< 当前筛选的页面类型，nil 表示显示全部
-    @StateObject private var tooltipManager = TooltipManager.shared  ///< 提示管理器（单例）
-    
+    @State private var selectedNodeID: UUID?
+    @State private var nodes: [GraphNode] = []
+    @State private var edges: [GraphEdge] = []
+    @State private var graphSize: CGSize = .zero
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+    @State private var offset: CGSize = .zero
+    @State private var lastOffset: CGSize = .zero
+    @State private var isAnimating = false
+    @State private var showLegend = false
+    @State private var filterType: PageType?
+    @StateObject private var tooltipManager = TooltipManager.shared
+
     // MARK: - Constants
-    /// Minimum node size in graph
     private static let minNodeSize: CGFloat = 24
-    /// Maximum node size in graph
     private static let maxNodeSize: CGFloat = 40
-    /// Selected node size (larger than normal)
     private static let selectedNodeSize: CGFloat = 40
-    /// Size increment per connection
     private static let nodeSizeIncrement: CGFloat = 3
-    /// Base node size
     private static let nodeBaseSize: CGFloat = 20
-    /// Geometry height offset for safe area
     private static let geometryHeightOffset: CGFloat = 100
-    /// Geometry size used for initial layout
-    private static let defaultGeometrySize = CGSize(
-        width: UIScreen.main.bounds.width,
-        height: UIScreen.main.bounds.height - 100
-    )
 
     var filteredNodes: [GraphNode] {
         guard let filter = filterType else { return nodes }
@@ -70,24 +59,45 @@ struct GraphContainerView: View {
         NavigationStack {
             ZStack {
                 Color.wikiBackground.ignoresSafeArea()
-
-                // 点阵背景装饰
                 WikiDotPattern(dotColor: .wikiBorder, spacing: 24, dotSize: 2)
                     .opacity(0.35)
 
                 if nodes.isEmpty {
-                    emptyStateView
+                    GraphEmptyStateView()
                 } else {
-                    graphCanvas
+                    GraphCanvasView(
+                        filteredNodes: filteredNodes,
+                        filteredEdges: filteredEdges,
+                        selectedNodeID: $selectedNodeID,
+                        isAnimating: $isAnimating,
+                        scale: $scale,
+                        offset: $offset,
+                        graphSize: $graphSize,
+                        defaultGeometrySize: graphSize.width > 0 ? graphSize : CGSize(width: 400, height: 600)
+                    ) { node in
+                        withAnimation(.spring(response: 0.5)) {
+                            selectedNodeID = selectedNodeID == node.id ? nil : node.id
+                            isAnimating = selectedNodeID != nil
+                        }
+                    }
                 }
 
                 if !nodes.isEmpty {
-                    zoomControls
-                    typeFilterPills
+                    GraphZoomControlsView(
+                        scale: $scale,
+                        lastScale: $lastScale,
+                        offset: $offset,
+                        lastOffset: $lastOffset,
+                        onRelayout: layoutGraph
+                    )
+                    GraphFilterPillsView(
+                        filterType: $filterType,
+                        tooltipManager: tooltipManager
+                    )
                 }
 
                 if showLegend && !nodes.isEmpty {
-                    legendOverlay
+                    GraphLegendView()
                 }
 
                 if let selectedID = selectedNodeID,
@@ -124,8 +134,20 @@ struct GraphContainerView: View {
         }
     }
 
-    // MARK: - Empty State
-    private var emptyStateView: some View {
+    private func layoutGraph() {
+        let result = GraphLayoutEngine.layout(
+            pages: store.pages,
+            linkResolver: { title in store.pageByTitle(title) },
+            canvasSize: graphSize.width > 0 ? graphSize : CGSize(width: 400, height: 600)
+        )
+        nodes = result.nodes
+        edges = result.edges
+    }
+}
+
+// MARK: - Graph Empty State
+private struct GraphEmptyStateView: View {
+    var body: some View {
         VStack(spacing: 24) {
             ZStack {
                 Circle()
@@ -168,9 +190,27 @@ struct GraphContainerView: View {
         }
         .padding(.horizontal, 32)
     }
+}
 
-    // MARK: - Graph Canvas
-    private var graphCanvas: some View {
+// MARK: - Graph Canvas View
+private struct GraphCanvasView: View {
+    let filteredNodes: [GraphNode]
+    let filteredEdges: [GraphEdge]
+    @Binding var selectedNodeID: UUID?
+    @Binding var isAnimating: Bool
+    @Binding var scale: CGFloat
+    @Binding var offset: CGSize
+    @Binding var graphSize: CGSize
+    let defaultGeometrySize: CGSize
+    let onNodeTap: (GraphNode) -> Void
+
+    private static let minNodeSize: CGFloat = 24
+    private static let maxNodeSize: CGFloat = 40
+    private static let selectedNodeSize: CGFloat = 40
+    private static let nodeSizeIncrement: CGFloat = 3
+    private static let nodeBaseSize: CGFloat = 20
+
+    var body: some View {
         GeometryReader { geometry in
             let canvasSize = CGSize(
                 width: max(geometry.size.width, graphSize.width),
@@ -206,7 +246,7 @@ struct GraphContainerView: View {
 
             ForEach(filteredNodes) { node in
                 let isSelected = selectedNodeID == node.id
-                let linkCount = edges.filter { $0.source == node.id || $0.target == node.id }.count
+                let linkCount = filteredEdges.filter { $0.source == node.id || $0.target == node.id }.count
                 let nodeSize: CGFloat = isSelected ? Self.selectedNodeSize : max(Self.minNodeSize, min(Self.maxNodeSize, Self.nodeBaseSize + CGFloat(linkCount) * Self.nodeSizeIncrement))
 
                 GraphNodeView(
@@ -215,10 +255,7 @@ struct GraphContainerView: View {
                     isAnimating: isAnimating,
                     linkCount: linkCount
                 ) {
-                    withAnimation(.spring(response: 0.3)) {
-                        selectedNodeID = selectedNodeID == node.id ? nil : node.id
-                        isAnimating = selectedNodeID != nil
-                    }
+                    onNodeTap(node)
                 }
 
                 GraphNodeLabel(node: node, isSelected: isSelected, nodeSize: nodeSize)
@@ -229,49 +266,63 @@ struct GraphContainerView: View {
         .gesture(
             MagnificationGesture()
                 .onChanged { value in
-                    let newScale = lastScale * value
+                    let newScale = scale * value
                     scale = min(max(newScale, 0.5), 3.0)
                 }
-                .onEnded { _ in lastScale = scale }
+                .onEnded { _ in }
         )
         .simultaneousGesture(
             DragGesture()
                 .onChanged { value in
                     offset = CGSize(
-                        width: lastOffset.width + value.translation.width,
-                        height: lastOffset.height + value.translation.height
+                        width: offset.width + value.translation.width,
+                        height: offset.height + value.translation.height
                     )
                 }
-                .onEnded { _ in lastOffset = offset }
+                .onEnded { _ in }
         )
-        .onAppear { graphSize = Self.defaultGeometrySize }
+        .onAppear { graphSize = CGSize(width: 400, height: 600) }
     }
+}
 
-    // MARK: - Zoom Controls
-    private var zoomControls: some View {
+// MARK: - Graph Zoom Controls View
+private struct GraphZoomControlsView: View {
+    @Binding var scale: CGFloat
+    @Binding var lastScale: CGFloat
+    @Binding var offset: CGSize
+    @Binding var lastOffset: CGSize
+    let onRelayout: () -> Void
+
+    var body: some View {
         VStack {
             Spacer()
-
             HStack {
                 Spacer()
                 GraphZoomControls(
                     scale: $scale,
                     lastScale: $lastScale,
                     offset: $offset,
-                    lastOffset: $lastOffset
-                ) { layoutGraph() }
+                    lastOffset: $lastOffset,
+                    onRelayout: onRelayout
+                )
                 .padding(.trailing, 16)
             }
             .padding(.bottom, 80)
         }
     }
+}
 
-    // MARK: - Type Filter Pills
-    private var typeFilterPills: some View {
+// MARK: - Graph Filter Pills View
+private struct GraphFilterPillsView: View {
+    @Binding var filterType: PageType?
+    @ObservedObject var tooltipManager: TooltipManager
+
+    var body: some View {
         VStack {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     FilterPill(title: Localized.tr("search.all"), isSelected: filterType == nil) {
+                        HapticManager.selection()
                         withAnimation { filterType = nil }
                         if !tooltipManager.isShown(.graphFilter) {
                             withAnimation { tooltipManager.activeTooltip = .graphFilter }
@@ -285,6 +336,7 @@ struct GraphContainerView: View {
                             color: type.themedColor,
                             isSelected: filterType == type
                         ) {
+                            HapticManager.selection()
                             withAnimation { filterType = type }
                         }
                         .accessibilityIdentifier("Filter-\(type.rawValue)")
@@ -323,9 +375,11 @@ struct GraphContainerView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: tooltipManager.activeTooltip)
     }
+}
 
-    // MARK: - Legend Overlay
-    private var legendOverlay: some View {
+// MARK: - Graph Legend View
+private struct GraphLegendView: View {
+    var body: some View {
         VStack {
             HStack {
                 Spacer()
@@ -335,21 +389,5 @@ struct GraphContainerView: View {
             .padding(.top, 50)
             Spacer()
         }
-    }
-
-    // MARK: - Helpers
-
-    /// 触发图形重新布局
-    ///
-    /// 当页面数据变化时（如增删改页面或链接）调用此方法重新计算布局。
-    /// 内部调用 GraphLayoutEngine.layout 获取新的节点和边数据。
-    private func layoutGraph() {
-        let result = GraphLayoutEngine.layout(
-            pages: store.pages,
-            linkResolver: { title in store.pageByTitle(title) },
-            canvasSize: graphSize.width > 0 ? graphSize : Self.defaultGeometrySize
-        )
-        nodes = result.nodes
-        edges = result.edges
     }
 }

@@ -3,8 +3,8 @@ import SwiftUI
 // MARK: - Wiki Card Modifier
 /// 应用 Wiki 卡片背景的 ViewModifier。
 struct WikiCardModifier: ViewModifier {
-    var cornerRadius: CGFloat = 12
-    var padding: CGFloat = 16
+    var cornerRadius: CGFloat = WikiUI.cardRadius
+    var padding: CGFloat = WikiUI.cardPadding
     var backgroundColor: Color = .wikiCard
 
     func body(content: Content) -> some View {
@@ -19,8 +19,8 @@ struct WikiCardModifier: ViewModifier {
 /// 统一的卡片容器，统一背景、圆角、内边距。
 struct WikiCard<Content: View>: View {
     let content: Content
-    var cornerRadius: CGFloat = 12
-    var padding: CGFloat = 16
+    var cornerRadius: CGFloat = WikiUI.cardRadius
+    var padding: CGFloat = WikiUI.cardPadding
 
     var body: some View {
         content
@@ -34,11 +34,11 @@ struct WikiCard<Content: View>: View {
 /// 带边框的卡片，用于入口卡片等需要描边的场景。
 struct WikiBorderedCard<Content: View>: View {
     let content: Content
-    var cornerRadius: CGFloat = 12
+    var cornerRadius: CGFloat = WikiUI.cardRadius
     var borderColor: Color = .clear
 
     init(
-        cornerRadius: CGFloat = 12,
+        cornerRadius: CGFloat = WikiUI.cardRadius,
         borderColor: Color = .clear,
         @ViewBuilder content: () -> Content
     ) {
@@ -64,7 +64,7 @@ struct WikiBorderedCard<Content: View>: View {
 // MARK: - View Extension for Card Background
 extension View {
     /// 应用 Wiki 卡片背景的修饰符。
-    func wikiCard(cornerRadius: CGFloat = 12, padding: CGFloat = 16) -> some View {
+    func wikiCard(cornerRadius: CGFloat = WikiUI.cardRadius, padding: CGFloat = WikiUI.cardPadding) -> some View {
         modifier(WikiCardModifier(cornerRadius: cornerRadius, padding: padding))
     }
 }

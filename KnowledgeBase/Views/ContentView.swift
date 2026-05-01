@@ -94,10 +94,10 @@ struct ContentView: View {
     @ViewBuilder
     private var wikiTabContent: some View {
         if languageForceUpdate {
-            WikiNavigationView(selectedTab: $selectedTab)
+            NavigationView(selectedTab: $selectedTab)
                 .id(languageForceUpdate)
         } else {
-            WikiNavigationView(selectedTab: $selectedTab)
+            NavigationView(selectedTab: $selectedTab)
         }
     }
     

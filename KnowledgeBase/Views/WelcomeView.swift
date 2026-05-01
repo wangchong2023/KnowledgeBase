@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Welcome View
-struct WikiWelcomeView: View {
+struct WelcomeView: View {
     @EnvironmentObject var store: KMStore
     @Binding var selectedTab: ContentView.AppTab
     @State private var showCreateSheet = false

@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Wiki Navigation (Main Wiki Browser)
-struct WikiNavigationView: View {
+struct NavigationView: View {
     @EnvironmentObject var store: KMStore
     @Binding var selectedTab: ContentView.AppTab
     @State private var showCreateSheet = false
@@ -17,7 +17,7 @@ struct WikiNavigationView: View {
                    let page = store.pageByID(pageID) {
                     PageDetailView(page: page)
                 } else {
-                    WikiWelcomeView(selectedTab: $selectedTab)
+                    WelcomeView(selectedTab: $selectedTab)
                 }
 
                 // 引导 Tooltip 浮层（首次使用引导）
