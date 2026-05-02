@@ -1,0 +1,56 @@
+name: ZhiMind CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test (${{ matrix.platform }})
+    runs-on: macos-14
+    strategy:
+      matrix:
+        platform: [iOS, macOS, watchOS]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '16.0'
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: SwiftLint Check
+        run: swiftlint --strict --quiet
+
+      - name: Build for ${{ matrix.platform }}
+        run: |
+          if [ "${{ matrix.platform }}" == "iOS" ]; then
+            xcodebuild build -project KM.xcodeproj -scheme KM -destination 'generic/platform=iOS' -quiet
+          elif [ "${{ matrix.platform }}" == "watchOS" ]; then
+            xcodebuild build -project KM.xcodeproj -scheme KMWatch -destination 'generic/platform=watchOS' -quiet
+          else
+            xcodebuild build -project KM.xcodeproj -scheme KM -destination 'platform=macOS' -quiet
+          fi
+
+      - name: Run Unit Tests with Coverage
+        if: success()
+        run: |
+          if [ "${{ matrix.platform }}" == "iOS" ]; then
+            xcodebuild test -project KM.xcodeproj -scheme KM -destination 'platform=iOS Simulator,name=iPhone 15 Pro' -enableCodeCoverage YES -quiet
+          else
+            xcodebuild test -project KM.xcodeproj -scheme KM -destination 'platform=macOS' -enableCodeCoverage YES -quiet
+          fi
+
+      - name: Upload Build Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-${{ matrix.platform }}
+          path: ~/Library/Developer/Xcode/DerivedData/**/Logs/

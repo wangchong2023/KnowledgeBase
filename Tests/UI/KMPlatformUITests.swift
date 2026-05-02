@@ -318,7 +318,7 @@ final class MacCatalystTests: KMPlatformUITests {
             Thread.sleep(forTimeInterval: 0.5)
 
             // 检查是否有上下文菜单
-            let menu = app menus.firstMatch
+            let menu = app.menus.firstMatch
             if menu.exists {
                 // 按 Escape 关闭菜单
                 app.typeText(XCUIKeyboardKey.inputEscape.rawValue)

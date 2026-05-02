@@ -1,6 +1,6 @@
 import XCTest
 import SwiftUI
-@testable import KnowledgeBase
+@testable import KM
 
 // MARK: - Models Tests
 final class ModelsTests: XCTestCase {
@@ -162,6 +162,30 @@ final class ModelsTests: XCTestCase {
         XCTAssertEqual(p1, p2)
         p2.title = "Different"
         XCTAssertNotEqual(p1, p2)
+    }
+
+    // MARK: - LWW Conflict Resolution Tests
+    func testLWWConflictResolution() {
+        let baseID = UUID()
+        let now = Date()
+        
+        // Scenario 1: Remote has higher Lamport timestamp
+        let local1 = WikiPage(id: baseID, title: "Local", lamportTimestamp: 100, updated: now)
+        let remote1 = WikiPage(id: baseID, title: "Remote", lamportTimestamp: 101, updated: now)
+        let merged1 = local1.merge(with: remote1)
+        XCTAssertEqual(merged1.title, "Remote", "Higher Lamport timestamp should win")
+        
+        // Scenario 2: Local has higher Lamport timestamp
+        let local2 = WikiPage(id: baseID, title: "Local", lamportTimestamp: 200, updated: now)
+        let remote2 = WikiPage(id: baseID, title: "Remote", lamportTimestamp: 150, updated: now)
+        let merged2 = local2.merge(with: remote2)
+        XCTAssertEqual(merged2.title, "Local", "Higher local Lamport timestamp should win")
+        
+        // Scenario 3: Equal Lamport, Remote has later wall clock time
+        let local3 = WikiPage(id: baseID, title: "Local", lamportTimestamp: 300, updated: now.addingTimeInterval(-10))
+        let remote3 = WikiPage(id: baseID, title: "Remote", lamportTimestamp: 300, updated: now)
+        let merged3 = local3.merge(with: remote3)
+        XCTAssertEqual(merged3.title, "Remote", "Later updated date should win if Lamport is equal")
     }
     
     // MARK: - PageType Tests

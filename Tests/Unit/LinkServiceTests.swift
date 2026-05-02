@@ -1,5 +1,5 @@
 import XCTest
-@testable import KnowledgeBase
+@testable import KM
 
 final class LinkServiceTests: XCTestCase {
     var sut: LinkService!

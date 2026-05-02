@@ -1,21 +1,18 @@
-# Knowledge Management (KnowledgeBase)
-
-![Knowledge Management Cover](/Users/constantine/.gemini/antigravity/brain/47f3db46-336b-49c3-b83d-8f2953119222/knowledge-management_cover_1777657083679.png)
-
-> **"Build a personal library of concepts, entities, and sources."**
+# 知识灵动 (ZhiMind)
 > 基于 Karpathy LLM Wiki 方法论的 AI 原生知识管理进化引擎。
 
 ---
 
 ## 📚 深度文档 (Documentation)
 
-- [📖 产品规格说明书 (Specifications)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/SPECIFICATIONS.md) - PRD、SRS 与核心特性规格。
-- [🏗️ 架构设计文档 (Architecture)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/ARCHITECTURE.md) - 4+1 视图、L0-L3 分层及 **详细设计**。
-- [🎨 视觉设计系统 (Design System)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/DESIGN_SYSTEM.md) - 色彩、字体与交互反馈规范。
-- [🚨 异常处理规范 (Error Handling)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/ERROR_HANDLING.md) - 全系统错误码与 UI 映射准则。
-- [🤝 贡献指南 (Contributing)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/CONTRIBUTING.md) - 工程规范、Git 流与代码标准。
-- [🚀 进化路线图 (Roadmap)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/FUTURE_ROADMAP.md) - 短、中、远期的产品演进与前瞻技术规划。
-- [📖 用户操作指南 (User Guide)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/USER_GUIDE.md) - 从新手到专家的全量实战手册。
+- [📖 产品规格说明书 (Specifications)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Requirements/PRD.md)
+- [🏗️ 架构设计文档 (Architecture)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Architecture/ARCHITECTURE_4PLUS1.md)
+- [🎨 视觉设计系统 (Design System)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Design/VISUAL_SYSTEM.md)
+- [🚨 异常处理规范 (Error Handling)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Design/ERROR_POLICY.md)
+- [🤝 贡献指南 (Contributing)](file:///Users/constantine/Documents/work/code/projects/km/Docs/CONTRIBUTING.md)
+- [🚀 进化路线图 (Roadmap)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Requirements/ROADMAP.md)
+- [📖 用户操作指南 (User Guide)](file:///Users/constantine/Documents/work/code/projects/km/Docs/USER_GUIDE.md)
+- [🛠️ 开发者工具指南 (Developer Tools)](file:///Users/constantine/Documents/work/code/projects/km/Tools/README.md)
 
 ---
 
@@ -102,8 +99,12 @@ Knowledge Management 采用一套代码实现多端差异化交互：
 
 ## 🚀 快速开始
 
-1. **环境**：Xcode 15+ & `brew install xcodegen`。
-2. **构建**：运行 `xcodegen generate`。
+1. **环境**：Xcode 16.0 & `brew install xcodegen`。
+2. **构建**：
+   - 运行 `xcodegen generate` 生成项目。
+   - **iOS**: 选择 `KM` Scheme 进行编译（已包含 `KMTests` 单元测试）。
+   - **macOS**: 选择 `KMMac` 目标，支持 Catalyst 模式。
+   - **watchOS**: 选择 `KMWatch` 目标进行独立构建。
 3. **配置**：在设置中填入 API Key，并开启 **“深度扫描模式”**。
 
 ---

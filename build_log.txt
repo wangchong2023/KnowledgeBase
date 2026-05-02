@@ -1,0 +1,1008 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -project KM.xcodeproj -target KM -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO
+
+Build settings from command line:
+    CODE_SIGNING_ALLOWED = NO
+    SDKROOT = iphonesimulator26.4
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'KM' in project 'KM' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/com.apple.DeveloperTools/26.4.1-17E202/Xcode/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+    cd /Users/constantine/Documents/work/code/projects/km/KM.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -o /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/com.apple.DeveloperTools/26.4.1-17E202/Xcode/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+
+warning: ONLY_ACTIVE_ARCH=YES requested with multiple ARCHS and no active architecture could be computed; building for all applicable architectures (in target 'KM' from project 'KM')
+SwiftDriver KM normal arm64 com.apple.xcode.tools.swift.compiler (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name KM -Onone @/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/arm64/KM.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target arm64-apple-ios17.0-simulator -g -Xfrontend -serialize-debugging-options -enable-testing -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator -F /Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator -c -j18 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/com.apple.DeveloperTools/26.4.1-17E202/Xcode/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache -output-file-map /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/arm64/KM-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/arm64/KM.swiftmodule -validate-clang-modules-once -clang-build-session-file /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/arm64/KM_const_extract_protocols.json -Xcc -iquote -Xcc /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-generated-files.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-own-target-headers.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-all-target-headers.hmap -Xcc -iquote -Xcc /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-project-headers.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator/include -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources-normal/arm64 -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources/arm64 -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/arm64/KM-Swift.h -working-directory /Users/constantine/Documents/work/code/projects/km -experimental-emit-module-separately -disable-cmo
+
+SwiftDriver KM normal x86_64 com.apple.xcode.tools.swift.compiler (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-SwiftDriver -- /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name KM -Onone @/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM.SwiftFileList -DDEBUG -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -target x86_64-apple-ios17.0-simulator -g -Xfrontend -serialize-debugging-options -enable-testing -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -swift-version 5 -I /Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator -F /Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator -c -j18 -enable-batch-mode -incremental -Xcc -ivfsstatcache -Xcc /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/com.apple.DeveloperTools/26.4.1-17E202/Xcode/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache -output-file-map /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -explicit-module-build -module-cache-path /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM.swiftmodule -validate-clang-modules-once -clang-build-session-file /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM_const_extract_protocols.json -Xcc -iquote -Xcc /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-generated-files.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-own-target-headers.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-all-target-headers.hmap -Xcc -iquote -Xcc /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-project-headers.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator/include -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources-normal/x86_64 -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources/x86_64 -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources -Xcc -DDEBUG\=1 -emit-objc-header -emit-objc-header-path /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM-Swift.h -working-directory /Users/constantine/Documents/work/code/projects/km -experimental-emit-module-separately -disable-cmo
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ActivityKit-980L8PBMR98VI9XKWT8I3RHBF.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SwiftShims-DKZ8O9F38X087RAOXZUU50CLR.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_AvailabilityInternal-1SPQ0E03XZ7A39ICQNYAO2QDU.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stddef-20D998OFJR0ALD0OZMNL4XCRS.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_SwiftConcurrencyShims-F09MX8KK0B6DEFQ6555UF1NMV.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ptrauth-3ORR8KZPIZLTBA7ZP8OMH61YM.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ptrcheck-7HUV6US60ITI9JQAN2RZD3M6E.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_float-15A1DRC81AZ5Y5HBT7E8A6M4W.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdarg-8ZHSDEESRLPPHWKQI1LJNKFOK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/DeveloperToolsSupport-990HEWG24L6958TBBA7FS2ZU3.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdbool-98RIQN1HS0IWOONMXY4AQ2061.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdarg-69IJ9HQJVN20EDZXWNEXCKYOD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ptrcheck-5ESRX1MXGBNE5TVATDH4X7MI6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SwiftShims-3224FETPYV17FXOLY3RHC5IHG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_AvailabilityInternal-BYW73DI1RWAUKHHW0F5QE37RA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_SwiftConcurrencyShims-5QIG2HT292I72P982RNHBB4KF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ActivityKit-AB2VLQESZKF4WOV31EDFRZVXC.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_float-90Q63S3KN63D8OA1LF0Y6C7GI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/DeveloperToolsSupport-72HT155CY1OUZ60RRDFYA2PYO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ptrauth-D5G3KAQUWYC47Q5CQLSNEBSA7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stddef-1MJ240XAD63EK02J7GGJ4K1A9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdbool-CCPUURDL0H5UCM2SE7UEE704U.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_DarwinFoundation1-8W33SJXJ3AEVGTCHVI96RHD1L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_DarwinFoundation1-D779DWW28GKIABM91NUXLDTSK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_DarwinFoundation2-6HPHHCL9NS64AEPW6XRCAZXVB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ExtensionFoundation-CF05UE6RI1EV2LR1FPMDNUEK7.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SQLite3-86EBOEUAT7BGRW8Z3SAMMZE6R.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_limits-AH07QJ12LJ67EL7EOKL1AIMFB.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_DarwinFoundation2-3FGX5K1MRQ5OHS5K8AUNQPCSU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_limits-92GYSW0BLWCEBGBMWQP2QDUVJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ExtensionFoundation-CW97232Y6P4RXHXFOJATQYBT6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SQLite3-AXKK6NB3395DFXU2MM0ZFXVVY.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdint-2B9YG1G7PLGN1977JS1UNXYDJ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/sys_types-DCYQEYH014YQJJ83NGJMOK8V0.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_tgmath-CKT7B8JYPYOJZQMDR6BBTGHA5.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_DarwinFoundation3-9CBOT1138QJSCVFJ62YUZOPFQ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdatomic-C1HV1V1DSC0OVW0RZZ6H8ZJUX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdint-C915ASHXDXXF3MG7PDDKWH4B3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/sys_types-9EFMWRQ4NZCJMFUONQ5YLT4W6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_tgmath-COLN4TL0Q4L4U4CIXFJV7TXN3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_intrinsics-6HMPDQHPOIC4R4RQE85VGBM8Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_DarwinFoundation3-BE1GI9FSRQANKHP7NGZ00CUST.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_stdatomic-70WA5ZBHIVDW53I1PDO5XR2WK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_inttypes-NBEUDLYH10CU7M6ZMP9C6R7T.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_intrinsics-6OQ3PB4MQGLJ8U76AZB3RJF1S.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Darwin-E20HGBCO3ZIC0EOQLCKGSTQOJ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_Builtin_inttypes-A61A8DU1GL8VT4BFU1YXM9FF7.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Darwin-3J2X4K5KN9PDW62LSUB7YWHNU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/simd-2PNCT0PZDDFV7F549EBCNPOB1.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Compression-BAAUUT4VI6VLIZYJMLU0AOL8R.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/MachO-CSDQPS671XUAQXY7OKK0JF8CB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ObjectiveC-5STBHO4LJJDJKRI4Z59XTWEJ9.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/simd-62491OMVNHVCO0DROITO235H6.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/os_object-5O5WQK29IGO4NAY3L45GL4A25.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Compression-GDAMBHGV27M8EHXTXCGU6GFM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/MachO-4EIEUCNQTMMEM0VKW9JV3Y8JE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ObjectiveC-9TMCMN6XAXM2OM2YOHPP68MTO.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/os_workgroup-CQ3LJOQKNKZW0OR7QDMRECD3J.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/os_object-DYH2DU8ONFBXVEMUCF0AY3KA3.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Dispatch-9MIFX00PLODUY0PFT57QHLH8Q.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/os_workgroup-CG4D4LAU98E84MRFZUP0LGKIM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Spatial-1T9AMCQAMS724OW2BW5W5YMXE.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/XPC-WS5ZN5456CJO2VTWPKCNNIL.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/dnssd-2PU2JAJPE9PTLC5MDY70QAYUM.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreFoundation-D67980ICOLLLORITLPHT86JYA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Dispatch-9470RPL0I7956TYYU84DG4DA2.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/os-CM2YSLQNZND9LP6HJVZPDG058.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/dnssd-D2ZR4SNTGA6Z25C0E2MA85ARD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/XPC-CGZ05KUADKJGFDLTH15FVW9TU.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreFoundation-9VSDU8GFSSJGQ719W1IKL2DZX.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Spatial-AJVAHVPETGPE9KGJ0M8X5CXP9.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Security-360A0SV0X9MEAZMYKXGE76U2P.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CFNetwork-815NKQDMSJ1DQKTOS6491YXC3.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreGraphics-645ORESS19BGGH2MEDI9EP3PQ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreAudioTypes-4GY27X4K1TLU1Y9HSM7EQBIEO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/os-6GKHS3UOQD2P6CQZ62D6RKXFC.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreAudio-1EVYQB1OZ4FF8XXZQWIFNTJQ6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CFNetwork-61RIJHQ2HLMZH2Q7MGUYLS0G8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreAudioTypes-4ZDY2BX84TW2OMG5MN6OZU5O8.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Security-BKI1QYVB3P6C2LY3W7XGAM9JZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreGraphics-B47LDXPHPHUAC8GT41WHKUFBP.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Foundation-CJ3AZOA675887LG4F78O9IR5G.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ImageIO-CPTG2LIE0GKWT5DTZI1LBO1TC.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreText-11BUP1WNQ4O83W3MIRPWD0NDL.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreAudio-BF8J8VZMMYPN4JDVBWTF6X9NI.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Foundation-7NOZRHEKA1C84TGW6VBWKYW1.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreText-6KIART4X960VA62C7MGPNXFH9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ImageIO-4RC96HAAU2B8MMLKJLJ18E1EM.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AppIntents-5GZK1SDMB30YMX6HJ3X159XCJ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Symbols-APDGEJ967N8YO66321FUI56ZH.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/DataDetection-CBRNXKK17NJ3OTAZ2M6DFHZGU.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Accessibility-AWWPNIQEN0O8HCHCPRY6CSZRB.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UniformTypeIdentifiers-25VADVI9W83WYHPV21D9AI3J.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreData-EYBTSAI7PL4WXG9JM4HPAOXIQ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UserNotifications-BZMOOXKKSLAS4OOAFBJH5CEVQ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/OSLog-JGQ7JU6FKGKGW9JTJT4PDE19.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/IOSurface-C4P3E2UUPI8SZCF92KI7KJEIF.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/LocalAuthentication-4D52GZW76P1K16NRT8BDTP55R.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/OpenGLES-EG950B21MPGRPLPD8Q2HE6ODK.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/NaturalLanguage-3D955B0ZW5O8AAUC3AFE5D4GQ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Network-DZ9363J6R0R0LZJ52V0JDKY43.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/WatchConnectivity-F073L74220DTX1ZVKM7WHXT95.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/WidgetKit-E4JISLNY6ZL6L5EP1YFNPUBIF.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ModelIO-2EJCQ8O7IDH8ZZYMEU3M27DGA.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/RelevanceKit-1BKUXAOZN4BFEQ40P1E4F7XWO.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/FileProvider-23B9A3TRO3YYIZ3RHX05MA7T8.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UIUtilities-EPQB1VG5Z14M0OQ7S07WXBOOQ.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_LocationEssentials-V0QKBQNLRP1J5O40AJD7K71I.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreMIDI-1EOCNMPU0QEA5QYVIKEVRFDJT.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreTransferable-103ZV3HPWPFMNJEMW7QDMEEO7.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Metal-7AUUBDDC298RMR9JI2HZ5ODC5.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreSpotlight-5YYX15KUOAHTJ9DXMYQSVVD42.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Accessibility-E884D31BSKFL8RV5VA04S7FKM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/DataDetection-NWSBRU59IKSO3X6OMZQBMY05.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UniformTypeIdentifiers-ANZ2N995LSZUZGZNVFBDO6U0L.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreTransferable-178KBJFYSL9C3OZ9MK48ORUCO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/NaturalLanguage-8KN2MBSHR34BX36AE7JVWISJT.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreData-4J9RVEX6ZF9ECE0S93MU3F0VX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/OSLog-BDCRPUPNN56LPJ8QMBG9H2WE4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Symbols-DRIQ6QWZMKHLI3OG1XG8BZG0D.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/_LocationEssentials-8YGBWQTTMQ91IM6K6DL8BXY1H.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Network-BXHZJUH0VM57CBRKIBAMN9N5R.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AVRouting-6GZNMYPX5ZNM6IQYXETTUP9KV.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/IOSurface-K5PR5OWEAZM0V24E5K24JPBR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/ModelIO-13GT8T3EBKQQ0T94PHKR50GW5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/RelevanceKit-68W59P03DN9CFPAUIDZV816BZ.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/FileProvider-42F45A3JRIFBJF23774TXR32T.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UserNotifications-DY1FTG0KH7KTJL5C00ZS1NXJO.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/LocalAuthentication-45PEFFIV2QFO3UF8TQ066YZ47.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreLocation-DXM3645EGE1HMFAW6Z995FIIY.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/OpenGLES-D35D70LF70809CJTIIE7I0UKR.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AudioToolbox-4KKM5D98Y5TPZFZH5532TA7X0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UIUtilities-EDTKQGH440PUL1DSVWCHSDF8K.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreLocation-AINBZGLZNQGWGWE8NVFJ4TT98.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/WatchConnectivity-7JVKRCDWMSN43RESENUGQMFYD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AppIntents-EIYHTFDUZDQPNO93EBPGI49T6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreMIDI-5KH4SQ0V5NJ3SHY0MNJ6OJLA4.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/WidgetKit-DQIB4PUZRO8BKGWOKJBRGWTY0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreSpotlight-8NKZA0JHRA8PKWIFTB691T6ZW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Metal-1YHBMEUB3B0CZFH9S5AINDFPE.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AVRouting-MMF5T9967FSWVGWY8PRZVUZX.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CloudKit-4YBJMSAOQ5N9WEC8ML38Q4C04.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Intents-1AYUMVVVJPWSKIHQZYMTAA42K.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreVideo-4G79HX05CY742VPW0QFWD5ZSX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Intents-ENB66Y9REXTL5A2K3BH2YZ4I0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CloudKit-5MWAX29AHARPUILJ5QHFPXHYD.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AudioToolbox-16CYKV9VBRH1M421NOT2JP7WP.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreImage-D84YXR2VE01AZ3T6I21BCIAWD.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreML-D5K0EBXN9BF1L7ADM21MHT0OV.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreMedia-CNCBSXTHYWTL2R57OZZU8NK9U.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/QuartzCore-2H7ZSGNIKKIJMCQIWUK6C0W3C.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Accelerate-CYIGGEJNZ27Z3UEJOWMIDESJK.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreVideo-3GZLQTRZOF9ISZLO79B15GVSL.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SwiftUICore-22HF9IPKRJMPMW5OTZPT7I8LW.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/MediaToolbox-943M12J01LY7C6JNOA44I7HO6.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Vision-CN1Q7RGALD91W58S0U8C36CB8.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AVFAudio-8T1EIU3K14TC2ARAV1EBA4FMM.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UIKit-E0YNNHM1O4ZYB5UIDJUJ6WOZ5.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreMedia-20YCOK919UCGE10UG4V09E1W6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreML-C52Z4VUWSSXMV8UGX1YNY8UAG.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/QuartzCore-1L5YI1UH7XZAXIVL1DBMPHA8G.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Accelerate-E7AY4PL0EQCIPSK4YK4JE55ET.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/CoreImage-38BSLNGCGZJKF1EGV65QW8KCX.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SwiftUICore-6N65S8XMG1JWVOPAXHGQ467ED.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AVFoundation-5MUHDK0122EJCT6IWDZRORQP3.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AVFAudio-248TJRTZJ51O5LWJOTMHGJMQR.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Vision-57EBPV52244KPHIEFB15U1VN0.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/MediaToolbox-7B717L0CBGAWDU2BISXG4F05G.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/UIKit-A86WEX5269H4OO4AOVREFUVII.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/AVFoundation-5V5E3VXXW1I81JV5GP0RXOQRU.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Photos-4PH5TCHQND8G0U0TFEPHZWSFF.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Speech-B7B745QH7KANO7DR9K7R48TN9.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Speech-2PHJOKSJW0WGPDTTKNI3KQSGA.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/Photos-28ZV5V60Q6GDJ95QN0TAR30GA.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/PhotosUI-88QOLXV756KMY0OMX58IR869C.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SwiftUI-80O2BJANT95RDOFNNZSC74IN0.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/GLKit-3IXQSXSVP0RPV9VU1KT136BU7.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/MultipeerConnectivity-CVJMHXS3IJJKIP04M18TTZZB0.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/PDFKit-DDSWHUPWYYC34Q63ALIDN0T0A.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/WebKit-5GQQ4AHLKZQK3XTI6CZ5EI93Z.pcm
+
+SwiftExplicitDependencyGeneratePcm x86_64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SceneKit-53MW9PYYHMP06J9BID49M9S7K.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SwiftUI-D3CAJ0NLGAA0VGSSU9NVYDFK6.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/PDFKit-3XH0B3OC9T5VN7NCXLCM0F2RF.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/WebKit-9VSV4LTKMLGVCTAZ57191M40O.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/GLKit-DMJ75BYSRRHCB8ZJ4BSBXAUVW.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/PhotosUI-7AZ96Z1E1UDCT98FPORV322G2.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/MultipeerConnectivity-1UJ53O1BA8ISCAGBISF0661RM.pcm
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules/SceneKit-DU4NWIB838HV4LJ4DXFUGL1AR.pcm
+
+SwiftEmitModule normal x86_64 Emitting\ module\ for\ KM (in target 'KM' from project 'KM')
+EmitSwiftModule normal x86_64 (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ WikiPage.swift,\ WikiShortcutsService.swift,\ WikiTooltip.swift,\ WikiUI.swift,\ iCloudSyncComponents.swift,\ iCloudSyncManager.swift,\ iCloudSyncView.swift,\ GeneratedAssetSymbols.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/WikiPage.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/WikiShortcutsService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiTooltip.swift /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/WikiUI.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/iCloudSyncComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Sync/iCloudSyncManager.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/iCloudSyncView.swift /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/WikiPage.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/WikiShortcutsService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiTooltip.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/WikiUI.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/iCloudSyncComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Sync/iCloudSyncManager.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/iCloudSyncView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ SplashComponents.swift,\ SplashView.swift,\ SpotlightService.swift,\ TagCloudView.swift,\ TaskCenter.swift,\ TaskCenterView.swift,\ ThemeManager.swift,\ UndoService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/SplashComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Core/SplashView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/SpotlightService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/TagCloudView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/TaskCenter.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/TaskCenterView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/ThemeManager.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/UndoService.swift (in target 'KM' from project 'KM')
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/SplashComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Core/SplashView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/SpotlightService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/TagCloudView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/TaskCenter.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/TaskCenterView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/ThemeManager.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/UndoService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ RecursiveChunker.swift,\ SQLiteMigrator.swift,\ SQLiteStore.swift,\ SQLiteStoreCore.swift,\ SearchView.swift,\ SecurityReinforcement.swift,\ SecuritySettingsView.swift,\ ServiceContainer.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/RecursiveChunker.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/SQLiteMigrator.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/SQLiteStore.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/SQLiteStoreCore.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/SearchView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/SecurityReinforcement.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/SecuritySettingsView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/ServiceContainer.swift (in target 'KM' from project 'KM')
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/RecursiveChunker.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/SQLiteMigrator.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/SQLiteStore.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/SQLiteStoreCore.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/SearchView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/SecurityReinforcement.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/SecuritySettingsView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/ServiceContainer.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ PluginMarketService.swift,\ PluginProtocols.swift,\ PluginRegistry.swift,\ PromptService.swift,\ PromptWorkshopView.swift,\ Protocols.swift,\ QuizView.swift,\ ReadabilityModifiers.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Plugins/PluginMarketService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Plugins/PluginProtocols.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Plugins/PluginRegistry.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/PromptService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/PromptWorkshopView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/Protocols.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/QuizView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/ReadabilityModifiers.swift (in target 'KM' from project 'KM')
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Plugins/PluginMarketService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Plugins/PluginProtocols.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Plugins/PluginRegistry.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/PromptService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/PromptWorkshopView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/Protocols.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/QuizView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/ReadabilityModifiers.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ LLMService.swift,\ LLMServiceProtocol.swift,\ LLMSettingsView.swift,\ LinkScraperService.swift,\ LinkService.swift,\ LintIssue.swift,\ LintService.swift,\ LintView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/Protocols/LLMServiceProtocol.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/LLMSettingsView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/LinkScraperService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/LinkService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/LintIssue.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/LintService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/LintView.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/Protocols/LLMServiceProtocol.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/LLMSettingsView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/LinkScraperService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/LinkService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/LintIssue.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/LintService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/LintView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ SettingsAboutView.swift,\ SettingsComponents.swift,\ SettingsView.swift,\ Shimmer.swift,\ ShortcutManager.swift,\ SidebarView.swift,\ SnapshotService.swift,\ SpeechService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/SettingsAboutView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/SettingsComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/SettingsView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/Shimmer.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/ShortcutManager.swift /Users/constantine/Documents/work/code/projects/km/Sources/Platforms/iOS/SidebarView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/SnapshotService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/SpeechService.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/SettingsAboutView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/SettingsComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/SettingsView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/Shimmer.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/ShortcutManager.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Platforms/iOS/SidebarView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/SnapshotService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/SpeechService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ LocalAnalyticsService.swift,\ Localized.swift,\ LockOverlayView.swift,\ LogService.swift,\ LogView.swift,\ MCSessionDelegateImpl.swift,\ MarkdownEditorView.swift,\ MarkdownParser.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/LocalAnalyticsService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/Localized.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/LockOverlayView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/LogService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/LogView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/MCSessionDelegateImpl.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/MarkdownEditorView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/MarkdownParser.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/LocalAnalyticsService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/Localized.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/LockOverlayView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/LogService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/LogView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/MCSessionDelegateImpl.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/MarkdownEditorView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/MarkdownParser.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ IngestViewComponents.swift,\ KMApp.swift,\ KMBackupService.swift,\ KMKeyboardShortcuts.swift,\ KMStore.swift,\ KMWindowSceneDelegate.swift,\ KMiCloudSyncService.swift,\ KnowledgeDashboardView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/IngestViewComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/KMApp.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/KMBackupService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/KMKeyboardShortcuts.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/KMStore.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/KMWindowSceneDelegate.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Sync/KMiCloudSyncService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/KnowledgeDashboardView.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/IngestViewComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/KMApp.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/KMBackupService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/KMKeyboardShortcuts.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/KMStore.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Core/KMWindowSceneDelegate.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Sync/KMiCloudSyncService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/KnowledgeDashboardView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ MarkdownRendererView.swift,\ MarkdownTextView.swift,\ MermaidWebView.swift,\ NavigationView.swift,\ OCRScanComponents.swift,\ OCRScanView.swift,\ OCRService.swift,\ OnDeviceComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/MarkdownRendererView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/MarkdownTextView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/MermaidWebView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Core/NavigationView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/OCRScanComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/OCRScanView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/OCRService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/OnDeviceComponents.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/MarkdownRendererView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/MarkdownTextView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/MermaidWebView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Core/NavigationView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/OCRScanComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/OCRScanView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/OCRService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/OnDeviceComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ GraphView.swift,\ HapticManager.swift,\ HostingSetupSheet.swift,\ IconPickerView.swift,\ IndexView.swift,\ IngestQueue.swift,\ IngestService.swift,\ IngestView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/GraphView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/HapticManager.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/HostingSetupSheet.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/IconPickerView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/IndexView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/IngestQueue.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/IngestService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/IngestView.swift (in target 'KM' from project 'KM')
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c -filelist /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/sources-1 -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/GraphView.swift -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/HapticManager.swift -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/HostingSetupSheet.swift -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/IconPickerView.swift -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/IndexView.swift -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/IngestQueue.swift -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/IngestService.swift -primary-file /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/IngestView.swift -supplementary-output-file-map /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/supplementaryOutputs-4 -target x86_64-apple-ios17.0-simulator -module-can-import-version DeveloperToolsSupport 23.40.26 23.40.26 -module-can-import MachO -module-can-import-version UIKit 9126.4.27.1 9126.4.27 -disable-cross-import-overlay-search -swift-module-cross-import AppIntents /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/AppIntents.framework/Modules/AppIntents.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import AppIntents /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/AppIntents.framework/Modules/AppIntents.swiftcrossimport/UIKit.swiftoverlay -swift-module-cross-import AppIntents /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk/System/Library/Frameworks/AppIntents.framework/Modules/AppIntents.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import AppIntents /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk/System/Library/Frameworks/AppIntents.framework/Modules/AppIntents.swiftcrossimport/UIKit.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/WidgetKit.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import PhotosUI /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk/System/Library/Frameworks/PhotosUI.framework/Modules/PhotosUI.swiftcrossimport/WidgetKit.swiftoverlay -swift-module-cross-import RelevanceKit /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/RelevanceKit.framework/Modules/RelevanceKit.swiftcrossimport/MapKit.swiftoverlay -swift-module-cross-import RelevanceKit /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk/System/Library/Frameworks/RelevanceKit.framework/Modules/RelevanceKit.swiftcrossimport/MapKit.swiftoverlay -swift-module-cross-import SceneKit /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Library/Frameworks/SceneKit.framework/Modules/SceneKit.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import WebKit /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/System/Cryptexes/OS/System/Library/Frameworks/WebKit.framework/Modules/WebKit.swiftcrossimport/SwiftUI.swiftoverlay -swift-module-cross-import WebKit /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk/System/Library/Frameworks/WebKit.framework/Modules/WebKit.swiftcrossimport/SwiftUI.swiftoverlay -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libAppIntentsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#AppIntentsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM-dependencies-1.json -debug-module-path /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM.swiftmodule -enable-objc-interop -sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -I /Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator -F /Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=4 -module-cache-path /Users/constantine/Documents/work/code/projects/km/build/SwiftExplicitPrecompiledModules -swift-version 5 -Onone -D DEBUG -serialize-debugging-options -const-gather-protocols-file /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/KM_const_extract_protocols.json -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/constantine/Documents/work/code/projects/km -enable-anonymous-context-mangled-names -file-compilation-dir /Users/constantine/Documents/work/code/projects/km -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/C/com.apple.DeveloperTools/26.4.1-17E202/Xcode/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/swift-overrides.hmap -Xcc -iquote -Xcc /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-generated-files.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-own-target-headers.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-all-target-headers.hmap -Xcc -iquote -Xcc /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/KM-project-headers.hmap -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/Debug-iphonesimulator/include -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources-normal/x86_64 -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources/x86_64 -Xcc -I/Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/DerivedSources -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name KM -frontend-parseable-output -disable-clang-spi -clang-target x86_64-apple-ios26.4-simulator -target-sdk-version 26.4 -target-sdk-name iphonesimulator26.4 -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/GraphView.o -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/HapticManager.o -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/HostingSetupSheet.o -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IconPickerView.o -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IndexView.o -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IngestQueue.o -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IngestService.o -o /Users/constantine/Documents/work/code/projects/km/build/KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IngestView.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/GraphView.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/HapticManager.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/HostingSetupSheet.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IconPickerView.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IndexView.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IngestQueue.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IngestService.o -index-unit-output-path /KM.build/Debug-iphonesimulator/KM.build/Objects-normal/x86_64/IngestView.o
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/GraphView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/HapticManager.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/HostingSetupSheet.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/IconPickerView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/IndexView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/IngestQueue.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+/Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/IngestQueue.swift:36:26: error: value of type 'WikiPage' has no member 'summary'
+                    page.summary = result.summary
+                    ~~~~ ^~~~~~~
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/IngestService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/IngestView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ PageHistoryView.swift,\ PageSchema.swift,\ PageType.swift,\ PencilManager.swift,\ PerformanceBenchmarker.swift,\ PerformanceService.swift,\ PluginCenterView.swift,\ PluginDetailView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/Subviews/PageHistoryView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/PageSchema.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/PageType.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/PencilManager.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Dev/PerformanceBenchmarker.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/PerformanceService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/PluginCenterView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/PluginDetailView.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/Subviews/PageHistoryView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/PageSchema.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/PageType.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/PencilManager.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Dev/PerformanceBenchmarker.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/PerformanceService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/PluginCenterView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/PluginDetailView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ KnowledgeInsightService.swift,\ LLMAdapters.swift,\ LLMChatService.swift,\ LLMClient.swift,\ LLMContextBuilder.swift,\ LLMModels.swift,\ LLMProtocols.swift,\ LLMRefactorService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/KnowledgeInsightService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMAdapters.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMChatService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMClient.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMContextBuilder.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMModels.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMProtocols.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMRefactorService.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/KnowledgeInsightService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMAdapters.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMChatService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMClient.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMContextBuilder.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMModels.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMProtocols.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/LLMRefactorService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ FileSystemSyncService.swift,\ FlowLayout.swift,\ Graph3DComponents.swift,\ Graph3DView.swift,\ GraphClusteringService.swift,\ GraphComponents.swift,\ GraphLayoutEngine.swift,\ GraphModels.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Sync/FileSystemSyncService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/FlowLayout.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/Graph3DComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/Graph3DView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Graph/GraphClusteringService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/GraphComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Graph/GraphLayoutEngine.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/GraphModels.swift (in target 'KM' from project 'KM')
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Sync/FileSystemSyncService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/FlowLayout.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/Graph3DComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/Graph3DView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Graph/GraphClusteringService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/GraphComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Graph/GraphLayoutEngine.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/GraphModels.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ OnDeviceLLMService.swift,\ OnDeviceLLMSettingsView.swift,\ OnboardingService.swift,\ PDFComponents.swift,\ PDFReaderView.swift,\ PDFService.swift,\ PageDetailHeader.swift,\ PageDetailView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/OnDeviceLLMService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/OnDeviceLLMSettingsView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/OnboardingService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/PDFComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/PDFReaderView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/PDFService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/PageDetailHeader.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/PageDetailView.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/OnDeviceLLMService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Settings/OnDeviceLLMSettingsView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/OnboardingService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/PDFComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/PDFReaderView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Processors/PDFService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/PageDetailHeader.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/PageDetailView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ BreadcrumbView.swift,\ ChatComponents.swift,\ ChatView.swift,\ CollaborationComponents.swift,\ CollaborationModels.swift,\ CollaborationService.swift,\ CollaborationView.swift,\ ColorSchemeMode.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/BreadcrumbView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/ChatComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/ChatView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/CollaborationComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/CollaborationModels.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/CollaborationService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/CollaborationView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/ColorSchemeMode.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/BreadcrumbView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/ChatComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/ChatView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/CollaborationComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Models/CollaborationModels.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/CollaborationService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/CollaborationView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/ColorSchemeMode.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ WidgetAndWatchViews.swift,\ WikiCard.swift,\ WikiCardComponents.swift,\ WikiColors.swift,\ WikiDecorators.swift,\ WikiEmptyState.swift,\ WikiEventBus.swift,\ WikiLoadingOverlay.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/WidgetAndWatchViews.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiCard.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiCardComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/WikiColors.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiDecorators.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiEmptyState.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Events/WikiEventBus.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiLoadingOverlay.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/WidgetAndWatchViews.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiCard.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiCardComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Utilities/WikiColors.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiDecorators.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiEmptyState.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Events/WikiEventBus.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WikiLoadingOverlay.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 Compiling\ VaultSecurityService.swift,\ VaultService.swift,\ VisionProSpatialView.swift,\ VoiceNoteComponents.swift,\ VoiceNoteView.swift,\ WatchConnectivityService.swift,\ WeeklyInsightCard.swift,\ WelcomeView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/VaultSecurityService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/VaultService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/VisionProSpatialView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/VoiceNoteComponents.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/VoiceNoteView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/WatchConnectivityService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WeeklyInsightCard.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Core/WelcomeView.swift (in target 'KM' from project 'KM')
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/VaultSecurityService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Services/Storage/VaultService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/VisionProSpatialView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/VoiceNoteComponents.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/VoiceNoteView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/WatchConnectivityService.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/WeeklyInsightCard.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Views/Core/WelcomeView.swift (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    
+
+SwiftEmitModule normal arm64 Emitting\ module\ for\ KM (in target 'KM' from project 'KM')
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	SwiftCompile normal x86_64 Compiling\ GraphView.swift,\ HapticManager.swift,\ HostingSetupSheet.swift,\ IconPickerView.swift,\ IndexView.swift,\ IngestQueue.swift,\ IngestService.swift,\ IngestView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/GraphView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Infrastructure/HapticManager.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Components/HostingSetupSheet.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Views/Editors/IconPickerView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Pages/IndexView.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/IngestQueue.swift /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/Feature/IngestService.swift /Users/constantine/Documents/work/code/projects/km/Sources/Views/Features/IngestView.swift (in target 'KM' from project 'KM')
+	SwiftCompile normal x86_64 /Users/constantine/Documents/work/code/projects/km/Sources/Shared/Services/AI/IngestQueue.swift (in target 'KM' from project 'KM')
+(2 failures)

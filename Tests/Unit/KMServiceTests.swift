@@ -1,6 +1,6 @@
 import XCTest
 import SwiftUI
-@testable import KnowledgeBase
+@testable import KM
 
 // MARK: - BackupService Tests
 final class BackupServiceTests: XCTestCase {
@@ -747,4 +747,50 @@ final class PageLifecycleIntegrationTests: XCTestCase {
             XCTAssertEqual(WikiPage(title: "", type: type).folderName, expected)
         }
     }
+}
+
+// MARK: - Plugin Registry Tests (Security & Consistency)
+final class PluginRegistryTests: XCTestCase {
+    
+    func testMultiPluginInterceptorConsistency() {
+        let registry = PluginRegistry.shared
+        
+        // Mock Plugin 1: Adds a prefix
+        let p1 = MockPlugin(id: "p1", preProcessor: { "P1: " + $0 })
+        // Mock Plugin 2: Adds a suffix
+        let p2 = MockPlugin(id: "p2", preProcessor: { $0 + " :P2" })
+        
+        registry.register(p1)
+        registry.register(p2)
+        
+        let original = "Hello"
+        let processed = registry.applyPreProcess(to: original)
+        
+        XCTAssertTrue(processed.contains("P1:"), "Should contain prefix from P1")
+        XCTAssertTrue(processed.contains(":P2"), "Should contain suffix from P2")
+        XCTAssertEqual(processed, "P1: Hello :P2", "Plugins should be applied sequentially")
+        
+        // Clean up
+        registry.unregister("p1")
+        registry.unregister("p2")
+    }
+}
+
+// Mock Plugin Helper
+struct MockPlugin: PluginProtocol {
+    let id: String
+    var name: String { id }
+    var version: String { "1.0.0" }
+    var author: String { "Test" }
+    
+    var preProcessor: ((String) -> String)? = nil
+    
+    func preProcess(content: String) -> String {
+        preProcessor?(content) ?? content
+    }
+    
+    func postProcess(content: String) -> String { content }
+    func onPageCreated(_ page: WikiPage) {}
+    func onPageUpdated(_ page: WikiPage) {}
+    func onPageDeleted(_ page: WikiPage) {}
 }

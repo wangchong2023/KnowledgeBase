@@ -6,12 +6,13 @@
 每当有代码合并请求时，必须通过以下自动化检查：
 
 *   **L1: 静态检查 (Linting)**: 
-    *   使用 `swiftlint` 检查代码规范与中文注释完备度。
+    *   使用 `swiftlint --strict` 强制执行代码规范。任何警告都将被视为错误并阻断构建。
 *   **L2: 单元测试 (XCTest)**: 
-    *   覆盖率必须 > 80%。核心算法（LWW, RAG 分块）必须 100% 通过。
+    *   全库代码覆盖率阈值强制设定为 **85%**。
+    *   核心算法（LWW-Element-Set, RAG 分块, 向量相似度计算）必须 100% 通过。
 *   **L3: 性能红线 (Benchmark Automation)**:
-    *   自动运行 `PerformanceBenchmarker`。
-    *   **硬指标**: 50,000 篇文档下，检索时延增量不得超过 5%。
+    *   自动对比 `Docs/Testing/PERFORMANCE_BENCHMARK.md` 中的基准数据。
+    *   **硬指标**: 在 1,000 篇基准文档下，检索时延增量不得超过 5%。
 
 ## 2. 发布流程 (Release Pipeline)
 *   **TestFlight 灰度**: 自动将 Beta 版本分发至“专家测试组”。

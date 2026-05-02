@@ -1,5 +1,5 @@
 import XCTest
-@testable import KnowledgeBase
+@testable import KM
 
 // MARK: - E2E: Complete Wiki Page Workflow Tests
 /// 覆盖从创建→编辑→链接→健康检查→删除的完整页面生命周期
