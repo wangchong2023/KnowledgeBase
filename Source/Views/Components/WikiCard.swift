@@ -298,18 +298,60 @@ struct WikiTextField: View {
 }
 
 // MARK: - Wiki Tag Input Field
-/// 标签输入框（带占位符提示）。
+/// 标签输入框（令牌化/芯片式输入）。
 struct WikiTagField: View {
     let placeholder: String
-    @Binding var text: String
+    @Binding var tags: [String]
+    @State private var newTag: String = ""
 
     var body: some View {
-        TextField(placeholder, text: $text)
-            .textFieldStyle(.plain)
-            .padding()
+        VStack(alignment: .leading, spacing: 8) {
+            FlowLayout(spacing: 8) {
+                ForEach(tags, id: \.self) { tag in
+                    HStack(spacing: 4) {
+                        Text("#\(tag)")
+                            .font(.caption.weight(.medium))
+                        Button(action: { 
+                            withAnimation(.spring()) {
+                                tags.removeAll { $0 == tag }
+                            }
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(.wikiSecondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.wikiAccent.opacity(0.12))
+                    .clipShape(Capsule())
+                    .foregroundStyle(.wikiAccent)
+                }
+                
+                TextField(placeholder, text: $newTag)
+                    .textFieldStyle(.plain)
+                    .onSubmit {
+                        let trimmed = newTag.trimmingCharacters(in: .whitespaces)
+                            .replacingOccurrences(of: "#", with: "")
+                        if !trimmed.isEmpty && !tags.contains(trimmed) {
+                            withAnimation(.spring()) {
+                                tags.append(trimmed)
+                            }
+                        }
+                        newTag = ""
+                    }
+                    .frame(minWidth: 120)
+                    .foregroundStyle(.wikiText)
+            }
+            .padding(10)
             .background(Color.wikiCard)
-            .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
-            .foregroundStyle(.wikiText)
+            .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: WikiUI.smallRadius)
+                    .stroke(Color.wikiSecondary.opacity(0.2), lineWidth: 1)
+            )
+        }
     }
 }
 

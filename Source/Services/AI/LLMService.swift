@@ -32,6 +32,16 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
             configStore.isEnabled = isEnabled
         }
     }
+    @Published var autoScan: Bool {
+        didSet {
+            configStore.autoScan = autoScan
+        }
+    }
+    @Published var autoRefactor: Bool {
+        didSet {
+            configStore.autoRefactor = autoRefactor
+        }
+    }
     @Published var isStreaming = false
     @Published var streamingContent = ""
     @Published var isProcessing = false
@@ -59,6 +69,8 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
         self._baseURL = .init(initialValue: configStore.baseURL)
         self._model = .init(initialValue: configStore.model)
         self._isEnabled = .init(initialValue: configStore.isEnabled)
+        self._autoScan = .init(initialValue: configStore.autoScan)
+        self._autoRefactor = .init(initialValue: configStore.autoRefactor)
         
         // 加载历史消息
         self.chatHistory = historyStore.messages
@@ -70,7 +82,7 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
         setupExternalSync()
     }
     
-    /// 同步配置存储层的变更到当前实例的 Published 属性
+    /// 同步配置存储层的变更到当前实例 of Published 属性
     private func setupExternalSync() {
         configStore.objectWillChange
             .receive(on: RunLoop.main)
@@ -81,6 +93,8 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
                 if self.configStore.baseURL != self.baseURL { self.baseURL = self.configStore.baseURL }
                 if self.configStore.model != self.model { self.model = self.configStore.model }
                 if self.configStore.isEnabled != self.isEnabled { self.isEnabled = self.configStore.isEnabled }
+                if self.configStore.autoScan != self.autoScan { self.autoScan = self.configStore.autoScan }
+                if self.configStore.autoRefactor != self.autoRefactor { self.autoRefactor = self.configStore.autoRefactor }
                 self.updateStrategy()
             }
             .store(in: &cancellables)
@@ -232,7 +246,6 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
                         }
                     }
                     
-                    let userMessage = ChatMessage(role: .user, content: query)
                     let linkedTitles = self.extractWikiLinks(from: fullContent)
                     let relatedIDs = pages.filter { linkedTitles.contains($0.title) }.map(\.id)
                     let assistantMessage = ChatMessage(
@@ -241,10 +254,10 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
                         relatedPageIDs: relatedIDs
                     )
                     
-                    self.chatHistory.append(userMessage)
-                    self.chatHistory.append(assistantMessage)
-                    
-                    await MainActor.run { self.isProcessing = false }
+                    await MainActor.run {
+                        self.chatHistory.append(assistantMessage)
+                        self.isProcessing = false
+                    }
                     continuation.finish()
                 } catch {
                     await MainActor.run { self.isProcessing = false }

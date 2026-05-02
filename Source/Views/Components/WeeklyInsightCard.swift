@@ -43,38 +43,16 @@ struct WeeklyInsightCard: View {
                     SkeletonBox(width: 280, height: 16)
                 }
             } else if let insight = store.weeklyInsight {
-                VStack(alignment: .leading, spacing: 20) {
-                    // 摘要正文 - 使用更好的排版
-                    Text(insight.aiSummary)
-                        .font(.callout)
-                        .lineSpacing(6)
-                        .foregroundStyle(.wikiText.opacity(0.95))
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color.wikiBackground.opacity(0.5))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
-                                )
-                        )
-                    
-                    // 核心指标
-                    HStack(spacing: 20) {
-                        InsightStat(label: "新增页面", value: "\(insight.totalNewPages)", icon: "doc.badge.plus", color: .blue)
-                        Divider().frame(height: 30)
-                        InsightStat(label: "成长势能", value: insight.growthTraction, icon: "chart.line.uptrend.xyaxis", color: .green)
-                        Spacer()
-                    }
-                    .padding(.horizontal, 4)
-                    
-                    // 关键关键词标签
-                    if !insight.topKeywords.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text(Localized.tr("weekly.coreAreas"))
-                                .font(.caption.bold())
-                                .foregroundStyle(.wikiSecondary)
-                            
+                VStack(alignment: .leading, spacing: 24) {
+                    // 核心指标 (奖牌化设计)
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack(spacing: 24) {
+                            InsightStat(label: "新增页面", value: "\(insight.totalNewPages)", icon: "doc.badge.plus", color: .blue)
+                            Divider().frame(height: 36)
+                            InsightStat(label: "成长势能", value: insight.growthTraction, icon: "chart.line.uptrend.xyaxis", color: .green)
+                        }
+                        
+                        if !insight.topKeywords.isEmpty {
                             FlowLayout(spacing: 8) {
                                 ForEach(insight.topKeywords, id: \.self) { tag in
                                     Text("#\(tag)")
@@ -88,6 +66,48 @@ struct WeeklyInsightCard: View {
                             }
                         }
                     }
+                    .padding(16)
+                    .background(Color.wikiCard.opacity(0.5))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
+                    )
+
+                    // 摘要正文
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "quote.opening")
+                                .font(.title2)
+                                .foregroundStyle(.wikiAccent.opacity(0.3))
+                            Spacer()
+                        }
+                        
+                        MarkdownRendererView(content: insight.aiSummary, onLinkTap: { title in
+                            if let page = store.pages.first(where: { $0.title == title }) {
+                                store.selectedPageID = page.id
+                            }
+                        })
+                        .padding(.horizontal, 4)
+                        
+                        HStack {
+                            Spacer()
+                            Image(systemName: "quote.closing")
+                                .font(.title2)
+                                .foregroundStyle(.wikiAccent.opacity(0.3))
+                        }
+                    }
+                    .padding(20)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background {
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16)
+                                    .stroke(LinearGradient(colors: [Color.wikiAccent.opacity(0.5), .clear], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                            )
+                    }
+                    .shadow(color: .black.opacity(0.05), radius: 10, y: 4)
                 }
                 .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
             } else {
@@ -148,21 +168,24 @@ struct InsightStat: View {
     let color: Color
     
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 14))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(color)
-                .frame(width: 30, height: 30)
-                .background(color.opacity(0.1))
-                .clipShape(Circle())
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle()
+                        .fill(color.opacity(0.15))
+                        .overlay(Circle().stroke(color.opacity(0.3), lineWidth: 1))
+                )
             
-            VStack(alignment: .leading, spacing: 0) {
-                Text(label)
-                    .font(.system(size: 10))
-                    .foregroundStyle(.wikiSecondary)
+            VStack(alignment: .leading, spacing: 4) {
                 Text(value)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                    .font(.title2.weight(.bold))
                     .foregroundStyle(.wikiText)
+                Text(label)
+                    .font(.caption)
+                    .foregroundStyle(.wikiSecondary)
             }
         }
     }

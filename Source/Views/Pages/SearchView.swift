@@ -63,81 +63,124 @@ struct SearchView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Search bar
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.wikiSecondary)
-                TextField(Localized.tr("search.placeholder"), text: $searchText)
-                    .foregroundStyle(.wikiText)
-                    .accessibilityIdentifier("searchPlaceholder")
-
-                if !searchText.isEmpty {
-                    Button(action: { 
-                        searchText = ""
-                        useAdvancedSearch = false
-                        advancedResults = []
-                    }) {
-                        Image(systemName: "xmark.circle.fill")
+            // Search Header (Bar + Filters)
+            VStack(spacing: 12) {
+                // Unified Search Bar
+                HStack(spacing: 0) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass")
                             .foregroundStyle(.wikiSecondary)
-                    }
-                }
-            }
-            .padding()
-            .background(Color.wikiCard)
-            .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
-            .padding(.horizontal)
-            .padding(.top)
+                        TextField(Localized.tr("search.placeholder"), text: $searchText)
+                            .foregroundStyle(.wikiText)
+                            .accessibilityIdentifier("searchPlaceholder")
+                            .submitLabel(.search)
+                            .onSubmit {
+                                if !searchText.isEmpty {
+                                    runAdvancedSearch()
+                                }
+                            }
 
-            // Filters
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    // Type filters
-                    FilterPill(title: Localized.tr("search.all"), accessibilityIdentifier: "filter-all", isSelected: filterType == nil) {
-                        HapticManager.shared.trigger(.selection)
-                        filterType = nil
-                    }
-
-                    ForEach(PageType.allCases) { type in
-                        FilterPill(
-                            title: type.displayName,
-                            icon: type.icon,
-                            color: type.themedColor,
-                            accessibilityIdentifier: "filter-\(type.rawValue)",
-                            isSelected: filterType == type
-                        ) {
-                            HapticManager.shared.trigger(.selection)
-                            filterType = type
+                        if !searchText.isEmpty {
+                            Button(action: { 
+                                searchText = ""
+                                useAdvancedSearch = false
+                                advancedResults = []
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.wikiSecondary)
+                            }
+                            .padding(.trailing, 4)
                         }
                     }
+                    .padding(.leading, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.wikiCard)
+                    
+                    if !searchText.isEmpty {
+                        Button(action: runAdvancedSearch) {
+                            ZStack {
+                                if store.isAdvancedSearching {
+                                    ProgressView().scaleEffect(0.8).tint(.white)
+                                } else {
+                                    Text(Localized.tr("search.advancedAI"))
+                                        .font(.system(size: 14, weight: .bold))
+                                }
+                            }
+                            .foregroundStyle(.white)
+                            .frame(maxHeight: .infinity)
+                            .padding(.horizontal, 16)
+                            .background(
+                                LinearGradient(
+                                    colors: [.wikiAccent, .wikiAccent.opacity(0.85)],
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                            )
+                        }
+                        .transition(.move(edge: .trailing))
+                    }
+                }
+                .frame(height: 46)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.wikiBorder.opacity(0.5), lineWidth: 0.5)
+                )
+                .padding(.horizontal)
+                .animation(.spring(response: 0.3, dampingFraction: 0.7), value: searchText.isEmpty)
+                
+                // Filters
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        FilterPill(title: Localized.tr("search.all"), accessibilityIdentifier: "filter-all", isSelected: filterType == nil) {
+                            HapticManager.shared.trigger(.selection)
+                            filterType = nil
+                        }
 
-                    Divider().frame(height: 24).background(Color.wikiBorder)
-
-                    // Sort options
-                    Menu {
-                        ForEach(SortOption.allCases, id: \.self) { option in
-                            Button(action: { sortBy = option }) {
-                                Label(Localized.tr(option.rawValue), systemImage: sortBy == option ? "checkmark" : "")
+                        ForEach(PageType.allCases) { type in
+                            FilterPill(
+                                title: type.displayName,
+                                icon: type.icon,
+                                color: type.themedColor,
+                                accessibilityIdentifier: "filter-\(type.rawValue)",
+                                isSelected: filterType == type
+                            ) {
+                                HapticManager.shared.trigger(.selection)
+                                filterType = type
                             }
                         }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "arrow.up.arrow.down")
-                                .font(.caption)
-                            Text(Localized.tr(sortBy.rawValue))
-                                .font(.caption)
+
+                        Divider().frame(height: 24).background(Color.wikiBorder)
+
+                        // Sort options
+                        Menu {
+                            ForEach(SortOption.allCases, id: \.self) { option in
+                                Button(action: { sortBy = option }) {
+                                    Label(Localized.tr(option.rawValue), systemImage: sortBy == option ? "checkmark" : "")
+                                }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "arrow.up.arrow.down")
+                                    .font(.caption)
+                                Text(Localized.tr(sortBy.rawValue))
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Color.wikiCard)
+                            .clipShape(Capsule())
+                            .foregroundStyle(.wikiSecondary)
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(Color.wikiCard)
-                        .clipShape(Capsule())
-                        .foregroundStyle(.wikiSecondary)
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-                .padding(.vertical, 10)
             }
+            .padding(.top, 12)
+            .background(Color.wikiBackground)
             
-            if store.llmService.isEnabled && !searchText.isEmpty {
+            // AI Search Trigger (Conditional)
+            if store.llmService.isEnabled && !searchText.isEmpty && !useAdvancedSearch {
                 Button(action: runAdvancedSearch) {
                     HStack(spacing: 8) {
                         if store.isAdvancedSearching {
@@ -145,132 +188,123 @@ struct SearchView: View {
                         } else {
                             Image(systemName: "sparkles")
                         }
-                        Text(useAdvancedSearch ? Localized.tr("search.showAll") : Localized.tr("search.advancedAI"))
+                        Text(Localized.tr("search.advancedAI"))
                             .font(.system(size: 13, weight: .bold))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
                     .background(
-                        ZStack {
-                            if useAdvancedSearch {
-                                Capsule().fill(Color.wikiSecondary)
-                            } else {
-                                LinearGradient(
-                                    colors: [.wikiAccent, .wikiAccent.opacity(0.8)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                                .clipShape(Capsule())
-                            }
-                        }
+                        LinearGradient(
+                            colors: [.wikiAccent, .wikiAccent.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
                     .foregroundStyle(.white)
                     .clipShape(Capsule())
-                    .shadow(color: (useAdvancedSearch ? Color.wikiSecondary : Color.wikiAccent).opacity(0.4), radius: 8, y: 4)
+                    .shadow(color: Color.wikiAccent.opacity(0.4), radius: 8, y: 4)
                 }
                 .buttonStyle(ScaleButtonStyle())
-                .padding(.horizontal)
-                .padding(.bottom, 12)
+                .padding(.top, 8)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
             
-            if useAdvancedSearch && store.lastSearchDiagnostic != nil {
-                Button(action: { showDiagnostics = true }) {
-                    Label(Localized.tr("search.diagnostics"), systemImage: "doc.text.magnifyingglass")
-                        .font(.caption2)
-                        .foregroundStyle(.purple.opacity(0.8))
+            // Main Results Content
+            ZStack {
+                if store.isAdvancedSearching {
+                    VStack(spacing: 16) {
+                        ForEach(0..<6) { _ in
+                            HStack(spacing: 12) {
+                                SkeletonBox(width: 44, height: 44)
+                                VStack(alignment: .leading, spacing: 8) {
+                                    SkeletonBox(width: 140, height: 14)
+                                    SkeletonBox(width: 240, height: 10)
+                                }
+                                Spacer()
+                            }
+                            .padding(.horizontal)
+                        }
+                        Spacer()
+                    }
+                    .padding(.top, 20)
+                } else if filteredPages.isEmpty {
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: searchText.isEmpty ? "magnifyingglass" : "doc.text.magnifyingglass")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.wikiSecondary.opacity(0.5))
+                        
+                        Text(searchText.isEmpty ? Localized.tr("search.placeholder") : Localized.tr("search.noResults"))
+                            .font(.headline)
+                            .foregroundStyle(.wikiSecondary)
+                        
+                        if !searchText.isEmpty {
+                            Text(Localized.tr("search.noResultsHint"))
+                                .font(.caption)
+                                .foregroundStyle(.wikiSecondary.opacity(0.7))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                        }
+                        Spacer()
+                    }
+                } else {
+                    List {
+                        ForEach(filteredPages) { page in
+                            NavigationLink(value: page) {
+                                PageRowView(page: page)
+                            }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .contextMenu {
+                                Button {
+                                    HapticManager.shared.trigger(.selection)
+                                    previewPage = page
+                                } label: {
+                                    Label(Localized.tr("misc.quickPreview"), systemImage: "eye")
+                                }
+                                
+                                Button {
+                                    WikiPasteboard.string = "[[\(page.title)]]"
+                                } label: {
+                                    Label(Localized.tr("misc.copyWikiLink"), systemImage: "link")
+                                }
+                            }
+                        }
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .animation(.default, value: store.isAdvancedSearching)
+            .animation(.default, value: filteredPages.isEmpty)
+            
+            // Footer
+            if !filteredPages.isEmpty {
+                Divider().background(Color.wikiBorder.opacity(0.5))
+                HStack {
+                    Text(Localized.trf("search.pagesCount", filteredPages.count))
+                        .font(.caption)
+                        .foregroundStyle(.wikiSecondary)
+                    
+                    if useAdvancedSearch {
+                        Spacer()
+                        Button(action: { showDiagnostics = true }) {
+                            Label(Localized.tr("search.diagnostics"), systemImage: "info.circle")
+                                .font(.caption2)
+                                .foregroundStyle(.wikiAccent)
+                        }
+                    } else {
+                        Spacer()
+                    }
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 4)
+                .padding(.vertical, 10)
+                .background(Color.wikiBackground)
             }
-
-            // Results
-            if store.isAdvancedSearching {
-                VStack(spacing: 12) {
-                    ForEach(0..<5) { _ in
-                        HStack(spacing: 12) {
-                            SkeletonBox(width: 40, height: 40)
-                            VStack(alignment: .leading, spacing: 6) {
-                                SkeletonBox(width: 150, height: 16)
-                                SkeletonBox(width: 250, height: 12)
-                            }
-                            Spacer()
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                .padding(.top)
-            } else if filteredPages.isEmpty {
-                VStack(spacing: 12) {
-                    if searchText.isEmpty {
-                        // 未搜索状态
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.wikiSecondary)
-                        Text(Localized.tr("search.placeholder"))
-                            .font(.subheadline)
-                            .foregroundStyle(.wikiSecondary)
-                    } else {
-                        // 搜索无结果
-                        Image(systemName: "doc.text.magnifyingglass")
-                            .font(.system(size: 40))
-                            .foregroundStyle(.wikiSecondary)
-                        Text(Localized.tr("search.noResults"))
-                            .font(.subheadline)
-                            .foregroundStyle(.wikiSecondary)
-                        Text(Localized.tr("search.noResultsHint"))
-                            .font(.caption)
-                            .foregroundStyle(.wikiSecondary.opacity(0.7))
-                    }
-                }
-                .frame(maxHeight: .infinity)
-            } else {
-                List {
-                    ForEach(filteredPages) { page in
-                        NavigationLink(value: page) {
-                            PageRowView(page: page)
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .contextMenu {
-                            Button {
-                                HapticManager.shared.trigger(.selection)
-                                previewPage = page
-                            } label: {
-                                Label(Localized.tr("misc.quickPreview"), systemImage: "eye")
-                            }
-                            
-                            Button {
-                                WikiPasteboard.string = "[[\(page.title)]]"
-                            } label: {
-                                Label(Localized.tr("misc.copyWikiLink"), systemImage: "link")
-                            }
-                        }
-                    }
-                }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .refreshable {
-                    // 本地数据无需刷新，仅提供视觉反馈
-                    try? await Task.sleep(nanoseconds: 500_000_000)
-                }
-                .navigationDestination(for: WikiPage.self) { destination in
-                    PageDetailView(page: destination)
-                }
-            }
-
-            // Result count
-            HStack {
-                Text(Localized.trf("search.pagesCount", filteredPages.count))
-                    .font(.caption)
-                    .foregroundStyle(.wikiSecondary)
-                Spacer()
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 8)
         }
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("search.title"))
+        .navigationBarTitleDisplayMode(.large)
         .sheet(item: $previewPage) { page in
             PagePreviewSheet(page: page)
         }

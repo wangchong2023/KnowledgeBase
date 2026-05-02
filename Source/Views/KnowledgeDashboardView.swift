@@ -9,8 +9,8 @@ struct KnowledgeDashboardView: View {
             VStack(spacing: 24) {
                 // 1. 核心资产统计
                 HStack(spacing: 16) {
-                    MetricBox(title: "总页面", value: "\(store.pages.count)", icon: "doc.on.doc", color: .blue)
-                    MetricBox(title: "知识连接", value: "\(totalLinks)", icon: "link", color: .wikiAccent)
+                    MetricBox(title: Localized.tr("dashboard.totalPages"), value: "\(store.pages.count)", icon: "doc.on.doc", color: .blue)
+                    MetricBox(title: Localized.tr("dashboard.totalLinks"), value: "\(totalLinks)", icon: "link", color: .wikiAccent)
                 }
                 .padding(.horizontal)
                 

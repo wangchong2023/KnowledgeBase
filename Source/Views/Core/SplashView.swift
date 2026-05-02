@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - SplashView
-/// 启动画面：Karpathy 名言 + 程序化生成的书本+神经网络星空背景
+/// 启动画面：名言引导 + 程序化生成的书本 + 神经网络星空背景
 struct SplashView: View {
     @State private var quoteOpacity: Double = 0
     @State private var authorOpacity: Double = 0
@@ -75,11 +75,11 @@ struct SplashView: View {
                         )
                         .opacity(quoteOpacity > 0.5 ? 0.4 : 0)
                     
-                    // 署名
+                    // 署名 (仅保留装饰线)
                     HStack(spacing: 0) {
                         Text("— ")
                             .foregroundStyle(.white.opacity(0.5))
-                        Text("Andrej Karpathy")
+                        Text(Localized.tr("splash.author"))
                             .foregroundStyle(
                                 LinearGradient(
                                     colors: [Color.wikiAccent.opacity(0.8), Color.wikiAccent],

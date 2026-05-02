@@ -38,10 +38,10 @@ struct LLMSettingsView: View {
                 }
                 .padding(.vertical, 4)
                 
-                Toggle(Localized.tr("ondevice.enableAutoScan"), isOn: .constant(true)) // 后续可绑定到持久化设置
+                Toggle(Localized.tr("ondevice.enableAutoScan"), isOn: $llmService.autoScan)
                     .tint(.wikiAccent)
                 
-                Toggle(Localized.tr("ondevice.autoRefactor"), isOn: .constant(false))
+                Toggle(Localized.tr("ondevice.autoRefactor"), isOn: $llmService.autoRefactor)
                     .tint(.wikiAccent)
             } header: {
                 Text(Localized.tr("settings.advancedMaintenance"))
@@ -111,6 +111,10 @@ struct LLMSettingsView: View {
                             .padding()
                             .background(Color.wikiCard)
                             .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: WikiUI.smallRadius)
+                                    .stroke(Color.wikiBorder.opacity(0.8), lineWidth: 1)
+                            )
                         }
                         
                         // Base URL
@@ -125,6 +129,10 @@ struct LLMSettingsView: View {
                                 .padding()
                                 .background(Color.wikiCard)
                                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: WikiUI.smallRadius)
+                                        .stroke(Color.wikiBorder.opacity(0.8), lineWidth: 1)
+                                )
                                 .autocapitalization(.none)
                                 .keyboardType(.URL)
                         }
@@ -141,6 +149,10 @@ struct LLMSettingsView: View {
                                 .padding()
                                 .background(Color.wikiCard)
                                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: WikiUI.smallRadius)
+                                        .stroke(Color.wikiBorder.opacity(0.8), lineWidth: 1)
+                                )
                                 .autocapitalization(.none)
                         }
                         
@@ -227,25 +239,6 @@ struct LLMSettingsView: View {
                 }
             } header: {
                 Text(Localized.tr("llm.validation"))
-            }
-            
-            // Chat History
-            Section {
-                HStack {
-                    Label(Localized.tr("llm.chatHistory"), systemImage: "bubble.left.and.bubble.right")
-                        .foregroundStyle(.wikiText)
-                    Spacer()
-                    Text("\(llmService.chatHistory.count) \(Localized.tr("llm.messages"))")
-                        .foregroundStyle(.wikiSecondary)
-                }
-                
-                Button(role: .destructive, action: {
-                    llmService.clearChatHistory()
-                }) {
-                    Label(Localized.tr("llm.clearHistory"), systemImage: "trash")
-                }
-            } header: {
-                Text(Localized.tr("llm.chatSection"))
             }
             
             // Info

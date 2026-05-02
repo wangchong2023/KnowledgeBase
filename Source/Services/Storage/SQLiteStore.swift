@@ -265,12 +265,12 @@ final class SQLiteStore: ObservableObject {
     func seedDefaultContent(logAction: (String, String, String) -> Void) {
         // 1. 欢迎页
         _ = createPage(
-            title: "👋 欢迎使用 KM",
+            title: "👋 欢迎使用 智元",
             type: .concept,
             content: """
             # 欢迎来到您的第二大脑
             
-            KM 是一个“AI 原生”的知识进化引擎。它不仅能帮您存储笔记，还能通过 [[3D 图谱]] 发现知识间的隐秘联系。
+            智元 是一个“AI 原生”的知识进化引擎。它不仅能帮您存储笔记，还能通过 [[3D 图谱]] 发现知识间的隐秘联系。
             
             ### 快速开始
             - 尝试点击右侧的 [[智能对话]] 按钮，问我：“我库里有哪些内容？”
@@ -287,8 +287,8 @@ final class SQLiteStore: ObservableObject {
             content: """
             # 3D 知识拓扑
             
-            在 KM 中，知识是以节点形式存在的。
-            当您在 [[👋 欢迎使用 KM]] 中提到本页面时，系统会自动建立一条连线。
+            在 智元 中，知识是以节点形式存在的。
+            当您在 [[👋 欢迎使用 智元]] 中提到本页面时，系统会自动建立一条连线。
             
             随着内容增多，您会看到知识的“聚类”现象。
             """,

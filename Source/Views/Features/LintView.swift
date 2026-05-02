@@ -120,34 +120,57 @@ struct LintViewContent: View {
     
     private var healthDashboardHeader: some View {
         VStack(spacing: 16) {
-            ZStack {
-                // 背景环
-                Circle()
-                    .stroke(healthColor.opacity(0.1), lineWidth: 15)
-                    .frame(width: 160, height: 160)
-                
-                // 进度环
-                Circle()
-                    .trim(from: 0, to: CGFloat(score) / 100.0)
-                    .stroke(
-                        AngularGradient(colors: [healthColor.opacity(0.6), healthColor], center: .center),
-                        style: StrokeStyle(lineWidth: 15, lineCap: .round)
-                    )
-                    .frame(width: 160, height: 160)
-                    .rotationEffect(.degrees(-90))
-                
-                VStack(spacing: 4) {
-                    Text("\(score)")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
-                    Text(Localized.tr("lint.health.score"))
-                        .font(.caption2)
-                        .foregroundStyle(.wikiSecondary)
+            ZStack(alignment: .bottomTrailing) {
+                HStack {
+                    Spacer()
+                    ZStack {
+                        // 背景环
+                        Circle()
+                            .stroke(healthColor.opacity(0.1), lineWidth: 15)
+                            .frame(width: 160, height: 160)
+                        
+                        // 进度环
+                        Circle()
+                            .trim(from: 0, to: CGFloat(score) / 100.0)
+                            .stroke(
+                                AngularGradient(colors: [healthColor.opacity(0.6), healthColor], center: .center),
+                                style: StrokeStyle(lineWidth: 15, lineCap: .round)
+                            )
+                            .frame(width: 160, height: 160)
+                            .rotationEffect(.degrees(-90))
+                        
+                        VStack(spacing: 4) {
+                            Text("\(score)")
+                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                            Text(Localized.tr("lint.health.score"))
+                                .font(.caption2)
+                                .foregroundStyle(.wikiSecondary)
+                        }
+                    }
+                    Spacer()
                 }
+                
+                // 评分规则展示在右下角
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(Localized.tr("lint.rule.error"))
+                    Text(Localized.tr("lint.rule.warning"))
+                    Text(Localized.tr("lint.rule.info"))
+                }
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .foregroundStyle(.wikiSecondary)
+                .padding(12)
+                .background(Color.wikiCard.opacity(0.6))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.trailing, 10)
             }
             
             Text(healthLabel)
-                .font(.title2.bold())
+                .font(.title3.bold())
                 .foregroundStyle(healthColor)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+                .background(healthColor.opacity(0.1))
+                .clipShape(Capsule())
         }
     }
     
@@ -565,7 +588,7 @@ struct LintIssueRow: View {
                 }
             } catch {
                 await MainActor.run {
-                    self.aiSuggestion = "获取建议失败：\(error.localizedDescription)"
+                    self.aiSuggestion = Localized.trf("lint.aiSuggestionError", error.localizedDescription)
                     self.isAnalyzing = false
                 }
             }

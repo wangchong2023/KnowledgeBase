@@ -28,8 +28,8 @@ struct PluginDetailView: View {
                         Text(author).font(.subheadline).foregroundStyle(.wikiSecondary)
                         
                         HStack(spacing: 15) {
-                            statItem(label: "下载", value: "1.2K", icon: "arrow.down.circle")
-                            statItem(label: "评分", value: "4.9", icon: "star.fill", color: .yellow)
+                            statItem(label: Localized.tr("plugin.stat.downloads"), value: "1.2K", icon: "arrow.down.circle")
+                            statItem(label: Localized.tr("plugin.stat.rating"), value: "4.9", icon: "star.fill", color: .yellow)
                         }
                         .padding(.top, 4)
                     }
@@ -62,7 +62,7 @@ struct PluginDetailView: View {
                 withAnimation { isInstalled.toggle() }
                 HapticManager.shared.trigger(.success)
             }) {
-                Label(isInstalled ? "卸载" : "安装", systemImage: isInstalled ? "trash" : "icloud.and.arrow.down")
+                Label(isInstalled ? Localized.tr("plugin.action.uninstall") : Localized.tr("plugin.action.install"), systemImage: isInstalled ? "trash" : "icloud.and.arrow.down")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
@@ -91,20 +91,20 @@ struct PluginDetailView: View {
     
     private var permissionsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("所需权限")
+            Text(Localized.tr("plugin.section.permissions"))
                 .font(.headline)
             
             HStack(spacing: 8) {
-                PermissionTag(icon: "lock.shield", text: "沙盒安全", color: .green)
-                PermissionTag(icon: "network", text: "网络访问", color: .blue)
-                PermissionTag(icon: "pencil.and.outline", text: "内容修改", color: .orange)
+                PermissionTag(icon: "lock.shield", text: Localized.tr("plugin.perm.sandbox"), color: .green)
+                PermissionTag(icon: "network", text: Localized.tr("plugin.perm.network"), color: .blue)
+                PermissionTag(icon: "pencil.and.outline", text: Localized.tr("plugin.perm.content"), color: .orange)
             }
         }
     }
     
     private var descriptionSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("关于此插件")
+            Text(Localized.tr("plugin.section.about"))
                 .font(.headline)
             
             Text(description)

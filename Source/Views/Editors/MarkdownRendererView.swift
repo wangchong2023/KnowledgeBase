@@ -10,7 +10,7 @@ struct MarkdownRendererView: View {
     private let parser = MarkdownParser()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 12) {
             let blocks = parser.parse(content)
             ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 renderBlock(block)
@@ -48,8 +48,8 @@ struct MarkdownRendererView: View {
         renderInlineContent(text)
             .font(.system(size: size, weight: .bold, design: .rounded))
             .foregroundStyle(.wikiText)
-            .padding(.top, level == 1 ? 16 : 10)
-            .padding(.bottom, 4)
+            .padding(.top, level == 1 ? 8 : 4)
+            .padding(.bottom, 2)
     }
 
     // MARK: - Render Paragraph
@@ -57,7 +57,7 @@ struct MarkdownRendererView: View {
     private func renderParagraph(text: String) -> some View {
         renderInlineContent(text)
             .foregroundStyle(.wikiText)
-            .padding(.vertical, 3)
+            .lineSpacing(4)
     }
 
     // MARK: - Render Bullet List
@@ -193,41 +193,46 @@ struct MarkdownRendererView: View {
     @ViewBuilder
     private func renderInlineContent(_ text: String) -> some View {
         let segments = parser.parseInlineSegments(text)
-
-        HStack(spacing: 0) {
-            ForEach(Array(segments.enumerated()), id: \.offset) { _, segment in
-                switch segment.type {
-                case .text:
-                    Text(segment.content)
-                        .font(.body)
-                case .bold:
-                    Text(segment.content)
-                        .font(.body.weight(.bold))
-                case .italic:
-                    Text(segment.content)
-                        .font(.body.italic())
-                case .code:
-                    Text(segment.content)
-                        .font(.system(.caption, design: .monospaced))
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 2)
-                        .background(Color.wikiAccent.opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: WikiUI.inlineRadius))
-                case .wikilink:
-                    Button(action: { onLinkTap(segment.content) }) {
-                        Text(segment.content)
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(.wikiAccent)
-                            .underline()
-                    }
-                    .buttonStyle(.plain)
-                    .contentShape(Rectangle())
-                case .emoji:
-                    Text(segment.content)
-                        .font(.body)
+        
+        Text(buildAttributedString(from: segments))
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+    
+    private func buildAttributedString(from segments: [MarkdownParser.InlineSegment]) -> AttributedString {
+        var result = AttributedString()
+        
+        for segment in segments {
+            var container = AttributedString(segment.content)
+            
+            switch segment.type {
+            case .text:
+                container.font = .body
+            case .bold:
+                container.font = .body.weight(.bold)
+            case .italic:
+                container.font = .body.italic()
+            case .code:
+                container.font = .system(.caption, design: .monospaced)
+                container.backgroundColor = Color.wikiAccent.opacity(0.15)
+                container.foregroundColor = .wikiText
+            case .wikilink:
+                container.font = .body.weight(.medium)
+                container.foregroundColor = .wikiAccent
+                container.underlineStyle = .single
+                // 我们在 Text 上无法直接捕获这个特定属性的点击，
+                // 但我们可以通过转换整个 Text 为 Link 或使用自定义属性。
+                // 暂时使用标准 link 属性，由外部 onLinkTap 处理或通过自定义 URL 协议。
+                if let encoded = segment.content.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+                    container.link = URL(string: "wikilink://\(encoded)")
                 }
+            case .emoji:
+                container.font = .body
             }
-            Spacer(minLength: 0)
+            
+            result.append(container)
         }
+        
+        return result
     }
 }

@@ -75,13 +75,13 @@ struct CreateWikiPageIntent: AppIntent {
 }
 
 // MARK: - Knowledge Base Shortcuts Provider
-struct KMShortcuts: AppShortcutsProvider {
+struct WikiShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: SearchWikiIntent(),
             phrases: [
-                "在\(.applicationName)中搜索知识库",
-                "\(.applicationName)知识搜索"
+                "在 \(.applicationName) 中搜索",
+                "\(.applicationName) 搜索"
             ],
             shortTitle: LocalizedStringResource("shortcuts.searchWiki", table: nil),
             systemImageName: "magnifyingglass"
@@ -90,8 +90,8 @@ struct KMShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: GetWikiStatsIntent(),
             phrases: [
-                "\(.applicationName)知识库统计",
-                "\(.applicationName)统计"
+                "\(.applicationName) 统计",
+                "\(.applicationName) 概览"
             ],
             shortTitle: LocalizedStringResource("shortcuts.wikiStats", table: nil),
             systemImageName: "chart.bar"
@@ -100,8 +100,8 @@ struct KMShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: CreateWikiPageIntent(),
             phrases: [
-                "在\(.applicationName)中创建知识",
-                "\(.applicationName)新建页面"
+                "在 \(.applicationName) 中创建",
+                "\(.applicationName) 新建"
             ],
             shortTitle: LocalizedStringResource("shortcuts.createPage", table: nil),
             systemImageName: "plus.circle"

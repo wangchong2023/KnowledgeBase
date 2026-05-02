@@ -179,6 +179,12 @@ final class LLMConfigStore: ObservableObject {
     @Published var isEnabled: Bool {
         didSet { saveConfig() }
     }
+    @Published var autoScan: Bool {
+        didSet { saveConfig() }
+    }
+    @Published var autoRefactor: Bool {
+        didSet { saveConfig() }
+    }
     
     private let configKey = "wikicraft_llm_config"
     
@@ -188,6 +194,8 @@ final class LLMConfigStore: ObservableObject {
         let baseURL: String
         let model: String
         let isEnabled: Bool
+        let autoScan: Bool
+        let autoRefactor: Bool
     }
     
     init() {
@@ -198,12 +206,16 @@ final class LLMConfigStore: ObservableObject {
             self.baseURL = config.baseURL
             self.model = config.model
             self.isEnabled = config.isEnabled
+            self.autoScan = config.autoScan
+            self.autoRefactor = config.autoRefactor
         } else {
             self.provider = .deepSeek
             self.apiKey = ""
             self.baseURL = LLMProvider.deepSeek.defaultBaseURL
             self.model = LLMProvider.deepSeek.defaultModel
             self.isEnabled = false
+            self.autoScan = true
+            self.autoRefactor = false
         }
     }
     
@@ -213,7 +225,9 @@ final class LLMConfigStore: ObservableObject {
             apiKey: apiKey,
             baseURL: baseURL,
             model: model,
-            isEnabled: isEnabled
+            isEnabled: isEnabled,
+            autoScan: autoScan,
+            autoRefactor: autoRefactor
         )
         if let data = try? JSONEncoder().encode(config) {
             UserDefaults.standard.set(data, forKey: configKey)

@@ -31,7 +31,7 @@ struct AdaptiveSidebarView: View {
             }
         }
         .listStyle(.sidebar)
-        .navigationTitle("Knowledge Management")
+        .navigationTitle(Localized.tr("app.name"))
     }
     
     private func sidebarRow(for tab: ContentView.AppTab) -> some View {

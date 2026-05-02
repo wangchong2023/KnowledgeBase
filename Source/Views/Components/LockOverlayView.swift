@@ -5,90 +5,141 @@ struct LockOverlayView: View {
     @EnvironmentObject var store: KMStore
     @State private var isAnimating = false
     
+    private var unlockIcon: String {
+        #if os(macOS)
+        return "touchid"
+        #else
+        return "faceid"
+        #endif
+    }
+    
+    private var titleSize: CGFloat {
+        #if os(macOS)
+        return 36
+        #else
+        return UIDevice.current.userInterfaceIdiom == .pad ? 36 : 28
+        #endif
+    }
+
     var body: some View {
         ZStack {
-            // 1. 深度毛玻璃背景
+            // 1. Immersive Deep Glass Background
             Rectangle()
                 .fill(.ultraThinMaterial)
                 .ignoresSafeArea()
-                .overlay {
-                    Color.wikiBackground.opacity(0.4)
-                }
+            
+            // Animated Background Glows
+            ZStack {
+                Circle()
+                    .fill(Color.wikiAccent.opacity(0.12))
+                    .frame(width: 500, height: 500)
+                    .blur(radius: 100)
+                    .offset(x: isAnimating ? 150 : -150, y: isAnimating ? -100 : 100)
+                
+                Circle()
+                    .fill(Color.purple.opacity(0.08))
+                    .frame(width: 400, height: 400)
+                    .blur(radius: 80)
+                    .offset(x: isAnimating ? -180 : 180, y: isAnimating ? 80 : -80)
+            }
+            .animation(.easeInOut(duration: 10).repeatForever(autoreverses: true), value: isAnimating)
             
             VStack(spacing: 40) {
-                // 2. 动态锁图标
+                Spacer()
+                
+                // 2. The Vault Icon Container
                 ZStack {
-                    // 外围光晕
+                    // Rotating decorative rings
                     Circle()
-                        .fill(Color.wikiAccent.opacity(0.15))
-                        .frame(width: 160, height: 160)
-                        .blur(radius: 30)
-                        .scaleEffect(isAnimating ? 1.2 : 0.8)
+                        .stroke(
+                            LinearGradient(colors: [Color.wikiAccent.opacity(0.4), .clear], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: 1
+                        )
+                        .frame(width: 180, height: 180)
+                        .rotationEffect(.degrees(isAnimating ? 360 : 0))
+                        .animation(.linear(duration: 20).repeatForever(autoreverses: false), value: isAnimating)
                     
-                    // 核心图标
-                    VStack(spacing: 12) {
+                    Circle()
+                        .stroke(
+                            LinearGradient(colors: [.clear, Color.wikiAccent.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: 1
+                        )
+                        .frame(width: 220, height: 220)
+                        .rotationEffect(.degrees(isAnimating ? -360 : 0))
+                        .animation(.linear(duration: 25).repeatForever(autoreverses: false), value: isAnimating)
+
+                    VStack(spacing: 20) {
                         Image(systemName: "lock.shield.fill")
-                            .font(.system(size: 80))
+                            .font(.system(size: 80, weight: .ultraLight))
                             .foregroundStyle(
                                 LinearGradient(
-                                    colors: [.wikiAccent, .wikiAccent.opacity(0.7)],
+                                    colors: [Color.wikiAccent, Color.wikiAccent.opacity(0.7)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                             )
-                            .shadow(color: .wikiAccent.opacity(0.4), radius: 20, y: 10)
-                            .symbolEffect(.bounce, value: isAnimating)
+                            .shadow(color: Color.wikiAccent.opacity(0.4), radius: 30, y: 15)
+                            .symbolEffect(.bounce, options: .repeat(2), value: isAnimating)
                     }
                 }
                 
-                // 3. 文字提示
-                VStack(spacing: 8) {
+                // 3. Information & Copy
+                VStack(spacing: 12) {
                     Text(Localized.tr("security.vaultLocked"))
-                        .font(.title2.bold())
+                        .font(.system(size: titleSize, weight: .bold, design: .rounded))
                         .foregroundStyle(.wikiText)
                     
                     Text(Localized.tr("security.unlockHint"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
+                        .frame(maxWidth: 320)
+                        .lineSpacing(4)
                 }
                 
-                // 4. 高级感解锁按钮
-                Button(action: { store.securityService.unlock() }) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "faceid")
-                            .font(.title3)
+                Spacer()
+                
+                // 4. Elegant Unlock Button
+                Button(action: { 
+                    #if os(iOS)
+                    HapticManager.shared.trigger(.selection)
+                    #endif
+                    store.securityService.unlock() 
+                }) {
+                    HStack(spacing: 16) {
+                        Image(systemName: unlockIcon)
+                            .font(.title2)
+                        
                         Text(Localized.tr("security.unlock"))
                             .font(.headline)
                     }
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 16)
-                    .background(
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 18)
+                    .background {
                         ZStack {
-                            Capsule()
-                                .fill(Color.wikiAccent)
                             Capsule()
                                 .fill(
                                     LinearGradient(
-                                        colors: [.white.opacity(0.2), .clear],
+                                        colors: [Color.wikiAccent, Color.wikiAccent.opacity(0.8)],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
                                 )
+                            
+                            Capsule()
+                                .stroke(.white.opacity(0.4), lineWidth: 0.5)
                         }
-                    )
+                    }
                     .foregroundStyle(.white)
-                    .clipShape(Capsule())
-                    .shadow(color: .wikiAccent.opacity(0.3), radius: 15, y: 8)
+                    .shadow(color: Color.wikiAccent.opacity(0.5), radius: 25, y: 12)
                 }
                 .buttonStyle(ScaleButtonStyle())
+                .padding(.bottom, 60)
             }
+            .padding(.horizontal)
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
-                isAnimating = true
-            }
+            isAnimating = true
         }
     }
 }

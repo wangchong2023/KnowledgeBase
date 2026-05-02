@@ -94,37 +94,14 @@ struct SettingsView: View {
                     SettingsNavigationRow(icon: "externaldrive.fill", title: Localized.tr("backup.title"), identifier: "数据-备份") {
                         BackupView()
                     }
+
+                    Button(action: { showFolderImporter = true }) {
+                        Label(Localized.tr("settings.exportToFolder"), systemImage: "square.and.arrow.up")
+                            .foregroundStyle(.wikiText)
+                    }
+                    .accessibilityIdentifier("数据-导出知识库")
                 } header: {
                     Text(Localized.tr("settings.section.data"))
-                }
-
-                // ── 数据导入 ──
-                Section {
-                    Button(action: { showFolderImporterForImport = true }) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "folder.badge.plus")
-                                .font(.title3)
-                                .foregroundStyle(.white)
-                                .frame(width: 36, height: 36)
-                                .background(Color.blue)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(Localized.tr("settings.importFromFolder"))
-                                    .font(.subheadline.weight(.medium))
-                                    .foregroundStyle(.wikiText)
-                                Text(Localized.tr("settings.importFromFolder.desc"))
-                                    .font(.caption)
-                                    .foregroundStyle(.wikiSecondary)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption).foregroundStyle(.wikiSecondary)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityIdentifier("数据-从文件夹导入")
-                } header: {
-                    Text(Localized.tr("settings.section.import"))
                 }
                 
                 // ── 更多功能 ──

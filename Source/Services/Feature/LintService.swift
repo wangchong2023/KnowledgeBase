@@ -20,8 +20,8 @@ final class LintService {
                     severity: .warning,
                     type: .island,
                     pageID: page.id,
-                    message: String(format: "发现知识孤岛：\"%@\"", page.title),
-                    suggestion: "建议将此页面链接到现有知识网络，或从中引用相关内容。"
+                    message: String(format: Localized.tr("lint.islandMessage"), page.title),
+                    suggestion: Localized.tr("lint.islandSuggestion")
                 ))
             } else if backs.isEmpty && page.type != .raw {
                 // Legacy orphan check (no incoming links only)
@@ -44,8 +44,8 @@ final class LintService {
                             severity: .info,
                             type: .cycle,
                             pageID: pageA.id,
-                            message: String(format: "检测到循环引用: \"%@\" ↔ \"%@\"", pageA.title, pageB.title),
-                            suggestion: "循环引用可能导致逻辑死循环，建议检查是否可以将两者合并或细化关联。"
+                            message: String(format: Localized.tr("lint.cycleMessage"), pageA.title, pageB.title),
+                            suggestion: Localized.tr("lint.cycleSuggestion")
                         ))
                     }
                 }

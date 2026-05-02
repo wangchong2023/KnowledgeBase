@@ -14,7 +14,6 @@
 		04AA753468FED7A1411B08FB /* AccessibilityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EB03709EB868A915839B236 /* AccessibilityService.swift */; };
 		069AC8A48E9F207819AB6FA2 /* ColorSchemeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71E7506B18A47AAC3285F54F /* ColorSchemeMode.swift */; };
 		076D53A5369A596F454C40EF /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4D37A72665E45238D447A1 /* BackupView.swift */; };
-		07806E0416832D52A01E0C1C /* KMShortcutsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74AC3AD27BF1AD89CE1D9B5C /* KMShortcutsService.swift */; };
 		0807F0F2198F575F835D624B /* PluginRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 928DCF00680D5B71672FE9C7 /* PluginRegistry.swift */; };
 		09ED7744242E723D949377EB /* LLMRefactorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13488BF75BEDDB9BC6B09FB5 /* LLMRefactorService.swift */; };
 		0BBBB3E1FD13C1E135BACD46 /* VaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0285D0B23EA33B64BCD2BDD9 /* VaultService.swift */; };
@@ -31,6 +30,7 @@
 		175851268F4E8CD1A1105333 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B93D9BF4217A01814EBD4DF0 /* LaunchScreen.storyboard */; };
 		1830778922F9275B56A2375A /* VaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0285D0B23EA33B64BCD2BDD9 /* VaultService.swift */; };
 		1A8493D41BA520DB8331FD93 /* Graph3DComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2105EE4904009819D3F32BEB /* Graph3DComponents.swift */; };
+		1A9A4332BB7DD4E25A5B80DA /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550776381795D176234F1B50 /* FlowLayout.swift */; };
 		1AB05BBA376653FFBCE94014 /* SettingsAboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B9F4B447BD774BAC334628 /* SettingsAboutView.swift */; };
 		1B47EA59C888B17F9938BFCB /* KMApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D25AEA6EA40D676FD7150C /* KMApp.swift */; };
 		1C5B8D28198005E7E997A3EA /* LockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FFB2382057699714BE6C9BF /* LockOverlayView.swift */; };
@@ -110,7 +110,6 @@
 		49FFD08A3DABD2DAEDBFB187 /* PDFComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4199F9FE95068602A7A9EB14 /* PDFComponents.swift */; };
 		4A631950D547EF52BD8B9056 /* VaultSecurityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7DACCCAAF3DE5AE7A760DB /* VaultSecurityService.swift */; };
 		4AD1052AB63209753D499D4A /* AdaptiveSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4FC7F2099D1782DB783DFB3 /* AdaptiveSidebarView.swift */; };
-		4EDDA5B18097B868E4002A66 /* KMShortcutsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74AC3AD27BF1AD89CE1D9B5C /* KMShortcutsService.swift */; };
 		4F03121956801729F9B17384 /* PluginMarketService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC8D5B9A7C81514D06CB5F /* PluginMarketService.swift */; };
 		50ABF90EF31748ACCEB67831 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B9FA8333525744C57CF3126 /* Localized.swift */; };
 		5146833BCF6D5716FAACF589 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88AAC8BABFD9E1D2F2C680F /* LLMService.swift */; };
@@ -208,6 +207,7 @@
 		B0A5A0F275ABB08C486A901B /* KMNewFeaturesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95A1FD9F6474AC752598C26A /* KMNewFeaturesTests.swift */; };
 		B13C8BB7BD793810D8F7C6B7 /* LogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A0A1F2771607B71807D5A8 /* LogService.swift */; };
 		B1AABF76A1598958D47E3DA1 /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9948E6FADB86952724CE4F9 /* SpeechService.swift */; };
+		B1E5899AF9F6212F29A0B1CE /* WikiShortcutsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A5D4C58E31706A4E5C0029 /* WikiShortcutsService.swift */; };
 		B338E74F7C84DC50A9A1EA15 /* TagCloudView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9813D5077C1612F71B541EE /* TagCloudView.swift */; };
 		B368554AD1565AAA7C890BB2 /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E9A3D86F60DC25E8B2AEAF1 /* LogView.swift */; };
 		B3C3F85682C1253FBDFEFCF0 /* WikiUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F643F5AFC5828C951F21A41E /* WikiUI.swift */; };
@@ -230,6 +230,7 @@
 		C83473F48C1B4395402B962A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402FED1E25E614AA9808186D /* ContentView.swift */; };
 		C836EA3CCEC829377BA56C89 /* PluginDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6583170933E64A3EFA2B4ED7 /* PluginDetailView.swift */; };
 		C8D29CCAB0F2F2E2684F3DB2 /* AppConfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 5C4853CC0EB8B2C947FB3CE3 /* AppConfig.json */; };
+		C954D00272BAED9494974B68 /* WikiShortcutsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A5D4C58E31706A4E5C0029 /* WikiShortcutsService.swift */; };
 		C9640B8691B34F801B0F2BA5 /* PDFService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17B58C2037EF270E96CF5DB /* PDFService.swift */; };
 		CA64B7B1D3881E970CE87E44 /* PromptWorkshopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C542FA3A987941992F28D57 /* PromptWorkshopView.swift */; };
 		CACCC601682E4BD8A8494211 /* IngestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A45960005F66A8F67580D782 /* IngestService.swift */; };
@@ -269,6 +270,7 @@
 		EB07B5C4FC8678452B14B259 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 855071AA84BA0DEF3CD730C2 /* ThemeManager.swift */; };
 		EB1DEAFE64471E368544CC08 /* LLMServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56829926D682BF4E292364E0 /* LLMServiceProtocol.swift */; };
 		EB253CB48428BE1F94036224 /* LLMSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98B9AFF1229B63AB1C2A829 /* LLMSettingsView.swift */; };
+		EB71EC967CFF503FC69F56D7 /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550776381795D176234F1B50 /* FlowLayout.swift */; };
 		EB7BE9906667B2444E97EC87 /* WikiEmptyState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E063FE321E1AA4F4397C4D9B /* WikiEmptyState.swift */; };
 		EB7FA1E77033C0187B416503 /* PageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4831DF168825A0F128308B74 /* PageDetailView.swift */; };
 		EB8374D8DFB9D60691C1D4AA /* SQLiteStoreCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB5D7D14A0147B834BB5954 /* SQLiteStoreCore.swift */; };
@@ -376,6 +378,7 @@
 		402FED1E25E614AA9808186D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4199F9FE95068602A7A9EB14 /* PDFComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFComponents.swift; sourceTree = "<group>"; };
 		41EFC4B5E88C4AA660C8EFFE /* EditorComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorComponents.swift; sourceTree = "<group>"; };
+		43A5D4C58E31706A4E5C0029 /* WikiShortcutsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiShortcutsService.swift; sourceTree = "<group>"; };
 		4622D75F21CD38ACE9B40A45 /* CollaborationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollaborationModels.swift; sourceTree = "<group>"; };
 		466C0BC602175DDA5AE509E5 /* iCloudSyncComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iCloudSyncComponents.swift; sourceTree = "<group>"; };
 		46D25AEA6EA40D676FD7150C /* KMApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMApp.swift; sourceTree = "<group>"; };
@@ -388,6 +391,7 @@
 		51DB63FF049A7C5B1D4904D0 /* VoiceNoteComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceNoteComponents.swift; sourceTree = "<group>"; };
 		538DE0245770489E30DC4A78 /* WikiCardComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiCardComponents.swift; sourceTree = "<group>"; };
 		54F23AED189A4F5368281A0D /* HostingSetupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingSetupSheet.swift; sourceTree = "<group>"; };
+		550776381795D176234F1B50 /* FlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowLayout.swift; sourceTree = "<group>"; };
 		56829926D682BF4E292364E0 /* LLMServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMServiceProtocol.swift; sourceTree = "<group>"; };
 		5A5458FB149D67A2344B6180 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		5AD72BBBEE008B198B651196 /* WeeklyInsightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyInsightCard.swift; sourceTree = "<group>"; };
@@ -402,7 +406,6 @@
 		7024E6BBC8F463E38556D51B /* KMUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMUITests.swift; sourceTree = "<group>"; };
 		71E7506B18A47AAC3285F54F /* ColorSchemeMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorSchemeMode.swift; sourceTree = "<group>"; };
 		72E924AB9790FD0FCC9CDD47 /* KMWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMWatchView.swift; sourceTree = "<group>"; };
-		74AC3AD27BF1AD89CE1D9B5C /* KMShortcutsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMShortcutsService.swift; sourceTree = "<group>"; };
 		7C7A9549CBCDF97573C729D4 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		7E373BB37AF587B079083B89 /* WikiCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiCard.swift; sourceTree = "<group>"; };
 		7FD16F2EC302F7CE7F1CDEF1 /* LLMModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMModels.swift; sourceTree = "<group>"; };
@@ -576,6 +579,7 @@
 			children = (
 				71E7506B18A47AAC3285F54F /* ColorSchemeMode.swift */,
 				C2C4AF1C44DC061AC05F3591 /* CrossPlatform.swift */,
+				550776381795D176234F1B50 /* FlowLayout.swift */,
 				3B9FA8333525744C57CF3126 /* Localized.swift */,
 				855071AA84BA0DEF3CD730C2 /* ThemeManager.swift */,
 				07BC7A51A9EDC754436D2B54 /* WikiColors.swift */,
@@ -657,10 +661,10 @@
 				37D3E4EA2250BA8BC8337A48 /* DeepLinkService.swift */,
 				D5BBBF9A3449E490DC7B6043 /* HapticManager.swift */,
 				9B323A158724FF1FD8F98135 /* KMKeyboardShortcuts.swift */,
-				74AC3AD27BF1AD89CE1D9B5C /* KMShortcutsService.swift */,
 				AEACB02E004536B1DA3DF47B /* LocalAnalyticsService.swift */,
 				13A0A1F2771607B71807D5A8 /* LogService.swift */,
 				A77A41F0BE990CB023A47FB7 /* PerformanceService.swift */,
+				43A5D4C58E31706A4E5C0029 /* WikiShortcutsService.swift */,
 			);
 			path = Infrastructure;
 			sourceTree = "<group>";
@@ -1136,6 +1140,7 @@
 				3F11D30B5566202BD9A92D45 /* EditorComponents.swift in Sources */,
 				531AF2C6AC7C83DAB893BB2B /* EmbeddingManager.swift in Sources */,
 				2D85ADF879E901D6ED559430 /* FileSystemSyncService.swift in Sources */,
+				1A9A4332BB7DD4E25A5B80DA /* FlowLayout.swift in Sources */,
 				1A8493D41BA520DB8331FD93 /* Graph3DComponents.swift in Sources */,
 				EA824D1513169FE7F73C6A6E /* Graph3DView.swift in Sources */,
 				8ADE7A37FEC71039CB4202C0 /* GraphClusteringService.swift in Sources */,
@@ -1153,7 +1158,6 @@
 				1B47EA59C888B17F9938BFCB /* KMApp.swift in Sources */,
 				312346B5411256BE766D125C /* KMBackupService.swift in Sources */,
 				5740F094830E010476F6E461 /* KMKeyboardShortcuts.swift in Sources */,
-				4EDDA5B18097B868E4002A66 /* KMShortcutsService.swift in Sources */,
 				24C721F649171E14FF196AF5 /* KMStore.swift in Sources */,
 				377029A77130B350A1AF7C1C /* KMWindowSceneDelegate.swift in Sources */,
 				48A91591DC1E6155E7CC3E95 /* KMiCloudSyncService.swift in Sources */,
@@ -1244,6 +1248,7 @@
 				6EFE82623CB799DAA637224B /* WikiEventBus.swift in Sources */,
 				13F2124DB89EB65A089378AB /* WikiLoadingOverlay.swift in Sources */,
 				310F742F06BF492F67911A45 /* WikiPage.swift in Sources */,
+				B1E5899AF9F6212F29A0B1CE /* WikiShortcutsService.swift in Sources */,
 				30C31490B1E57A8368225B30 /* WikiTooltip.swift in Sources */,
 				B3C3F85682C1253FBDFEFCF0 /* WikiUI.swift in Sources */,
 				47076D7D2D3F5B2C85D38FE8 /* iCloudSyncComponents.swift in Sources */,
@@ -1312,6 +1317,7 @@
 				0F7F7CC6C754DBD4616251F4 /* EditorComponents.swift in Sources */,
 				5DCA111F8FCF160CB4A83587 /* EmbeddingManager.swift in Sources */,
 				1FCA5E1B78857EF0B5EEA52E /* FileSystemSyncService.swift in Sources */,
+				EB71EC967CFF503FC69F56D7 /* FlowLayout.swift in Sources */,
 				53FD5689A9037FD765C5B4F3 /* Graph3DComponents.swift in Sources */,
 				53806332E1A1E9B7E929A583 /* Graph3DView.swift in Sources */,
 				F3A658C172906551ACBAAE82 /* GraphClusteringService.swift in Sources */,
@@ -1329,7 +1335,6 @@
 				D39BE5C79038B69FEE335E36 /* KMApp.swift in Sources */,
 				3DCDA8C848B9F65D54BBA872 /* KMBackupService.swift in Sources */,
 				66EF4577995B211BD4252CC6 /* KMKeyboardShortcuts.swift in Sources */,
-				07806E0416832D52A01E0C1C /* KMShortcutsService.swift in Sources */,
 				CCD8EAB223616F6C47F88A1C /* KMStore.swift in Sources */,
 				1DDCAECE8FF988BAB1069A3B /* KMWindowSceneDelegate.swift in Sources */,
 				884EC8667F272E962EA3813A /* KMiCloudSyncService.swift in Sources */,
@@ -1420,6 +1425,7 @@
 				229F97659AE48077FF8A249E /* WikiEventBus.swift in Sources */,
 				43792791753F6BD18A9E32E2 /* WikiLoadingOverlay.swift in Sources */,
 				96AF9E2BE65CAB050E34CBF6 /* WikiPage.swift in Sources */,
+				C954D00272BAED9494974B68 /* WikiShortcutsService.swift in Sources */,
 				D005405D2162C94DEE640D1D /* WikiTooltip.swift in Sources */,
 				D28454FF25AC725D31B1CA82 /* WikiUI.swift in Sources */,
 				5F6163C64FC39DF592CE0D67 /* iCloudSyncComponents.swift in Sources */,

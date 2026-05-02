@@ -168,7 +168,7 @@ struct IngestManualFormSection: View {
     @Binding var newContent: String
     @Binding var newType: PageType
     @Binding var newCustomIcon: String?
-    @Binding var newTags: String
+    @Binding var newTags: [String]
     @Binding var showIconPicker: Bool
     @Binding var useSmartIngest: Bool
     @Binding var smartResult: SmartIngestResult?
@@ -200,7 +200,7 @@ struct IngestManualFormSection: View {
                     .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
                 WikiTextField(placeholder: Localized.tr("ingest.field.titlePlaceholder"), text: $newTitle)
-                    .accessibilityIdentifier("输入页面标题")
+                    .accessibilityIdentifier("ingest.titleInput")
             }
 
             // Type selector
@@ -214,7 +214,7 @@ struct IngestManualFormSection: View {
                 Text(Localized.tr("ingest.field.tags"))
                     .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
-                WikiTagField(placeholder: Localized.tr("ingest.field.tagsPlaceholder"), text: $newTags)
+                WikiTagField(placeholder: Localized.tr("ingest.field.tagsPlaceholder"), tags: $newTags)
             }
 
             // Content editor
@@ -271,7 +271,7 @@ struct IngestManualFormSection: View {
                 }
             }
             .tint(.wikiAccent)
-            .accessibilityIdentifier("智能导入")
+            .accessibilityIdentifier("ingest.smartToggleAction")
 
             if useSmartIngest {
                 Text(Localized.tr("ingest.smartToggleHint"))
@@ -298,9 +298,13 @@ struct IngestManualFormSection: View {
             if useDeepScan {
                 Text(Localized.tr("ingest.deepScanDesc"))
                     .font(horizontalSizeClass == .regular ? .subheadline : .caption)
-                    .foregroundStyle(.wikiSecondary)
+                    .foregroundStyle(.wikiSource)
+                    .padding(.leading, 30)
             }
         }
+        .padding()
+        .background(useDeepScan ? Color.wikiSource.opacity(0.1) : Color.wikiCard.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
         .padding(.horizontal)
     }
 

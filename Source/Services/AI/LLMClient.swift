@@ -70,11 +70,13 @@ final class LLMClient {
     // MARK: - Streaming Request (SSE)
     /// Sends a streaming chat completion request and returns an async stream of text chunks.
     func sendStreamingRequest(body: [String: Any]) -> AsyncThrowingStream<URLSession.AsyncBytes, Error> {
-        AsyncThrowingStream { continuation in
-            Task { [weak self] in
-                guard let self = self else { return }
-                
-                guard let url = URL(string: "\(self.normalizedBaseURL)/chat/completions") else {
+        // Capture necessary properties directly so they survive if LLMClient is deallocated
+        let urlString = "\(self.normalizedBaseURL)/chat/completions"
+        let token = self.apiKey
+        
+        return AsyncThrowingStream { continuation in
+            Task {
+                guard let url = URL(string: urlString) else {
                     continuation.finish(throwing: LLMError.invalidURL)
                     return
                 }
@@ -82,7 +84,7 @@ final class LLMClient {
                 var request = URLRequest(url: url)
                 request.httpMethod = "POST"
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                request.setValue("Bearer \(self.apiKey)", forHTTPHeaderField: "Authorization")
+                request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
                 request.timeoutInterval = Self.streamingTimeout
                 
                 let httpBody = try? JSONSerialization.data(withJSONObject: body)

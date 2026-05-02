@@ -16,7 +16,7 @@
 		<string>zh-Hans</string>
 	</array>
 	<key>CFBundleName</key>
-	<string>知识库</string>
+	<string>智元</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -32,7 +32,7 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UILaunchScreen</key>
+	<key>UILuunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
@@ -68,13 +68,13 @@
 		</dict>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>知识库需要麦克风权限来录制语音笔记。</string>
+	<string>智元需要麦克风权限来录制语音笔记。</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>知识库需要语音识别来转录你的语音笔记。</string>
+	<string>智元需要语音识别来转录你的语音笔记。</string>
 	<key>NSCameraUsageDescription</key>
-	<string>知识库需要相机权限来扫描文档文字（OCR）。</string>
+	<string>智元需要相机权限来扫描文档文字（OCR）。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>知识库需要相册权限来进行 OCR 文字扫描。</string>
+	<string>智元需要相册权限来进行 OCR 文字扫描。</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIUserInterfaceStyle</key>

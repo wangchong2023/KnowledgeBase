@@ -106,6 +106,9 @@ struct GraphContainerView: View {
         .onChange(of: store.pages.count) { _, _ in
             withAnimation(.spring(response: 0.6)) { layoutGraph() }
         }
+        .navigationDestination(for: WikiPage.self) { destination in
+            PageDetailView(page: destination)
+        }
     }
     
     private var insightsPanel: some View {
@@ -145,53 +148,15 @@ struct GraphContainerView: View {
                     .padding(.leading, 8)
                 
                 HStack(spacing: 12) {
-                    // 1. 图例开关 (独立出来，解决用户反馈的找不到功能的问题)
-                    Button(action: { 
-                        withAnimation(.spring(response: 0.3)) {
-                            showLegend.toggle()
-                        }
-                    }) {
-                        Image(systemName: showLegend ? "info.bubble.fill" : "info.bubble")
-                            .foregroundStyle(showLegend ? .wikiAccent : .wikiSecondary)
-                    }
-                    .help(Localized.tr("graph.menu.showLegend"))
-
-                    // 2. 洞察灯泡
+                    // 洞察灯泡 (仅保留最核心的图谱洞察功能)
                     Button(action: { 
                         computeInsights()
                         showInsights = true 
                     }) {
                         Image(systemName: "lightbulb.fill")
+                            .foregroundStyle(.wikiAccent)
                     }
                     .help(Localized.tr("graph.insights"))
-
-                    // 3. 更多操作
-                    Menu {
-                        Section(Localized.tr("graph.menu.analysis")) {
-                            Button(action: {
-                                withAnimation {
-                                    useClustering.toggle()
-                                    if useClustering { store.updateClusters() }
-                                }
-                            }) {
-                                Label(useClustering ? Localized.tr("graph.menu.disableClustering") : Localized.tr("graph.menu.enableClustering"), 
-                                      systemImage: useClustering ? "sparkles" : "circle.grid.2x2")
-                            }
-                            
-                            Button(action: { withAnimation(.spring) { layoutGraph() } }) {
-                                Label(Localized.tr("graph.menu.relayout"), systemImage: "arrow.triangle.2.circlepath")
-                            }
-                        }
-                        
-                        Section(Localized.tr("graph.menu.visuals")) {
-                            Button(action: { showLegend.toggle() }) {
-                                Label(showLegend ? Localized.tr("graph.menu.hideLegend") : Localized.tr("graph.menu.showLegend"), 
-                                      systemImage: "list.bullet.indent")
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle.fill")
-                    }
                 }
                 .font(.system(size: 13))
                 .foregroundStyle(.wikiAccent)

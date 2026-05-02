@@ -134,22 +134,7 @@ final class IngestService {
     
     /// 对 Markdown 中的图表进行语义增强，提升 RAG 召回率
     func enrichRichContent(_ content: String, llm: any LLMServiceProtocol) async -> String {
-        let prompt = """
-        # Role: 知识工程专家
-        
-        # Task: 
-        分析以下 Markdown 内容，识别其中的表格 (|---|) 和图片 (![]())。
-        
-        # Requirements:
-        1. 对于每个表格，基于其行列数据生成一段 150 字以内的“数据洞察摘要”。
-        2. 对于每个核心图片，基于标题或上下文推测其视觉语义。
-        3. 将这些分析结果以 `> [Semantic Insight]: ...` 的格式插入到原图表下方。
-        4. 保持原文逻辑不变，仅返回增强后的完整 Markdown 内容。
-        
-        # Content:
-        ---
-        \(content)
-        """
+        let prompt = String(format: Localized.tr("ingest.enrichRichContentPrompt"), content)
         
         do {
             return try await llm.generate(prompt: prompt, temperature: 0.3)
@@ -215,7 +200,7 @@ final class IngestService {
         
         let isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
         if isLowPowerMode {
-            print("🔋 [Eco-Indexing] 系统处于低功耗模式，将采用节流索引策略。")
+            print(Localized.tr("ingest.ecoIndexingLowPower"))
         }
 
         for case let fileURL as URL in enumerator {

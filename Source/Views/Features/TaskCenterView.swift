@@ -47,31 +47,79 @@ struct TaskCenterView: View {
     }
     
     private var emptyState: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "checklist")
-                .font(.system(size: 60))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [.wikiAccent.opacity(0.6), .wikiAccent.opacity(0.2)],
-                        startPoint: .top,
-                        endPoint: .bottom
+        VStack(spacing: 32) {
+            ZStack {
+                Circle()
+                    .fill(Color.wikiAccent.opacity(0.1))
+                    .frame(width: 120, height: 120)
+                
+                Image(systemName: "tray.fill")
+                    .font(.system(size: 50))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.wikiAccent.opacity(0.8), .wikiAccent.opacity(0.4)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
+                    .offset(y: 4)
+                
+                Image(systemName: "sparkles")
+                    .font(.system(size: 24))
+                    .foregroundStyle(.purple)
+                    .offset(x: 35, y: -35)
+            }
             
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Text(Localized.tr("aitask.empty.title"))
-                    .font(.headline)
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(.wikiText)
                 
                 Text(Localized.tr("aitask.empty.desc"))
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.wikiSecondary)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 40)
+                    .lineSpacing(4)
             }
+            
+            VStack(alignment: .leading, spacing: 16) {
+                Text(Localized.tr("aitask.howToTrigger"))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.wikiSecondary)
+                    .padding(.bottom, 4)
+                
+                guideRow(icon: "stethoscope", color: .red, title: Localized.tr("aitask.guide.health"), desc: Localized.tr("aitask.guide.health.desc"))
+                guideRow(icon: "arrow.down.doc.fill", color: .blue, title: Localized.tr("aitask.guide.ingest"), desc: Localized.tr("aitask.guide.ingest.desc"))
+                guideRow(icon: "wand.and.stars", color: .purple, title: Localized.tr("aitask.guide.archive"), desc: Localized.tr("aitask.guide.archive.desc"))
+            }
+            .padding()
+            .background(Color.wikiCard)
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(.horizontal, 24)
         }
-        .frame(maxWidth: .infinity, minHeight: 300)
+        .frame(maxWidth: .infinity, minHeight: 400)
         .listRowBackground(Color.clear)
+    }
+    
+    private func guideRow(icon: String, color: Color, title: String, desc: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundStyle(color)
+                .frame(width: 32, height: 32)
+                .background(color.opacity(0.1))
+                .clipShape(Circle())
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.wikiText)
+                Text(desc)
+                    .font(.caption)
+                    .foregroundStyle(.wikiSecondary)
+            }
+            Spacer()
+        }
     }
 }
 

@@ -19,6 +19,7 @@ struct ChatViewContent: View {
     @FocusState private var isInputFocused: Bool
     @State private var aiGeneratedQuestions: [String] = []
     @State private var isGeneratingAIQuestions = false
+    @State private var showPrompts = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,12 +36,23 @@ struct ChatViewContent: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    Button(action: { llmService.clearChatHistory() }) {
-                        Label(Localized.tr("chat.clearHistory"), systemImage: "trash")
+                    Section {
+                        Button(action: { }) {
+                            Label("\(llmService.chatHistory.count) \(Localized.tr("llm.messages"))", systemImage: "bubble.left.and.bubble.right")
+                        }
+                        .disabled(true)
+                        
+                        Button(role: .destructive, action: { 
+                            llmService.clearChatHistory() 
+                        }) {
+                            Label(Localized.tr("llm.clearHistory"), systemImage: "trash")
+                        }
                     }
-
-                    NavigationLink(destination: LLMSettingsView()) {
-                        Label(Localized.tr("chat.llmSettings"), systemImage: "gearshape")
+                    
+                    Section {
+                        NavigationLink(destination: LLMSettingsView()) {
+                            Label(Localized.tr("chat.llmSettings"), systemImage: "gearshape")
+                        }
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -106,6 +118,7 @@ struct ChatViewContent: View {
                         
                         if isLoading {
                             streamingBubble
+                                .id("streaming")
                         }
                     }
                 }
@@ -114,6 +127,14 @@ struct ChatViewContent: View {
             .onChange(of: llmService.chatHistory.count) {
                 if let lastID = llmService.chatHistory.last?.id {
                     withAnimation { proxy.scrollTo(lastID, anchor: .bottom) }
+                }
+            }
+            .onChange(of: llmService.streamingContent) {
+                withAnimation { proxy.scrollTo("streaming", anchor: .bottom) }
+            }
+            .onChange(of: isLoading) {
+                if isLoading {
+                    withAnimation { proxy.scrollTo("streaming", anchor: .bottom) }
                 }
             }
         }
@@ -170,8 +191,9 @@ struct ChatViewContent: View {
                     suggestionGroup(title: Localized.tr("chat.group.base"), icon: "lightbulb", queries: defaultQueries)
                 }
                 .padding(.horizontal)
+                .padding(.horizontal)
             }
-            .frame(maxHeight: 400)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -202,6 +224,7 @@ struct ChatViewContent: View {
             ForEach(queries, id: \.self) { query in
                 Button(action: { 
                     HapticManager.shared.trigger(.link)
+                    showPrompts = false
                     // 立即填充并发送，解决“填充不提交”的问题
                     inputText = query
                     sendMessage(query) 
@@ -283,6 +306,16 @@ struct ChatViewContent: View {
             Divider()
             
             HStack(alignment: .bottom, spacing: 12) {
+                Button(action: { showPrompts.toggle() }) {
+                    Image(systemName: "sparkles.rectangle.stack")
+                        .font(.title3)
+                        .foregroundStyle(.wikiAccent)
+                        .frame(width: 44, height: 44)
+                        .background(Color.wikiCard)
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                
                 TextField(isLoading ? Localized.tr("chat.aiRunning") : Localized.tr("chat.inputPlaceholder"), text: $inputText)
                     .font(.subheadline)
                     .focused($isInputFocused)
@@ -316,6 +349,19 @@ struct ChatViewContent: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(isLoading ? Color.wikiCard.opacity(0.5) : Color.wikiCard)
+            .sheet(isPresented: $showPrompts) {
+                NavigationStack {
+                    chatWelcome
+                        .navigationTitle("探索与提示")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button(Localized.tr("misc.close")) { showPrompts = false }
+                            }
+                        }
+                }
+                .presentationDetents([.medium, .large])
+            }
         }
     }
     
@@ -341,6 +387,10 @@ struct ChatViewContent: View {
         isLoading = true
         llmService.streamingContent = ""
         errorMessage = nil
+        
+        // 立即在 UI 中显示用户的消息
+        let userMessage = ChatMessage(role: .user, content: text)
+        llmService.chatHistory.append(userMessage)
         
         Task {
             do {

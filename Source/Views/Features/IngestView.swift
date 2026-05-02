@@ -47,7 +47,7 @@ struct IngestView: View {
     @State private var newContent = ""
     @State private var newType: PageType = .source
     @State private var newCustomIcon: String? = nil
-    @State private var newTags = ""
+    @State private var newTags: [String] = []
     @State private var isIngesting = false
     @State private var ingestSuccess = false
     @State private var useSmartIngest = false
@@ -61,7 +61,7 @@ struct IngestView: View {
     @State private var showOCRScan = false
     @State private var showURLImport = false
     @State private var newURL = ""
-    @State private var useDeepScan = true
+    @State private var useDeepScan = false
     @State private var isExtracting = false
     
     // File Import State
@@ -318,9 +318,7 @@ struct IngestView: View {
                 }
             }
         } else {
-            let tags = newTags.split(separator: ",")
-                .map { $0.trimmingCharacters(in: .whitespaces) }
-                .filter { !$0.isEmpty }
+            let tags = newTags
 
             Task {
                 do {
@@ -401,7 +399,7 @@ struct IngestView: View {
     private func resetForm() {
         newTitle = ""
         newContent = ""
-        newTags = ""
+        newTags = []
         newCustomIcon = nil
         ingestSuccess = false
     }
@@ -469,7 +467,7 @@ struct IngestView: View {
         newTitle = title
         newContent = content
         newType = .concept
-        newTags = Localized.tr("settings.importTag")
+        newTags = [Localized.tr("settings.importTag")]
         manualFormTitle = Localized.tr("ingest.clipboardImport") // 使用 "剪贴板" 或新增 "从剪贴板导入"
         
         withAnimation {

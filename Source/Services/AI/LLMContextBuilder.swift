@@ -77,16 +77,15 @@ final class LLMContextBuilder {
     // MARK: - Context Retrieval (for query)
     /// Finds relevant pages for a given query using title/alias/tag/content matching + 1-hop link expansion.
     func buildRelevantContext(query: String, pages: [WikiPage]) -> String {
-        let queryLower = query.lowercased()
         var relevantPages: [WikiPage] = []
         
         // Find pages whose title or content is related to the query
         for page in pages {
-            let titleMatch = queryLower.contains(page.title.lowercased()) ||
-                             page.title.lowercased().contains(queryLower) ||
-                             page.aliases.contains(where: { queryLower.contains($0.lowercased()) })
-            let tagMatch = page.tags.contains(where: { queryLower.contains($0.lowercased()) })
-            let contentMatch = page.content.lowercased().contains(queryLower)
+            let titleMatch = page.title.localizedCaseInsensitiveContains(query) ||
+                             query.localizedCaseInsensitiveContains(page.title) ||
+                             page.aliases.contains(where: { $0.localizedCaseInsensitiveContains(query) })
+            let tagMatch = page.tags.contains(where: { $0.localizedCaseInsensitiveContains(query) })
+            let contentMatch = page.content.localizedCaseInsensitiveContains(query)
             
             if titleMatch || tagMatch || contentMatch {
                 relevantPages.append(page)

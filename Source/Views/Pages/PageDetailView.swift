@@ -41,14 +41,17 @@ struct PageDetailView: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
-            pinButton
-            backlinksButton
-            editButton
-            aiMenuButton
-        }
-        
-        ToolbarItemGroup(placement: .topBarLeading) {
-            moreMenu
+            HStack(spacing: 8) {
+                pinButton
+                backlinksButton
+                editButton
+                aiMenuButton
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.wikiCard.opacity(0.5))
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1))
         }
     }
     
@@ -137,6 +140,18 @@ struct PageDetailView: View {
             iconMenuItem
             statusSubmenu
             confidenceSubmenu
+            Divider()
+            
+            // 导出当前页面为 Markdown 文件 (支持 AirDrop, 微信, 邮件等)
+            if let fileURL = exportMarkdownFile() {
+                ShareLink(item: fileURL, preview: SharePreview(page.title, image: Image(systemName: "doc.text"))) {
+                    Label(Localized.tr("export.header"), systemImage: "square.and.arrow.up")
+                }
+            }
+            Button(action: { copyToClipboard() }) {
+                Label(Localized.tr("misc.copy"), systemImage: "doc.on.doc")
+            }
+            
             Divider()
             deleteButton
         } label: {
@@ -325,18 +340,22 @@ struct PageDetailView: View {
         .overlay {
             if isLoadingAI && aiResult == nil {
                 ZStack {
-                    Color.black.opacity(0.1).ignoresSafeArea()
+                    Color.black.opacity(0.001) // 极低透明度捕获触摸，防止点击底层
+                        .ignoresSafeArea()
+                        .onTapGesture { /* 拦截点击 */ }
+                    
                     VStack(spacing: 12) {
                         ProgressView()
                             .tint(.white)
-                    Text(Localized.tr("misc.aiThinking"))
-                            .font(.caption)
+                        Text(Localized.tr("misc.aiThinking"))
+                            .font(.caption.weight(.medium))
                             .foregroundStyle(.white)
                     }
-                    .padding(24)
-                    .background(.ultraThinMaterial)
+                    .padding(.horizontal, 30)
+                    .padding(.vertical, 20)
+                    .background(.ultraThinMaterial.opacity(0.95))
                     .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(radius: 10)
+                    .shadow(color: .black.opacity(0.2), radius: 20)
                 }
             }
         }
@@ -747,11 +766,12 @@ struct PageDetailView: View {
     // MARK: - Navigation
 
     /// 根据页面标题导航到对应页面
+    /// 导航到指定页面
     /// - Parameter title: 目标页面的标题
-    /// - Note: 如果找不到对应页面，则不进行导航
+    /// - Note: 如果找不到对应页面，则不进行导航。属于“智元”核心导航逻辑。
     private func navigateToPage(_ title: String) {
         if let target = store.pages.first(where: { $0.title == title }) {
-            store.selectedPageID = target.id
+            store.navigationPath.append(target)
         }
     }
 }
@@ -904,6 +924,46 @@ private struct SnapshotDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .background(Color.wikiBackground)
         }
+    }
+}
+
+// MARK: - Export Helpers
+extension PageDetailView {
+    /// 将页面内容导出为临时 Markdown 文件 URL，以便支持系统级分享（AirDrop, 微信等）
+    private func exportMarkdownFile() -> URL? {
+        let content = """
+        ---
+        title: \(page.title)
+        type: \(page.type.rawValue)
+        tags: \(page.tags.joined(separator: ", "))
+        ---
+        
+        # \(page.title)
+        
+        \(page.content)
+        """
+        
+        // 清理文件名中的非法字符
+        let safeTitle = page.title.components(separatedBy: CharacterSet.alphanumerics.inverted).joined(separator: "_")
+        let fileName = "\(safeTitle).md"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        
+        do {
+            try content.write(to: tempURL, atomically: true, encoding: .utf8)
+            return tempURL
+        } catch {
+            return nil
+        }
+    }
+    
+    private func copyToClipboard() {
+        let content = """
+        # \(page.title)
+        
+        \(page.content)
+        """
+        WikiPasteboard.string = content
+        HapticManager.shared.trigger(.success)
     }
 }
 

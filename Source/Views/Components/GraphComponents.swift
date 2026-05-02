@@ -157,7 +157,7 @@ struct GraphZoomControls: View {
                     lastOffset = .zero
                 }
             }) {
-                Image(systemName: "arrow.up.left.and.arrow.down.right.magnifyingglass")
+                Image(systemName: "scope")
                     .font(.body)
                     .foregroundStyle(.wikiSecondary)
                     .frame(width: 36, height: 36)
@@ -170,7 +170,7 @@ struct GraphZoomControls: View {
             Button(action: {
                 withAnimation(.spring(response: 0.6)) { onRelayout() }
             }) {
-                Image(systemName: "arrow.triangle.2.circlepath")
+                Image(systemName: "arrow.clockwise")
                     .font(.body)
                     .foregroundStyle(.wikiSecondary)
                     .frame(width: 36, height: 36)

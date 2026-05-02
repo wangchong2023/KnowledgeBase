@@ -26,20 +26,22 @@ struct ChatBubbleView: View {
                 Text(message.content)
                     .font(.subheadline)
                     .foregroundStyle(.white)
-                    .padding(12)
+                    .padding(14)
                     .background(
                         LinearGradient(
-                            colors: [.wikiAccent, .wikiAccent.opacity(0.8)],
+                            colors: [.wikiAccent, .wikiAccent.opacity(0.85)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
+                    .shadow(color: Color.wikiAccent.opacity(0.2), radius: 6, x: 0, y: 3)
                 
                 Text(message.timestamp, style: .time)
-                    .font(.caption2)
+                    .font(.system(size: 10))
                     .foregroundStyle(.wikiSecondary)
             }
+            .frame(maxWidth: 500, alignment: .trailing)
             
             Image(systemName: "person.circle.fill")
                 .font(.subheadline)
@@ -61,9 +63,14 @@ struct ChatBubbleView: View {
             
             VStack(alignment: .leading, spacing: 8) {
                 ChatContentView(text: message.content, pages: pages)
-                    .padding(12)
+                    .padding(14)
                     .background(Color.wikiCard)
                     .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: WikiUI.mediumRadius)
+                            .stroke(Color.wikiAccent.opacity(0.12), lineWidth: 1)
+                    )
+                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
                 
                 // Collapsible References Panel
                 if !message.relatedPageIDs.isEmpty {
@@ -71,9 +78,10 @@ struct ChatBubbleView: View {
                 }
                 
                 Text(message.timestamp, style: .time)
-                    .font(.caption2)
+                    .font(.system(size: 10))
                     .foregroundStyle(.wikiSecondary)
             }
+            .frame(maxWidth: 500, alignment: .leading)
             
             Spacer(minLength: 40)
         }
@@ -155,10 +163,17 @@ struct ChatBubbleView: View {
     }
     
     private var systemBubble: some View {
-        Text(message.content)
-            .font(.caption)
-            .foregroundStyle(.wikiSecondary)
-            .padding(.horizontal, 20)
+        HStack {
+            Spacer()
+            Text(message.content)
+                .font(.system(size: 11))
+                .foregroundStyle(.wikiSecondary.opacity(0.8))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 4)
+                .background(Capsule().fill(Color.wikiCard.opacity(0.5)))
+            Spacer()
+        }
+        .padding(.vertical, 8)
     }
 }
 
@@ -171,57 +186,21 @@ struct ChatContentView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            let displayText = expanded ? text : String(text.prefix(600))
+            let displayText = expanded ? text : String(text.prefix(1500))
             
-            renderText(displayText)
+            MarkdownRendererView(content: displayText, onLinkTap: { title in
+                if let page = pages.first(where: { $0.title == title }) {
+                    HapticManager.shared.trigger(.link)
+                    store.selectedPageID = page.id
+                }
+            })
             
-            if text.count > 600 && !expanded {
+            if text.count > 1500 && !expanded {
                 Button(Localized.tr("chat.expandFull")) {
                     withAnimation { expanded = true }
                 }
                 .font(.caption)
                 .foregroundStyle(.wikiAccent)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func renderText(_ text: String) -> some View {
-        let segments = ChatLinkParser.parseSegments(text)
-        
-        VStack(alignment: .leading, spacing: 4) {
-            ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
-                if segment.isLink {
-                    Button(action: {
-                        if let page = pages.first(where: { $0.title == segment.text }) {
-                            HapticManager.shared.trigger(.link)
-                            store.selectedPageID = page.id
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "link.circle.fill")
-                                .font(.system(size: 10))
-                            Text(segment.text)
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.wikiAccent.opacity(0.15))
-                        .foregroundStyle(.wikiAccent)
-                        .clipShape(Capsule())
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.wikiAccent.opacity(0.3), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .padding(.vertical, 2)
-                } else {
-                    Text(segment.text)
-                        .font(.subheadline)
-                        .foregroundStyle(.wikiText)
-                        .tint(.wikiAccent)
-                }
             }
         }
     }

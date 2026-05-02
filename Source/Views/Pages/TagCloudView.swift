@@ -63,7 +63,7 @@ struct TagCloudViewContent: View {
             pagesListView
         }
         .background(Color.wikiBackground)
-        .navigationTitle(isEditMode ? "管理标签" : Localized.tr("tag.title"))
+        .navigationTitle(isEditMode ? Localized.tr("tags.manageTitle") : Localized.tr("tag.title"))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -126,7 +126,7 @@ struct TagCloudViewContent: View {
                 isEditMode = false
             }
         } message: {
-            Text("确定要删除选中的 \(selectedTagsForBulk.count) 个标签吗？这将从所有关联页面中移除它们。")
+            Text(Localized.trf("tags.bulkDeleteWarning", selectedTagsForBulk.count))
         }
         .task {
             await fetchData()
@@ -262,13 +262,15 @@ struct TagCloudViewContent: View {
                         }
                     } header: {
                         HStack {
-                            Text(Localized.trf("tag.tagPages", tag))
+                            Text(tag)
+                                .font(.headline)
                                 .foregroundStyle(.wikiText)
                             Spacer()
-                            Text(Localized.trf("page.backlinksCount", filteredPages.count))
+                            Text(Localized.trf("tag.tagPages", filteredPages.count))
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
                         }
+                        .padding(.vertical, 4)
                     }
                 }
                 .listStyle(.plain)
@@ -278,7 +280,7 @@ struct TagCloudViewContent: View {
                     Image(systemName: isEditMode ? "checklist" : "tag")
                         .font(.title)
                         .foregroundStyle(.wikiSecondary)
-                    Text(isEditMode ? "请选择要管理的标签" : Localized.tr("tagcloud.selectTag"))
+                    Text(isEditMode ? Localized.tr("tags.selectToManage") : Localized.tr("tagcloud.selectTag"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -343,45 +345,3 @@ struct BlurView: View {
 }
 #endif
 
-// MARK: - Flow Layout
-struct FlowLayout: Layout {
-    var spacing: CGFloat = 8
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let result = arrangeSubviews(proposal: proposal, subviews: subviews)
-        return result.size
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        let result = arrangeSubviews(proposal: proposal, subviews: subviews)
-        for (index, position) in result.positions.enumerated() {
-            subviews[index].place(at: CGPoint(x: bounds.minX + position.x, y: bounds.minY + position.y), proposal: .unspecified)
-        }
-    }
-
-    private func arrangeSubviews(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, positions: [CGPoint]) {
-        let maxWidth = proposal.width ?? .infinity
-        var positions: [CGPoint] = []
-        var currentX: CGFloat = 0
-        var currentY: CGFloat = 0
-        var rowHeight: CGFloat = 0
-        var maxX: CGFloat = 0
-
-        for subview in subviews {
-            let size = subview.sizeThatFits(.unspecified)
-
-            if currentX + size.width > maxWidth && currentX > 0 {
-                currentX = 0
-                currentY += rowHeight + spacing
-                rowHeight = 0
-            }
-
-            positions.append(CGPoint(x: currentX, y: currentY))
-            rowHeight = max(rowHeight, size.height)
-            currentX += size.width + spacing
-            maxX = max(maxX, currentX)
-        }
-
-        return (CGSize(width: maxX, height: currentY + rowHeight), positions)
-    }
-}

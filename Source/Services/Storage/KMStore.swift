@@ -389,10 +389,16 @@ class KMStore: ObservableObject {
             let existingTitles = sqliteStore.pages.map { $0.title }
             
             var tempLinks: [PotentialLinkSuggestion] = []
+            var seenLinks = Set<String>()
             for page in activePages {
                 let found = try await llmService.discoverPotentialLinks(content: page.content, existingTitles: existingTitles)
-                for title in found {
-                    tempLinks.append(PotentialLinkSuggestion(sourcePageID: page.id, sourceTitle: page.title, targetTitle: title))
+                // 仅添加不存在于当前页面的新链接，并排重
+                for title in Set(found) {
+                    let linkKey = "\(page.id.uuidString)-\(title)"
+                    if !seenLinks.contains(linkKey) && !page.content.contains("[[\(title)]]") {
+                        seenLinks.insert(linkKey)
+                        tempLinks.append(PotentialLinkSuggestion(sourcePageID: page.id, sourceTitle: page.title, targetTitle: title))
+                    }
                 }
             }
             let capturedLinks = tempLinks

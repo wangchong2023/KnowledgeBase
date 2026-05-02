@@ -43,20 +43,30 @@ struct GraphLayoutEngine {
             )
         }
 
-        // ── 创建边 ──
+        // ── 创建边 (确保无向去重) ──
         var edges: [GraphEdge] = []
         for page in pages {
             for link in page.outgoingLinks {
                 if let targetPage = linkResolver(link) {
-                    if !edges.contains(where: { $0.source == page.id && $0.target == targetPage.id }) {
+                    // 检查是否已存在该边（无向去重）
+                    let alreadyExists = edges.contains { e in
+                        (e.source == page.id && e.target == targetPage.id) ||
+                        (e.source == targetPage.id && e.target == page.id)
+                    }
+                    if !alreadyExists && page.id != targetPage.id {
                         edges.append(GraphEdge(source: page.id, target: targetPage.id))
                     }
                 }
             }
             for relatedID in page.relatedPageIDs {
-                if pages.contains(where: { $0.id == relatedID }),
-                   !edges.contains(where: { $0.source == page.id && $0.target == relatedID }) {
-                    edges.append(GraphEdge(source: page.id, target: relatedID))
+                if pages.contains(where: { $0.id == relatedID }) {
+                    let alreadyExists = edges.contains { e in
+                        (e.source == page.id && e.target == relatedID) ||
+                        (e.source == relatedID && e.target == page.id)
+                    }
+                    if !alreadyExists && page.id != relatedID {
+                        edges.append(GraphEdge(source: page.id, target: relatedID))
+                    }
                 }
             }
         }

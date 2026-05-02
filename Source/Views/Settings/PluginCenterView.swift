@@ -60,7 +60,7 @@ struct PluginCenterView: View {
                         .fill(isSafeModeOn ? Color.green : Color.orange)
                         .frame(width: 8, height: 8)
                         .shadow(color: (isSafeModeOn ? Color.green : Color.orange).opacity(0.5), radius: 3)
-                    Text(isSafeModeOn ? "安全模式已开启" : "社区模式 (风险提示)")
+                    Text(isSafeModeOn ? Localized.tr("plugin.safeModeOn") : Localized.tr("plugin.communityMode"))
                         .font(.caption2.bold())
                         .foregroundStyle(isSafeModeOn ? .green : .orange)
                 }
@@ -103,7 +103,7 @@ struct PluginCenterView: View {
             let filtered = registry.plugins.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }
             
             if filtered.isEmpty {
-                emptyStateView(icon: "puzzlepiece", title: "暂无插件", sub: "去社区市场发现惊喜吧")
+                emptyStateView(icon: "puzzlepiece", title: Localized.tr("plugin.noPlugins"), sub: Localized.tr("plugin.noPluginsHint"))
             } else {
                 ForEach(filtered, id: \.id) { plugin in
                     PluginCard(name: plugin.name, version: plugin.version, isLocal: true)
