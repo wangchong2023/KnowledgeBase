@@ -17,9 +17,25 @@ struct KnowledgeDashboardView: View {
                 
                 // 2. 连接密度图 (模拟可视化)
                 VStack(alignment: .leading, spacing: 16) {
-                    Text(Localized.tr("dashboard.density"))
-                        .font(.headline)
-                        .padding(.horizontal)
+                    HStack(spacing: 6) {
+                        Text(Localized.tr("dashboard.density"))
+                            .font(.headline)
+                        
+                        Button {
+                            showDensityInfo = true
+                        } label: {
+                            Image(systemName: "info.circle")
+                                .font(.caption)
+                                .foregroundStyle(.wikiSecondary)
+                        }
+                        .popover(isPresented: $showDensityInfo) {
+                            Text(Localized.tr("dashboard.density.desc"))
+                                .font(.caption)
+                                .padding()
+                                .presentationCompactAdaptation(.popover)
+                        }
+                    }
+                    .padding(.horizontal)
                     
                     ZStack {
                         RoundedRectangle(cornerRadius: 16)
@@ -78,6 +94,7 @@ struct KnowledgeDashboardView: View {
     }
     
     @State private var tags: [(tag: String, count: Int)] = []
+    @State private var showDensityInfo = false
     
     private var totalLinks: Int {
         store.pages.reduce(0) { $0 + $1.outgoingLinks.count }

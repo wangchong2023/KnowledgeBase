@@ -205,7 +205,7 @@ struct MarkdownEditorToolbar: View {
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: "OCR 扫描", icon: "text.viewfinder") {
+                EditorToolbarButton(title: Localized.tr("editor.ocrScan"), icon: "text.viewfinder") {
                     onOCR()
                 }
             }

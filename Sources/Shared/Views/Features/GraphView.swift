@@ -144,32 +144,33 @@ struct GraphContainerView: View {
     
     private var graphToolbar: some ToolbarContent {
         ToolbarItem(placement: .automatic) {
-            HStack(spacing: 8) {
-                // 左侧统计文字，增加起始间距
+            HStack(spacing: 10) {
+                // 左侧统计文字
                 Text(Localized.trf("graph.nodesConnections", getFilteredNodes().count, getFilteredEdges(for: getFilteredNodes()).count))
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.wikiSecondary)
-                    .padding(.leading, 8)
+                    .padding(.leading, 4)
                 
-                HStack(spacing: 12) {
-                    // 洞察灯泡 (仅保留最核心的图谱洞察功能)
-                    Button(action: { 
-                        computeInsights()
-                        showInsights = true 
-                    }) {
-                        Image(systemName: "lightbulb.fill")
-                            .foregroundStyle(.wikiAccent)
-                    }
-                    .help(Localized.tr("graph.insights"))
+                Divider()
+                    .frame(height: 12)
+                    .foregroundStyle(.wikiBorder)
+
+                // 洞察灯泡
+                Button(action: { 
+                    computeInsights()
+                    showInsights = true 
+                }) {
+                    Image(systemName: "lightbulb.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.wikiAccent)
                 }
-                .font(.system(size: 13))
-                .foregroundStyle(.wikiAccent)
+                .help(Localized.tr("graph.insights"))
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .background {
                 Capsule()
-                    .fill(Color.wikiCard.opacity(0.8))
+                    .fill(Color.wikiCard.opacity(0.85))
                     .overlay(Capsule().stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1))
             }
         }

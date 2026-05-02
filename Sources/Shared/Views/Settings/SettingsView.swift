@@ -138,7 +138,7 @@ struct SettingsView: View {
                     }
                     
                     Button(role: .destructive, action: { showResetConfirmation = true }) {
-                        Label(Localized.tr("settings.reset"), systemImage: "trash")
+                        Label(Localized.tr("settings.reset"), systemImage: "arrow.counterclockwise")
                             .foregroundStyle(.red)
                     }
                     .accessibilityIdentifier("数据-重置知识库")

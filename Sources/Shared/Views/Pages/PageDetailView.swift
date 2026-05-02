@@ -734,11 +734,11 @@ struct PageDetailView: View {
     private func synthesize(_ type: SynthesisType) {
         let title: String
         switch type {
-        case .mindmap: title = "生成思维导图"
-        case .quiz: title = "生成知识测验"
-        case .slides: title = "生成演示大纲"
-        case .report: title = "生成深度总结"
-        case .infographic: title = "生成知识信息图"
+        case .mindmap: title = Localized.tr("action.generateMindmap")
+        case .quiz: title = Localized.tr("action.generateQuiz")
+        case .slides: title = Localized.tr("action.generateSlides")
+        case .report: title = Localized.tr("action.generateReport")
+        case .infographic: title = Localized.tr("action.generateInfographic")
         }
         
         let taskID = TaskCenter.shared.addTask(type: .ai, name: title, target: page.title)

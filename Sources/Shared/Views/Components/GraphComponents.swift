@@ -422,7 +422,7 @@ struct GraphInsightsPanel: View {
         }
     
     private func insightSection(id: String, icon: String, title: String, count: Int, description: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 10) {
             // Section header
             Button(action: {
                 withAnimation { 
@@ -435,26 +435,26 @@ struct GraphInsightsPanel: View {
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: icon)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(color)
-                        .frame(width: 20)
+                        .frame(width: 24)
                     
                     Text(title)
-                        .font(.caption.weight(.semibold))
+                        .font(.subheadline.bold())
                         .foregroundStyle(.wikiText)
                     
                     Text("\(count)")
-                        .font(.caption2)
+                        .font(.footnote)
                         .foregroundStyle(color)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
                         .background(color.opacity(0.15))
                         .clipShape(Capsule())
                     
                     Spacer()
                     
                     Image(systemName: expandedSections.contains(id) ? "chevron.down" : "chevron.right")
-                        .font(.caption2)
+                        .font(.footnote)
                         .foregroundStyle(.wikiSecondary)
                 }
                 .contentShape(Rectangle())
@@ -464,26 +464,26 @@ struct GraphInsightsPanel: View {
             
             if expandedSections.contains(id) {
                 Text(description)
-                    .font(.caption2)
+                    .font(.footnote)
                     .foregroundStyle(.wikiSecondary)
-                    .padding(.leading, 28)
+                    .padding(.leading, 32)
                 
                 // Node chips
                 let nodeIDs = getNodeIDs(for: id)
                 if !nodeIDs.isEmpty {
-                    FlowLayout(spacing: 6) {
+                    FlowLayout(spacing: 8) {
                         ForEach(nodeIDs, id: \.self) { nodeID in
                             if let node = nodes.first(where: { $0.id == nodeID }) {
                                 Button(action: { onSelectNode(nodeID) }) {
-                                    HStack(spacing: 3) {
+                                    HStack(spacing: 4) {
                                         Image(systemName: node.type.icon)
-                                            .font(.caption2)
+                                            .font(.footnote)
                                         Text(node.title)
-                                            .font(.caption2)
+                                            .font(.footnote)
                                             .lineLimit(1)
                                     }
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
                                     .background(color.opacity(0.15))
                                     .clipShape(Capsule())
                                     .foregroundStyle(color)
@@ -492,11 +492,11 @@ struct GraphInsightsPanel: View {
                             }
                         }
                     }
-                    .padding(.leading, 28)
+                    .padding(.leading, 32)
                 }
             }
         }
-        .padding(10)
+        .padding(12)
         .background(color.opacity(0.05))
         .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
     }

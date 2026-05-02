@@ -227,53 +227,55 @@ final class MarkdownParser {
     // MARK: - Inline Parsing
     func parseInlineSegments(_ text: String) -> [InlineSegment] {
         var segments: [InlineSegment] = []
-        var remaining = text
+        let nsText = text as NSString
+        var currentOffset = 0
 
-        while !remaining.isEmpty {
-            // Wikilink [[...]]
-            if let range = remaining.range(of: "\\[\\[([^\\]]+)\\]\\]", options: .regularExpression) {
-                let before = String(remaining[remaining.startIndex..<range.lowerBound])
-                if !before.isEmpty {
+        let patterns: [(InlineType, NSRegularExpression)] = [
+            (.wikilink, .wikiLinkRegex),
+            (.bold, .boldRegex),
+            (.italic, .italicRegex),
+            (.code, .codeRegex)
+        ]
+
+        while currentOffset < nsText.length {
+            var earliestMatch: (type: InlineType, match: NSTextCheckingResult)?
+
+            for (type, regex) in patterns {
+                if let match = regex.firstMatch(in: text, range: NSRange(location: currentOffset, length: nsText.length - currentOffset)) {
+                    if earliestMatch == nil || match.range.location < earliestMatch!.match.range.location {
+                        earliestMatch = (type, match)
+                    }
+                }
+            }
+
+            if let earliest = earliestMatch {
+                let matchRange = earliest.match.range
+                
+                // Add text before the match
+                if matchRange.location > currentOffset {
+                    let before = nsText.substring(with: NSRange(location: currentOffset, length: matchRange.location - currentOffset))
                     segments.append(InlineSegment(type: .text, content: before))
                 }
-                let linkContent = remaining[range].dropFirst(2).dropLast(2)
-                let linkTitle = String(linkContent.split(separator: "|").first ?? Substring(linkContent))
-                segments.append(InlineSegment(type: .wikilink, content: linkTitle.trimmingCharacters(in: .whitespaces)))
-                remaining = String(remaining[range.upperBound...])
-            }
-            // Bold **...**
-            else if let range = remaining.range(of: "\\*\\*([^*]+)\\*\\*", options: .regularExpression) {
-                let before = String(remaining[remaining.startIndex..<range.lowerBound])
-                if !before.isEmpty {
-                    segments.append(InlineSegment(type: .text, content: before))
+
+                // Add the matched segment
+                let content: String
+                switch earliest.type {
+                case .wikilink:
+                    let raw = nsText.substring(with: earliest.match.range(at: 1))
+                    content = raw.split(separator: "|").first.map(String.init)?.trimmingCharacters(in: .whitespaces) ?? raw
+                case .bold, .italic, .code:
+                    content = nsText.substring(with: earliest.match.range(at: 1))
+                default:
+                    content = ""
                 }
-                let boldContent = remaining[range].dropFirst(2).dropLast(2)
-                segments.append(InlineSegment(type: .bold, content: String(boldContent)))
-                remaining = String(remaining[range.upperBound...])
-            }
-            // Code `...`
-            else if let range = remaining.range(of: "`([^`]+)`", options: .regularExpression) {
-                let before = String(remaining[remaining.startIndex..<range.lowerBound])
-                if !before.isEmpty {
-                    segments.append(InlineSegment(type: .text, content: before))
-                }
-                let codeContent = remaining[range].dropFirst().dropLast()
-                segments.append(InlineSegment(type: .code, content: String(codeContent)))
-                remaining = String(remaining[range.upperBound...])
-            }
-            // Italic *...*
-            else if let range = remaining.range(of: "\\*([^*]+)\\*", options: .regularExpression) {
-                let before = String(remaining[remaining.startIndex..<range.lowerBound])
-                if !before.isEmpty {
-                    segments.append(InlineSegment(type: .text, content: before))
-                }
-                let italicContent = remaining[range].dropFirst().dropLast()
-                segments.append(InlineSegment(type: .italic, content: String(italicContent)))
-                remaining = String(remaining[range.upperBound...])
-            }
-            else {
-                segments.append(InlineSegment(type: .text, content: remaining))
-                remaining = ""
+                
+                segments.append(InlineSegment(type: earliest.type, content: content))
+                currentOffset = matchRange.location + matchRange.length
+            } else {
+                // Add remaining text
+                let remainingText = nsText.substring(from: currentOffset)
+                segments.append(InlineSegment(type: .text, content: remainingText))
+                break
             }
         }
 
@@ -290,4 +292,12 @@ final class MarkdownParser {
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty && !$0.hasPrefix("-") }
     }
+}
+
+extension NSRegularExpression {
+    static let wikiLinkRegex = try! NSRegularExpression(pattern: "\\[\\[([^\\]]+)\\]\\]")
+    static let boldRegex = try! NSRegularExpression(pattern: "\\*\\*([^*]+)\\*\\*")
+    static let italicRegex = try! NSRegularExpression(pattern: "\\*([^*]+)\\*")
+    static let codeRegex = try! NSRegularExpression(pattern: "`([^`]+)`")
+    static let linkRegex = try! NSRegularExpression(pattern: "\\[([^\\]]+)\\]\\(([^\\)]+)\\)")
 }

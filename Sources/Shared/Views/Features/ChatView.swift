@@ -25,6 +25,8 @@ struct ChatViewContent: View {
     @State private var showPrompts = false
     @State private var exportWebView: WKWebView?
     @State private var exportURL: IdentifiableURL?
+    @State private var isSelectionMode = false
+    @State private var selectedMessageIDs: Set<UUID> = []
 
     var body: some View {
         VStack(spacing: 0) {
@@ -56,11 +58,20 @@ struct ChatViewContent: View {
                     
                     if !llmService.chatHistory.isEmpty {
                         Section(Localized.tr("chat.exportConversation")) {
+                            Button(action: {
+                                withAnimation {
+                                    isSelectionMode.toggle()
+                                    if !isSelectionMode { selectedMessageIDs.removeAll() }
+                                }
+                            }) {
+                                Label(isSelectionMode ? Localized.tr("misc.done") : Localized.tr("chat.selectToExport"), systemImage: isSelectionMode ? "checkmark.circle.fill" : "checklist")
+                            }
+
                             Button(action: exportAsMarkdown) {
-                                Label(Localized.tr("chat.exportMarkdown"), systemImage: "doc.text")
+                                Label(isSelectionMode && !selectedMessageIDs.isEmpty ? Localized.tr("chat.exportSelectedMarkdown") : Localized.tr("chat.exportMarkdown"), systemImage: "doc.text")
                             }
                             Button(action: exportAsPDF) {
-                                Label(Localized.tr("chat.exportPDF"), systemImage: "doc.richtext")
+                                Label(isSelectionMode && !selectedMessageIDs.isEmpty ? Localized.tr("chat.exportSelectedPDF") : Localized.tr("chat.exportPDF"), systemImage: "doc.richtext")
                             }
                         }
                     }
@@ -90,13 +101,30 @@ struct ChatViewContent: View {
             if !store.pages.isEmpty && llmService.isEnabled && aiGeneratedQuestions.isEmpty {
                 isGeneratingAIQuestions = true
                 do {
-                    let questions = try await AISynthesisService.shared.generateInsightfulQuestions(pages: store.pages)
+                    var questions = try await AISynthesisService.shared.generateInsightfulQuestions(pages: store.pages)
+                    
+                    // Fallback if AI returns empty or fails
+                    if questions.isEmpty {
+                        questions = [
+                            Localized.tr("chat.fallback.q1"),
+                            Localized.tr("chat.fallback.q2"),
+                            Localized.tr("chat.fallback.q3")
+                        ]
+                    }
+                    
                     await MainActor.run {
                         self.aiGeneratedQuestions = questions
                         self.isGeneratingAIQuestions = false
                     }
                 } catch {
-                    isGeneratingAIQuestions = false
+                    await MainActor.run {
+                        self.aiGeneratedQuestions = [
+                            Localized.tr("chat.fallback.q1"),
+                            Localized.tr("chat.fallback.q2"),
+                            Localized.tr("chat.fallback.q3")
+                        ]
+                        self.isGeneratingAIQuestions = false
+                    }
                 }
             }
         }
@@ -126,13 +154,12 @@ struct ChatViewContent: View {
     private var chatMessageList: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 16) {
+                LazyVStack(spacing: 12) {
                     if llmService.chatHistory.isEmpty {
-                        chatWelcome
+                        chatWelcome()
                     } else {
                         ForEach(llmService.chatHistory) { message in
-                            ChatBubbleView(message: message, pages: store.pages, selectedTab: $selectedTab)
-                                .id(message.id)
+                            messageRow(for: message)
                         }
                         
                         if isLoading {
@@ -141,7 +168,7 @@ struct ChatViewContent: View {
                         }
                     }
                 }
-                .padding(.horizontal, 10)
+                .padding(.horizontal, 4)
                 .padding(.bottom, 16)
             }
             .onChange(of: llmService.chatHistory.count) {
@@ -160,33 +187,56 @@ struct ChatViewContent: View {
         }
     }
     
-    // MARK: - Chat Welcome
-    private var chatWelcome: some View {
-        VStack(spacing: 24) {
-            Spacer().frame(height: 20)
-
-            // 带光晕的图标
-            ZStack {
-                Circle()
-                    .fill(Color.wikiAccent.opacity(0.1))
-                    .frame(width: 80, height: 80)
-                    .blur(radius: 12)
-
-                Image(systemName: "bubble.left.and.bubble.right.fill")
-                    .font(.system(size: 36, weight: .light))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [.wikiAccent, .wikiConcept],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .shadow(color: .wikiAccent.opacity(0.3), radius: 8, x: 0, y: 4)
+    @ViewBuilder
+    private func messageRow(for message: ChatMessage) -> some View {
+        ChatBubbleView(
+            message: message, 
+            pages: store.pages, 
+            selectedTab: $selectedTab,
+            isSelectionMode: isSelectionMode,
+            isSelected: selectedMessageIDs.contains(message.id)
+        )
+        .id(message.id)
+        .onTapGesture {
+            if isSelectionMode {
+                if selectedMessageIDs.contains(message.id) {
+                    selectedMessageIDs.remove(message.id)
+                } else {
+                    selectedMessageIDs.insert(message.id)
+                }
+                HapticManager.shared.trigger(.selection)
             }
+        }
+    }
 
-            Text(Localized.tr("chat.welcomeTitle"))
-                .font(.title3.weight(.bold))
-                .foregroundStyle(.wikiText)
+    private func chatWelcome(isSheet: Bool = false) -> some View {
+        VStack(spacing: isSheet ? 12 : 8) {
+            if !isSheet {
+                // Remove Spacer to tighten layout
+
+                // 带光晕的图标
+                ZStack {
+                    Circle()
+                        .fill(Color.wikiAccent.opacity(0.1))
+                        .frame(width: 80, height: 80)
+                        .blur(radius: 12)
+
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                        .font(.system(size: 36, weight: .light))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.wikiAccent, .wikiConcept],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .shadow(color: .wikiAccent.opacity(0.3), radius: 8, x: 0, y: 4)
+                }
+
+                Text(Localized.tr("chat.welcomeTitle"))
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(.wikiText)
+            }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
@@ -222,7 +272,7 @@ struct ChatViewContent: View {
             // 标题现在支持点击直接触发“总体探索”
             Button(action: {
                 HapticManager.shared.trigger(.link)
-                let query = "请针对我的知识库进行一次\(title)式的深度探索。"
+                let query = Localized.trf("chat.deepExplorePrompt", title)
                 sendMessage(query)
             }) {
                 HStack(spacing: 6) {
@@ -329,13 +379,13 @@ struct ChatViewContent: View {
                 Button(action: { showPrompts.toggle() }) {
                     Image(systemName: "sparkles.rectangle.stack")
                         .font(.title3)
-                        .foregroundStyle(isLoading ? .wikiSecondary.opacity(0.5) : .wikiAccent)
+                        .foregroundStyle(llmService.chatHistory.isEmpty || isLoading ? .wikiSecondary.opacity(0.5) : .wikiAccent)
                         .frame(width: 44, height: 44)
                         .background(Color.wikiCard)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
-                .disabled(isLoading)
+                .disabled(llmService.chatHistory.isEmpty || isLoading)
                 
                 TextField(isLoading ? Localized.tr("chat.aiRunning") : Localized.tr("chat.inputPlaceholder"), text: $inputText)
                     .font(.subheadline)
@@ -373,8 +423,8 @@ struct ChatViewContent: View {
             .background(isLoading ? Color.wikiCard.opacity(0.5) : Color.wikiCard)
             .sheet(isPresented: $showPrompts) {
                 NavigationStack {
-                    chatWelcome
-                        .navigationTitle("探索与提示")
+                    chatWelcome(isSheet: true)
+                        .navigationTitle(Localized.tr("chat.explorationAndPrompts"))
 #if os(iOS)
                         .navigationBarTitleDisplayMode(.inline)
 #endif
@@ -470,7 +520,10 @@ struct ChatViewContent: View {
     
     // MARK: - Export Functions
     private func exportAsMarkdown() {
-        let history = llmService.chatHistory
+        let history = isSelectionMode && !selectedMessageIDs.isEmpty ? 
+            llmService.chatHistory.filter { selectedMessageIDs.contains($0.id) } : 
+            llmService.chatHistory
+            
         var mdString = "# \(Localized.tr("chat.conversationHistory"))\n\n"
         for message in history {
             let roleName = message.role == .user ? "You" : "AI"
@@ -478,7 +531,8 @@ struct ChatViewContent: View {
             mdString += "\(message.content)\n\n"
         }
         
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ChatExport.md")
+        let filename = isSelectionMode && !selectedMessageIDs.isEmpty ? "ChatSelection.md" : "ChatExport.md"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
         try? mdString.write(to: tempURL, atomically: true, encoding: .utf8)
         self.exportURL = IdentifiableURL(url: tempURL)
     }
@@ -487,7 +541,10 @@ struct ChatViewContent: View {
         let webView = WKWebView()
         self.exportWebView = webView
         
-        let history = llmService.chatHistory
+        let history = isSelectionMode && !selectedMessageIDs.isEmpty ? 
+            llmService.chatHistory.filter { selectedMessageIDs.contains($0.id) } : 
+            llmService.chatHistory
+
         var htmlContent = ""
         for message in history {
             let roleName = message.role == .user ? "You" : "AI"
@@ -501,6 +558,8 @@ struct ChatViewContent: View {
             """
         }
         
+        let title = isSelectionMode && !selectedMessageIDs.isEmpty ? Localized.tr("chat.selectedHistory") : Localized.tr("chat.conversationHistory")
+        
         let html = """
         <!DOCTYPE html>
         <html>
@@ -513,7 +572,7 @@ struct ChatViewContent: View {
             </style>
         </head>
         <body>
-            <h1>\(Localized.tr("chat.conversationHistory"))</h1>
+            <h1>\(title)</h1>
             \(htmlContent)
         </body>
         </html>
@@ -525,7 +584,8 @@ struct ChatViewContent: View {
             let config = WKPDFConfiguration()
             webView.createPDF(configuration: config) { result in
                 if case .success(let data) = result {
-                    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ChatExport.pdf")
+                    let filename = isSelectionMode && !selectedMessageIDs.isEmpty ? "ChatSelection.pdf" : "ChatExport.pdf"
+                    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
                     try? data.write(to: tempURL)
                     self.exportURL = IdentifiableURL(url: tempURL)
                 }

@@ -8,83 +8,102 @@ struct ChatBubbleView: View {
     @State private var referencesExpanded = false
     @Binding var selectedTab: ContentView.AppTab
     
+    var isSelectionMode: Bool = false
+    var isSelected: Bool = false
+    
     var body: some View {
-        switch message.role {
-        case .user:
-            userBubble
-        case .assistant:
-            assistantBubble
-        case .system:
-            systemBubble
+        HStack(spacing: 12) {
+            if isSelectionMode {
+                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isSelected ? Color.wikiAccent : Color.wikiSecondary)
+                    .font(.title3)
+                    .transition(.move(edge: .leading).combined(with: .opacity))
+            }
+            
+            Group {
+                switch message.role {
+                case .user:
+                    userBubble
+                case .assistant:
+                    assistantBubble
+                case .system:
+                    systemBubble
+                }
+            }
         }
+        .padding(.vertical, 4)
+    }
+    
+    private var timestampString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/M/d HH:mm"
+        return formatter.string(from: message.timestamp)
     }
     
     private var userBubble: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Spacer(minLength: 8)
-            
+        VStack(alignment: .trailing, spacing: 4) {
             VStack(alignment: .trailing, spacing: 4) {
+                Image(systemName: "person.circle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.white.opacity(0.8))
+                
                 Text(message.content)
                     .font(.footnote)
                     .foregroundStyle(.white)
-                    .padding(14)
-                    .background(
-                        LinearGradient(
-                            colors: [.wikiAccent, .wikiAccent.opacity(0.85)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
-                    .shadow(color: Color.wikiAccent.opacity(0.2), radius: 6, x: 0, y: 3)
-                
-                Text(message.timestamp, style: .time)
-                    .font(.system(size: 10))
-                    .foregroundStyle(.wikiSecondary)
             }
-            .frame(maxWidth: .infinity, alignment: .trailing)
+            .padding(14)
+            .background(
+                LinearGradient(
+                    colors: [.wikiAccent, .wikiAccent.opacity(0.85)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
+            .shadow(color: Color.wikiAccent.opacity(0.2), radius: 6, x: 0, y: 3)
             
-            Image(systemName: "person.circle.fill")
-                .font(.subheadline)
-                .foregroundStyle(.wikiAccent)
-                .frame(width: 28, height: 28)
-                .background(Color.wikiAccent.opacity(0.15))
-                .clipShape(Circle())
+            Text(timestampString)
+                .font(.system(size: 10))
+                .foregroundStyle(.wikiSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .padding(.leading, 24)
     }
     
     private var assistantBubble: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "sparkles")
-                .font(.subheadline)
-                .foregroundStyle(.wikiAccent)
-                .frame(width: 28, height: 28)
-                .background(Color.wikiAccent.opacity(0.15))
-                .clipShape(Circle())
-            
-            VStack(alignment: .leading, spacing: 8) {
-                ChatContentView(text: message.content, pages: pages, selectedTab: $selectedTab)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
-                    .background(Color.wikiCard)
-                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: WikiUI.mediumRadius)
-                            .stroke(Color.wikiAccent.opacity(0.12), lineWidth: 1)
-                    )
-                    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
-                
-                // Collapsible References Panel
-                if !message.relatedPageIDs.isEmpty {
-                    referencesPanel
+        VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 4) {
+                    Image(systemName: "sparkles")
+                        .font(.caption2)
+                    Text("AI")
+                        .font(.system(size: 10, weight: .bold))
                 }
+                .foregroundStyle(.wikiAccent)
                 
-                Text(message.timestamp, style: .time)
-                    .font(.system(size: 10))
-                    .foregroundStyle(.wikiSecondary)
+                ChatContentView(text: message.content, pages: pages, selectedTab: $selectedTab)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(Color.wikiCard)
+            .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: WikiUI.mediumRadius)
+                    .stroke(Color.wikiAccent.opacity(0.12), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+            
+            // Collapsible References Panel
+            if !message.relatedPageIDs.isEmpty {
+                referencesPanel
+            }
+            
+            Text(timestampString)
+                .font(.system(size: 10))
+                .foregroundStyle(.wikiSecondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.trailing, 8)
     }
     
     /// Collapsible references panel showing cited wiki pages grouped by type
@@ -193,7 +212,8 @@ struct ChatContentView: View {
             let displayText = expanded ? text : String(text.prefix(1500))
             
             MarkdownRendererView(content: displayText, isPrivate: false, onLinkTap: { title in
-                if let page = pages.first(where: { $0.title == title }) {
+                let targetTitle = title.trimmingCharacters(in: .whitespaces)
+                if let page = pages.first(where: { $0.title.localizedCaseInsensitiveCompare(targetTitle) == .orderedSame }) {
                     HapticManager.shared.trigger(.link)
                     store.selectedPageID = page.id
                     selectedTab = .wiki

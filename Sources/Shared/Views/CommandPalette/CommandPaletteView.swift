@@ -30,17 +30,17 @@ struct CommandPaletteView: View {
             
             // 结果列表
             List {
-                Section("快速操作") {
-                    CommandRow(icon: "sparkles", title: "AI 深度探索当前库", shortcut: "↵") {
+                Section(Localized.tr("cmd.quickActions")) {
+                    CommandRow(icon: "sparkles", title: Localized.tr("cmd.deepExplore"), shortcut: "↵") {
                         // 触发逻辑
                         dismiss()
                     }
-                    CommandRow(icon: "doc.badge.plus", title: "新建知识页面", shortcut: "N") {
+                    CommandRow(icon: "doc.badge.plus", title: Localized.tr("cmd.newWikiPage"), shortcut: "N") {
                         dismiss()
                     }
                 }
                 
-                Section("最近访问") {
+                Section(Localized.tr("cmd.recentAccess")) {
                     ForEach(store.pages.prefix(3)) { page in
                         CommandRow(icon: page.type.icon, title: page.title) {
                             dismiss()

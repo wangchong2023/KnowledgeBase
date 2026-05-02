@@ -51,7 +51,7 @@ final class KnowledgeInsightService: @unchecked Sendable {
         # Current Focus: \(recentFocus)
         # Recall Page Title: \(target.title)
         # Recall Content: \(target.content.prefix(500))
-        # Requirements: 分析为什么现在复习这个页面对当前的研究有帮助。
+        # Requirements: 分析为什么现在复习这个页面对当前的研究有帮助。文字精简，总字数不超过 30 字。
         返回 JSON 格式: {"insight": "...", "suggestedConnection": "..."}
         """
         
@@ -69,9 +69,9 @@ final class KnowledgeInsightService: @unchecked Sendable {
     private func generateSimpleRecap(pages: [WikiPage], llmService: any LLMServiceProtocol) async throws -> DailyRecap {
         let sorted = pages.sorted { $0.updated < $1.updated }
         let target = sorted.first!
-        let prompt = "分析页面内容并提供复习见解: \(target.title)\n\(target.content.prefix(300))"
+        let prompt = "分析页面内容并提供复习见解（字数 30 字以内）: \(target.title)\n\(target.content.prefix(300))"
         let response = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个知识导师。")
-        return DailyRecap(targetPageTitle: target.title, insight: response, suggestedConnection: "定期复习是巩固知识的关键。")
+        return DailyRecap(targetPageTitle: target.title, insight: response, suggestedConnection: Localized.tr("insight.recap.tip"))
     }
 
     /// 生成最近一周的知识洞察
@@ -100,7 +100,7 @@ final class KnowledgeInsightService: @unchecked Sendable {
             totalNewPages: newPages.count,
             topKeywords: keywords,
             aiSummary: summary,
-            growthTraction: newPages.count > 5 ? "爆发式增长" : "稳步积累中"
+            growthTraction: newPages.count > 5 ? Localized.tr("insight.growth.explosive") : Localized.tr("insight.growth.steady")
         )
     }
 }

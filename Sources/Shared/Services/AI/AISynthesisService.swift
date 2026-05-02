@@ -192,7 +192,7 @@ final class AISynthesisService {
             .joined(separator: "\n")
         
         let prompt = """
-        \(PromptService.shared.quizPrompt)
+        \(PromptService.shared.insightQuestionsPrompt)
         
         要求：
         1. 仅返回 JSON 数组格式，例如: ["问题1", "问题2", "问题3"]
@@ -206,12 +206,25 @@ final class AISynthesisService {
     }
     
     private func parseJSONArray(_ text: String) -> [String] {
-        let cleaned = text.replacingOccurrences(of: "```json", with: "").replacingOccurrences(of: "```", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let data = cleaned.data(using: .utf8),
-              let array = try? JSONDecoder().decode([String].self, from: data) else {
-            return []
+        let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Try direct parse first
+        if let data = cleaned.data(using: .utf8),
+           let array = try? JSONDecoder().decode([String].self, from: data) {
+            return array
         }
-        return array
+        
+        // Try to find [ ... ] block using regex if direct parse failed
+        let pattern = "\\[[\\s\\S]*\\]"
+        if let range = cleaned.range(of: pattern, options: .regularExpression) {
+            let jsonPart = String(cleaned[range])
+            if let data = jsonPart.data(using: .utf8),
+               let array = try? JSONDecoder().decode([String].self, from: data) {
+                return array
+            }
+        }
+        
+        return []
     }
 }
 

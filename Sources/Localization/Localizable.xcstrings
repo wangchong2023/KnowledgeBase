@@ -325,6 +325,86 @@
         }
       }
     },
+    "action.generateInfographic" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Infographic"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成知识信息图"
+          }
+        }
+      }
+    },
+    "action.generateMindmap" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Mindmap"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成思维导图"
+          }
+        }
+      }
+    },
+    "action.generateQuiz" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Quiz"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成知识测验"
+          }
+        }
+      }
+    },
+    "action.generateReport" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Deep Summary"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成深度总结"
+          }
+        }
+      }
+    },
+    "action.generateSlides" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate Slides"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成演示大纲"
+          }
+        }
+      }
+    },
     "action.healthCheck" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -392,6 +472,9 @@
           }
         }
       }
+    },
+    "AI" : {
+
     },
     "ai.status.scanning" : {
       "localizations" : {
@@ -1194,6 +1277,38 @@
         }
       }
     },
+    "chat.conversationHistory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conversation History"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对话记录"
+          }
+        }
+      }
+    },
+    "chat.deepExplorePrompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please perform a %@ deep exploration of my knowledge base."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请针对我的知识库进行一次%@式的深度探索。"
+          }
+        }
+      }
+    },
     "chat.expandFull" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1207,6 +1322,114 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "展开全文"
+          }
+        }
+      }
+    },
+    "chat.explorationAndPrompts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exploration & Prompts"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "探索与提示"
+          }
+        }
+      }
+    },
+    "insight.growth.explosive" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Explosive Growth" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "爆发式增长" } }
+      }
+    },
+    "insight.growth.steady" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Steady Accumulation" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "稳步积累中" } }
+      }
+    },
+    "chat.exportConversation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Conversation"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出对话"
+          }
+        }
+      }
+    },
+    "chat.exportMarkdown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export as Markdown"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出为 Markdown"
+          }
+        }
+      }
+    },
+    "chat.exportPDF" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export as PDF"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出为 PDF"
+          }
+        }
+      }
+    },
+    "chat.exportSelectedMarkdown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Selected (Markdown)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出选中内容 (Markdown)"
+          }
+        }
+      }
+    },
+    "chat.exportSelectedPDF" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export Selected (PDF)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出选中内容 (PDF)"
           }
         }
       }
@@ -1321,6 +1544,62 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "引用来源"
+          }
+        }
+      }
+    },
+    "chat.fallback.q1" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Summarize the most important concepts in my knowledge base" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "总结我的知识库中最核心的概念" } }
+      }
+    },
+    "chat.fallback.q2" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find logical gaps or missing links between pages" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "找出知识库中可能存在的逻辑断层" } }
+      }
+    },
+    "chat.fallback.q3" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Suggest a learning path based on my recent content" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "根据我最近的内容生成学习建议" } }
+      }
+    },
+    "dashboard.density.desc" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reflects the richness of connections between knowledge nodes. The higher the density, the more interconnected your knowledge network is." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "反映知识节点之间连接的丰富程度。密度越高，说明你的知识网络关联越紧密，越容易产生跨领域的洞见。" } }
+      }
+    },
+    "chat.selectedHistory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected Chat History"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选中的对话记录"
+          }
+        }
+      }
+    },
+    "chat.selectToExport" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Messages"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择聊天内容"
           }
         }
       }
@@ -1508,6 +1787,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "知识库 AI 助手"
+          }
+        }
+      }
+    },
+    "cmd.deepExplore" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Deep Explore"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI 深度探索当前库"
+          }
+        }
+      }
+    },
+    "cmd.newWikiPage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Wiki Page"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建知识页面"
+          }
+        }
+      }
+    },
+    "cmd.quickActions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Actions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快速操作"
+          }
+        }
+      }
+    },
+    "cmd.recentAccess" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent Access"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近访问"
           }
         }
       }
@@ -2909,6 +3252,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "列表"
+          }
+        }
+      }
+    },
+    "editor.ocrScan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OCR Scan"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OCR 扫描"
           }
         }
       }
@@ -11886,13 +12245,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prompt Factory"
+            "value" : "Prompt Settings"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提示词工厂"
+            "value" : "提示词设置"
           }
         }
       }
@@ -12166,13 +12525,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The Prompt Workshop is your laboratory for tuning AI logic. You can modify underlying 'System Prompts' to change AI generation depth and style, or pin your own frequent shortcuts."
+            "value" : "The Prompt Settings is your laboratory for tuning AI logic. You can modify underlying 'System Prompts' to change AI generation depth and style, or pin your own frequent shortcuts."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提示词工厂是您调教 AI 处理逻辑的实验室。您可以修改底层的“系统指令”来改变 AI 生成内容的深度和风格，或置顶您自己的常用快捷指令。"
+            "value" : "在这里，您可以深度定制 AI 的核心处理逻辑。通过修改底层“系统指令”，精准掌控生成内容的深度与风格，并管理您的个性化快捷指令。"
           }
         }
       }
@@ -12182,13 +12541,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI Prompt Lab"
+            "value" : "Prompt Settings"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "AI 提示词实验室"
+            "value" : "提示词设置"
           }
         }
       }
@@ -12305,6 +12664,70 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最近更新"
+          }
+        }
+      }
+    },
+    "report.appName" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ZhiMind"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "智元 (ZhiMind)"
+          }
+        }
+      }
+    },
+    "report.footer" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatically generated by ZhiMind AI Engine | Privacy priority, local storage"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "由 ZhiMind AI 引擎自动生成 | 隐私优先，本地存储"
+          }
+        }
+      }
+    },
+    "report.nodeCount" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contains %lld knowledge nodes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共包含 %lld 个知识节点"
+          }
+        }
+      }
+    },
+    "report.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Knowledge Base Deep Summary Report"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "知识库深度总结报告"
           }
         }
       }
@@ -12745,6 +13168,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "高级维护设置"
+          }
+        }
+      }
+    },
+    "settings.biometricProtection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Biometric Protection"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "面容 ID / 指纹保护"
+          }
+        }
+      }
+    },
+    "settings.promptWorkshop" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prompt Workshop"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "提示词设置"
           }
         }
       }
@@ -15038,6 +15493,38 @@
         }
       }
     },
+    "stat.growth" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Growth Traction"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "成长势能"
+          }
+        }
+      }
+    },
+    "stat.newPages" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Pages"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增页面"
+          }
+        }
+      }
+    },
     "stat.performance" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16350,31 +16837,10 @@
         }
       }
     },
-    "共包含 %@ 个知识节点" : {
-
-    },
-    "最近访问" : {
-
-    },
     "创建" : {
 
     },
     "导入" : {
-
-    },
-    "快速操作" : {
-
-    },
-    "探索与提示" : {
-
-    },
-    "智元 (ZhiMind)" : {
-
-    },
-    "由 ZhiMind AI 引擎自动生成 | 隐私优先，本地存储" : {
-
-    },
-    "知识库深度总结报告" : {
 
     }
   },

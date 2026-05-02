@@ -7,26 +7,34 @@ struct TaskCenterView: View {
     @Environment(KMStore.self) var store
     
     var body: some View {
-        List {
+        ZStack {
+            Color.wikiBackground.ignoresSafeArea()
+            
             if taskCenter.tasks.isEmpty {
-                emptyState
-            } else {
-                ForEach(taskCenter.tasks) { task in
-                    TaskRow(task: task)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            taskCenter.markAsRead(task.id)
-                            if let pageID = task.associatedPageID {
-                                store.selectedPageID = pageID
-                                store.selectedTool = nil
-                            }
-                        }
+                ScrollView {
+                    emptyState
+                        .padding(.top, 20)
                 }
-                .onDelete { indices in
-                    indices.forEach { index in
-                        taskCenter.removeTask(taskCenter.tasks[index].id)
+            } else {
+                List {
+                    ForEach(taskCenter.tasks) { task in
+                        TaskRow(task: task)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                taskCenter.markAsRead(task.id)
+                                if let pageID = task.associatedPageID {
+                                    store.selectedPageID = pageID
+                                    store.selectedTool = nil
+                                }
+                            }
+                    }
+                    .onDelete { indices in
+                        indices.forEach { index in
+                            taskCenter.removeTask(taskCenter.tasks[index].id)
+                        }
                     }
                 }
+                .listStyle(.insetGrouped)
             }
         }
         .navigationTitle(Localized.tr("aitask.center.title"))
@@ -61,7 +69,7 @@ struct TaskCenterView: View {
     }
     
     private var emptyState: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 24) {
             ZStack {
                 Circle()
                     .fill(Color.wikiAccent.opacity(0.1))
@@ -111,7 +119,7 @@ struct TaskCenterView: View {
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 24)
         }
-        .frame(maxWidth: .infinity, minHeight: 400)
+        .frame(maxWidth: .infinity)
         .listRowBackground(Color.clear)
     }
     

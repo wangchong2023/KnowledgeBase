@@ -47,9 +47,9 @@ struct WeeklyInsightCard: View {
                     // 核心指标 (奖牌化设计)
                     VStack(alignment: .leading, spacing: 16) {
                         HStack(spacing: 24) {
-                            InsightStat(label: "新增页面", value: "\(insight.totalNewPages)", icon: "doc.badge.plus", color: .blue)
+                            InsightStat(label: Localized.tr("stat.newPages"), value: "\(insight.totalNewPages)", icon: "doc.badge.plus", color: .blue)
                             Divider().frame(height: 36)
-                            InsightStat(label: "成长势能", value: insight.growthTraction, icon: "chart.line.uptrend.xyaxis", color: .green)
+                            InsightStat(label: Localized.tr("stat.growth"), value: insight.growthTraction, icon: "chart.line.uptrend.xyaxis", color: .green)
                         }
                         
                         if !insight.topKeywords.isEmpty {

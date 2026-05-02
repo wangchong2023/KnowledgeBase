@@ -52,17 +52,21 @@ struct SidebarView: View {
             Section {
                 NavigationLink(value: SidebarSelection.tool(.dashboard)) {
                     Label(Localized.tr("sidebar.dashboard"), systemImage: "gauge.with.needle.fill")
-                        .foregroundStyle(.wikiAccent)
                 }
                 .accessibilityIdentifier("dashboard")
 
                 NavigationLink(value: SidebarSelection.tool(.chat)) {
                     Label(Localized.tr("tab.chat"), systemImage: "sparkles")
-                        .foregroundStyle(.wikiAccent)
                 }
                 .accessibilityIdentifier("AI-Chat")
                 
+                NavigationLink(value: SidebarSelection.tool(.synthesis)) {
+                    Label(Localized.tr("sidebar.synthesis"), systemImage: "wand.and.stars")
+                }
 
+                NavigationLink(value: SidebarSelection.tool(.weeklyReport)) {
+                    Label(Localized.tr("sidebar.weeklyInsight"), systemImage: "doc.text.magnifyingglass")
+                }
             } header: {
                 Text(Localized.tr("sidebar.capabilities"))
             }
@@ -136,14 +140,6 @@ struct SidebarView: View {
 
                 NavigationLink(value: SidebarSelection.tool(.tagCloud)) {
                     Label(Localized.tr("sidebar.tagManager"), systemImage: "tag.fill")
-                }
-
-                NavigationLink(value: SidebarSelection.tool(.synthesis)) {
-                    Label(Localized.tr("sidebar.synthesis"), systemImage: "wand.and.stars")
-                }
-
-                NavigationLink(value: SidebarSelection.tool(.weeklyReport)) {
-                    Label(Localized.tr("sidebar.weeklyInsight"), systemImage: "doc.text.magnifyingglass")
                 }
 
                 NavigationLink(value: SidebarSelection.tool(.taskCenter)) {

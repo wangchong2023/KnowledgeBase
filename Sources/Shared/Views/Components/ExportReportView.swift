@@ -8,7 +8,7 @@ struct ExportReportView: View {
         VStack(alignment: .leading, spacing: 20) {
             // 页眉：品牌标识
             HStack {
-                Text("智元 (ZhiMind)")
+                Text(Localized.tr("report.appName"))
                     .font(.system(size: 24, weight: .bold))
                     .foregroundStyle(.wikiAccent)
                 Spacer()
@@ -21,11 +21,11 @@ struct ExportReportView: View {
             Divider()
             
             // 报告标题
-            Text("知识库深度总结报告")
+            Text(Localized.tr("report.title"))
                 .font(.system(size: 32, weight: .black))
                 .padding(.vertical, 10)
             
-            Text("共包含 \(pages.count) 个知识节点")
+            Text(Localized.trf("report.nodeCount", pages.count))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
             
@@ -66,7 +66,7 @@ struct ExportReportView: View {
             
             // 页脚
             Divider()
-            Text("由 ZhiMind AI 引擎自动生成 | 隐私优先，本地存储")
+            Text(Localized.tr("report.footer"))
                 .font(.caption2)
                 .foregroundStyle(.wikiBorder)
                 .frame(maxWidth: .infinity, alignment: .center)
