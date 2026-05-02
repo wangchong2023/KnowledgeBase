@@ -1,0 +1,49 @@
+[
+  {
+    "id": "io.knowledge-management.plugin.gitsync",
+    "name": "Git 增量同步",
+    "author": "Knowledge Management Team",
+    "description": "支持将您的金库无缝同步至 GitHub/GitLab，支持自动冲突合并与版本追溯。",
+    "version": "1.2.0",
+    "icon": "arrow.triangle.2.circlepath",
+    "downloads": "2.4K",
+    "rating": 4.8,
+    "minAppVersion": "2.0.0",
+    "requiredPermissions": ["network", "writeContent"],
+    "monetization": {
+      "model": "donation",
+      "supportURL": "https://github.com/sponsors/knowledge-management"
+    }
+  },
+  {
+    "id": "io.knowledge-management.plugin.excalidraw",
+    "name": "手绘白板 (Excalidraw)",
+    "author": "CreativeMind",
+    "description": "在 Markdown 文档中直接嵌入可编辑的矢量手绘图，支持无限画布。",
+    "version": "0.9.5",
+    "icon": "paintbrush.fill",
+    "downloads": "1.8K",
+    "rating": 4.9,
+    "minAppVersion": "2.0.0",
+    "requiredPermissions": ["writeContent"],
+    "monetization": {
+      "model": "free"
+    }
+  },
+  {
+    "id": "io.knowledge-management.plugin.advanced-tables",
+    "name": "高级表格助手",
+    "author": "TonyHelper",
+    "description": "像 Excel 一样操作 Markdown 表格，支持公式计算与自动对齐。",
+    "version": "1.0.2",
+    "icon": "tablecells",
+    "downloads": "5.6K",
+    "rating": 4.7,
+    "minAppVersion": "1.5.0",
+    "requiredPermissions": ["readContent", "writeContent"],
+    "monetization": {
+      "model": "subscription",
+      "supportURL": "https://knowledge-management.io/premium"
+    }
+  }
+]

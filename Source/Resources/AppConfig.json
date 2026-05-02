@@ -1,0 +1,19 @@
+{
+  "network": {
+    "plugin_market_production": "https://raw.githubusercontent.com/knowledge-management/plugins/main/community.json",
+    "plugin_market_debug": "http://localhost:8000/community.json",
+    "jina_reader_base": "https://r.jina.ai/",
+    "ollama_base": "http://localhost:11434",
+    "deepseek_base": "https://api.deepseek.com/v1"
+  },
+  "performance": {
+    "search_debounce_ms": 300,
+    "rerank_top_limit": 10,
+    "max_log_entries": 500
+  },
+  "storage": {
+    "logs_filename": "km_logs.json",
+    "pages_filename": "km_pages.json",
+    "sqlite_filename": "km_database.sqlite3"
+  }
+}

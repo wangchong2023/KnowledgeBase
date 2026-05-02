@@ -1,6 +1,6 @@
-# WorkBuddy (KnowledgeBase)
+# Knowledge Management (KnowledgeBase)
 
-![WorkBuddy Cover](/Users/constantine/.gemini/antigravity/brain/47f3db46-336b-49c3-b83d-8f2953119222/workbuddy_cover_1777657083679.png)
+![Knowledge Management Cover](/Users/constantine/.gemini/antigravity/brain/47f3db46-336b-49c3-b83d-8f2953119222/knowledge-management_cover_1777657083679.png)
 
 > **"Build a personal library of concepts, entities, and sources."**
 > 基于 Karpathy LLM Wiki 方法论的 AI 原生知识管理进化引擎。
@@ -9,14 +9,19 @@
 
 ## 📚 深度文档 (Documentation)
 
-- [📖 用户操作指南 (User Guide)](file:///Users/constantine/Documents/work/code/projects/workbuddy/KnowledgeBase/docs/USER_GUIDE.md) - 从新手到专家的全量实战手册。
-- [🏗️ 架构设计文档 (Architecture)](file:///Users/constantine/Documents/work/code/projects/workbuddy/KnowledgeBase/docs/ARCHITECTURE.md) - 深入解析 4+1 架构视图与 RAG 实现细节。
+- [📖 产品规格说明书 (Specifications)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/SPECIFICATIONS.md) - PRD、SRS 与核心特性规格。
+- [🏗️ 架构设计文档 (Architecture)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/ARCHITECTURE.md) - 4+1 视图、L0-L3 分层及 **详细设计**。
+- [🎨 视觉设计系统 (Design System)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/DESIGN_SYSTEM.md) - 色彩、字体与交互反馈规范。
+- [🚨 异常处理规范 (Error Handling)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/ERROR_HANDLING.md) - 全系统错误码与 UI 映射准则。
+- [🤝 贡献指南 (Contributing)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/CONTRIBUTING.md) - 工程规范、Git 流与代码标准。
+- [🚀 进化路线图 (Roadmap)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/FUTURE_ROADMAP.md) - 短、中、远期的产品演进与前瞻技术规划。
+- [📖 用户操作指南 (User Guide)](file:///Users/constantine/Documents/work/code/projects/knowledge-management/KnowledgeBase/docs/USER_GUIDE.md) - 从新手到专家的全量实战手册。
 
 ---
 
 ## 🏗️ 架构全景：知识编译生态 (Knowledge Compiler Ecosystem)
 
-WorkBuddy 不仅是 Markdown 编辑器，它是一个 **AI 原生 RAG 闭环系统**。
+Knowledge Management 不仅是 Markdown 编辑器，它是一个 **AI 原生 RAG 闭环系统**。
 
 ### 1. 核心架构图谱
 
@@ -51,26 +56,21 @@ graph TD
 
 | 特性 | 描述 | 技术实现 |
 |------|------|---------|
-| **语义溯源** | 点击引用标记瞬间定位原文 | Markdown 正则解析 + 文本高亮锚点 |
-| **产出实验室** | 知识转化为测验、导图、报告 | 结构化 Prompt + JSON Schema 校验 |
-| **外部库同步** | 挂载本地 Obsidian 或物理目录 | Scoped URL + VaultService 增量扫描 |
-| **AI 任务中控** | 全局监控后台长耗时 AI 任务 | AITaskCenter + Combine 状态流 |
-| **物理快照** | 版本回滚与知识重构防护 | SnapshotService + 内容 Hash 校验 |
+| **响应式架构** | iPad/Mac 自动进化为三栏式桌面布局 | NavigationSplitView + SizeClass 适配 |
+| **指令中枢** | 全局 Cmd+K 唤起搜索与高频指令 | KeyboardShortcut + 模糊检索模型 |
+| **空间面包屑** | 历史路径回溯，解决深度跳转迷失感 | NavigationHistory + 物理级 UI 组件 |
+| **感知透明化** | AI 实时思维日志展示 | AITaskCenter + 动态日志流渲染 |
+| **语义溯源** | 知识芯片化跳转，点击瞬间定位原文 | Markdown 解析 + 互动 Chip 组件 |
 
 ---
 
-## 📱 跨平台适配细节 (Cross-Platform Parity)
+## 📱 跨平台适配细节 (Adaptive Design)
 
-```mermaid
-pie title 功能适配权重
-    "macOS (多任务/管理)" : 35
-    "iPadOS (阅读/测验)" : 40
-    "iOS (摄入/监控)" : 25
-```
+Knowledge Management 采用一套代码实现多端差异化交互：
 
-- **iPhone**：顶部的 **AI 脉搏灯** 提供非侵入式进度反馈；Quiz 采用全屏模态。
-- **iPad**：支持 Split View 与 Slide Over，Quiz 在平板模式下提供大尺寸交互窗口。
-- **macOS**：支持三栏式 SplitView，侧边栏 Badge 实时显示后台 AI 任务堆栈。
+- **iPhone**: 经典的 `TabView` 底栏导航，单手操作友好。
+- **iPad**: 自动切换为 **三栏式 SplitView**。左侧模块导航，中间页面列表，右侧沉浸式详情。
+- **macOS**: 完美的桌面软件体验。支持 `Cmd + K` 全局唤起，配合多窗口模式实现极致生产力。
 
 ---
 
@@ -86,7 +86,7 @@ pie title 功能适配权重
 2. 原文编辑器会自动滚动并高亮该出处。
 
 ### 3. 外部库挂载
-点击侧边栏 **“挂载外部库”**，授权访问物理文件夹。WorkBuddy 将作为这些 Markdown 文件的“AI 增强层”。
+点击侧边栏 **“挂载外部库”**，授权访问物理文件夹。Knowledge Management 将作为这些 Markdown 文件的“AI 增强层”。
 
 ---
 

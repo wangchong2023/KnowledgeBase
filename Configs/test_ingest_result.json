@@ -1,0 +1,28 @@
+{
+  "id": "c4367559-d956-4965-b2f4-16bac133391f",
+  "object": "chat.completion",
+  "created": 1777653328,
+  "model": "deepseek-v4-flash",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here is the compilation of the raw text into a structured Wiki page in JSON format.\n\n```json\n{\n  \"title\": \"Knowledge Management Core Compiler\",\n  \"type\": \"concept\",\n  \"content\": \"The **Knowledge Management Core Compiler** is a specialized module within the [[Knowledge Management Knowledge Management]] system. Its primary function is to ingest raw, unstructured text and transform it into a structured, machine-readable **Wiki page** in **JSON format**, following the predefined **PageSchema**.\\n\\nThe compilation process involves extracting and populating several key fields:\\n*   **title:** A concise, definitive page title.\\n*   **type:** Categorizing the page as one of three specific types: `concept`, `entity`, or `source`.\\n*   **content:** Writing the main body in **Standard Markdown**, utilizing `[[wikilinks]]` to connect to other key terms or related pages.\\n*   **tags:** Assigning a relevant array of tags for categorization.\\n*   **aliases:** Listing other valid names or references for the page's subject.\\n*   **relatedTitles:** Identifying titles of other concepts, entities, or sources mentioned in the content that should have their own dedicated pages.\\n*   **summary:** Generating a concise one-sentence summary capturing the essence of the page's subject.\\n\\nThe compiler ensures consistency, connectivity, and high data quality across the entire knowledge base by strictly adhering to this schema.\",\n  \"tags\": [\n    \"compiler\",\n    \"knowledge management\",\n    \"structured data\",\n    \"transformation\",\n    \"knowledge-management\"\n  ],\n  \"aliases\": [\n    \"Knowledge Management Compiler\",\n    \"Schema Compiler\"\n  ],\n  \"relatedTitles\": [\n    \"Knowledge Management Knowledge Management\",\n    \"Wiki page\",\n    \"PageSchema\"\n  ],\n  \"summary\": \"The Knowledge Management Core Compiler ingests raw text and outputs a structured Wiki page in JSON format following the PageSchema.\"\n}\n```"
+      },
+      "logprobs": null,
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 132,
+    "completion_tokens": 421,
+    "total_tokens": 553,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 132
+  },
+  "system_fingerprint": "fp_058df29938_prod0820_fp8_kvcache_20260402"
+}

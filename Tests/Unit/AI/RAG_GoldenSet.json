@@ -1,0 +1,20 @@
+[
+  {
+    "id": "GS-001",
+    "document": "WorkBuddy 采用 LWW (Last Write Wins) 冲突合并算法，结合兰伯特时间戳实现最终一致性。",
+    "question": "WorkBuddy 如何处理多设备同步冲突？",
+    "expected_keywords": ["LWW", "Last Write Wins", "兰伯特时间戳", "最终一致性"]
+  },
+  {
+    "id": "GS-002",
+    "document": "插件熔断机制会在插件执行超过 0.5s 时自动切断其运行，防止主线程卡顿。",
+    "question": "插件如果运行太慢会发生什么？",
+    "expected_keywords": ["熔断", "0.5s", "切断", "卡顿"]
+  },
+  {
+    "id": "GS-100",
+    "document": "智适应索引 (Eco-Indexing) 在检测到低功耗模式时，会自动降低批量导入的 CPU 占用率。",
+    "question": "省电模式下索引速度会变慢吗？",
+    "expected_keywords": ["Eco-Indexing", "低功耗", "降频", "CPU"]
+  }
+]

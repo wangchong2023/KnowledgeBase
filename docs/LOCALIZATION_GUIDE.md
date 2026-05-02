@@ -1,0 +1,25 @@
+# Knowledge Management 国际化与本地化指南 (Localization Guide)
+
+为了让 Knowledge Management 走向全球，我们采用“双层本地化”架构。
+
+## 1. 核心应用翻译 (App i18n)
+*   **资产位置**: `KnowledgeBase/Resources/Localizable.strings`
+*   **工作流**:
+    1.  开发者在代码中使用 `Localized.tr("key")`。
+    2.  翻译者在 `.strings` 文件中对应各语言。
+*   **规范**: 必须保留 `%@` 等占位符，且中文翻译需遵循《中文文案排版指引》。
+
+## 2. 插件市场本地化 (Market i18n)
+*   **策略**: 影子服务器支持 `Accept-Language` 请求头。
+*   **JSON 结构**:
+    ```json
+    {
+      "description": {
+        "zh": "强大的插件...",
+        "en": "Powerful plugin..."
+      }
+    }
+    ```
+
+## 3. 动态扩展
+新增语言需在 `ThemeManager` 中注册对应的 Locale，确保日期格式、搜索分词器（如日语 MeCab）同步切换。

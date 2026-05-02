@@ -1,4 +1,4 @@
-name: KnowledgeBase
+name: KM
 options:
   bundleIdPrefix: com.km
   deploymentTarget:
@@ -11,22 +11,23 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     TARGETED_DEVICE_FAMILY: "1,2"
-    INFOPLIST_FILE: KnowledgeBase/Info.plist
+    INFOPLIST_FILE: Source/Info.plist
     DEVELOPMENT_TEAM: ""
 
 targets:
-  KnowledgeBase:
+  KM:
     type: application
     platform: iOS
     sources:
-      - path: KnowledgeBase
+      - path: Source
         excludes:
           - "**/MacOS.lproj/**"
           - "**/MacInfo.plist"
+          - "Services/HapticManager.swift"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.km.app
-        INFOPLIST_FILE: KnowledgeBase/Info.plist
+        INFOPLIST_FILE: Source/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_EMIT_LOC_STRINGS: "YES"
 
@@ -35,19 +36,20 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: KnowledgeBase
+      - path: Source
         excludes:
           - "**/*.md"
           - "**/Base.lproj/**"
           - "**/Info.plist"
           - "**/MacInfo.plist"
+          - "Utilities/HapticManager.swift"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.km.app
-        INFOPLIST_FILE: KnowledgeBase/MacInfo.plist
+        INFOPLIST_FILE: Source/MacInfo.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_EMIT_LOC_STRINGS: "YES"
-        CODE_SIGN_ENTITLEMENTS: KnowledgeBase/KnowledgeBase.entitlements
+        CODE_SIGN_ENTITLEMENTS: Source/KnowledgeBase.entitlements
         SDKROOT: iphoneos
         TARGETED_DEVICE_FAMILY: "2"
         SUPPORTS_MACCATALYST: "YES"
@@ -56,7 +58,7 @@ targets:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - KMTests
+      - path: Tests/Unit
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.km.app.tests
@@ -64,13 +66,13 @@ targets:
         GENERATE_INFOPLIST_FILE: "YES"
         INFOPLIST_FILE: ""
     dependencies:
-      - target: KnowledgeBase
+      - target: KM
 
   KMUITests:
     type: bundle.ui-testing
     platform: iOS
     sources:
-      - KMUITests
+      - path: Tests/UI
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.km.app.uitests
@@ -79,13 +81,13 @@ targets:
         INFOPLIST_FILE: ""
         UI_TARGET_FOR_PREVIEWS: "YES"
     dependencies:
-      - target: KnowledgeBase
+      - target: KM
 
   KMWatch:
     type: application
     platform: watchOS
     sources:
-      - KMWatch
+      - path: KMWatch
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.km.app.watch
@@ -96,4 +98,4 @@ targets:
         GENERATE_INFOPLIST_FILE: "YES"
         INFOPLIST_FILE: ""
     dependencies:
-      - target: KnowledgeBase
+      - target: KM

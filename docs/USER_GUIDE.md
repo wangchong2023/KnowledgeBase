@@ -1,6 +1,6 @@
-# WorkBuddy 用户操作指南 (Official User Guide)
+# Knowledge Management 用户操作指南 (Official User Guide)
 
-欢迎使用 WorkBuddy！本指南将带您从零开始，逐步掌握这款 AI 原生知识管理引擎的核心超能力。
+欢迎使用 Knowledge Management！本指南将带您从零开始，逐步掌握这款 AI 原生知识管理引擎的核心超能力。
 
 ---
 
@@ -69,7 +69,7 @@ sequenceDiagram
 
 ## 📂 3. 进阶：外部库挂载 (External Vaults)
 
-WorkBuddy 可以作为您现有知识体系（如 Obsidian, Logseq）的“AI 加速层”：
+Knowledge Management 可以作为您现有知识体系（如 Obsidian, Logseq）的“AI 加速层”：
 
 1. 点击侧边栏底部的 **“挂载外部库”**。
 2. 选择您的本地文件夹（例如您的 Obsidian Vault）。
@@ -82,8 +82,8 @@ graph TD
     Scan --> Index[5. 自动同步向量索引]
 ```
 
-3. **重要 (iOS 用户)**：请在系统弹窗中点击“授权访问”，以便 WorkBuddy 能够持久化读取。
-4. **同步**：WorkBuddy 会实时扫描该目录下的文件变更并同步至向量索引。
+3. **重要 (iOS 用户)**：请在系统弹窗中点击“授权访问”，以便 Knowledge Management 能够持久化读取。
+4. **同步**：Knowledge Management 会实时扫描该目录下的文件变更并同步至向量索引。
 
 ---
 
@@ -100,7 +100,7 @@ graph TD
 ## ❓ 常见问题 (FAQ)
 
 **Q: 为什么有些 PDF 无法检索到内容？**
-A: 请确保在“设置”中开启了“深度扫描”。此外，扫描件 PDF 需要经过 OCR 处理后才能被 WorkBuddy 的分块引擎识别。
+A: 请确保在“设置”中开启了“深度扫描”。此外，扫描件 PDF 需要经过 OCR 处理后才能被 Knowledge Management 的分块引擎识别。
 
 **Q: 如何在 iPhone 上查看任务进度？**
 A: 详情页顶部有一个呼吸脉搏灯。如果它在闪烁，说明后台正在进行 AI 运算。您可以随时切换页面，任务不会中断。

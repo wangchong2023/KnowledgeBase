@@ -1,4 +1,4 @@
-# WorkBuddy 功能清单 & 测试指南
+# Knowledge Management 功能清单 & 测试指南
 
 > 文档版本：2026-05-01 (v2.1) | 覆盖全平台特性、组件与 AI 诊断逻辑
 
