@@ -41,6 +41,7 @@ final class MarkdownTextViewCoordinator: NSObject, UITextViewDelegate {
 }
 
 // MARK: - Markdown Text View Representable
+#if os(iOS)
 struct MarkdownTextViewRepresentable: UIViewRepresentable {
     @Binding var text: String
     @Binding var cursorPosition: Int
@@ -93,6 +94,7 @@ struct MarkdownTextViewRepresentable: UIViewRepresentable {
         return coordinator
     }
 }
+#endif
 
 // MARK: - Cursor-aware Action Executor
 /// 持有 coordinator 引用，提供光标感知文本操作。

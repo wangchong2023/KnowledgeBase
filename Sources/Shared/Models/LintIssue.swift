@@ -1,7 +1,7 @@
 import SwiftUI
 
 // MARK: - Potential Link Suggestion
-struct PotentialLinkSuggestion: Identifiable {
+struct PotentialLinkSuggestion: Identifiable, Codable, Sendable {
     var id = UUID()
     let sourcePageID: UUID
     let sourceTitle: String
@@ -9,7 +9,7 @@ struct PotentialLinkSuggestion: Identifiable {
 }
 
 // MARK: - Lint Issue
-struct LintIssue: Identifiable {
+struct LintIssue: Identifiable, Codable, Sendable {
     var id = UUID()
     var severity: LintSeverity
     var type: IssueType = .generic
@@ -17,7 +17,7 @@ struct LintIssue: Identifiable {
     var message: String
     var suggestion: String
     
-    enum IssueType {
+    enum IssueType: String, Codable, Sendable {
         case generic
         case brokenLink
         case orphan
@@ -39,7 +39,7 @@ struct LintIssue: Identifiable {
         }
     }
 
-    enum LintSeverity {
+    enum LintSeverity: String, Codable, Sendable {
         case error, warning, info
         
         var icon: String {

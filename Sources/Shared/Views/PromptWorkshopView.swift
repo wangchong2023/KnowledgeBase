@@ -12,7 +12,6 @@ struct PromptWorkshopView: View {
     
     var body: some View {
         Form {
-            // ── 认知补全：功能简介 ──
             // ── 认知补全：功能简介 (可收缩) ──
             Section {
                 DisclosureGroup(isExpanded: $isIntroExpanded) {
@@ -147,6 +146,8 @@ struct PromptWorkshopView: View {
                 }
             } header: {
                 Text(Localized.tr("prompt.expert.base.title"))
+            } footer: {
+                Text(Localized.tr("prompt.expert.base.footer"))
             }
             
             Section {
@@ -163,17 +164,9 @@ struct PromptWorkshopView: View {
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #endif
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button(action: {
-                    promptService.save()
-                    HapticManager.shared.trigger(.success)
-                    dismiss()
-                }) {
-                    Text(Localized.tr("misc.done"))
-                        .fontWeight(.semibold)
-                }
-            }
+        .onDisappear {
+            promptService.save()
+            HapticManager.shared.trigger(.success)
         }
         .alert(Localized.tr("prompt.resetConfirm"), isPresented: $showResetAlert) {
             Button(Localized.tr("misc.reset"), role: .destructive) {

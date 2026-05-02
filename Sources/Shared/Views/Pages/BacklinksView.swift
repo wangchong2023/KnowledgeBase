@@ -11,7 +11,7 @@ struct BacklinksView: View {
     
     private func fetchData() async {
         isLoading = true
-        let bl = await store.getBacklinks(for: page.id)
+        let bl = store.getBacklinks(for: page.id)
         
         var op: [WikiPage] = []
         for title in page.outgoingLinks {

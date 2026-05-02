@@ -289,6 +289,7 @@ struct PageDetailView: View {
         // both in the Graph tab's NavigationStack and elsewhere.
         .navigationDestination(for: WikiPage.self) { destination in
             PageDetailView(page: destination, heroNamespace: heroNamespace)
+                .environment(\.navigate, navigate)
         }
         .toolbar { toolbarContent }
         .confirmationDialog(Localized.tr("page.confirmDelete"), isPresented: $showDeleteConfirmation) {
@@ -792,9 +793,11 @@ struct PageDetailView: View {
     /// 导航到指定页面
     /// - Parameter title: 目标页面的标题
     /// - Note: 如果找不到对应页面，则不进行导航。属于“智元”核心导航逻辑。
+    @Environment(\.navigate) private var navigate
+    
     private func navigateToPage(_ title: String) {
         if let target = store.pages.first(where: { $0.title == title }) {
-            store.navigationPath.append(target)
+            navigate(target)
         }
     }
 }

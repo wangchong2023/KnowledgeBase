@@ -57,8 +57,10 @@ struct LogViewContent: View {
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #endif
+#if os(iOS)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarBackground(Color.wikiBackground, for: .navigationBar)
+#endif
     }
 }
 

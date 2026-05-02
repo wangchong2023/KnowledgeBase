@@ -1,5 +1,30 @@
 import SwiftUI
 
+// MARK: - Navigation Action
+/// 提供一种跨视图层级触发导航的方式，绕过对单一全局 Path 的硬编码依赖。
+struct NavigateAction: Sendable {
+    private let action: @Sendable (WikiPage) -> Void
+    
+    init(action: @escaping @Sendable (WikiPage) -> Void) {
+        self.action = action
+    }
+    
+    func callAsFunction(_ page: WikiPage) {
+        action(page)
+    }
+}
+
+struct NavigateActionKey: EnvironmentKey {
+    static let defaultValue = NavigateAction(action: { _ in })
+}
+
+extension EnvironmentValues {
+    var navigate: NavigateAction {
+        get { self[NavigateActionKey.self] }
+        set { self[NavigateActionKey.self] = newValue }
+    }
+}
+
 // MARK: - Wiki Decorators
 /// 装饰性元素组件库：增强视觉质感、层次感、科技感
 
@@ -328,10 +353,17 @@ struct QuizPresentationModifier: ViewModifier {
                         .frame(minWidth: 500, minHeight: 600)
                 }
         } else {
+            #if os(iOS) && !targetEnvironment(macCatalyst)
             content
                 .fullScreenCover(item: $activeQuiz) { quiz in
                     QuizView(quiz: quiz)
                 }
+            #else
+            content
+                .sheet(item: $activeQuiz) { quiz in
+                    QuizView(quiz: quiz)
+                }
+            #endif
         }
     }
 }

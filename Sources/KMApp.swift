@@ -1,8 +1,9 @@
 import SwiftUI
 
 @main
+@MainActor
 struct KMApp: App {
-    @State private var store = KMStore()
+    @State private var store: KMStore
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var llmService = LLMService()
     @State private var hasSeenSplash = false
@@ -37,7 +38,10 @@ struct KMApp: App {
         ServiceContainer.shared.register(KnowledgeInsightService(), for: KnowledgeInsightService.self)
         ServiceContainer.shared.register(PluginRegistry.shared, for: PluginRegistry.self)
         
-        // 5. 设置 UI 样式
+        // 5. 在服务注册完成后初始化 Store (确保 @Inject 依赖已就绪)
+        _store = State(wrappedValue: KMStore())
+        
+        // 6. 设置 UI 样式
         #if canImport(UIKit)
         UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor(Color.wikiAccent)
         #endif
@@ -47,7 +51,7 @@ struct KMApp: App {
         WindowGroup {
             ZStack {
                 ContentView()
-                    .environmentObject(store)
+                    .environment(store)
                     .environmentObject(themeManager)
                     .environmentObject(llmService)
                     .preferredColorScheme(themeManager.colorSchemeMode.preferredColorScheme)

@@ -32,10 +32,55 @@ final class KMStore: @preconcurrency GraphDataProvider {
     var searchResults: [WikiPage] = []
     var selectedPageID: UUID?
     var navigationHistory: [WikiPage] = []
-    var lintIssues: [LintIssue] = []
+    
+    @ObservationIgnored private var _lintIssues: [LintIssue] = {
+        if let data = UserDefaults.standard.data(forKey: "lastLintIssues"),
+           let decoded = try? JSONDecoder().decode([LintIssue].self, from: data) {
+            return decoded
+        }
+        return []
+    }()
+    var lintIssues: [LintIssue] {
+        get { access(keyPath: \.lintIssues); return _lintIssues }
+        set {
+            withMutation(keyPath: \.lintIssues) {
+                _lintIssues = newValue
+                if let data = try? JSONEncoder().encode(newValue) {
+                    UserDefaults.standard.set(data, forKey: "lastLintIssues")
+                }
+            }
+        }
+    }
+
     var navigationPath = NavigationPath()
     var showPerfDashboard = false
-    var isPrivacyModeEnabled = false 
+    @ObservationIgnored private var _isPrivacyModeEnabled: Bool = UserDefaults.standard.object(forKey: "isPrivacyModeEnabled") as? Bool ?? true
+    var isPrivacyModeEnabled: Bool {
+        get {
+            access(keyPath: \.isPrivacyModeEnabled)
+            return _isPrivacyModeEnabled
+        }
+        set {
+            withMutation(keyPath: \.isPrivacyModeEnabled) {
+                _isPrivacyModeEnabled = newValue
+                UserDefaults.standard.set(newValue, forKey: "isPrivacyModeEnabled")
+            }
+        }
+    }
+    
+    @ObservationIgnored private var _isBiometricEnabled: Bool = UserDefaults.standard.object(forKey: "isBiometricEnabled") as? Bool ?? false
+    var isBiometricEnabled: Bool {
+        get {
+            access(keyPath: \.isBiometricEnabled)
+            return _isBiometricEnabled
+        }
+        set {
+            withMutation(keyPath: \.isBiometricEnabled) {
+                _isBiometricEnabled = newValue
+                UserDefaults.standard.set(newValue, forKey: "isBiometricEnabled")
+            }
+        }
+    }
     
     var refactorSuggestions: [RefactorSuggestion] = []
     var potentialLinks: [PotentialLinkSuggestion] = []
@@ -45,8 +90,20 @@ final class KMStore: @preconcurrency GraphDataProvider {
     var weeklyInsight: KnowledgeInsightService.WeeklyInsight?
     var selectedTool: ToolItem?
 
+    @ObservationIgnored private var _lastLintScore: Int = UserDefaults.standard.integer(forKey: "lastLintScore")
+    var lastLintScore: Int {
+        get { access(keyPath: \.lastLintScore); return _lastLintScore }
+        set { withMutation(keyPath: \.lastLintScore) { _lastLintScore = newValue; UserDefaults.standard.set(newValue, forKey: "lastLintScore") } }
+    }
+    
+    @ObservationIgnored private var _lastLintDate: Date? = UserDefaults.standard.object(forKey: "lastLintDate") as? Date
+    var lastLintDate: Date? {
+        get { access(keyPath: \.lastLintDate); return _lastLintDate }
+        set { withMutation(keyPath: \.lastLintDate) { _lastLintDate = newValue; UserDefaults.standard.set(newValue, forKey: "lastLintDate") } }
+    }
+    
     enum ToolItem: String, CaseIterable, Hashable {
-        case index, chat, log, lint, tagCloud, collab, taskCenter, weeklyReport, dashboard, pluginMarket
+        case index, chat, log, lint, tagCloud, collab, taskCenter, weeklyReport, dashboard, pluginMarket, synthesis
     }
     
     var pages: [WikiPage] { sqliteStore.pages }
@@ -169,12 +226,109 @@ final class KMStore: @preconcurrency GraphDataProvider {
         return ExtractedURLContent(title: result.title, content: result.markdown)
     }
 
-    func runLint() { Task { let issues = await lintService.runLint(pages: pages, linkService: linkService); await MainActor.run { self.lintIssues = issues } } }
-    func runAIScan() async { isScanningAI = true; try? await Task.sleep(nanoseconds: 1_000_000_000); isScanningAI = false }
-    func generateWeeklyInsight() async { try? await Task.sleep(nanoseconds: 500_000_000) }
+    func runLint() {
+        Task {
+            let issues = await lintService.runLint(pages: pages, linkService: linkService)
+            await MainActor.run {
+                self.lintIssues = issues
+                self.lastLintDate = Date()
+            }
+        }
+    }
+    
+    func runAIScan() async {
+        guard llmService.isEnabled else { 
+            logService.addLog(action: "AI 扫描跳过", target: "系统", details: "LLM 服务未启用")
+            return 
+        }
+        
+        await MainActor.run { isScanningAI = true }
+        let taskID = TaskCenter.shared.addTask(type: .ai, name: Localized.tr("aitask.scanTaskName"), target: "System")
+        
+        do {
+            // 1. 获取重构建议（随机抽取一部分页面进行分析，避免 Token 过载）
+            let samplePages = Array(sqliteStore.pages.prefix(10))
+            let suggestions = try await llmService.analyzeForRefactoring(pages: samplePages)
+            
+            // 2. 发现潜在链接（针对最近活跃的页面）
+            let activePages = sqliteStore.pages.sorted(by: { $0.updated > $1.updated }).prefix(5)
+            let existingTitles = sqliteStore.pages.map { $0.title }
+            
+            var tempLinks: [PotentialLinkSuggestion] = []
+            var seenLinks = Set<String>()
+            for page in activePages {
+                let found = try await llmService.discoverPotentialLinks(content: page.content, existingTitles: existingTitles)
+                // 仅添加不存在于当前页面的新链接，并排重
+                for title in Set(found) {
+                    let linkKey = "\(page.id.uuidString)-\(title)"
+                    if !seenLinks.contains(linkKey) && !page.content.contains("[[\(title)]]") {
+                        seenLinks.insert(linkKey)
+                        tempLinks.append(PotentialLinkSuggestion(sourcePageID: page.id, sourceTitle: page.title, targetTitle: title))
+                    }
+                }
+            }
+            let capturedLinks = tempLinks
+            
+            await MainActor.run {
+                self.refactorSuggestions = suggestions
+                self.potentialLinks = capturedLinks
+                self.isScanningAI = false
+                TaskCenter.shared.updateTask(taskID, status: .completed)
+            }
+        } catch {
+            logService.addLog(action: "AI 扫描失败", target: "系统", details: error.localizedDescription)
+            await MainActor.run { 
+                isScanningAI = false 
+                TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
+            }
+        }
+    }
+    
+    func generateWeeklyInsight() async {
+        guard llmService.isEnabled else { return }
+        do {
+            let insight = try await insightService.generateWeeklyInsight(pages: sqliteStore.pages, llmService: llmService)
+            await MainActor.run {
+                self.weeklyInsight = insight
+            }
+        } catch {
+            print("[Weekly Insight] Error: \(error)")
+        }
+    }
+    
     func runPartialAIScan(for page: WikiPage) { Task { await runAIScan() } }
-    func applyRefactorSuggestion(_ s: RefactorSuggestion) {}
-    func applyPotentialLink(_ l: PotentialLinkSuggestion) {}
+    
+    func applyRefactorSuggestion(_ suggestion: RefactorSuggestion) {
+        if suggestion.type == "rename", let page = sqliteStore.pages.first(where: { $0.title == suggestion.target }) {
+            renamePage(page, to: suggestion.suggestion)
+        }
+    }
+    
+    func applyPotentialLink(_ suggestion: PotentialLinkSuggestion) {
+        if let index = sqliteStore.pages.firstIndex(where: { $0.id == suggestion.sourcePageID }) {
+            var page = sqliteStore.pages[index]
+            page.content += "\n\n相关链接: [[\(suggestion.targetTitle)]]"
+            updatePage(page, forceDeepScan: false)
+        }
+        potentialLinks.removeAll { $0.id == suggestion.id }
+    }
+    
+    func renamePage(_ page: WikiPage, to newTitle: String) {
+        let oldTitle = page.title
+        var updated = page
+        updated.title = newTitle
+        sqliteStore.updatePage(updated, forceDeepScan: false)
+        
+        for i in sqliteStore.pages.indices {
+            let p = sqliteStore.pages[i]
+            if p.content.contains("[[\(oldTitle)]]") {
+                var refPage = p
+                refPage.content = refPage.content.replacingOccurrences(of: "[[\(oldTitle)]]", with: "[[\(newTitle)]]")
+                sqliteStore.updatePage(refPage, forceDeepScan: false)
+            }
+        }
+        backupService.markDirty()
+    }
     func findSimilarPages(for page: WikiPage, limit: Int = 3) -> [WikiPage] { [] }
     func mountVault(at url: URL) { }
     func resetAllData() { try? clearAllData() }

@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 struct ContentView: View {
     @Environment(KMStore.self) var store
     @EnvironmentObject var themeManager: ThemeManager
@@ -9,6 +10,8 @@ struct ContentView: View {
     @State private var showCommandPalette = false
     @State private var languageForceUpdate: Bool = false
     @Namespace private var heroNamespace
+    @State private var searchPath = NavigationPath()
+    @State private var graphPath = NavigationPath()
     
     enum AppTab: String, CaseIterable {
         case wiki
@@ -222,26 +225,50 @@ struct ContentView: View {
     /// Graph tab 内容，languageForceUpdate 时强制刷新
     @ViewBuilder
     private var graphTabContent: some View {
-        NavigationStack {
-            if languageForceUpdate {
-                GraphContainerView(heroNamespace: heroNamespace)
-                    .id(languageForceUpdate)
-            } else {
-                GraphContainerView(heroNamespace: heroNamespace)
+        NavigationStack(path: $graphPath) {
+            Group {
+                if languageForceUpdate {
+                    GraphContainerView(heroNamespace: heroNamespace)
+                        .id(languageForceUpdate)
+                } else {
+                    GraphContainerView(heroNamespace: heroNamespace)
+                }
             }
+            .navigationDestination(for: WikiPage.self) { page in
+                PageDetailView(page: page)
+                    .environment(\.navigate, NavigateAction { target in
+                        Task { @MainActor in
+                            graphPath.append(target)
+                        }
+                    })
+            }
+            .environment(\.navigate, NavigateAction { target in
+                Task { @MainActor in
+                    graphPath.append(target)
+                }
+            })
         }
     }
     
     /// Search tab 内容，languageForceUpdate 时强制刷新
     @ViewBuilder
     private var searchTabContent: some View {
-        NavigationStack {
-            if languageForceUpdate {
-                SearchView()
-                    .id(languageForceUpdate)
-            } else {
-                SearchView()
-            }
+        NavigationStack(path: $searchPath) {
+            SearchView()
+                .id(languageForceUpdate)
+                .navigationDestination(for: WikiPage.self) { page in
+                    PageDetailView(page: page)
+                        .environment(\.navigate, NavigateAction { target in
+                            Task { @MainActor in
+                                searchPath.append(target)
+                            }
+                        })
+                }
+                .environment(\.navigate, NavigateAction { target in
+                    Task { @MainActor in
+                        searchPath.append(target)
+                    }
+                })
         }
     }
 

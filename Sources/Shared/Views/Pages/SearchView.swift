@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(KMStore.self) var store
+    @Environment(\.navigate) var navigate
     @State private var searchText = ""
     @State private var filterType: PageType?
     @State private var filterStatus: PageStatus?
@@ -219,9 +220,13 @@ struct SearchView: View {
                 } else {
                     List {
                         ForEach(filteredPages) { page in
-                            NavigationLink(value: page) {
+                            Button(action: {
+                                HapticManager.shared.trigger(.selection)
+                                navigate(page)
+                            }) {
                                 PageRowView(page: page)
                             }
+                            .buttonStyle(.plain)
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                             .contextMenu {

@@ -27,7 +27,9 @@ struct OnDeviceLLMSettingsView: View {
         }
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("ondevice.title"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
         .sheet(isPresented: $showTestSheet) {
             OnDeviceTestView(onDeviceService: onDeviceService)
         }

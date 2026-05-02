@@ -17,24 +17,24 @@ final class OnboardingService: ObservableObject {
         
         var title: String {
             switch self {
-            case .welcome: return "👋 欢迎使用 智元"
-            case .linking: return "🔗 双向链接"
-            case .aiLab: return "🧪 AI 实验室"
-            case .graph: return "🕸️ 知识图谱"
-            case .vault: return "🛡️ 隐私金库"
+            case .welcome: return Localized.trf("onboarding.step.welcome.title", Localized.tr("app.name"))
+            case .linking: return Localized.tr("onboarding.step.linking.title")
+            case .aiLab: return Localized.tr("onboarding.step.aiLab.title")
+            case .graph: return Localized.tr("onboarding.step.graph.title")
+            case .vault: return Localized.tr("onboarding.step.vault.title")
             }
         }
         
         var description: String {
             switch self {
-            case .welcome: return "您的第二大脑，致力于将离动资料转化为联动智慧。"
-            case .linking: return "使用 [[ 语法在笔记间建立联系，形成知识网络。"
-            case .aiLab: return "一键生成思维导图、演示文稿和深度报告。"
-            case .graph: return "在 3D 空间中俯瞰您的知识星系。"
-            case .vault: return "端侧加密与生物识别，守护您的每一行灵感。"
+            case .welcome: return Localized.tr("onboarding.step.welcome.desc")
+            case .linking: return Localized.tr("onboarding.step.linking.desc")
+            case .aiLab: return Localized.tr("onboarding.step.aiLab.desc")
+            case .graph: return Localized.tr("onboarding.step.graph.desc")
+            case .vault: return Localized.tr("onboarding.step.vault.desc")
             }
         }
-        
+
         var icon: String {
             switch self {
             case .welcome: return "brain.head.profile"
@@ -90,7 +90,7 @@ struct OnboardingOverlay: View {
                     }
                     
                     Button(action: { service.nextStep() }) {
-                        Text(step == .vault ? "开启探索" : "下一步")
+                        Text(step == .vault ? Localized.tr("onboarding.action.start") : Localized.tr("onboarding.action.next"))
                             .font(.headline)
                             .foregroundStyle(.white)
                             .padding(.horizontal, 40)
@@ -99,7 +99,7 @@ struct OnboardingOverlay: View {
                             .clipShape(Capsule())
                     }
                     
-                    Button("跳过") {
+                    Button(Localized.tr("onboarding.action.skip")) {
                         service.completeOnboarding()
                     }
                     .font(.footnote)

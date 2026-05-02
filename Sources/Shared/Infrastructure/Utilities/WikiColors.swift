@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // MARK: - Wiki Accent Color Environment Key
 private struct WikiAccentColorKey: EnvironmentKey {

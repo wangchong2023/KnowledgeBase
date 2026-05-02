@@ -194,7 +194,6 @@
 		561B77AC7FEB5E53C2F73C59 /* ShortcutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 603835DE66478FA4D6283183 /* ShortcutManager.swift */; };
 		584BCAEC89212F1D75578028 /* IngestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2CC2BAA69DF3991713639ED /* IngestView.swift */; };
 		58D03E63E222C51385380BF3 /* UndoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A48552A12FF74FA8FB2A38 /* UndoService.swift */; };
-		58DB4D99C0D876A9C4A5F58D /* SecuritySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69758FDBE48911267E08D03A /* SecuritySettingsView.swift */; };
 		58E02A729E244AADCC2C50ED /* GraphClusteringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5CF040B8872098AD0578DF /* GraphClusteringService.swift */; };
 		5911F74DE15A6F687F1EF5A4 /* KMiCloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F8620EB8DC489195BD8112 /* KMiCloudSyncService.swift */; };
 		59E757DECB3FE666197C74AC /* PDFComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4904A05036D1BD81416C4223 /* PDFComponents.swift */; };
@@ -246,7 +245,6 @@
 		719C3D5FA52A1EC950909049 /* IngestViewComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30610EE7EA858817A228915 /* IngestViewComponents.swift */; };
 		72859FBFF9C2DAD7338AAAEE /* FlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ADE77A0DBC070AE0135FDAC /* FlowLayout.swift */; };
 		7285EDB4AC0D3D5A3A9841F8 /* KMBackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1005462979635FD09D96A9C /* KMBackupService.swift */; };
-		732F407D2E2F8D7D5ABC3DAF /* SecuritySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69758FDBE48911267E08D03A /* SecuritySettingsView.swift */; };
 		736ED84083B46C0DAA6DE9AD /* AsyncStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E795EAF363B480EEE60EDB2 /* AsyncStatus.swift */; };
 		73C60B99C47D5BFF6064FA9B /* ColorSchemeMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78C81BF944282895BC154025 /* ColorSchemeMode.swift */; };
 		73CB6B1F506B9585CDCBB1BA /* VisionProSpatialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9013D006A5AE579A219C7F1E /* VisionProSpatialView.swift */; };
@@ -366,7 +364,6 @@
 		A71A060E6ABCC357E57E8ACA /* KMStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A867974060192412024BB5B /* KMStore.swift */; };
 		A813F068FF0180D3C5EABABA /* SplashComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3BF951148D99080DC7BC084 /* SplashComponents.swift */; };
 		A8B5BC4A2B2F14B18D0F2525 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C13595834963DBC4C7C2AF /* AppConfig.swift */; };
-		A92FA4F859AFA70EAD4E10F9 /* SecuritySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69758FDBE48911267E08D03A /* SecuritySettingsView.swift */; };
 		A9643DFEB4AF7801A51B28C1 /* SQLiteStoreCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBEBC9BBBE9A57F0C41941E3 /* SQLiteStoreCore.swift */; };
 		A9D8BDA9662772F256B100CB /* KMiCloudSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F8620EB8DC489195BD8112 /* KMiCloudSyncService.swift */; };
 		A9E4830FB32806FBDF6CDFA4 /* PageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA21F8CD4E23FCDFBD3A843 /* PageType.swift */; };
@@ -585,7 +582,7 @@
 		3DA59C2E6B23CDE4EFE95611 /* AIProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProviders.swift; sourceTree = "<group>"; };
 		3DE119B2B6CBC92C34EBE6F6 /* Graph3DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graph3DView.swift; sourceTree = "<group>"; };
 		3E215C1D5252B75BD61F8371 /* LinkServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkServiceTests.swift; sourceTree = "<group>"; };
-		3F025CDA6513CA81C575A796 /* KM.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KM.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F025CDA6513CA81C575A796 /* KM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F4D126CA4C7E6B4323231BA /* Graph3DComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graph3DComponents.swift; sourceTree = "<group>"; };
 		3FF5F2D3BCC92EB96795221C /* LLMContextBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMContextBuilder.swift; sourceTree = "<group>"; };
 		40A9681E7F2A5FB2F09840B0 /* WikiDecorators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiDecorators.swift; sourceTree = "<group>"; };
@@ -620,7 +617,6 @@
 		680891645F009374264ACA2C /* IngestService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestService.swift; sourceTree = "<group>"; };
 		6869D91DA00FE775745D9AB3 /* LogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogService.swift; sourceTree = "<group>"; };
 		68CEE2E0327101F18F1C591B /* AccessibilityService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityService.swift; sourceTree = "<group>"; };
-		69758FDBE48911267E08D03A /* SecuritySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecuritySettingsView.swift; sourceTree = "<group>"; };
 		69DD491EB97A8B9E77242E1A /* KMWindowSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMWindowSceneDelegate.swift; sourceTree = "<group>"; };
 		6A16795870AEE63D3F03BA24 /* SearchPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPerformanceTests.swift; sourceTree = "<group>"; };
 		6B012D95DE5278A90B442150 /* IngestQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngestQueue.swift; sourceTree = "<group>"; };
@@ -664,7 +660,7 @@
 		96231F813095BF4B39EF8C45 /* OnDeviceLLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceLLMService.swift; sourceTree = "<group>"; };
 		974813529F3E444AA2443C04 /* KMKeyboardShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMKeyboardShortcuts.swift; sourceTree = "<group>"; };
 		97A0DB92CD641F2AD1CFF423 /* WikiColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiColors.swift; sourceTree = "<group>"; };
-		97B9165FA18BE560F82960C7 /* KMTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		97B9165FA18BE560F82960C7 /* KMTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		99AE09ED3A146EF9288BD8A0 /* LintIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LintIssue.swift; sourceTree = "<group>"; };
 		9C08CAD47570A7662961A58A /* NavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationView.swift; sourceTree = "<group>"; };
 		9C3EFB146FA9DBAF2F7CAD29 /* LockOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockOverlayView.swift; sourceTree = "<group>"; };
@@ -711,7 +707,7 @@
 		D819DA1E8DCD15365393E049 /* KMServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMServiceTests.swift; sourceTree = "<group>"; };
 		D97470AEB7224A9C3B7B5233 /* LinkScraperService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkScraperService.swift; sourceTree = "<group>"; };
 		DB5C5884A272E79725865FFA /* KMTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMTests.swift; sourceTree = "<group>"; };
-		DB92E873FF99FD383B5F2A5C /* KMMac.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KMMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB92E873FF99FD383B5F2A5C /* KMMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KMMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC13E29AA70D68AA61B5EB02 /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
 		DCB6C3B2981E7B646F959299 /* WikiLoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiLoadingOverlay.swift; sourceTree = "<group>"; };
 		DE5B39868C8E30E96E036E60 /* SettingsAboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAboutView.swift; sourceTree = "<group>"; };
@@ -945,7 +941,6 @@
 				384672CCAA12F48DA1F2616A /* OnDeviceLLMSettingsView.swift */,
 				BA981B77AF0BC45DA706D2F0 /* PluginCenterView.swift */,
 				1FCDE3739A16128015920CC7 /* PluginDetailView.swift */,
-				69758FDBE48911267E08D03A /* SecuritySettingsView.swift */,
 				DE5B39868C8E30E96E036E60 /* SettingsAboutView.swift */,
 				A8221E0986DC8A69DF1F2E9D /* SettingsView.swift */,
 			);
@@ -1453,7 +1448,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					35CB6EBE1A48004070C5309B = {
 						DevelopmentTeam = "";
@@ -1665,7 +1660,6 @@
 				8A18F94B5C07C6B6D88D9104 /* SearchView.swift in Sources */,
 				FE0B178B8E2DE0FD5FBBC6FA /* SecurityManager.swift in Sources */,
 				AEE8D871FD449FED8F49E49F /* SecurityReinforcement.swift in Sources */,
-				58DB4D99C0D876A9C4A5F58D /* SecuritySettingsView.swift in Sources */,
 				78A30322CBC27BFC59CCEA96 /* ServiceContainer.swift in Sources */,
 				3C5A08108768FE88F9E06DCB /* SettingsAboutView.swift in Sources */,
 				911BA77B8E22BE3D429917FE /* SettingsComponents.swift in Sources */,
@@ -1861,7 +1855,6 @@
 				08617DEB16AAA0098841983F /* SearchView.swift in Sources */,
 				F2BB2A56FAD61B34626D32C5 /* SecurityManager.swift in Sources */,
 				F3598674846A3CF4103C15B1 /* SecurityReinforcement.swift in Sources */,
-				A92FA4F859AFA70EAD4E10F9 /* SecuritySettingsView.swift in Sources */,
 				251C501723F66E4CB5ECA8C7 /* ServiceContainer.swift in Sources */,
 				DBA298C44D2DD5E7E3202523 /* SettingsAboutView.swift in Sources */,
 				302CA4945CA92C4664D17B8F /* SettingsComponents.swift in Sources */,
@@ -2033,7 +2026,6 @@
 				0CD705C7DB871EC9D309CE3C /* SearchView.swift in Sources */,
 				8335D072805750E1119634EF /* SecurityManager.swift in Sources */,
 				444BEE4AF996871C6E0C4F25 /* SecurityReinforcement.swift in Sources */,
-				732F407D2E2F8D7D5ABC3DAF /* SecuritySettingsView.swift in Sources */,
 				A46FC11E77793BB347FB694A /* ServiceContainer.swift in Sources */,
 				F320D5F3F12C4EE71A417C75 /* SettingsAboutView.swift in Sources */,
 				B26F05447D24B31B500908E1 /* SettingsComponents.swift in Sources */,
@@ -2180,6 +2172,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -2206,6 +2199,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -2286,6 +2280,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -2305,6 +2300,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;

@@ -107,11 +107,10 @@ struct MarkdownRendererView: View {
 
     @ViewBuilder
     private func renderParagraph(text: String) -> some View {
-        let segments = parser.parseInlineSegments(text)
-        Text(buildAttributedString(from: segments))
-        .font(.system(.body, design: .serif))
-        .lineSpacing(UIScreen.main.bounds.width < 400 ? 4 : 6) // 根据屏幕宽度微调行间距
-        .foregroundStyle(.wikiText.opacity(0.9))
+        renderInlineContent(text)
+            .font(.system(.body, design: .serif))
+            .lineSpacing(6)
+            .foregroundStyle(.wikiText.opacity(0.9))
     }
 
     // MARK: - Render Bullet List

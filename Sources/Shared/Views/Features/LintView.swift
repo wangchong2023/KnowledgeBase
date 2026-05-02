@@ -110,7 +110,28 @@ struct LintViewContent: View {
     
     private var healthDashboardHeader: some View {
         VStack(spacing: 16) {
-            ZStack(alignment: .bottomTrailing) {
+            ZStack(alignment: .topLeading) {
+                // 上次检查时间展示在左上角
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(Localized.tr("lint.lastCheck.title"))
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.wikiSecondary)
+                    
+                    if let date = store.lastLintDate {
+                        Text(date, style: .date)
+                            .font(.system(size: 9, design: .monospaced))
+                        Text(date, style: .time)
+                            .font(.system(size: 9, design: .monospaced))
+                    } else {
+                        Text(Localized.tr("lint.lastCheck.never"))
+                            .font(.system(size: 9))
+                    }
+                }
+                .padding(8)
+                .background(Color.wikiCard.opacity(0.4))
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .padding(.leading, 10)
+                
                 HStack {
                     Spacer()
                     ZStack {
@@ -140,17 +161,38 @@ struct LintViewContent: View {
                     Spacer()
                 }
                 
-                // 评分规则展示在右下角
+                // 评分标准展示在右下角
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(Localized.tr("lint.rule.error"))
-                    Text(Localized.tr("lint.rule.warning"))
-                    Text(Localized.tr("lint.rule.info"))
+                    HStack(spacing: 6) {
+                        Text(Localized.tr("lint.health.excellent"))
+                        Text("90-100")
+                            .foregroundStyle(.wikiSecondary.opacity(0.8))
+                    }
+                    HStack(spacing: 6) {
+                        Text(Localized.tr("lint.health.good"))
+                        Text("70-89")
+                            .foregroundStyle(.wikiSecondary.opacity(0.8))
+                    }
+                    HStack(spacing: 6) {
+                        Text(Localized.tr("lint.health.fair"))
+                        Text("50-69")
+                            .foregroundStyle(.wikiSecondary.opacity(0.8))
+                    }
+                    HStack(spacing: 6) {
+                        Text(Localized.tr("lint.health.poor"))
+                        Text("< 50")
+                            .foregroundStyle(.wikiSecondary.opacity(0.8))
+                    }
                 }
                 .font(.system(size: 11, weight: .medium, design: .rounded))
                 .foregroundStyle(.wikiSecondary)
                 .padding(12)
-                .background(Color.wikiCard.opacity(0.6))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .background(Color.wikiCard.opacity(0.7))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
+                )
                 .padding(.trailing, 10)
             }
             
@@ -376,7 +418,7 @@ struct LintViewContent: View {
         Task {
             // 模拟扫描耗时，增加视觉反馈
             try? await Task.sleep(nanoseconds: 1_000_000_000)
-            await store.runLint()
+            store.runLint()
             await MainActor.run {
                 isRunning = false
             }

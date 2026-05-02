@@ -168,6 +168,7 @@ struct MarkdownEditorView: View {
 
     // MARK: - Content Editor
     private var contentEditor: some View {
+#if os(iOS)
         MarkdownTextViewRepresentable(
             text: $editorContent,
             cursorPosition: $cursorPosition,
@@ -183,6 +184,13 @@ struct MarkdownEditorView: View {
             executeAction(action)
             pendingAction = nil
         }
+#else
+        TextEditor(text: $editorContent)
+            .frame(maxHeight: .infinity)
+            .onChange(of: editorContent) { _, newValue in
+                page.content = newValue
+            }
+#endif
     }
 
     // MARK: - Tag Management

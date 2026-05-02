@@ -15,6 +15,7 @@ struct OCRImagePickerArea: View {
     var body: some View {
         VStack(spacing: 16) {
             if let image = selectedImage {
+                #if canImport(UIKit)
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
@@ -25,6 +26,18 @@ struct OCRImagePickerArea: View {
                         RoundedRectangle(cornerRadius: WikiUI.cardRadius)
                             .stroke(Color.wikiBorder, lineWidth: 1)
                     )
+                #else
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 300)
+                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+                    .shadow(color: .black.opacity(0.1), radius: 8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: WikiUI.cardRadius)
+                            .stroke(Color.wikiBorder, lineWidth: 1)
+                    )
+                #endif
             } else {
                 // Placeholder
                 RoundedRectangle(cornerRadius: WikiUI.cardRadius)

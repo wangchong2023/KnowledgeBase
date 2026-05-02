@@ -28,7 +28,7 @@ import PhotosUI
 /// ```
 @MainActor
 class OCRService: ObservableObject {
-    static let shared = OCRService()
+    @MainActor static let shared = OCRService()
     
     /// Recognize text from a WikiImage
     func recognizeText(from image: WikiImage, completion: @escaping @Sendable (Result<String, Error>) -> Void) {

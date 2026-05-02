@@ -38,7 +38,7 @@ struct AdaptiveSidebarView: View {
                     HapticManager.shared.trigger(.selection)
                     store.securityService.lock()
                 }) {
-                    Image(systemName: "lock.shield")
+                    Image(systemName: "lock.fill")
                         .foregroundStyle(.red.opacity(0.8))
                 }
                 .help(Localized.tr("security.lockVault"))
@@ -67,9 +67,19 @@ struct AdaptiveDetailView: View {
         case .wiki:
             NavigationView(selectedTab: $selectedTab, heroNamespace: heroNamespace)
         case .graph:
-            GraphContainerView(heroNamespace: heroNamespace)
+            NavigationStack {
+                GraphContainerView(heroNamespace: heroNamespace)
+                    .navigationDestination(for: WikiPage.self) { page in
+                        PageDetailView(page: page)
+                    }
+            }
         case .search:
-            SearchView()
+            NavigationStack {
+                SearchView()
+                    .navigationDestination(for: WikiPage.self) { page in
+                        PageDetailView(page: page)
+                    }
+            }
         case .ingest:
             IngestView()
         case .settings:

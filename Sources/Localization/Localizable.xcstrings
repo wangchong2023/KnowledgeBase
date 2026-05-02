@@ -117,6 +117,9 @@
     "•" : {
 
     },
+    "< 50" : {
+
+    },
     "${pageTitle}" : {
 
     },
@@ -124,6 +127,15 @@
 
     },
     "1" : {
+
+    },
+    "50-69" : {
+
+    },
+    "70-89" : {
+
+    },
+    "90-100" : {
 
     },
     "a11y.highContrast" : {
@@ -594,6 +606,7 @@
       }
     },
     "aitask.scanTaskName" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2229,6 +2242,9 @@
           }
         }
       }
+    },
+    "Content" : {
+
     },
     "create.basicInfo" : {
       "extractionState" : "stale",
@@ -6331,6 +6347,7 @@
       }
     },
     "lint.rule.error" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6347,6 +6364,7 @@
       }
     },
     "lint.rule.info" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -6363,6 +6381,7 @@
       }
     },
     "lint.rule.warning" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -11265,6 +11284,9 @@
         }
       }
     },
+    "Plugin Market" : {
+
+    },
     "plugin.action.install" : {
       "localizations" : {
         "en" : {
@@ -11548,19 +11570,15 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请根据以下内容生成一个 Mermaid 格式的思维导图（mindmap）。直接输出代码块。"
+            "value" : "请根据提供的知识内容生成一个 Mermaid 格式的思维导图（mindmap）。要求：\n1. 必须以 `mindmap` 关键字开头。\n2. 使用缩进表示层级关系。\n3. 根节点使用 `root((标题))` 格式。\n4. 子节点直接写文字，避免使用特殊字符（如括号、冒号等），如有必要请用引号包裹。\n5. 仅输出代码块，不要有任何解释文字。"
           }
         }
       }
     },
     "prompt.default.quiz" : {
       "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请根据以下内容生成 3 道选择题和 1 道简答题，用于知识测验。使用 Markdown 格式。"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Generate quiz with 3 MCQs and 1 short answer. Use beautiful Markdown, ## for titles, and fold answers in <details> tags." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "生成知识测验。要求：1. 包含 3 道选择题和 1 道简答题。2. 使用精美 Markdown 格式。3. 必须提供答案解析并用 <details> 标签折叠显示。" } }
       }
     },
     "prompt.default.report" : {
@@ -11586,6 +11604,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "# Role: 专业演讲教练\n# Task: 将内容转化为带引用的演示文稿大纲（幻灯片格式）。\n# Requirements:\n1. 使用 Markdown 分隔符 `---` 表示换页。\n2. 每页包含标题和 3-5 个核心要点。\n3. **必须标注来源**：每个要点后使用 `[[Source]]` 标记。"
+          }
+        }
+      }
+    },
+    "prompt.expert.base.footer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure deep system instructions for specific AI tasks (e.g., Mindmap, Quiz) to optimize generation results."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "针对特定 AI 任务（如思维导图、知识测验）配置深层的系统指令，以优化生成效果。"
           }
         }
       }
@@ -11624,18 +11659,8 @@
     },
     "prompt.expert.mindmap.title" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tuning 'Mindmap' Generation"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "调教“思维导图”生成"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Generate Mindmap" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "生成思维导图" } }
       }
     },
     "prompt.expert.quiz.footer" : {
@@ -11656,18 +11681,8 @@
     },
     "prompt.expert.quiz.title" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tuning 'Quiz' Logic"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "调教“知识测验”逻辑"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Generate Quiz" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "生成知识测验" } }
       }
     },
     "prompt.expert.report.footer" : {
@@ -11688,18 +11703,8 @@
     },
     "prompt.expert.report.title" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tuning 'Report' Depth"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "调教“深度报告”深度"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Generate Report" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "生成深度报告" } }
       }
     },
     "prompt.expert.slides.footer" : {
@@ -11720,18 +11725,8 @@
     },
     "prompt.expert.slides.title" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tuning 'Slides' Style"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "调教“演示文稿”风格"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Generate Slides" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "生成演示文稿" } }
       }
     },
     "prompt.factory.title" : {
@@ -12936,22 +12931,6 @@
         }
       }
     },
-    "settings.lockVaultNow" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lock Vault Now"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即锁定金库"
-          }
-        }
-      }
-    },
     "settings.masterIndex" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -13503,22 +13482,6 @@
         }
       }
     },
-    "settings.vaultSecurity" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vault Security"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "金库安全"
-          }
-        }
-      }
-    },
     "settings.version" : {
       "localizations" : {
         "en" : {
@@ -13618,6 +13581,20 @@
             "value" : "所有页面"
           }
         }
+      }
+    },
+    "sidebar.capabilities" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Common" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "常用" } }
+      }
+    },
+    "sidebar.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Library" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "知识库" } }
       }
     },
     "sidebar.dashboard" : {
@@ -13743,6 +13720,7 @@
       }
     },
     "sidebar.recent" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -13771,6 +13749,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安全与锁定"
+          }
+        }
+      }
+    },
+    "sidebar.synthesis" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synthesis"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "知识合成"
           }
         }
       }
@@ -15093,6 +15088,57 @@
         }
       }
     },
+    "synthesis.actions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synthesis Actions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合成操作"
+          }
+        }
+      }
+    },
+    "synthesis.intro" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select pages to synthesize into high-value outputs like mindmaps or reports."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择知识页面，将其合成为思维导图、演示文稿、测试或深度报告。"
+          }
+        }
+      }
+    },
+    "synthesis.selectPages" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Sources"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择知识源"
+          }
+        }
+      }
+    },
     "tab.chat" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15433,6 +15479,108 @@
         }
       }
     },
+    "tagCloud.delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
+          }
+        }
+      }
+    },
+    "tagCloud.deleteConfirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete Tag"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除标签"
+          }
+        }
+      }
+    },
+    "tagCloud.deleteDesc" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Are you sure you want to delete tag '%@'? This will remove it from all pages."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "确定要删除标签 '%@' 吗？这将从所有页面中移除该标签。"
+          }
+        }
+      }
+    },
+    "tagCloud.newName" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Name"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新名称"
+          }
+        }
+      }
+    },
+    "tagCloud.rename" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重命名"
+          }
+        }
+      }
+    },
+    "tagCloud.searchPrompt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search tags..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索标签..."
+          }
+        }
+      }
+    },
     "tagcloud.selectTag" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -15450,7 +15598,25 @@
         }
       }
     },
+    "tagCloud.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tags"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "标签管理"
+          }
+        }
+      }
+    },
     "tags.addNew" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -15472,6 +15638,7 @@
       }
     },
     "tags.bulkManage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15488,6 +15655,7 @@
       }
     },
     "tags.confirmBulkDelete" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -15498,6 +15666,7 @@
       }
     },
     "tags.createHint" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -15508,6 +15677,7 @@
       }
     },
     "tags.inputName" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -15518,6 +15688,7 @@
       }
     },
     "tags.manageTitle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15534,6 +15705,7 @@
       }
     },
     "tags.pageContent" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -15544,6 +15716,7 @@
       }
     },
     "tags.pageTitle" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -15554,6 +15727,7 @@
       }
     },
     "tags.selectedCount" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -15564,6 +15738,7 @@
       }
     },
     "tags.selectToManage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16016,9 +16191,6 @@
     "导入" : {
 
     },
-    "开启后，修改隐私设置或解锁加密内容需要 FaceID/TouchID 验证。" : {
-
-    },
     "快速操作" : {
 
     },
@@ -16028,10 +16200,10 @@
     "提示词工厂" : {
 
     },
-    "日期" : {
+    "智元 (ZhiMind)" : {
 
     },
-    "智元 (ZhiMind)" : {
+    "生物识别保护" : {
 
     },
     "由 ZhiMind AI 引擎自动生成 | 隐私优先，本地存储" : {
@@ -16040,18 +16212,39 @@
     "知识库深度总结报告" : {
 
     },
-    "页面数" : {
+    "page.count" : {
+      "extractionState" : "stale",
       "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "页面数"
-          }
-        }
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "页面数" } }
       }
     },
-    "高级安全" : {
-
+    "aitask.processing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Processing..." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "处理中..." } }
+      }
+    },
+    "misc.selectAll" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Select All" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "全选" } }
+      }
+    },
+    "misc.deselectAll" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Deselect All" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "取消全选" } }
+      }
+    },
+    "misc.done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Done" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "完成" } }
+      }
     }
   },
   "version" : "1.0"

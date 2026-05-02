@@ -41,7 +41,7 @@ struct ChatBubbleView: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.wikiSecondary)
             }
-            .frame(maxWidth: 500, alignment: .trailing)
+            .frame(maxWidth: .infinity, alignment: .trailing)
             
             Image(systemName: "person.circle.fill")
                 .font(.subheadline)
@@ -81,7 +81,7 @@ struct ChatBubbleView: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.wikiSecondary)
             }
-            .frame(maxWidth: 500, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             
             Spacer(minLength: 40)
         }

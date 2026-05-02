@@ -62,20 +62,9 @@ struct SidebarView: View {
                 }
                 .accessibilityIdentifier("AI-Chat")
                 
-                NavigationLink(value: SidebarSelection.tool(.taskCenter)) {
-                    HStack {
-                        Label(Localized.tr("aitask.center.title"), systemImage: "cpu.fill")
-                        Spacer()
-                        if TaskCenter.shared.unreadCount > 0 {
-                            Text("\(TaskCenter.shared.unreadCount)")
-                                .font(.caption2.bold())
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(Capsule().fill(.red))
-                        }
-                    }
-                }
+
+            } header: {
+                Text(Localized.tr("sidebar.capabilities"))
             }
             
             // ══ 2. 知识宇宙 (分类管理) ══
@@ -109,25 +98,7 @@ struct SidebarView: View {
                 Text(Localized.tr("sidebar.universe"))
             }
 
-            // ══ 3. 最近修改 ══
-            let recentPages = store.pages.sorted(by: { $0.updated > $1.updated }).prefix(5)
-            if !recentPages.isEmpty {
-                Section {
-                    DisclosureGroup(isExpanded: $isRecentExpanded) {
-                        ForEach(recentPages) { page in
-                            NavigationLink(value: SidebarSelection.page(page.id)) {
-                                PageSidebarRow(page: page, heroNamespace: heroNamespace)
-                            }
-                            .contextMenu {
-                                sidebarContextMenu(for: page)
-                            }
-                        }
-                    } label: {
-                        Label(Localized.tr("sidebar.recent"), systemImage: "clock.fill")
-                            .font(.subheadline.bold())
-                    }
-                }
-            }
+
 
             // ══ 4. 已收藏 ══
             let pinnedPages = store.pages.filter { $0.isPinned }
@@ -167,18 +138,32 @@ struct SidebarView: View {
                     Label(Localized.tr("sidebar.tagManager"), systemImage: "tag.fill")
                 }
 
+                NavigationLink(value: SidebarSelection.tool(.synthesis)) {
+                    Label(Localized.tr("sidebar.synthesis"), systemImage: "wand.and.stars")
+                }
+
                 NavigationLink(value: SidebarSelection.tool(.weeklyReport)) {
                     Label(Localized.tr("sidebar.weeklyInsight"), systemImage: "doc.text.magnifyingglass")
                 }
+
+                NavigationLink(value: SidebarSelection.tool(.taskCenter)) {
+                    HStack {
+                        Label(Localized.tr("aitask.center.title"), systemImage: "cpu.fill")
+                        Spacer()
+                        if TaskCenter.shared.unreadCount > 0 {
+                            Text("\(TaskCenter.shared.unreadCount)")
+                                .font(.caption2.bold())
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(.red))
+                        }
+                    }
+                }
+
+
             } header: {
                 Text(Localized.tr("sidebar.tools"))
-            }
-
-            // ══ 6. 扩展 ══
-            Section {
-                NavigationLink(value: SidebarSelection.tool(.pluginMarket)) {
-                    Label(Localized.tr("sidebar.pluginMarket"), systemImage: "puzzlepiece.extension.fill")
-                }
             }
         }
         .listStyle(.sidebar)
@@ -188,14 +173,14 @@ struct SidebarView: View {
             return true
         }
         #endif
-        .navigationTitle(Localized.tr("app.name"))
+        .navigationTitle(Localized.tr("sidebar.title"))
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button(action: {
                     HapticManager.shared.trigger(.selection)
                     store.securityService.lock()
                 }) {
-                    Image(systemName: "lock.shield")
+                    Image(systemName: "lock.fill")
                         .foregroundStyle(.red.opacity(0.8))
                 }
                 .help(Localized.tr("security.lockVault"))

@@ -144,9 +144,12 @@ struct DailyRecapSection: View {
                             .font(.subheadline.bold())
                             .foregroundStyle(.wikiAccent)
                         
-                        Text(recap.insight)
-                            .font(.body)
-                            .foregroundStyle(.wikiText)
+                        MarkdownRendererView(
+                            content: recap.insight,
+                            isPrivate: false,
+                            onLinkTap: { _ in }
+                        )
+                        .padding(.vertical, 4)
                         
                         Divider()
                         

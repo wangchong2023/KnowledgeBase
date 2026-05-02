@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import LocalAuthentication
 
 struct SettingsView: View {
     @Environment(KMStore.self) var store
@@ -11,9 +12,50 @@ struct SettingsView: View {
     @Binding var languageForceUpdate: Bool
     @State private var showFolderImporterForImport = false
     
+    @MainActor
+    private func authenticate() async -> Bool {
+        let context = LAContext()
+        var error: NSError?
+        
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            return await withCheckedContinuation { continuation in
+                context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: Localized.tr("security.unlockReason")) { success, _ in
+                    continuation.resume(returning: success)
+                }
+            }
+        } else {
+            return true
+        }
+    }
+    
     var body: some View {
         @Bindable var store = store
-        NavigationStack {
+        
+        let privacyBinding = Binding<Bool>(
+            get: { store.isPrivacyModeEnabled },
+            set: { newValue in
+                Task {
+                    if await authenticate() {
+                        store.isPrivacyModeEnabled = newValue
+                        HapticManager.shared.trigger(.success)
+                    }
+                }
+            }
+        )
+        
+        let biometricBinding = Binding<Bool>(
+            get: { store.isBiometricEnabled },
+            set: { newValue in
+                Task {
+                    if await authenticate() {
+                        store.isBiometricEnabled = newValue
+                        HapticManager.shared.trigger(.success)
+                    }
+                }
+            }
+        )
+
+        return NavigationStack {
             List {
                 // ── 外观 ──
                 Section {
@@ -94,13 +136,19 @@ struct SettingsView: View {
                     SettingsNavigationRow(icon: "externaldrive.fill", title: Localized.tr("backup.title"), identifier: "数据-备份") {
                         BackupView()
                     }
+                    
+                    Button(role: .destructive, action: { showResetConfirmation = true }) {
+                        Label(Localized.tr("settings.reset"), systemImage: "trash")
+                            .foregroundStyle(.red)
+                    }
+                    .accessibilityIdentifier("数据-重置知识库")
                 } header: {
                     Text(Localized.tr("settings.section.data"))
                 }
                 
                 // ── 安全与隐私 ──
                 Section {
-                    Toggle(isOn: $store.isPrivacyModeEnabled) {
+                    Toggle(isOn: privacyBinding) {
                         Label {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(Localized.tr("settings.privacyMode"))
@@ -115,9 +163,15 @@ struct SettingsView: View {
                     }
                     .accessibilityIdentifier("安全-隐私模式开关")
                     
-                    SettingsNavigationRow(icon: "lock.shield.fill", title: Localized.tr("settings.vaultSecurity"), identifier: "安全-金库锁") {
-                        SecuritySettingsView()
+                    Toggle(isOn: biometricBinding) {
+                        Label {
+                            Text("生物识别保护")
+                        } icon: {
+                            Image(systemName: "faceid")
+                                .foregroundStyle(.blue)
+                        }
                     }
+                    .accessibilityIdentifier("安全-生物识别开关")
                 } header: {
                     Text(Localized.tr("settings.section.security"))
                 }
@@ -139,15 +193,7 @@ struct SettingsView: View {
                     Text(Localized.tr("settings.section.moreFeatures"))
                 }
                 
-                // ── 危险操作 ──
-                Section {
-                    Button(role: .destructive, action: { showResetConfirmation = true }) {
-                        Label(Localized.tr("settings.reset"), systemImage: "trash")
-                    }
-                    .accessibilityIdentifier("危险-重置知识库")
-                } header: {
-                    Text(Localized.tr("settings.section.danger"))
-                }
+
 
                 // ── 关于 ──
                 Section {
