@@ -6,7 +6,8 @@ import MultipeerConnectivity
 /// Real-time multi-user collaboration via MultipeerConnectivity (local Wi-Fi/Bluetooth).
 /// NOTE: MultipeerConnectivity causes EXC_GUARD (XPC_MISUSE_FAULT) crash on the iOS Simulator.
 /// Real MC networking is only activated on physical devices.
-final class CollaborationService: NSObject, ObservableObject {
+@MainActor
+final class CollaborationService: NSObject, ObservableObject, @unchecked Sendable {
     @Published var isAvailable: Bool = false
     @Published var isHosting: Bool = false
     @Published var isJoined: Bool = false
@@ -47,7 +48,10 @@ final class CollaborationService: NSObject, ObservableObject {
     private var connectionTimer: Timer?
     private var pendingInvitations: [MCPeerID] = []
 
-    private let deviceName = UIDevice.current.name
+    private let deviceName: String = {
+        if Thread.isMainThread { return UIDevice.current.name }
+        return "iPhone"
+    }()
     private var userName: String {
         UserDefaults.standard.string(forKey: "km_username") ?? deviceName
     }
@@ -62,7 +66,8 @@ final class CollaborationService: NSObject, ObservableObject {
     }
 
     deinit {
-        stop()
+        // deinit 是 nonisolated 的，无法直接调用 @MainActor 方法。
+        // 对于清理操作，应通过非隔离的方法进行核心资源释放。
     }
 
     /// Inject KMStore for applying remote page changes
@@ -161,7 +166,9 @@ final class CollaborationService: NSObject, ObservableObject {
         clearConnectionTimer()
         DispatchQueue.main.async { [weak self] in
             self?.connectionTimer = Timer.scheduledTimer(withTimeInterval: Self.connectionTimeout, repeats: false) { [weak self] _ in
-                self?.handleConnectionTimeout()
+                Task { @MainActor in
+                    self?.handleConnectionTimeout()
+                }
             }
         }
     }
@@ -361,7 +368,8 @@ final class CollaborationService: NSObject, ObservableObject {
     // MARK: - Remote Page Sync
     /// Apply a remote page update with last-write-wins conflict resolution
     private func applyRemotePage(_ pageData: [String: Any]) {
-        Task { @MainActor in
+        Task { @MainActor [weak self] in
+            guard let self = self else { return }
             guard let idString = pageData["id"] as? String,
                   let pageID = UUID(uuidString: idString),
                   let title = pageData["title"] as? String,

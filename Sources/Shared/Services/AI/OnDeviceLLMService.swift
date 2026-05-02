@@ -1,5 +1,5 @@
-import Foundation
-import CoreML
+@preconcurrency import Foundation
+@preconcurrency import CoreML
 import Combine
 
 // MARK: - On-Device LLM Service
@@ -187,7 +187,7 @@ final class OnDeviceLLMService: ObservableObject {
         }
         
         // Core ML text generation
-        if let mlModel = currentModel as? MLModel {
+        if currentModel is MLModel {
             let inputFeatures: [String: Any] = [
                 "prompt": prompt,
                 "max_tokens": maxTokens,
@@ -196,9 +196,14 @@ final class OnDeviceLLMService: ObservableObject {
             
             do {
                 let provider = try MLDictionaryFeatureProvider(dictionary: inputFeatures)
-                let prediction = try await mlModel.prediction(from: provider)
+                let modelToPredict = self.currentModel as? MLModel
+                let generatedTextResult = try await Task.detached(priority: .userInitiated) {
+                    guard let model = modelToPredict else { throw LLMError.apiError("Model not loaded") }
+                    let prediction = try model.prediction(from: provider)
+                    return prediction.featureValue(for: "generated_text")?.stringValue
+                }.value
                 
-                if let generated = prediction.featureValue(for: "generated_text")?.stringValue {
+                if let generated = generatedTextResult {
                     let elapsed = Date().timeIntervalSince(startTime)
                     let tokenCount = generated.split(separator: " ").count
                     inferenceSpeed = Double(tokenCount) / elapsed

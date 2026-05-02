@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 知识周报卡片 (PM 视角：价值闭环)
 struct WeeklyInsightCard: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var isGenerating = false
     
     var body: some View {
@@ -192,7 +192,7 @@ struct InsightStat: View {
 }
 
 struct WeeklyReportView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     
     var body: some View {
         ScrollView {
@@ -230,6 +230,8 @@ struct WeeklyReportView: View {
         }
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("sidebar.weeklyInsight"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
     }
 }

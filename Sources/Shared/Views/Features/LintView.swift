@@ -9,7 +9,7 @@ struct LintView: View {
 
 // MARK: - 健康检查核心内容 ( Dashboard 模式)
 struct LintViewContent: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var isRunning = false
     @State private var selectedTab = 0 // 0: 健康检查, 1: AI 建议
 
@@ -259,7 +259,9 @@ struct LintViewContent: View {
                         }
                     }
                 }
+#if os(iOS)
                 .listStyle(.insetGrouped)
+#endif
                 .scrollContentBackground(.hidden)
             }
         }
@@ -392,7 +394,7 @@ struct LintViewContent: View {
 
 struct RefactorSuggestionRow: View {
     let suggestion: RefactorSuggestion
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -454,7 +456,7 @@ struct RefactorSuggestionRow: View {
 
 struct PotentialLinkRow: View {
     let link: PotentialLinkSuggestion
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     
     var body: some View {
         HStack {
@@ -488,7 +490,7 @@ struct PotentialLinkRow: View {
 // MARK: - Lint Issue Row
 struct LintIssueRow: View {
     let issue: LintIssue
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var aiSuggestion: String?
     @State private var isAnalyzing = false
 

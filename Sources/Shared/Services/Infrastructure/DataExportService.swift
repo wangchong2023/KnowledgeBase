@@ -3,7 +3,7 @@ import PDFKit
 
 /// 数据导出与迁移服务 (Product Manager 视角：增强用户数据安全感与可迁移性)
 final class DataExportService {
-    static let shared = DataExportService()
+    nonisolated(unsafe) static let shared = DataExportService()
     
     private init() {}
     

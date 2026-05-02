@@ -2,8 +2,7 @@ import Foundation
 
 /// [L2] 领域服务：统一 Prompt 资产管理中心
 /// 实现提示词与逻辑代码的解耦，便于后续调优与多语言适配。
-@MainActor
-final class PromptService: ObservableObject {
+final class PromptService: ObservableObject, @unchecked Sendable {
     static let shared = PromptService()
     
     private init() {

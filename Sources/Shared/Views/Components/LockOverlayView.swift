@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 锁定界面 (Security & Design 视角：提供高级感与安全感)
 struct LockOverlayView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var isAnimating = false
     
     private var unlockIcon: String {

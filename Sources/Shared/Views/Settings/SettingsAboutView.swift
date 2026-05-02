@@ -42,11 +42,15 @@ struct SettingsAboutView: View {
                 }
             }
         }
+#if os(iOS)
         .listStyle(.insetGrouped)
+#endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("app.name"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
     }
 
     private var appVersion: String {

@@ -4,7 +4,7 @@ import SwiftUI
 struct WikilinkPickerSheet: View {
     @Binding var page: WikiPage
     @Binding var editorContent: String
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     
@@ -22,7 +22,9 @@ struct WikilinkPickerSheet: View {
             }
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("editor.insertWikiLink"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
         }
     }
     

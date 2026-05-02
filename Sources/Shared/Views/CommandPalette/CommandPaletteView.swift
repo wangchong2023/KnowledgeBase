@@ -3,7 +3,7 @@ import SwiftUI
 /// 全局指令中枢 (Command Palette)
 /// 满足硬核用户 Cmd+K 盲操需求，极大缩短交互路径。
 struct CommandPaletteView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
     @FocusState private var isFocused: Bool

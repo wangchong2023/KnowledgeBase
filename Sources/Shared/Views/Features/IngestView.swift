@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: - Activity Item Model
@@ -41,7 +41,7 @@ struct ActivityItem: Identifiable {
 /// 知识导入视图，由 5 个子组件组成：
 /// IngestHeroSection / IngestEntryCardsSection / IngestManualFormSection / SmartIngestPreview / IngestTipsSection
 struct IngestView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @EnvironmentObject var llmService: LLMService
 
     @State private var newTitle = ""
@@ -201,9 +201,11 @@ struct IngestView: View {
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(manualFormTitle)
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.cancel")) {
                         showManualForm = false
                     }
@@ -479,7 +481,7 @@ struct IngestView: View {
 
 // MARK: - Activity Row View
 struct ActivityRow: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     let item: ActivityItem
     let isCurrent: Bool
     

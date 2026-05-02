@@ -3,7 +3,7 @@ import SwiftUI
 /// 页面历史快照列表面板 (Refactored from PageDetailView)
 struct PageHistoryView: View {
     let page: WikiPage
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Environment(\.dismiss) private var dismiss
     
     @State private var history: [SnapshotInfo] = []
@@ -32,9 +32,11 @@ struct PageHistoryView: View {
                 }
             }
             .navigationTitle(Localized.tr("page.history"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.close")) { dismiss() }
                 }
             }
@@ -92,7 +94,9 @@ private struct SnapshotDetailView: View {
                 .padding()
             }
             .navigationTitle(Localized.tr("page.snapshot.preview"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .background(Color.wikiBackground)
         }
     }

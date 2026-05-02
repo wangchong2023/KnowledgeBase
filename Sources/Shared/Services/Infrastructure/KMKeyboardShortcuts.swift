@@ -49,7 +49,7 @@ enum KMKeyboardShortcuts {
 
 // MARK: - Keyboard Shortcuts View Modifier
 struct KeyboardShortcutsViewModifier: ViewModifier {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var showCreateSheet = false
 
     func body(content: Content) -> some View {

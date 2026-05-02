@@ -59,6 +59,7 @@ protocol InterceptionPlugin: KnowledgePlugin {
 }
 
 /// 分析服务协议：用于系统埋点与行为观测
+@MainActor
 protocol AnalyticsServiceProtocol: AnyObject {
     func trackEvent(_ name: String, properties: [String: Any]?)
     func trackError(_ error: Error, details: String?)

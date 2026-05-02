@@ -2,8 +2,7 @@ import Foundation
 
 /// 依赖注入容器 (L2 层：解耦中枢)
 /// 遵循 Service Locator 模式，支持 Mock 替换
-@MainActor
-final class ServiceContainer {
+final class ServiceContainer: @unchecked Sendable {
     static let shared = ServiceContainer()
     
     private var services: [String: Any] = [:]

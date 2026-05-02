@@ -2,7 +2,7 @@ import SwiftUI
 
 struct BacklinksView: View {
     let page: WikiPage
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Environment(\.dismiss) private var dismiss
     
     @State private var backlinks: [WikiPage] = []
@@ -106,11 +106,15 @@ struct BacklinksView: View {
                     }
                 }
             }
+#if os(iOS)
             .listStyle(.insetGrouped)
+#endif
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(page.title)
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .task {
                 await fetchData()
             }

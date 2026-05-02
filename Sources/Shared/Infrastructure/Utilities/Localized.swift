@@ -17,9 +17,9 @@ enum LanguageMode: String, CaseIterable {
 
     var icon: String {
         switch self {
-        case .system: return "globe"
-        case .chinese: return "character.book.closed"
-        case .english: return "character.cursor.ibeam"
+        case .system:  return "globe"                      // 跟随系统
+        case .chinese: return "globe.asia.australia.fill"  // 简体中文
+        case .english: return "globe.americas.fill"        // English
         }
     }
 }

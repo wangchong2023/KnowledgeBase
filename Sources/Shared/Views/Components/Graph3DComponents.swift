@@ -31,7 +31,7 @@ struct TappableSceneView: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator(onNodeTap: onNodeTap) }
 
-    class Coordinator: NSObject {
+    @MainActor class Coordinator: NSObject {
         let onNodeTap: (UUID) -> Void
         init(onNodeTap: @escaping (UUID) -> Void) { self.onNodeTap = onNodeTap }
 

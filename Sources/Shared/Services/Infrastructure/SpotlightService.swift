@@ -38,7 +38,9 @@ final class SpotlightService {
     /// 全量重新索引 (建议在应用启动或数据库重置时调用)
     func reindexAll(pages: [WikiPage]) {
         CSSearchableIndex.default().deleteAllSearchableItems { [weak self] _ in
-            pages.forEach { self?.indexPage($0) }
+            Task { @MainActor in
+                pages.forEach { self?.indexPage($0) }
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 import LocalAuthentication
 
 // MARK: - Markdown Renderer View
@@ -6,7 +6,7 @@ import LocalAuthentication
 /// Parsing logic is extracted to MarkdownParser service for reuse.
 @MainActor
 struct MarkdownRendererView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     let content: String
     let isPrivate: Bool
     let onLinkTap: (String) -> Void
@@ -262,6 +262,21 @@ struct MarkdownRendererView: View {
         Text(buildAttributedString(from: segments))
             .lineLimit(nil)
             .fixedSize(horizontal: false, vertical: true)
+            .environment(\.openURL, OpenURLAction { url in
+                if url.scheme == "wikilink" {
+                    // 对于 wikilink://Title，Title 会被作为 host 解析（如果 Title 不包含特殊字符）
+                    // 或者作为 path。更稳妥的方式是解析整个 URL 的内容。
+                    let title = url.absoluteString
+                        .replacingOccurrences(of: "wikilink://", with: "")
+                        .removingPercentEncoding ?? ""
+                    
+                    if !title.isEmpty {
+                        onLinkTap(title)
+                    }
+                    return .handled
+                }
+                return .systemAction
+            })
     }
     
     private func buildAttributedString(from segments: [MarkdownParser.InlineSegment]) -> AttributedString {
@@ -272,27 +287,27 @@ struct MarkdownRendererView: View {
             
             switch segment.type {
             case .text:
-                container.font = .body
+                container.swiftUI.font = .body
             case .bold:
-                container.font = .body.weight(.bold)
+                container.swiftUI.font = .body.weight(.bold)
             case .italic:
-                container.font = .body.italic()
+                container.swiftUI.font = .body.italic()
             case .code:
-                container.font = .system(.caption, design: .monospaced)
-                container.backgroundColor = Color.wikiAccent.opacity(0.15)
-                container.foregroundColor = .wikiText
+                container.swiftUI.font = .system(.caption, design: .monospaced)
+                container.swiftUI.backgroundColor = Color.wikiAccent.opacity(0.15)
+                container.swiftUI.foregroundColor = .wikiText
             case .wikilink:
-                container.font = .body.weight(.medium)
-                container.foregroundColor = .wikiAccent
-                container.underlineStyle = .single
+                container.swiftUI.font = .body.weight(.medium)
+                container.swiftUI.foregroundColor = .wikiAccent
+                container.swiftUI.underlineStyle = .single
                 // 我们在 Text 上无法直接捕获这个特定属性的点击，
                 // 但我们可以通过转换整个 Text 为 Link 或使用自定义属性。
                 // 暂时使用标准 link 属性，由外部 onLinkTap 处理或通过自定义 URL 协议。
                 if let encoded = segment.content.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-                    container.link = URL(string: "wikilink://\(encoded)")
+                    container.foundation.link = URL(string: "wikilink://\(encoded)")
                 }
             case .emoji:
-                container.font = .body
+                container.swiftUI.font = .body
             }
             
             result.append(container)

@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 
 // MARK: - On-Device Test View
 @MainActor
@@ -21,7 +21,9 @@ struct OnDeviceTestView: View {
             .padding()
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("ondevice.test"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
         }
     }
     

@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -46,7 +46,7 @@ enum EditorPendingAction: Equatable {
 struct MarkdownEditorView: View {
     @Binding var page: WikiPage  ///< 绑定的页面对象，编辑结果直接写回此对象
     @Binding var isEditing: Bool  ///< 绑定外部的编辑状态
-    @EnvironmentObject var store: KMStore  ///< 全局知识库存储
+    @Environment(KMStore.self) var store  ///< 全局知识库存储
     @State private var showLinkPicker = false  ///< 是否显示 WikiLink 页面选择器
     @State private var editorContent: String = ""  ///< 编辑器文本内容（与 page.content 同步）
     @State private var showTagInput = false  ///< 是否显示标签输入框
@@ -256,6 +256,7 @@ extension View {
     }
 }
 
+@MainActor
 struct OCRPickerModifier: ViewModifier {
     @Binding var isPresented: Bool
     let onResult: (String) -> Void

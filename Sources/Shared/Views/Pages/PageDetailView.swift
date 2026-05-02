@@ -22,7 +22,7 @@ import SwiftUI
 struct PageDetailView: View {
     @State var page: WikiPage
     var heroNamespace: Namespace.ID? = nil
-    @EnvironmentObject var store: KMStore  ///< 全局知识库存储
+    @Environment(KMStore.self) var store  ///< 全局知识库存储
     @State private var isEditing = false  ///< 是否处于编辑模式
     @State private var showBacklinks = false  ///< 是否显示反向链接面板
     @State private var showDeleteConfirmation = false  ///< 是否显示删除确认对话框
@@ -40,7 +40,7 @@ struct PageDetailView: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        ToolbarItemGroup(placement: .topBarTrailing) {
+        ToolbarItemGroup(placement: .automatic) {
             HStack(spacing: 8) {
                 pinButton
                 backlinksButton
@@ -282,7 +282,9 @@ struct PageDetailView: View {
         .background(Color.wikiBackground)
         .toolbarBackground(.hidden, for: .navigationBar)
         .navigationTitle("")
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
         // Register navigationDestination so NavigationLink(value: WikiPage) works
         // both in the Graph tab's NavigationStack and elsewhere.
         .navigationDestination(for: WikiPage.self) { destination in
@@ -329,9 +331,6 @@ struct PageDetailView: View {
                 }
                 
                 PageDetailHeader(page: page, heroNamespace: heroNamespace)
-                    #if os(iOS)
-                    .matchedGeometryEffect(id: page.id, in: heroNamespace ?? Namespace().wrappedValue, isSource: false)
-                    #endif
                     .padding(.top, store.navigationHistory.isEmpty ? 10 : 0)
                     .background(.ultraThinMaterial)
             }
@@ -382,6 +381,20 @@ struct PageDetailView: View {
                         .foregroundStyle(.wikiText)
                     Spacer()
                     if !isLoadingAI {
+                        if let result = aiResult, result.contains("- ") {
+                            Button(action: {
+                                Task {
+                                    @Inject var workflowService: WorkflowService
+                                    try? await workflowService.syncToReminders(text: result, title: page.title)
+                                }
+                            }) {
+                                Label(Localized.tr("misc.syncToReminders"), systemImage: "checklist")
+                                    .font(.caption)
+                                    .foregroundStyle(.wikiAccent)
+                            }
+                            .padding(.trailing, 8)
+                        }
+                        
                         Button(action: { 
                             WikiPasteboard.string = aiResult
                             HapticManager.shared.trigger(.success)
@@ -819,7 +832,7 @@ struct RelatedPageDropDelegate: DropDelegate {
 // MARK: - Snapshot History View
 struct SnapshotHistoryView: View {
     let page: WikiPage
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Environment(\.dismiss) private var dismiss
     @State private var history: [SnapshotInfo] = []
     @State private var selectedSnapshot: SnapshotInfo?
@@ -856,9 +869,11 @@ struct SnapshotHistoryView: View {
                 }
             }
             .navigationTitle(Localized.tr("page.history"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.close")) { dismiss() }
                 }
             }
@@ -931,7 +946,9 @@ private struct SnapshotDetailView: View {
                 .padding()
             }
             .navigationTitle(Localized.tr("page.snapshot.preview"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .background(Color.wikiBackground)
         }
     }

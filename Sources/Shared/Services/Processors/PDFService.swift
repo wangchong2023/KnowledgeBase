@@ -102,7 +102,7 @@ struct PDFHighlight: Identifiable, Codable {
 /// }
 /// ```
 class PDFService {
-    static let shared = PDFService()
+    nonisolated(unsafe) static let shared = PDFService()
     
     private let documentsDirectory: URL
     

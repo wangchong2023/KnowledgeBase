@@ -2,7 +2,7 @@ import SwiftUI
 
 /// AI 脉搏指示器 (PM 视角：增强用户对 AI 处理状态的感知)
 struct AIPulseIndicator: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var isAnimating = false
     
     private var isActive: Bool {

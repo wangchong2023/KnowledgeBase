@@ -145,7 +145,7 @@ struct GuideStepRow: View {
 struct PageRowView: View {
     let page: WikiPage
     var compact: Bool = false
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     
     var body: some View {
         HStack(spacing: 12) {

@@ -25,9 +25,11 @@ struct PDFIngestSheet: View {
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("pdf.ingestToWiki"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("pdf.ingest")) { ingestContent() }
                         .fontWeight(.semibold)
                         .disabled(targetTitle.isEmpty)

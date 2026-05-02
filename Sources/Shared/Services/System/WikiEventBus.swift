@@ -31,3 +31,5 @@ final class WikiEventBus {
         subject.eraseToAnyPublisher()
     }
 }
+
+extension WikiEventBus: @unchecked Sendable {}

@@ -9,7 +9,7 @@ struct ExternalPage {
 }
 
 class VaultService {
-    static let shared = VaultService()
+    nonisolated(unsafe) static let shared = VaultService()
     
     /// 扫描指定文件夹下的所有 Markdown 文件
     func scan(directory: URL) -> [ExternalPage] {
@@ -67,7 +67,7 @@ class VaultService {
     #if os(macOS)
     func storeBookmark(for url: URL) {
         do {
-            let data = try url.bookmarksData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+            let data = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
             UserDefaults.standard.set(data, forKey: "vault_bookmark_\(url.lastPathComponent)")
         } catch {
             print("Failed to create bookmark: \(error)")

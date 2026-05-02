@@ -9,7 +9,7 @@ struct LogView: View {
 
 // MARK: - Log View Content (for use inside parent NavigationStack)
 struct LogViewContent: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var expandedEntryIDs: Set<UUID> = []
 
     var body: some View {
@@ -48,11 +48,15 @@ struct LogViewContent: View {
                 }
             }
         }
+#if os(iOS)
         .listStyle(.insetGrouped)
+#endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("settings.operationLog"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarBackground(Color.wikiBackground, for: .navigationBar)
     }

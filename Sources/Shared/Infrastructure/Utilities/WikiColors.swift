@@ -55,7 +55,11 @@ extension Color {
     // Uses the shared ThemeManager singleton for consistency and caching.
     // Views should prefer @Environment(\.wikiAccentColor) for the best performance.
     static var wikiAccent: Color {
-        ThemeManager.shared.accentColor
+        // ThemeManager.shared 是 @MainActor 隔离的。
+        // 在 UI 代码中，这里通常在主线程运行。
+        MainActor.assumeIsolated {
+            ThemeManager.shared.accentColor
+        }
     }
 
     static let wikiText = Color(

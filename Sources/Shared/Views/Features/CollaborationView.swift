@@ -11,7 +11,7 @@ struct CollaborationView: View {
 // MARK: - Collaboration View Content (for use inside parent NavigationStack)
 struct CollaborationViewContent: View {
     @StateObject private var collabService = CollaborationService()
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var roomName = ""
     @State private var userName = ""
     @State private var showHostingSheet = false
@@ -42,7 +42,9 @@ struct CollaborationViewContent: View {
         }
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("collab.title"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
         .sheet(isPresented: $showHostingSheet) {
             HostingSetupSheet(collabService: collabService, roomName: $roomName)
         }

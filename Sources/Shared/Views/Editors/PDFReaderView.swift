@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 // MARK: - PDF Library View
 @MainActor
 struct PDFLibraryView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var documents: [PDFDocumentInfo] = []
     @State private var showFilePicker = false
     @State private var selectedDoc: PDFDocumentInfo?
@@ -26,7 +26,7 @@ struct PDFLibraryView: View {
             }
             .navigationTitle(Localized.tr("pdf.title"))
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Button(action: { showFilePicker = true }) {
                         Image(systemName: "plus")
                     }
@@ -40,7 +40,7 @@ struct PDFLibraryView: View {
                 handleFileImport(result)
             }
             .sheet(item: $selectedDoc) { doc in
-                PDFReaderView(documentInfo: doc, store: store)
+                PDFReaderView(documentInfo: doc)
             }
             .onAppear {
                 documents = PDFService.shared.loadDocumentsInfo()
@@ -82,7 +82,7 @@ struct PDFLibraryView: View {
         _ = PDFService.shared.deletePDF(fileName: doc.fileName)
         documents.removeAll { $0.id == doc.id }
         PDFService.shared.saveDocumentsInfo(documents)
-        store.addLog(action: Localized.tr("logAction.deletePDF"), target: doc.title)
+        store.addLog(action: Localized.tr("logAction.deletePDF"), target: doc.title, details: "")
     }
 
     private func ingestPDF(_ doc: PDFDocumentInfo) {
@@ -147,7 +147,9 @@ private struct PDFDocumentListView: View {
                 }
             }
         }
+#if os(iOS)
         .listStyle(.insetGrouped)
+#endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
     }
@@ -156,7 +158,7 @@ private struct PDFDocumentListView: View {
 // MARK: - PDF Reader View (Full Screen)
 struct PDFReaderView: View {
     let documentInfo: PDFDocumentInfo
-    @ObservedObject var store: KMStore
+    @Environment(KMStore.self) var store
 
     @State private var currentPage = 0
     @State private var highlights: [PDFHighlight] = []
@@ -179,9 +181,11 @@ struct PDFReaderView: View {
                 }
             }
             .navigationTitle(documentInfo.title)
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .automatic) {
                     Button(action: { showHighlightPanel.toggle() }) {
                         Image(systemName: showHighlightPanel ? "highlighter.fill" : "highlighter")
                     }
@@ -345,7 +349,7 @@ struct PDFKitRepresentedView: UIViewRepresentable {
         Coordinator(self)
     }
 
-    class Coordinator: NSObject {
+    @MainActor class Coordinator: NSObject {
         var parent: PDFKitRepresentedView
 
         init(_ parent: PDFKitRepresentedView) {

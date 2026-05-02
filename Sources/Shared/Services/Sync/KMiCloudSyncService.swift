@@ -108,7 +108,7 @@ class iCloudSyncService: ObservableObject {
     func checkiCloudStatus() {
         guard let container else { return }
         container.accountStatus { [weak self] status, error in
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self?.iCloudAvailable = (status == .available)
                 if status != .available {
                     self?.syncStatus = .error(Localized.tr("icloud.notAvailable"))
@@ -432,3 +432,6 @@ enum ConflictResolution: String, CaseIterable {
         }
     }
 }
+
+@MainActor
+extension iCloudSyncService: @unchecked Sendable {}

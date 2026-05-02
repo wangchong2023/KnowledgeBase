@@ -6,10 +6,12 @@ class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
 
     @AppStorage("colorSchemeMode") var colorSchemeModeRaw: String = ColorSchemeMode.dark.rawValue
-    @AppStorage("accentColor") var accentColorRaw: String = "blue"
+    nonisolated var accentColorRaw: String {
+        get { UserDefaults.standard.string(forKey: "accentColor") ?? "blue" }
+    }
 
     /// Migrate legacy isDarkMode key on first access
-    private static var didMigrate = false
+    private nonisolated(unsafe) static var didMigrate = false
 
     var colorSchemeMode: ColorSchemeMode {
         get {
@@ -32,16 +34,17 @@ class ThemeManager: ObservableObject {
 
     /// Live color: reads from UserDefaults on every access (no cache).
     /// @AppStorage already handles observation via Combine.
-    var accentColor: Color {
+    nonisolated var accentColor: Color {
         ThemeManager.colorForName(accentColorRaw)
     }
 
     func setAccentColor(_ color: String) {
-        accentColorRaw = color
+        UserDefaults.standard.set(color, forKey: "accentColor")
+        objectWillChange.send()
     }
 
     /// Maps a color name string (stored in UserDefaults) to a system Color.
-    static func colorForName(_ name: String) -> Color {
+    nonisolated static func colorForName(_ name: String) -> Color {
         switch name {
         case "blue": return .blue
         case "purple": return .purple
@@ -56,7 +59,9 @@ class ThemeManager: ObservableObject {
     }
 
     /// Instance method wrapper for convenience.
-    func colorForName(_ name: String) -> Color {
+    nonisolated func colorForName(_ name: String) -> Color {
         Self.colorForName(name)
     }
 }
+
+extension ThemeManager: @unchecked Sendable {}

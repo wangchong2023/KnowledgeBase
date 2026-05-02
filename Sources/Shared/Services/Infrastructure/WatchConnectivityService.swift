@@ -1,4 +1,5 @@
 import Foundation
+#if canImport(WatchConnectivity)
 import WatchConnectivity
 import Combine
 
@@ -12,9 +13,8 @@ final class WatchConnectivityService: NSObject, ObservableObject, WCSessionDeleg
     private override init() {
         super.init()
         if WCSession.isSupported() {
-            let session = WCSession.default
-            session.delegate = self
-            session.activate()
+            WCSession.default.delegate = self
+            WCSession.default.activate()
         }
     }
     
@@ -31,15 +31,17 @@ final class WatchConnectivityService: NSObject, ObservableObject, WCSessionDeleg
     
     // MARK: - WCSessionDelegate
     
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         if let error = error {
-            LogService.shared.error("⌚ [WatchSync] 激活失败: \(error.localizedDescription)")
+            Task { @MainActor in
+                LogService.shared.error("⌚ [WatchSync] 激活失败: \(error.localizedDescription)")
+            }
         }
     }
     
-    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
+    nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String : Any] = [:]) {
         if let content = userInfo["content"] as? String {
-            DispatchQueue.main.async {
+            Task { @MainActor in
                 self.lastReceivedText = content
                 // 触发主 App 存储逻辑（由 KMStore 监听）
                 NotificationCenter.default.post(name: .didReceiveWatchContent, object: content)
@@ -48,13 +50,17 @@ final class WatchConnectivityService: NSObject, ObservableObject, WCSessionDeleg
     }
     
     #if os(iOS)
-    func sessionDidBecomeInactive(_ session: WCSession) {}
-    func sessionDidDeactivate(_ session: WCSession) {
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
+    nonisolated func sessionDidDeactivate(_ session: WCSession) {
         session.activate() // 重新激活
     }
     #endif
 }
 
+extension WatchConnectivityService: @unchecked Sendable {}
+#endif
+
 extension Notification.Name {
     static let didReceiveWatchContent = Notification.Name("didReceiveWatchContent")
 }
+

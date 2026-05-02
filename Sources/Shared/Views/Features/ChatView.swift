@@ -9,7 +9,7 @@ struct ChatView: View {
 
 // MARK: - Chat View Content (for use inside parent NavigationStack)
 struct ChatViewContent: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @EnvironmentObject var llmService: LLMService
     @StateObject private var promptService = PromptService.shared
     @State private var inputText = ""
@@ -34,7 +34,7 @@ struct ChatViewContent: View {
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("chat.title"))
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .automatic) {
                 Menu {
                     Section {
                         Button(action: { }) {
@@ -353,9 +353,11 @@ struct ChatViewContent: View {
                 NavigationStack {
                     chatWelcome
                         .navigationTitle("探索与提示")
+#if os(iOS)
                         .navigationBarTitleDisplayMode(.inline)
+#endif
                         .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
+                            ToolbarItem(placement: .automatic) {
                                 Button(Localized.tr("misc.close")) { showPrompts = false }
                             }
                         }

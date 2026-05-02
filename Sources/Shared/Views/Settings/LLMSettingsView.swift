@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 
 // MARK: - LLM Settings View
 @MainActor

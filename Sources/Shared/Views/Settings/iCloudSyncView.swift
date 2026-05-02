@@ -1,9 +1,9 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 
 // MARK: - iCloud Sync Settings View
 struct iCloudSyncView: View {
     @ObservedObject var syncService: iCloudSyncService
-    @ObservedObject var store: KMStore
+    var store: KMStore
     
     @State private var isSyncing = false
     @State private var showError = false
@@ -82,7 +82,11 @@ struct iCloudSyncView: View {
                 .disabled(isSyncing)
             }
         }
+#if os(iOS)
+#if os(iOS)
         .listStyle(.insetGrouped)
+#endif
+#endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("icloud.title"))
@@ -242,7 +246,7 @@ struct iCloudSyncView: View {
     // MARK: - Helpers
     /// Replaces all local data with imported pages from sync results.
     private func replaceLocalData(with pages: [WikiPage]) {
-        store.resetAllData()
+        try? store.clearAllData()
         for page in pages {
             store.addImportedPage(page)
         }

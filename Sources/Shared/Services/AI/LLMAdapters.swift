@@ -1,7 +1,6 @@
 import Foundation
 
 /// OpenAI 兼容适配器 (DeepSeek, SiliconFlow 等)
-@MainActor
 struct OpenAICompatibleAdapter: LLMAdapter {
     let id: String
     let displayName: String
@@ -33,10 +32,16 @@ struct OpenAICompatibleAdapter: LLMAdapter {
             "stream": true
         ]
         
-        return AsyncThrowingStream { continuation in
+        struct SendableBody: @unchecked Sendable {
+            let dict: [String: Any]
+        }
+        let safeBody = SendableBody(dict: body)
+        let capturedClient = client
+        
+        return AsyncThrowingStream { @Sendable continuation in
             Task {
                 do {
-                    let bytes = try await client.sendStreamingRequest(body: body)
+                    let bytes = try await capturedClient.sendStreamingRequest(body: safeBody.dict)
                     for try await chunk in SSEParser.parse(bytes: bytes) {
                         continuation.yield(chunk)
                     }
@@ -65,3 +70,5 @@ struct OllamaAdapter: LLMAdapter {
         return AsyncThrowingStream { _ in }
     }
 }
+
+extension OpenAICompatibleAdapter: @unchecked Sendable {}

@@ -5,7 +5,7 @@ import Combine
 /// 组合了 LLMConfigStore (配置) + LLMContextBuilder (上下文) + ChatHistoryStore (历史) + LLMClient (客户端)。
 /// 暴露与之前相同的公共接口，以确保视图层的零修改兼容性。
 @MainActor
-final class LLMService: ObservableObject, LLMServiceProtocol {
+final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendable {
     
     // MARK: - UI 状态属性 (向后兼容)
     @Published var provider: LLMProvider {
@@ -179,8 +179,12 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
         let systemPrompt = contextBuilder.buildSystemPrompt(pages: pages) + "\n\n" + context
         
         let requestBody = makeChatRequestBody(systemPrompt: systemPrompt, query: query)
-        
-        let response = try await makeClient().sendRequest(body: requestBody)
+        let client = makeClient()
+        struct SendableBody: @unchecked Sendable {
+            let dict: [String: Any]
+        }
+        let safeBody = SendableBody(dict: requestBody)
+        let response = try await client.sendRequest(body: safeBody.dict)
         
         guard let choices = response["choices"] as? [[String: Any]],
               let firstChoice = choices.first,
@@ -218,10 +222,15 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
                 let context = self.contextBuilder.buildRelevantContext(query: query, pages: pages)
                 let systemPrompt = self.contextBuilder.buildSystemPrompt(pages: pages) + "\n\n" + context
                 
-                let requestBody = self.makeStreamingRequestBody(systemPrompt: systemPrompt, query: query)
+                let body = self.makeStreamingRequestBody(systemPrompt: systemPrompt, query: query)
+                struct SendableBody: @unchecked Sendable {
+                    let dict: [String: Any]
+                }
+                let safeBody = SendableBody(dict: body)
+                let client = self.makeClient()
                 
                 do {
-                let streamResult = try await self.makeClient().sendStreamingRequest(body: requestBody)
+                    let streamResult = try await client.sendStreamingRequest(body: safeBody.dict)
                     
                     var fullContent = ""
                     
@@ -268,7 +277,8 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
     
     func generate(prompt: String, systemPrompt: String) async throws -> String {
         if let adapter = activeAdapter {
-            return try await adapter.generate(prompt: prompt, systemPrompt: systemPrompt)
+            let capturedAdapter = adapter
+            return try await capturedAdapter.generate(prompt: prompt, systemPrompt: systemPrompt)
         }
         
         // Fallback to legacy implementation if no adapter is set
@@ -307,11 +317,11 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
         await MainActor.run { isProcessing = true }
         defer { Task { await MainActor.run { isProcessing = false } } }
         
-        await TaskCenter.shared.updateLatestStatus("🔍 \(Localized.tr("ai.status.preprocessing")): \(title)")
+        TaskCenter.shared.updateLatestStatus("🔍 \(Localized.tr("ai.status.preprocessing")): \(title)")
         let prompt = contextBuilder.buildIngestPrompt(title: title, rawContent: rawContent, pages: pages)
         let systemPrompt = Localized.tr("llm.ingest.systemPrompt")
         
-        await TaskCenter.shared.updateLatestStatus("🧠 \(Localized.tr("ai.status.analyzing")): \(title)")
+        TaskCenter.shared.updateLatestStatus("🧠 \(Localized.tr("ai.status.analyzing")): \(title)")
         let requestBody: [String: Any] = [
             "model": model,
             "messages": [

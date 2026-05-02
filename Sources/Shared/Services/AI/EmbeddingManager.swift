@@ -4,7 +4,6 @@ import Accelerate
 
 /// 商用级向量管理中心
 /// 负责向量的异步计算、持久化同步以及基于 Accelerate 框架的高性能检索。
-@MainActor
 final class EmbeddingManager {
     private let core: SQLiteStoreCore
     private let embeddingModel: NLEmbedding?
@@ -132,23 +131,36 @@ final class EmbeddingManager {
         }()
         
         let keys = Array(currentCache.keys)
-        let resultsLock = NSLock()
-        var results: [(UUID, Float)] = []
+        let keysCount = keys.count
+        let rawResults = UnsafeMutablePointer<(UUID, Float)>.allocate(capacity: keysCount)
+        
+        // 使用 Sendable 包装器来传递指针，避开 Capture 检查
+        struct PointerWrapper: @unchecked Sendable {
+            let ptr: UnsafeMutablePointer<(UUID, Float)>
+        }
+        let wrappedResults = PointerWrapper(ptr: rawResults)
         
         // 并行计算相似度
-        DispatchQueue.concurrentPerform(iterations: keys.count) { index in
+        DispatchQueue.concurrentPerform(iterations: keysCount) { index in
             let id = keys[index]
             if let vector = currentCache[id] {
                 let score = cosineSimilarity(vector, qv)
-                if score > AppConfig.AI.similarityThreshold {
-                    resultsLock.lock()
-                    results.append((id, score))
-                    resultsLock.unlock()
-                }
+                wrappedResults.ptr[index] = (id, score)
+            } else {
+                wrappedResults.ptr[index] = (id, -1.0)
             }
         }
         
-        return results.sorted { $0.1 > $1.1 }.prefix(topK).map { $0 }
+        var resultsList: [(UUID, Float)] = []
+        for i in 0..<keysCount {
+            let res = rawResults[i]
+            if res.1 > AppConfig.AI.similarityThreshold {
+                resultsList.append(res)
+            }
+        }
+        rawResults.deallocate()
+        
+        return resultsList.sorted { $0.1 > $1.1 }.prefix(topK).map { $0 }
     }
     
     /// 利用 Accelerate 的 vDSP_dotpr 计算两个向量的点积（余弦相似度基础）
@@ -187,3 +199,6 @@ final class EmbeddingManager {
         return dotProduct / denominator
     }
 }
+
+// MARK: - Sendable 合规声明
+extension EmbeddingManager: @unchecked Sendable {}

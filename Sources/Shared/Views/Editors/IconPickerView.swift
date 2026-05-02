@@ -59,9 +59,11 @@ struct IconPickerView: View {
             }
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("iconPicker.selectIcon"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.ok")) { dismiss() }
                         .fontWeight(.medium)
                 }

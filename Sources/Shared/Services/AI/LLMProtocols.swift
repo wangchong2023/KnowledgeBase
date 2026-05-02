@@ -2,7 +2,7 @@ import Foundation
 
 /// AI 模型适配器协议
 /// 允许系统在本地模型 (Ollama/Llama) 与云端 API (OpenAI/Claude) 之间无缝切换。
-protocol LLMAdapter {
+protocol LLMAdapter: Sendable {
     var id: String { get }
     var displayName: String { get }
     
@@ -14,7 +14,7 @@ protocol LLMAdapter {
 }
 
 /// AI 任务上下文信息
-struct LLMTaskContext {
+struct LLMTaskContext: Sendable {
     let query: String
     let relevantPages: [WikiPage]
     let systemPrompt: String

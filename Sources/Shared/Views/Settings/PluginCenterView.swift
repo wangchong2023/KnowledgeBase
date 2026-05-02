@@ -36,7 +36,9 @@ struct PluginCenterView: View {
             }
         }
         .navigationTitle(Localized.tr("plugin.center"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
     }
     
     private var headerSection: some View {

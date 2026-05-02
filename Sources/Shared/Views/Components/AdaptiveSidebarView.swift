@@ -3,7 +3,7 @@ import SwiftUI
 /// 响应式侧边栏 (iPad/Mac 专属)
 /// 将传统的底部 Tab 转换为更符合大屏习惯的垂直侧边栏。
 struct AdaptiveSidebarView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Binding var selectedTab: ContentView.AppTab
     
     var body: some View {
@@ -33,7 +33,7 @@ struct AdaptiveSidebarView: View {
         .listStyle(.sidebar)
         .navigationTitle(Localized.tr("app.name"))
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .automatic) {
                 Button(action: {
                     HapticManager.shared.trigger(.selection)
                     store.securityService.lock()
@@ -57,7 +57,7 @@ struct AdaptiveSidebarView: View {
 
 /// 响应式主内容区域
 struct AdaptiveDetailView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Binding var selectedTab: ContentView.AppTab
     @Binding var languageForceUpdate: Bool
     var heroNamespace: Namespace.ID

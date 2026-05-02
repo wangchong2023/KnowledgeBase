@@ -4,7 +4,7 @@ import SwiftUI
 /// 展示当前正在运行及最近完成的任务列表（含 AI 任务与导入任务）。
 struct TaskCenterView: View {
     @ObservedObject var taskCenter = TaskCenter.shared
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     
     var body: some View {
         List {
@@ -30,9 +30,12 @@ struct TaskCenterView: View {
             }
         }
         .navigationTitle(Localized.tr("aitask.center.title"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
+#if os(iOS)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .automatic) {
                 if !taskCenter.tasks.isEmpty {
                     Button(Localized.tr("aitask.clearAll")) {
                         taskCenter.tasks.removeAll()
@@ -40,6 +43,17 @@ struct TaskCenterView: View {
                 }
             }
         }
+#else
+        .toolbar {
+            ToolbarItem {
+                if !taskCenter.tasks.isEmpty {
+                    Button(Localized.tr("aitask.clearAll")) {
+                        taskCenter.tasks.removeAll()
+                    }
+                }
+            }
+        }
+#endif
         .background(Color.wikiBackground)
         .onAppear {
             taskCenter.markAllAsRead()

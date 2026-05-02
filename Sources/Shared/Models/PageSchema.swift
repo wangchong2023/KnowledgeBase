@@ -10,7 +10,7 @@ struct PageSchema: Codable {
 }
 
 final class SchemaService {
-    static let shared = SchemaService()
+    nonisolated(unsafe) static let shared = SchemaService()
     
     var schemas: [PageType: PageSchema] = [
         .entity: PageSchema(

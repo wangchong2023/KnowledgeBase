@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 @preconcurrency import Vision
 import PhotosUI
 
@@ -31,7 +31,7 @@ class OCRService: ObservableObject {
     static let shared = OCRService()
     
     /// Recognize text from a WikiImage
-    func recognizeText(from image: WikiImage, completion: @escaping (Result<String, Error>) -> Void) {
+    func recognizeText(from image: WikiImage, completion: @escaping @Sendable (Result<String, Error>) -> Void) {
         guard let cgImage = image.wikiCGImage else {
             completion(.failure(OCRError.invalidImage))
             return
@@ -105,3 +105,5 @@ enum OCRError: LocalizedError {
         }
     }
 }
+
+extension OCRService: @unchecked Sendable {}

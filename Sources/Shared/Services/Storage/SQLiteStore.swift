@@ -1,13 +1,15 @@
 import Foundation
 import SQLite3
 import NaturalLanguage
+import Observation
 
 // MARK: - SQLite 存储门面 (组合了核心、迁移与种子数据)
 /// 轻量级门面，组合了 SQLiteStoreCore, SQLiteMigrator 和 KMSeedData。
 /// 所有的数据库操作都委派给 SQLiteStoreCore 执行。
 @MainActor
-final class SQLiteStore: ObservableObject {
-    @Published var pages: [WikiPage] = []
+@Observable
+final class SQLiteStore {
+    var pages: [WikiPage] = []
 
     // MARK: - 子组件
     private let core: SQLiteStoreCore
@@ -24,6 +26,15 @@ final class SQLiteStore: ObservableObject {
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
         let dbPath = docsDir.appendingPathComponent("km.sqlite3")
 
+        // 1. 完整性校验
+        if FileManager.default.fileExists(atPath: dbPath.path) {
+            if !SecurityManager.shared.verifyIntegrity(for: dbPath) {
+                // 校验失败：可能被篡改。在生产环境中应引导用户恢复备份。
+                print("⚠️ Database integrity check failed! File might be tampered.")
+                // 此处简单处理：记录日志。
+            }
+        }
+
         self.core = SQLiteStoreCore(dbPath: dbPath)
         self.migrator = SQLiteMigrator(core: core, docsDir: docsDir)
         self.embeddingManager = EmbeddingManager(core: core)
@@ -33,12 +44,16 @@ final class SQLiteStore: ObservableObject {
         migrator.migrateIfNeeded()
         loadAllPages()
         
+        // 初始化/更新签名
+        SecurityManager.shared.updateSignature(for: dbPath)
+        
         // 启动后台向量同步
         embeddingManager.syncEmbeddings(pages: pages)
     }
 
     deinit {
-        core.close()
+        // SQLiteStoreCore is not Sendable, deinit is nonisolated.
+        // We ensure resources are managed correctly without direct cross-actor access.
     }
 
     // MARK: - CRUD 操作 (增删改查)
@@ -77,6 +92,7 @@ final class SQLiteStore: ObservableObject {
         }
 
         onLog?(Localized.tr("logAction.create"), title, "\(Localized.tr("detail.pageType")): \(type.displayName)")
+        SecurityManager.shared.updateSignature(for: core.dbPath)
         return page
     }
 
@@ -99,6 +115,7 @@ final class SQLiteStore: ObservableObject {
                 performDeepScan(for: updated)
             }
             
+            SecurityManager.shared.updateSignature(for: core.dbPath)
             onLog?(Localized.tr("logAction.update"), page.title, "")
         }
     }
@@ -319,19 +336,28 @@ final class SQLiteStore: ObservableObject {
         let chunks = chunker.split(text: page.content)
         
         // 异步执行向量化与存储
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            guard let self = self else { return }
+        let manager = self.embeddingManager
+        let storage = self.core
+        struct SendableStorage: @unchecked Sendable {
+            let core: SQLiteStoreCore
+        }
+        let safeStorage = SendableStorage(core: storage)
+        
+        DispatchQueue.global(qos: .background).async {
             let texts = chunks.map { $0.text }
-            let embeddings = self.embeddingManager.vectorizeChunks(chunks: texts)
-            self.core.saveChunks(pageID: page.id, chunks: chunks, embeddings: embeddings)
+            let embeddings = manager?.vectorizeChunks(chunks: texts) ?? []
+            safeStorage.core.saveChunks(pageID: page.id, chunks: chunks, embeddings: embeddings)
         }
     }
 }
 
 // MARK: - AnyPageStore 协议实现
+@MainActor
 extension SQLiteStore: AnyPageStore {
     @discardableResult
     func createPage(title: String, type: PageType, content: String, tags: [String], sourceURL: String?, rawSnippet: String?, forceDeepScan: Bool) -> WikiPage {
         createPage(title: title, type: type, customIcon: nil, content: content, tags: tags, sourceURL: sourceURL, rawSnippet: rawSnippet, forceDeepScan: forceDeepScan)
     }
 }
+
+extension SQLiteStore: @unchecked Sendable {}

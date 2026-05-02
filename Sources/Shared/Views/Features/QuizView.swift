@@ -139,9 +139,11 @@ struct QuizView: View {
                 }
             }
             .navigationTitle(quiz.title)
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.cancel")) { dismiss() }
                 }
             }

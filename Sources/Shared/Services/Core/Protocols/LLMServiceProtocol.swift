@@ -2,7 +2,8 @@ import Foundation
 import Combine
 
 /// LLM 服务协议 (专注于核心推理与对话)
-protocol LLMServiceProtocol: AnyObject {
+@MainActor
+protocol LLMServiceProtocol: AnyObject, Sendable {
     var objectWillChange: ObservableObjectPublisher { get }
     var isProcessing: Bool { get }
     var isEnabled: Bool { get }

@@ -564,9 +564,11 @@ struct URLImportSheet: View {
                 .background(Color.wikiCard)
             }
             .navigationTitle(Localized.tr("ingest.urlImport"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.cancel")) {
                         dismiss()
                     }

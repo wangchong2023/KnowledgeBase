@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var tooltipManager = TooltipManager.shared
     @State private var selectedTab: AppTab = .wiki
@@ -43,6 +43,7 @@ struct ContentView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
+        @Bindable var store = store
         let tintColor = ThemeManager.colorForName(themeManager.accentColorRaw)
         
         ZStack {
@@ -50,7 +51,7 @@ struct ContentView: View {
                 if horizontalSizeClass == .regular {
                     adaptiveSplitView(tintColor: tintColor)
                 } else {
-                    if #available(iOS 18, *) {
+                    if #available(iOS 18.0, macOS 15.0, macCatalyst 18.0, *) {
                         modernTabView(tintColor: tintColor)
                     } else {
                         legacyTabView(tintColor: tintColor)
@@ -95,9 +96,10 @@ struct ContentView: View {
     }
     
     // MARK: - iOS 18+ Modern TabView (Bottom TabBar — consistent on iPhone & iPad)
-    @available(iOS 18, *)
+    @available(iOS 18.0, macOS 15.0, macCatalyst 18.0, *)
     @ViewBuilder
     private func modernTabView(tintColor: Color) -> some View {
+        @Bindable var store = store
         TabView(selection: $selectedTab) {
             Tab(AppTab.wiki.displayTitle, systemImage: AppTab.wiki.icon, value: AppTab.wiki) {
                 wikiTabContent
@@ -145,6 +147,7 @@ struct ContentView: View {
     // MARK: - iOS 17 Legacy TabView (Bottom TabBar)
     @ViewBuilder
     private func legacyTabView(tintColor: Color) -> some View {
+        @Bindable var store = store
         TabView(selection: $selectedTab) {
             wikiTabContent
                 .accessibilityIdentifier("Wiki")

@@ -34,6 +34,7 @@ enum DocumentFormat {
 
 /// Abstraction layer allowing different store implementations to serve as data sources.
 /// SQLiteStore is the sole implementation; PageStore was removed (JSON-based, unused).
+@MainActor
 protocol AnyPageStore {
     var pages: [WikiPage] { get }
     @discardableResult
@@ -43,8 +44,7 @@ protocol AnyPageStore {
 // Note: SQLiteStore conformance is declared in SQLiteStore.swift to avoid circular dependency
 
 // MARK: - Ingest Service (Knowledge Ingestion)
-
-/// Handles raw content ingestion: creates source pages and auto-links existing concepts.
+@MainActor
 final class IngestService {
     let scraper = LinkScraperService()
 
@@ -211,7 +211,9 @@ final class IngestService {
             
             if let page = ingestDocument(at: fileURL, type: type, pageStore: pageStore) {
                 pages.append(page)
-                LocalAnalyticsService.shared.trackEvent("document_ingested", properties: ["format": fileURL.pathExtension])
+                Task { @MainActor in
+                    LocalAnalyticsService.shared.trackEvent("document_ingested", properties: ["format": fileURL.pathExtension])
+                }
             }
         }
 

@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 /// 日志服务协议，定义审计日志的核心行为
-protocol LogServiceProtocol: AnyObject {
+protocol LogServiceProtocol: AnyObject, Sendable {
     var logEntries: [LogEntry] { get }
     var logEntriesPublisher: AnyPublisher<[LogEntry], Never> { get }
     func addLog(action: String, target: String, details: String)
@@ -15,7 +15,7 @@ protocol LogServiceProtocol: AnyObject {
 extension LogServiceProtocol {
     /// 默认实现，简化调用
     func debug(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
-        debug(message, file: file, function: function, line: line)
+        self.debug(message, file: file, function: function, line: line)
     }
     func error(_ message: String, error: Error? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         self.error(message, error: error, file: file, function: function, line: line)
@@ -24,9 +24,8 @@ extension LogServiceProtocol {
 
 // MARK: - Log Service (Operation Logging)
 /// [L1] 领域层：管理审计日志的持久化与内存缓存
-@MainActor
-final class LogService: ObservableObject, LogServiceProtocol {
-    static let shared = LogService() // 全局共享实例 (用于底层非注入场景)
+final class LogService: ObservableObject, LogServiceProtocol, @unchecked Sendable {
+    static let shared = LogService() // 全局共享实例
     
     @Published var logEntries: [LogEntry] = []
     
@@ -70,11 +69,13 @@ final class LogService: ObservableObject, LogServiceProtocol {
     // MARK: - Add Entry
     func addLog(action: String, target: String, details: String = "") {
         let entry = LogEntry(action: action, target: target, details: details)
-        logEntries.insert(entry, at: 0)
-        if logEntries.count > AppConfig.maxLogEntries { 
-            logEntries = Array(logEntries.prefix(AppConfig.maxLogEntries)) 
+        Task { @MainActor in
+            logEntries.insert(entry, at: 0)
+            if logEntries.count > AppConfig.maxLogEntries { 
+                logEntries = Array(logEntries.prefix(AppConfig.maxLogEntries)) 
+            }
+            saveToDisk()
         }
-        saveToDisk()
     }
 
     // MARK: - Persistence
@@ -96,14 +97,19 @@ final class LogService: ObservableObject, LogServiceProtocol {
 
         do {
             let data = try Data(contentsOf: logsFileURL)
-            logEntries = try decoder.decode([LogEntry].self, from: data)
+            let loadedEntries = try decoder.decode([LogEntry].self, from: data)
+            Task { @MainActor in
+                self.logEntries = loadedEntries
+            }
         } catch {
             // Try migrating from UserDefaults
             if let data = UserDefaults.standard.data(forKey: logKey),
                let decoded = try? decoder.decode([LogEntry].self, from: data) {
-                logEntries = decoded
-                saveToDisk()
-                UserDefaults.standard.removeObject(forKey: logKey)
+                Task { @MainActor in
+                    self.logEntries = decoded
+                    self.saveToDisk()
+                    UserDefaults.standard.removeObject(forKey: self.logKey)
+                }
             }
         }
     }

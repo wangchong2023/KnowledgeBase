@@ -1,7 +1,7 @@
 import Foundation
 
 /// 链接解析服务：负责从网页或 YouTube 提取 Markdown 内容
-final class LinkScraperService {
+final class LinkScraperService: @unchecked Sendable {
     
     enum ScraperError: Error {
         case invalidURL

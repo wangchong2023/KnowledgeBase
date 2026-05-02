@@ -64,3 +64,5 @@ final class PluginMarketService: ObservableObject {
         }
     }
 }
+
+extension PluginMarketService: @unchecked Sendable {}

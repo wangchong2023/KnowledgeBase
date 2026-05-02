@@ -65,21 +65,46 @@ actor LinkService {
     func hybridSearchWithDiagnostics(query: String, in pages: [WikiPage], embeddingManager: EmbeddingManager) -> (results: [WikiPage], diagnostics: [SearchDiagnosticInfo.ResultScore]) {
         let keywordResults = search(query: query, in: pages)
         let semanticScored = embeddingManager.search(query: query)
-        let semanticResults = semanticScored.compactMap { res -> WikiPage? in
-            pages.first { $0.id == res.id }
-        }
+        
+        // 动态门槛：对于短查询，语义门槛要极高，否则噪音太大
+        let similarityThreshold: Float = query.count < 4 ? 0.85 : 0.75
+        
+        let semanticResults = semanticScored
+            .filter { res -> Bool in
+                // 动态门槛：对于短查询，语义门槛要极高
+                if query.count < 4 {
+                    // 对于短词，如果语义得分不足 0.88，则必须包含关键词
+                    if res.score > 0.88 { return true }
+                    if let page = pages.first(where: { $0.id == res.id }) {
+                        let lowerTitle = page.title.lowercased()
+                        let lowerQuery = query.lowercased()
+                        return lowerTitle.contains(lowerQuery)
+                    }
+                    return false
+                }
+                return res.score > similarityThreshold
+            }
+            .compactMap { res -> WikiPage? in
+                pages.first { $0.id == res.id }
+            }
         
         let k = 60
         var scores: [UUID: Double] = [:]
         var diagMap: [UUID: (fts: Int, vec: Int)] = [:]
         
+        // 只有在关键词命中或者语义得分极高时才认为有效
+        
+        // 动态权重：对于短查询（如 "3D"），关键词匹配更可靠
+        let keywordWeight = query.count < 4 ? 1.5 : 1.0
+        let semanticWeight = 1.0
+        
         for (index, page) in keywordResults.enumerated() {
-            scores[page.id, default: 0] += 1.0 / Double(k + index + 1)
+            scores[page.id, default: 0] += (1.0 / Double(k + index + 1)) * keywordWeight
             diagMap[page.id] = (index + 1, -1)
         }
         
         for (index, page) in semanticResults.enumerated() {
-            scores[page.id, default: 0] += 1.0 / Double(k + index + 1)
+            scores[page.id, default: 0] += (1.0 / Double(k + index + 1)) * semanticWeight
             let existing = diagMap[page.id] ?? (-1, -1)
             diagMap[page.id] = (existing.fts, index + 1)
         }

@@ -3,7 +3,7 @@ import SwiftUI
 /// 手表端语音采集视图
 struct WatchDictationView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var text = ""
     
     var body: some View {

@@ -13,7 +13,8 @@ final class PluginRegistry: ObservableObject {
     var analytics: AnalyticsServiceProtocol?
     
     // 数据提供者：用于将核心数据（如页面列表）安全传递给沙盒
-    var pagesProvider: (() -> [WikiPage])?
+    // 数据提供者：用于将核心数据（如页面列表）安全传递给沙盒
+    var pagesProvider: (@Sendable () -> [WikiPage])?
     
     // 内核版本定义
     nonisolated let currentHostVersion = "2.0.0"
@@ -48,7 +49,7 @@ final class PluginRegistry: ObservableObject {
     // MARK: - Plugin Context Implementation
     private struct PluginContextImpl: PluginContext {
         let manifest: PluginManifest
-        var hostVersion: String { PluginRegistry.shared.currentHostVersion }
+        var hostVersion: String { "2.0.0" } // nonisolated copy, avoids @MainActor crossing
         
         func log(_ message: String) {
             LogService.shared.debug("🔌 [Plugin:\(manifest.id)] \(message)")

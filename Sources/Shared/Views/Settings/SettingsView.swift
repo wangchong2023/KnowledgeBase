@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct SettingsView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var llmService: LLMService
     @State private var showResetConfirmation = false
@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var showFolderImporterForImport = false
     
     var body: some View {
+        @Bindable var store = store
         NavigationStack {
             List {
                 // ── 外观 ──
@@ -157,7 +158,9 @@ struct SettingsView: View {
                     Text(Localized.tr("settings.section.about"))
                 }
             }
+#if os(iOS)
             .listStyle(.insetGrouped)
+#endif
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("settings.settings"))

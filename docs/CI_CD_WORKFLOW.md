@@ -1,4 +1,21 @@
-# Knowledge Management 持续集成与发布工作流 (CI/CD Workflow)
+# Knowledge Management 持续集成与发布工作流# 持续集成与交付 (CI/CD) 规范
+
+## 1. 提交前检查 (Pre-commit)
+开发者在 Push 代码前应在本地执行：
+- `xcodebuild build`：确保 Swift 6 Strict Concurrency 模式下无 Error。
+- `SwiftLint`：无严重风格告警。
+
+## 2. 自动化流水线 (CI Pipeline)
+每次 Pull Request 触发：
+- **Build Audit**: 开启 `-Xfrontend -strict-concurrency=complete`。
+- **Unit Testing**: 执行 `KMStoreTests`, `ServiceTests`。
+- **UI Testing**: 执行 `KMUITests`（核心路径自动化）。
+- **Performance Check**: 监控 `SearchIndexing` 耗时，若超过阈值则告警。
+
+## 3. 发布标准
+- **Crash Free Rate**: > 99.9%
+- **Documentation**: 所有新增 Service 必须具备 L0-L3 分层说明。
+- **Test Coverage**: 核心业务逻辑（Storage, AI, Search）覆盖率 > 80%。
 
 为了确保 Knowledge Management 在快速迭代中始终保持“工业级稳定性”，我们定义以下自动化流水线。
 

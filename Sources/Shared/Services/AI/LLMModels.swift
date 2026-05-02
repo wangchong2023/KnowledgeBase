@@ -13,7 +13,7 @@ struct LLMProviderMetadata: Codable {
 
 // MARK: - LLM Registry
 final class LLMRegistry {
-    static let shared = LLMRegistry()
+    nonisolated(unsafe) static let shared = LLMRegistry()
     private var providers: [String: LLMProviderMetadata] = [:]
     
     private init() {

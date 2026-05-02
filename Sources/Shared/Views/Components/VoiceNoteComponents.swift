@@ -4,7 +4,7 @@ import SwiftUI
 struct SaveVoiceNoteSheet: View {
     @ObservedObject var speechService: SpeechService
     @Binding var title: String
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Environment(\.dismiss) private var dismiss
     @State private var selectedType: PageType = .source
     
@@ -21,7 +21,9 @@ struct SaveVoiceNoteSheet: View {
             }
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("speech.saveTitle"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
         }
     }
     

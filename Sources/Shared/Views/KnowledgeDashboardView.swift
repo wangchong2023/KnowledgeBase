@@ -1,9 +1,9 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 
 /// 知识资产仪表盘 (Designer & PM 视角：可视化知识价值)
 @MainActor
 struct KnowledgeDashboardView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     
     var body: some View {
         ScrollView {
@@ -112,7 +112,7 @@ struct MetricBox: View {
 
 /// 每日闪念区域 (PM 视角：主动召回交互)
 struct DailyRecapSection: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var recap: KnowledgeInsightService.DailyRecap?
     @State private var isLoading = false
     
@@ -134,29 +134,36 @@ struct DailyRecapSection: View {
                     .frame(maxWidth: .infinity)
                     .padding()
             } else if let recap = recap {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(recap.targetPageTitle)
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.wikiAccent)
-                    
-                    Text(recap.insight)
-                        .font(.body)
-                        .foregroundStyle(.wikiText)
-                    
-                    Divider()
-                    
-                    HStack(alignment: .top) {
-                        Image(systemName: "lightbulb.fill")
-                            .foregroundStyle(.yellow)
-                        Text(recap.suggestedConnection)
-                            .font(.caption)
-                            .italic()
-                            .foregroundStyle(.wikiSecondary)
+                Button {
+                    if let target = store.pages.first(where: { $0.title == recap.targetPageTitle }) {
+                        store.navigationPath.append(target)
                     }
+                } label: {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(recap.targetPageTitle)
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.wikiAccent)
+                        
+                        Text(recap.insight)
+                            .font(.body)
+                            .foregroundStyle(.wikiText)
+                        
+                        Divider()
+                        
+                        HStack(alignment: .top) {
+                            Image(systemName: "lightbulb.fill")
+                                .foregroundStyle(.yellow)
+                            Text(recap.suggestedConnection)
+                                .font(.caption)
+                                .italic()
+                                .foregroundStyle(.wikiSecondary)
+                        }
+                    }
+                    .padding()
+                    .background(Color.wikiCard)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
-                .padding()
-                .background(Color.wikiCard)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .buttonStyle(.plain)
             } else {
                 Text(Localized.tr("dashboard.dailyInsights.refresh"))
                     .font(.caption)
@@ -173,9 +180,12 @@ struct DailyRecapSection: View {
     private func loadRecap() {
         guard !isLoading else { return }
         isLoading = true
+        let svc = self.store.insightService
+        let llm = self.store.llmService
+        let pages = self.store.pages
         Task {
             do {
-                let result = try await store.insightService.generateDailyRecap(pages: store.pages, llmService: store.llmService)
+                let result = try await svc.generateDailyRecap(pages: pages, llmService: llm)
                 await MainActor.run {
                     self.recap = result
                     self.isLoading = false

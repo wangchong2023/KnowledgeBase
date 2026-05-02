@@ -11,7 +11,7 @@ import RealityKitContent
 #endif
 
 struct VisionProSpatialView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var orbitAngle: Angle = .degrees(0)
     @State private var showPageDetail = false
     @State private var selectedPage: WikiPage?

@@ -12164,6 +12164,7 @@
       }
     },
     "search.advancedAI" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {

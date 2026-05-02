@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Lint Service (Health Check)
 /// 对知识库进行健康检查：断裂链接、孤立页面、存根页面、陈旧内容。
 /// Returns issues without side effects — caller decides what to do with results.
-final class LintService {
+final class LintService: @unchecked Sendable {
     
     /// Threshold (in days) after which an active page is considered stale.
     private static let stalePageThresholdDays = 30

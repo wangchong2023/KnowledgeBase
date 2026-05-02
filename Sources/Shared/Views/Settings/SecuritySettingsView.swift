@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct SecuritySettingsView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Inject var securityService: VaultSecurityService
     
     var body: some View {
+        @Bindable var store = store
         List {
             Section {
                 Toggle(isOn: $store.isPrivacyModeEnabled) {

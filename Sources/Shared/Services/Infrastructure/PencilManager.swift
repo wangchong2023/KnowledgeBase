@@ -26,13 +26,13 @@ final class PencilManager: NSObject {
     }
     #endif
     
+#if os(iOS)
     func register(to view: UIView) {
-        #if os(iOS)
         let interaction = UIPencilInteraction()
         interaction.delegate = self
         view.addInteraction(interaction)
-        #endif
     }
+#endif
 }
 
 #if os(iOS)

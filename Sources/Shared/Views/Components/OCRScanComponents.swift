@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 import PhotosUI
 
 // MARK: - OCR Image Picker Area

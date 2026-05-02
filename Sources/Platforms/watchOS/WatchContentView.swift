@@ -3,7 +3,7 @@ import SwiftUI
 /// KMWatch 主界面 (Apple Watch)
 /// 专注于极简查阅与快速采集。
 struct WatchContentView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var isShowingDictation = false
     
     var body: some View {

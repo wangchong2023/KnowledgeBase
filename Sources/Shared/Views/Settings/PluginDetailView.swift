@@ -53,7 +53,9 @@ struct PluginDetailView: View {
             .padding()
         }
         .background(Color.wikiBackground)
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
     }
     
     private var actionButtons: some View {

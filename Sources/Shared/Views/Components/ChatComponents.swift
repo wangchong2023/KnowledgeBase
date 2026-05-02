@@ -4,7 +4,7 @@ import SwiftUI
 struct ChatBubbleView: View {
     let message: ChatMessage
     let pages: [WikiPage]
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var referencesExpanded = false
     
     var body: some View {
@@ -181,7 +181,7 @@ struct ChatBubbleView: View {
 struct ChatContentView: View {
     let text: String
     let pages: [WikiPage]
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var expanded = false
     
     var body: some View {

@@ -9,7 +9,7 @@ struct IndexView: View {
 
 // MARK: - Index View Content (for use inside parent NavigationStack)
 struct IndexViewContent: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
 
     var body: some View {
         List {
@@ -88,7 +88,9 @@ struct IndexViewContent: View {
                 }
             }
         }
+#if os(iOS)
         .listStyle(.insetGrouped)
+#endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("sidebar.masterIndex"))
@@ -126,7 +128,7 @@ struct IndexStatView: View {
 // MARK: - Index Row View
 struct IndexRowView: View {
     let page: WikiPage
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
 
     var body: some View {
         HStack(spacing: 10) {

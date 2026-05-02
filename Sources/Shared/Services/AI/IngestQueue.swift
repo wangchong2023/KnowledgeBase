@@ -1,6 +1,8 @@
 import Foundation
 import Combine
+#if !os(macOS)
 import BackgroundTasks
+#endif
 
 /// 离线处理队列 (Architect 视角：高并发与后台解耦)
 /// 负责在大规模导入文档时，将向量化与 AI 编译任务压入后台队列，不阻塞前台 UI。
@@ -22,9 +24,11 @@ final class IngestQueue: ObservableObject {
     
     /// 注册后台处理任务 (Senior Dev Item #4)
     func registerBackgroundTasks() {
+#if !os(macOS)
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.zhimind.ingest.process", using: nil) { task in
             self.handleBackgroundTask(task: task as! BGProcessingTask)
         }
+#endif
     }
     
     /// 将导入任务加入队列
@@ -66,34 +70,37 @@ final class IngestQueue: ObservableObject {
     }
 
     // MARK: - 后台调度逻辑
+#if !os(macOS)
     private func handleBackgroundTask(task: BGProcessingTask) {
-        // 如果队列为空，直接结束
         guard pendingCount > 0 else {
             task.setTaskCompleted(success: true)
             return
         }
         
         task.expirationHandler = {
-            // 当系统强制中断时，清理并等待下次机会
             self.operationQueue.cancelAllOperations()
         }
         
-        // 执行剩余任务
-        // (实际逻辑中可通过通知或直接调用 operationQueue)
         task.setTaskCompleted(success: true)
     }
+#endif
     
     func scheduleAppRefresh() {
         guard pendingCount > 0 else { return }
         
+#if !os(macOS)
         let request = BGProcessingTaskRequest(identifier: "com.zhimind.ingest.process")
         request.requiresNetworkConnectivity = false
-        request.requiresExternalPower = false // 允许电池下工作，增加弹性
+        request.requiresExternalPower = false
         
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
             LogService.shared.error("❌ [IngestQueue] 无法调度后台任务：\(error)")
         }
+#endif
     }
 }
+
+// MARK: - Sendable 合规声明
+extension IngestQueue: @unchecked Sendable {}

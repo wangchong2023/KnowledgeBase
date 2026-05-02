@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 图形可视化容器视图
 struct GraphContainerView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     var heroNamespace: Namespace.ID
     @State private var selectedNodeID: UUID?
     @State private var nodes: [GraphNode] = []
@@ -129,9 +129,11 @@ struct GraphContainerView: View {
                 }
             )
             .navigationTitle(Localized.tr("graph.insights"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.cancel")) {
                         showInsights = false
                     }
@@ -141,7 +143,7 @@ struct GraphContainerView: View {
     }
     
     private var graphToolbar: some ToolbarContent {
-        ToolbarItem(placement: .topBarTrailing) {
+        ToolbarItem(placement: .automatic) {
             HStack(spacing: 8) {
                 // 左侧统计文字，增加起始间距
                 Text(Localized.trf("graph.nodesConnections", getFilteredNodes().count, getFilteredEdges(for: getFilteredNodes()).count))
@@ -344,7 +346,7 @@ struct GraphCanvasView: View {
 
 // MARK: - Subviews
 private struct GraphEmptyStateView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     
     var body: some View {
         VStack(spacing: 32) {

@@ -3,7 +3,7 @@ import Foundation
 // MARK: - LLM HTTP Client
 /// Handles all HTTP communication with OpenAI-compatible LLM APIs.
 /// Supports both non-streaming and streaming (SSE) requests.
-final class LLMClient {
+final class LLMClient: @unchecked Sendable {
     
     // MARK: - Config
     private let baseURL: String
@@ -135,8 +135,6 @@ final class SSEParser {
                         fullContent += content
                         continuation.yield(content)
                     }
-                    
-                    // Yield accumulated full content at end
                     continuation.finish()
                 } catch {
                     continuation.finish(throwing: error)

@@ -20,7 +20,9 @@ struct HostingSetupSheet: View {
             }
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("collab.hostSession"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
         }
     }
     

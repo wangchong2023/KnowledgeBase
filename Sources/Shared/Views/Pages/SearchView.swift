@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SearchView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var searchText = ""
     @State private var filterType: PageType?
     @State private var filterStatus: PageStatus?
@@ -95,30 +95,6 @@ struct SearchView: View {
                     .padding(.leading, 14)
                     .padding(.vertical, 10)
                     .background(Color.wikiCard)
-                    
-                    if !searchText.isEmpty {
-                        Button(action: runAdvancedSearch) {
-                            ZStack {
-                                if store.isAdvancedSearching {
-                                    ProgressView().scaleEffect(0.8).tint(.white)
-                                } else {
-                                    Text(Localized.tr("search.advancedAI"))
-                                        .font(.system(size: 14, weight: .bold))
-                                }
-                            }
-                            .foregroundStyle(.white)
-                            .frame(maxHeight: .infinity)
-                            .padding(.horizontal, 16)
-                            .background(
-                                LinearGradient(
-                                    colors: [.wikiAccent, .wikiAccent.opacity(0.85)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
-                        }
-                        .transition(.move(edge: .trailing))
-                    }
                 }
                 .frame(height: 46)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -152,6 +128,28 @@ struct SearchView: View {
 
                         Divider().frame(height: 24).background(Color.wikiBorder)
 
+                        // Status Filters
+                        Menu {
+                            Button(Localized.tr("misc.all")) { filterStatus = nil }
+                            ForEach(PageStatus.allCases, id: \.self) { status in
+                                Button(status.displayName) { filterStatus = status }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "flag")
+                                    .font(.caption)
+                                Text(filterStatus?.displayName ?? Localized.tr("page.status"))
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(filterStatus == nil ? Color.wikiCard : Color.wikiAccent.opacity(0.1))
+                            .clipShape(Capsule())
+                            .foregroundStyle(filterStatus == nil ? .wikiSecondary : .wikiAccent)
+                        }
+
+                        Divider().frame(height: 24).background(Color.wikiBorder)
+
                         // Sort options
                         Menu {
                             ForEach(SortOption.allCases, id: \.self) { option in
@@ -179,35 +177,6 @@ struct SearchView: View {
             .padding(.top, 12)
             .background(Color.wikiBackground)
             
-            // AI Search Trigger (Conditional)
-            if store.llmService.isEnabled && !searchText.isEmpty && !useAdvancedSearch {
-                Button(action: runAdvancedSearch) {
-                    HStack(spacing: 8) {
-                        if store.isAdvancedSearching {
-                            ProgressView().scaleEffect(0.8).tint(.white)
-                        } else {
-                            Image(systemName: "sparkles")
-                        }
-                        Text(Localized.tr("search.advancedAI"))
-                            .font(.system(size: 13, weight: .bold))
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(
-                        LinearGradient(
-                            colors: [.wikiAccent, .wikiAccent.opacity(0.8)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .foregroundStyle(.white)
-                    .clipShape(Capsule())
-                    .shadow(color: Color.wikiAccent.opacity(0.4), radius: 8, y: 4)
-                }
-                .buttonStyle(ScaleButtonStyle())
-                .padding(.top, 8)
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
             
             // Main Results Content
             ZStack {
@@ -304,7 +273,9 @@ struct SearchView: View {
         }
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("search.title"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.large)
+#endif
         .sheet(item: $previewPage) { page in
             PagePreviewSheet(page: page)
         }
@@ -371,9 +342,11 @@ struct PagePreviewSheet: View {
             }
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("misc.preview"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.close")) { dismiss() }
                 }
             }
@@ -460,9 +433,11 @@ struct SearchDiagnosticSheet: View {
                 }
             }
             .navigationTitle(Localized.tr("search.diag.title"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.close")) { dismiss() }
                 }
             }

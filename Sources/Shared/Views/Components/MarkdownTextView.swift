@@ -1,4 +1,4 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -14,6 +14,7 @@ final class CursorState: ObservableObject {
 }
 
 // MARK: - Coordinator
+@MainActor
 final class MarkdownTextViewCoordinator: NSObject, UITextViewDelegate {
     let cursorState: CursorState
     /// 指向活跃的 UITextView，用于 executeAction 直接操作光标
@@ -95,6 +96,7 @@ struct MarkdownTextViewRepresentable: UIViewRepresentable {
 
 // MARK: - Cursor-aware Action Executor
 /// 持有 coordinator 引用，提供光标感知文本操作。
+@MainActor
 final class EditorActionExecutor {
     let coordinator: MarkdownTextViewCoordinator
 

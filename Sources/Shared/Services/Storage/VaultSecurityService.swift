@@ -40,3 +40,5 @@ final class VaultSecurityService: ObservableObject {
         HapticManager.shared.trigger(.lock)
     }
 }
+
+extension VaultSecurityService: @unchecked Sendable {}

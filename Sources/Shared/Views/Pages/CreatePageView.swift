@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CreatePageView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var type: PageType = .concept
@@ -79,7 +79,9 @@ struct CreatePageView: View {
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("create.title"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(Localized.tr("create.create")) {

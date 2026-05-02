@@ -2,7 +2,7 @@ import Foundation
 
 /// 基础分析服务实现：目前仅打印日志，未来可接入端侧埋点或 Firebase
 @MainActor
-final class LocalAnalyticsService: AnalyticsServiceProtocol {
+final class LocalAnalyticsService: AnalyticsServiceProtocol, @unchecked Sendable {
     static let shared = LocalAnalyticsService()
     
     private let logURL: URL
@@ -14,29 +14,37 @@ final class LocalAnalyticsService: AnalyticsServiceProtocol {
     
     func trackEvent(_ name: String, properties: [String: Any]? = nil) {
         let timestamp = Date().formatted(date: .omitted, time: .standard)
-        let event: [String: Any] = [
-            "event": name,
-            "timestamp": Date().timeIntervalSince1970,
-            "properties": properties ?? [:]
-        ]
         
         // 1. 控制台实时反馈
         print("📊 [Analytics] \(timestamp) | \(name) | \(properties?.description ?? "")")
+        
+        let event: [String: Any] = [
+            "name": name,
+            "properties": properties ?? [:],
+            "timestamp": Date().timeIntervalSince1970
+        ]
         
         // 2. 持久化至沙盒 (异步追加)
         saveEventToFile(event)
     }
     
     private func saveEventToFile(_ event: [String: Any]) {
+        // 先序列化为 Data，确保可以安全传递给后台线程
+        guard let dataToSave = try? JSONSerialization.data(withJSONObject: event) else { return }
+        let logURL = self.logURL
+        
         DispatchQueue.global(qos: .utility).async {
             var logs: [[String: Any]] = []
-            if let data = try? Data(contentsOf: self.logURL),
+            if let data = try? Data(contentsOf: logURL),
                let existing = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
                 logs = existing
             }
-            logs.append(event)
-            if let updatedData = try? JSONSerialization.data(withJSONObject: logs, options: .prettyPrinted) {
-                try? updatedData.write(to: self.logURL)
+            
+            if let newEvent = try? JSONSerialization.jsonObject(with: dataToSave) as? [String: Any] {
+                logs.append(newEvent)
+                if let updatedData = try? JSONSerialization.data(withJSONObject: logs, options: .prettyPrinted) {
+                    try? updatedData.write(to: logURL)
+                }
             }
         }
     }

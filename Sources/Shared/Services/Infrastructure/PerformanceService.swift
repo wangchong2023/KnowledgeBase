@@ -165,7 +165,9 @@ struct PerformanceDashboardView: View {
             }
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("perf.title"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -177,8 +179,10 @@ struct PerformanceDashboardView: View {
             }
             .onAppear {
                 service.updateMemoryUsage()
-                timer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
-                    service.updateMemoryUsage()
+                timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak service] _ in
+                    Task { @MainActor in
+                        service?.updateMemoryUsage()
+                    }
                 }
             }
             .onDisappear {

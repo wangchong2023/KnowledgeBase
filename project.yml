@@ -50,6 +50,8 @@ targets:
           - "Platforms/iOS/**"
           - "Platforms/watchOS/**"
           - "Info.plist"
+          - "Base.lproj/**"
+          - "LaunchScreen.storyboard"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.km.app

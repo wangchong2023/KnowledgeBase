@@ -1,10 +1,10 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 import PhotosUI
 
 // MARK: - OCR Scanner View
 @MainActor
 struct OCRScanView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var selectedImage: WikiImage?
     @State private var recognizedText = ""
@@ -68,9 +68,11 @@ struct OCRScanView: View {
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("ocr.title"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .automatic) {
                     Button(Localized.tr("misc.cancel")) {
                         dismiss()
                     }

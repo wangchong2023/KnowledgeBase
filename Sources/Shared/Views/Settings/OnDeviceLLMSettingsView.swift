@@ -1,11 +1,11 @@
-import SwiftUI
+@preconcurrency import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: - On-Device LLM Settings View
 @MainActor
 struct OnDeviceLLMSettingsView: View {
     @StateObject private var onDeviceService = OnDeviceLLMService()
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var testPrompt = ""
     @State private var testResult = ""
     @State private var showImportPicker = false

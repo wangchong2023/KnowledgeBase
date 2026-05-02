@@ -113,7 +113,7 @@ struct Triangle: Shape {
 // MARK: - Tooltip Overlay Manager
 /// 管理引导提示的显示状态，支持首次使用检测。
 class TooltipManager: ObservableObject {
-    static let shared = TooltipManager()
+    nonisolated(unsafe) static let shared = TooltipManager()
 
     @Published var activeTooltip: TooltipType?
     @Published var shownTooltips: Set<String> = []

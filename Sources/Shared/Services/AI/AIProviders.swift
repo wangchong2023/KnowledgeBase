@@ -23,42 +23,13 @@ final class DeepSeekStrategy: LLMStrategy {
     }
     
     func rewrite(query: String) async -> String {
-        let prompt = """
-        \(PromptService.shared.queryRewritePrompt)
-        查询：\(query)
-        """
-        return (try? await generate(prompt: prompt, temperature: 0.2)) ?? query
+        // 搜索页面基于本地搜索，不再进行大模型改写
+        return query
     }
     
     func rerank(query: String, candidates: [WikiPage]) async throws -> [WikiPage] {
-        guard !candidates.isEmpty else { return candidates }
-        
-        let candidateList = candidates.enumerated().map { (index, page) in
-            "- [ID:\(index)] \(page.title) | 标签: \(page.tags.joined(separator: ", "))"
-        }.joined(separator: "\n")
-        
-        let prompt = """
-        \(PromptService.shared.rerankPrompt)
-        
-        # Candidates:
-        \(candidateList)
-        
-        # Query: \"\(query)\"
-        """
-        
-        let result = try await generate(prompt: prompt, temperature: 0.1)
-        
-        // 解析 JSON
-        let clean = result.replacingOccurrences(of: "```json", with: "").replacingOccurrences(of: "```", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let data = clean.data(using: .utf8),
-              let json = try? JSONSerialization.jsonObject(with: data) as? [String: [Int]],
-              let ids = json["ranked_ids"] else {
-            return candidates
-        }
-        
-        return ids.compactMap { id in
-            id < candidates.count ? candidates[id] : nil
-        }
+        // 搜索页面基于本地搜索，不再进行大模型重排
+        return candidates
     }
     
     private func makeRequest(body: [String: Any]) async throws -> [String: Any] {
@@ -115,7 +86,7 @@ final class OllamaStrategy: LLMStrategy {
     }
     
     func rewrite(query: String) async -> String {
-        return (try? await generate(prompt: "Rewrite this search query to keywords: \(query)", temperature: 0.1)) ?? query
+        return query
     }
     
     func rerank(query: String, candidates: [WikiPage]) async throws -> [WikiPage] {

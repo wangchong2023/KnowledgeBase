@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Backup & Recovery View
 struct BackupView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @StateObject private var backupService = BackupService()
     @Environment(\.dismiss) private var dismiss
     @State private var showRestoreConfirmation = false
@@ -23,7 +23,7 @@ struct BackupView: View {
                             Text(Localized.tr("backup.lastBackup"))
                                 .foregroundStyle(.wikiSecondary)
                             Spacer()
-                            Text(lastDate, style: .relative)
+                            Text(lastDate.formatted(date: .numeric, time: .standard))
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
@@ -80,7 +80,9 @@ struct BackupView: View {
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("backup.title"))
+#if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+#endif
             .alert(Localized.tr("backup.restoreTitle"), isPresented: $showRestoreConfirmation) {
                 Button(Localized.tr("backup.restore"), role: .destructive) {
                     restoreFromBackup()

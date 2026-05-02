@@ -9,13 +9,12 @@ enum SidebarSelection: Hashable {
 }
 
 struct SidebarView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     var heroNamespace: Namespace.ID
 
     /// 状态恢复 (Platinum Experience Item #3)
     @SceneStorage("sidebar.selectedPageID") private var restoredPageID: String?
     @SceneStorage("sidebar.selectedTool") private var restoredTool: String?
-    @SceneStorage("sidebar.isKBExpanded") private var isKBExpanded: Bool = true
     @SceneStorage("sidebar.isRecentExpanded") private var isRecentExpanded: Bool = true
 
     private var selectionBinding: Binding<SidebarSelection?> {
@@ -86,25 +85,25 @@ struct SidebarView: View {
                     Label(Localized.tr("sidebar.allPages"), systemImage: "tray.full.fill")
                 }
                 
-                // 按类型分类 (折叠组)
-                DisclosureGroup(isExpanded: $isKBExpanded) {
-                    ForEach(PageType.allCases) { type in
-                        let count = store.pages.filter { $0.type == type }.count
-                        if count > 0 {
-                            NavigationLink(value: SidebarSelection.tool(.index)) {
+                // 按类型直接展示 (去除折叠嵌套，保持扁平清晰)
+                ForEach(PageType.allCases) { type in
+                    let count = store.pages.filter { $0.type == type }.count
+                    if count > 0 {
+                        NavigationLink(value: SidebarSelection.tool(.index)) {
+                            Label {
                                 HStack {
-                                    Label(type.displayName, systemImage: type.icon)
+                                    Text(type.displayName)
                                     Spacer()
                                     Text("\(count)")
                                         .font(.caption2)
                                         .foregroundStyle(.wikiSecondary)
                                 }
+                            } icon: {
+                                Image(systemName: type.icon)
+                                    .frame(width: 20, alignment: .center)
                             }
                         }
                     }
-                } label: {
-                    Label(Localized.tr("sidebar.navigation"), systemImage: "square.grid.2x2.fill")
-                        .font(.subheadline.bold())
                 }
             } header: {
                 Text(Localized.tr("sidebar.universe"))
@@ -191,7 +190,7 @@ struct SidebarView: View {
         #endif
         .navigationTitle(Localized.tr("app.name"))
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .automatic) {
                 Button(action: {
                     HapticManager.shared.trigger(.selection)
                     store.securityService.lock()
@@ -253,7 +252,7 @@ struct SidebarView: View {
 struct PageSidebarRow: View {
     let page: WikiPage
     var heroNamespace: Namespace.ID
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
 
     private var snippet: String? {
         let stripped = page.content

@@ -5,7 +5,7 @@ import SceneKit
 /// 3D knowledge graph visualization using SceneKit.
 /// Nodes float in 3D space, connected by edges, with force-directed layout.
 struct Graph3DView: View {
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var scene: SCNScene?
     @State private var selectedNodeID: UUID?
     @State private var cameraDistance: Float = 30
@@ -35,7 +35,9 @@ struct Graph3DView: View {
         }
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("graph3d.title"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
         .onAppear { buildScene() }
         .onChange(of: store.pages.count) { _, _ in buildScene() }
         .onChange(of: filterType) { _, _ in buildScene() }

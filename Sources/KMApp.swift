@@ -2,7 +2,7 @@ import SwiftUI
 
 @main
 struct KMApp: App {
-    @StateObject private var store = KMStore()
+    @State private var store = KMStore()
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var llmService = LLMService()
     @State private var hasSeenSplash = false

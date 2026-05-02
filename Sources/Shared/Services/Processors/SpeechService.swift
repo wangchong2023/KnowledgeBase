@@ -289,3 +289,5 @@ enum SpeechError: LocalizedError {
         }
     }
 }
+
+extension SpeechService: @unchecked Sendable {}

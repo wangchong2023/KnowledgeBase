@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Voice Note View
 struct VoiceNoteView: View {
     @StateObject private var speechService = SpeechService()
-    @EnvironmentObject var store: KMStore
+    @Environment(KMStore.self) var store
     @State private var noteTitle = ""
     @State private var showSaveSheet = false
     @Environment(\.dismiss) private var dismiss
@@ -35,8 +35,10 @@ struct VoiceNoteView: View {
         }
         .background(Color.wikiBackground.ignoresSafeArea())
         .navigationTitle(Localized.tr("speech.title"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.visible, for: .navigationBar)
+#endif
         .sheet(isPresented: $showSaveSheet) {
             SaveVoiceNoteSheet(speechService: speechService, title: $noteTitle)
         }

@@ -160,7 +160,9 @@ struct PromptWorkshopView: View {
             }
         }
         .navigationTitle(Localized.tr("prompt.factory.title"))
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+#endif
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button(action: {
