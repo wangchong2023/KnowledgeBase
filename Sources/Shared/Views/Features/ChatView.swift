@@ -1,9 +1,11 @@
 import SwiftUI
+import WebKit
 
 // MARK: - Chat View (entry point with NavigationStack)
 struct ChatView: View {
+    @Binding var selectedTab: ContentView.AppTab
     var body: some View {
-        ChatViewContent()
+        ChatViewContent(selectedTab: $selectedTab)
     }
 }
 
@@ -12,6 +14,7 @@ struct ChatViewContent: View {
     @Environment(KMStore.self) var store
     @EnvironmentObject var llmService: LLMService
     @StateObject private var promptService = PromptService.shared
+    @Binding var selectedTab: ContentView.AppTab
     @State private var inputText = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -20,6 +23,8 @@ struct ChatViewContent: View {
     @State private var aiGeneratedQuestions: [String] = []
     @State private var isGeneratingAIQuestions = false
     @State private var showPrompts = false
+    @State private var exportWebView: WKWebView?
+    @State private var exportURL: IdentifiableURL?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -49,6 +54,17 @@ struct ChatViewContent: View {
                         }
                     }
                     
+                    if !llmService.chatHistory.isEmpty {
+                        Section(Localized.tr("chat.exportConversation")) {
+                            Button(action: exportAsMarkdown) {
+                                Label(Localized.tr("chat.exportMarkdown"), systemImage: "doc.text")
+                            }
+                            Button(action: exportAsPDF) {
+                                Label(Localized.tr("chat.exportPDF"), systemImage: "doc.richtext")
+                            }
+                        }
+                    }
+                    
                     Section {
                         NavigationLink(destination: LLMSettingsView()) {
                             Label(Localized.tr("chat.llmSettings"), systemImage: "gearshape")
@@ -60,6 +76,9 @@ struct ChatViewContent: View {
                 }
                 .accessibilityIdentifier("menu")
             }
+        }
+        .sheet(item: $exportURL) { identifiable in
+            ActivityView(activityItems: [identifiable.url])
         }
         .alert(Localized.tr("misc.error"), isPresented: $showError) {
             Button(Localized.tr("misc.ok")) { errorMessage = nil }
@@ -112,7 +131,7 @@ struct ChatViewContent: View {
                         chatWelcome
                     } else {
                         ForEach(llmService.chatHistory) { message in
-                            ChatBubbleView(message: message, pages: store.pages)
+                            ChatBubbleView(message: message, pages: store.pages, selectedTab: $selectedTab)
                                 .id(message.id)
                         }
                         
@@ -122,7 +141,8 @@ struct ChatViewContent: View {
                         }
                     }
                 }
-                .padding()
+                .padding(.horizontal, 10)
+                .padding(.bottom, 16)
             }
             .onChange(of: llmService.chatHistory.count) {
                 if let lastID = llmService.chatHistory.last?.id {
@@ -305,16 +325,17 @@ struct ChatViewContent: View {
         VStack(spacing: 0) {
             Divider()
             
-            HStack(alignment: .bottom, spacing: 12) {
+            HStack(alignment: .center, spacing: 12) {
                 Button(action: { showPrompts.toggle() }) {
                     Image(systemName: "sparkles.rectangle.stack")
                         .font(.title3)
-                        .foregroundStyle(.wikiAccent)
+                        .foregroundStyle(isLoading ? .wikiSecondary.opacity(0.5) : .wikiAccent)
                         .frame(width: 44, height: 44)
                         .background(Color.wikiCard)
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
+                .disabled(isLoading)
                 
                 TextField(isLoading ? Localized.tr("chat.aiRunning") : Localized.tr("chat.inputPlaceholder"), text: $inputText)
                     .font(.subheadline)
@@ -342,12 +363,13 @@ struct ChatViewContent: View {
                         .font(.title2)
                         .foregroundStyle(isLoading ? .red : (canSend ? .wikiAccent : .wikiSecondary))
                         .symbolEffect(.bounce, value: isLoading)
+                        .frame(width: 44, height: 44)
                 }
                 .accessibilityIdentifier("send")
                 .disabled(!canSend && !isLoading)
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 8)
             .background(isLoading ? Color.wikiCard.opacity(0.5) : Color.wikiCard)
             .sheet(isPresented: $showPrompts) {
                 NavigationStack {
@@ -445,4 +467,71 @@ struct ChatViewContent: View {
             }
         }
     }
+    
+    // MARK: - Export Functions
+    private func exportAsMarkdown() {
+        let history = llmService.chatHistory
+        var mdString = "# \(Localized.tr("chat.conversationHistory"))\n\n"
+        for message in history {
+            let roleName = message.role == .user ? "You" : "AI"
+            mdString += "### \(roleName)\n"
+            mdString += "\(message.content)\n\n"
+        }
+        
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ChatExport.md")
+        try? mdString.write(to: tempURL, atomically: true, encoding: .utf8)
+        self.exportURL = IdentifiableURL(url: tempURL)
+    }
+    
+    private func exportAsPDF() {
+        let webView = WKWebView()
+        self.exportWebView = webView
+        
+        let history = llmService.chatHistory
+        var htmlContent = ""
+        for message in history {
+            let roleName = message.role == .user ? "You" : "AI"
+            let color = message.role == .user ? "#007AFF" : "#333"
+            let bgColor = message.role == .user ? "#F0F8FF" : "#F9F9F9"
+            htmlContent += """
+            <div style="background-color: \(bgColor); padding: 10px; margin-bottom: 10px; border-radius: 8px;">
+                <h4 style="margin-top: 0; color: \(color);">\(roleName)</h4>
+                <p style="white-space: pre-wrap; margin-bottom: 0;">\(message.content)</p>
+            </div>
+            """
+        }
+        
+        let html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: -apple-system, sans-serif; padding: 20px; color: #333; line-height: 1.5; }
+                h1 { border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+            </style>
+        </head>
+        <body>
+            <h1>\(Localized.tr("chat.conversationHistory"))</h1>
+            \(htmlContent)
+        </body>
+        </html>
+        """
+        
+        webView.loadHTMLString(html, baseURL: nil)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            let config = WKPDFConfiguration()
+            webView.createPDF(configuration: config) { result in
+                if case .success(let data) = result {
+                    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("ChatExport.pdf")
+                    try? data.write(to: tempURL)
+                    self.exportURL = IdentifiableURL(url: tempURL)
+                }
+                self.exportWebView = nil
+            }
+        }
+    }
 }
+

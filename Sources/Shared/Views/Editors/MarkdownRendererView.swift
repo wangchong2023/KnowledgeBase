@@ -10,6 +10,7 @@ struct MarkdownRendererView: View {
     let content: String
     let isPrivate: Bool
     let onLinkTap: (String) -> Void
+    var isCompact: Bool = false
 
     @State private var tempUnlocked = false
     private let laContext = LAContext()
@@ -108,7 +109,7 @@ struct MarkdownRendererView: View {
     @ViewBuilder
     private func renderParagraph(text: String) -> some View {
         renderInlineContent(text)
-            .font(.system(.body, design: .serif))
+            .font(isCompact ? .footnote : .system(.body, design: .serif))
             .lineSpacing(6)
             .foregroundStyle(.wikiText.opacity(0.9))
     }
@@ -286,11 +287,11 @@ struct MarkdownRendererView: View {
             
             switch segment.type {
             case .text:
-                container.swiftUI.font = .body
+                container.swiftUI.font = isCompact ? Font.footnote : Font.body
             case .bold:
-                container.swiftUI.font = .body.weight(.bold)
+                container.swiftUI.font = (isCompact ? Font.footnote : Font.body).weight(.bold)
             case .italic:
-                container.swiftUI.font = .body.italic()
+                container.swiftUI.font = (isCompact ? Font.footnote : Font.body).italic()
             case .code:
                 container.swiftUI.font = .system(.caption, design: .monospaced)
                 container.swiftUI.backgroundColor = Color.wikiAccent.opacity(0.15)

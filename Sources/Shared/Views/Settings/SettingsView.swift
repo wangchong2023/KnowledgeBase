@@ -61,7 +61,7 @@ struct SettingsView: View {
                 Section {
                     Picker(selection: $themeManager.colorSchemeMode) {
                         ForEach(ColorSchemeMode.allCases, id: \.self) { mode in
-                            Label(mode.displayName, systemImage: mode.icon)
+                            Text(mode.displayName)
                                 .tag(mode)
                         }
                     } label: {
@@ -73,7 +73,7 @@ struct SettingsView: View {
                     
                     Picker(selection: $selectedLanguage) {
                         ForEach(LanguageMode.allCases, id: \.self) { mode in
-                            Label(mode.displayName, systemImage: mode.icon)
+                            Text(mode.displayName)
                                 .tag(mode)
                         }
                     } label: {
@@ -110,7 +110,7 @@ struct SettingsView: View {
                         OnDeviceLLMSettingsView()
                     }
                     
-                    SettingsNavigationRow(icon: "flask.fill", title: "提示词工厂", identifier: "AI-提示词工厂") {
+                    SettingsNavigationRow(icon: "flask.fill", title: Localized.tr("settings.promptWorkshop"), identifier: "AI-提示词工厂") {
                         PromptWorkshopView()
                     }
                 } header: {
@@ -165,7 +165,7 @@ struct SettingsView: View {
                     
                     Toggle(isOn: biometricBinding) {
                         Label {
-                            Text("生物识别保护")
+                            Text(Localized.tr("settings.biometricProtection"))
                         } icon: {
                             Image(systemName: "faceid")
                                 .foregroundStyle(.blue)
@@ -195,13 +195,10 @@ struct SettingsView: View {
                 
 
 
-                // ── 关于 ──
                 Section {
                     SettingsNavigationRow(icon: "books.vertical.circle.fill", title: Localized.tr("settings.aboutApp"), identifier: "关于-应用") {
                         SettingsAboutView()
                     }
-                } header: {
-                    Text(Localized.tr("settings.section.about"))
                 }
             }
 #if os(iOS)

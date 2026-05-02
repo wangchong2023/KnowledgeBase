@@ -6,6 +6,7 @@ struct ChatBubbleView: View {
     let pages: [WikiPage]
     @Environment(KMStore.self) var store
     @State private var referencesExpanded = false
+    @Binding var selectedTab: ContentView.AppTab
     
     var body: some View {
         switch message.role {
@@ -20,11 +21,11 @@ struct ChatBubbleView: View {
     
     private var userBubble: some View {
         HStack(alignment: .top, spacing: 10) {
-            Spacer(minLength: 40)
+            Spacer(minLength: 8)
             
             VStack(alignment: .trailing, spacing: 4) {
                 Text(message.content)
-                    .font(.subheadline)
+                    .font(.footnote)
                     .foregroundStyle(.white)
                     .padding(14)
                     .background(
@@ -62,8 +63,9 @@ struct ChatBubbleView: View {
                 .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 8) {
-                ChatContentView(text: message.content, pages: pages)
-                    .padding(14)
+                ChatContentView(text: message.content, pages: pages, selectedTab: $selectedTab)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
                     .background(Color.wikiCard)
                     .clipShape(RoundedRectangle(cornerRadius: WikiUI.mediumRadius))
                     .overlay(
@@ -82,8 +84,6 @@ struct ChatBubbleView: View {
                     .foregroundStyle(.wikiSecondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Spacer(minLength: 40)
         }
     }
     
@@ -132,7 +132,10 @@ struct ChatBubbleView: View {
                             // Page chips
                             FlowLayout(spacing: 6) {
                                 ForEach(pagesOfType, id: \.id) { page in
-                                    Button(action: { store.selectedPageID = page.id }) {
+                                    Button(action: { 
+                                        store.selectedPageID = page.id 
+                                        selectedTab = .wiki
+                                    }) {
                                         HStack(spacing: 3) {
                                             Image(systemName: page.displayIcon)
                                                 .font(.caption2)
@@ -183,6 +186,7 @@ struct ChatContentView: View {
     let pages: [WikiPage]
     @Environment(KMStore.self) var store
     @State private var expanded = false
+    @Binding var selectedTab: ContentView.AppTab
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -192,8 +196,9 @@ struct ChatContentView: View {
                 if let page = pages.first(where: { $0.title == title }) {
                     HapticManager.shared.trigger(.link)
                     store.selectedPageID = page.id
+                    selectedTab = .wiki
                 }
-            })
+            }, isCompact: true)
             
             if text.count > 1500 && !expanded {
                 Button(Localized.tr("chat.expandFull")) {

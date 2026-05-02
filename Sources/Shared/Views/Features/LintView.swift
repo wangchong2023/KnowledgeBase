@@ -110,7 +110,7 @@ struct LintViewContent: View {
     
     private var healthDashboardHeader: some View {
         VStack(spacing: 16) {
-            ZStack(alignment: .topLeading) {
+            ZStack {
                 // 上次检查时间展示在左上角
                 VStack(alignment: .leading, spacing: 2) {
                     Text(Localized.tr("lint.lastCheck.title"))
@@ -118,19 +118,21 @@ struct LintViewContent: View {
                         .foregroundStyle(.wikiSecondary)
                     
                     if let date = store.lastLintDate {
-                        Text(date, style: .date)
-                            .font(.system(size: 9, design: .monospaced))
-                        Text(date, style: .time)
-                            .font(.system(size: 9, design: .monospaced))
+                        Text(formatDate(date))
+                            .font(.system(size: 10, design: .monospaced))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     } else {
                         Text(Localized.tr("lint.lastCheck.never"))
-                            .font(.system(size: 9))
+                            .font(.system(size: 10))
+                            .lineLimit(1)
                     }
                 }
                 .padding(8)
                 .background(Color.wikiCard.opacity(0.4))
                 .clipShape(RoundedRectangle(cornerRadius: 6))
                 .padding(.leading, 10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 
                 HStack {
                     Spacer()
@@ -184,17 +186,19 @@ struct LintViewContent: View {
                             .foregroundStyle(.wikiSecondary.opacity(0.8))
                     }
                 }
-                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .font(.system(size: 10, weight: .medium, design: .rounded))
                 .foregroundStyle(.wikiSecondary)
-                .padding(12)
+                .padding(10)
                 .background(Color.wikiCard.opacity(0.7))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 12)
+                    RoundedRectangle(cornerRadius: 10)
                         .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
                 )
                 .padding(.trailing, 10)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
             }
+            .frame(height: 180)
             
             Text(healthLabel)
                 .font(.title3.bold())
@@ -429,6 +433,12 @@ struct LintViewContent: View {
         Task {
             await store.runAIScan()
         }
+    }
+
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy/M/d HH:mm"
+        return formatter.string(from: date)
     }
 }
 

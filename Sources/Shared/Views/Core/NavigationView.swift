@@ -1,4 +1,5 @@
 @preconcurrency import SwiftUI
+import WebKit
 
 @MainActor
 struct NavigationView: View {
@@ -31,7 +32,7 @@ struct DetailContentView: View {
             case .dashboard, .none:
                 KnowledgeDashboardView()
             case .chat:
-                ChatView()
+                ChatView(selectedTab: $selectedTab)
             case .taskCenter:
                 TaskCenterView()
             case .index:
@@ -101,19 +102,10 @@ struct SynthesisView: View {
     var body: some View {
         List {
             Section {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "wand.and.stars")
-                            .font(.title2)
-                            .foregroundStyle(.wikiAccent)
-                        Text(Localized.tr("sidebar.synthesis"))
-                            .font(.title2.bold())
-                    }
-                    Text(Localized.tr("synthesis.intro"))
-                        .font(.subheadline)
-                        .foregroundStyle(.wikiSecondary)
-                }
-                .padding(.vertical, 8)
+                Text(Localized.tr("synthesis.intro"))
+                    .font(.subheadline)
+                    .foregroundStyle(.wikiSecondary)
+                    .padding(.vertical, 4)
             }
             .listRowBackground(Color.clear)
             
@@ -215,24 +207,138 @@ struct SynthesisView: View {
                 .navigationTitle(outputType.title)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
+                    ToolbarItem(placement: .topBarLeading) {
                         Button(Localized.tr("misc.done")) {
                             showOutput = false
                         }
+                        .fontWeight(.semibold)
                     }
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            #if os(iOS)
-                            UIPasteboard.general.string = generatedContent
-                            #endif
-                            HapticManager.shared.trigger(.success)
-                        } label: {
-                            Image(systemName: "doc.on.doc")
+                    ToolbarItem(placement: .topBarTrailing) {
+                        HStack(spacing: 18) {
+                            Button {
+                                #if os(iOS)
+                                UIPasteboard.general.string = generatedContent
+                                #endif
+                                HapticManager.shared.trigger(.success)
+                            } label: {
+                                Image(systemName: "doc.on.doc")
+                                    .font(.system(size: 15, weight: .medium))
+                            }
+                            
+                            Button {
+                                exportAction()
+                            } label: {
+                                Image(systemName: "square.and.arrow.up")
+                                    .font(.system(size: 15, weight: .medium))
+                            }
                         }
                     }
                 }
+                .sheet(item: $pdfURL) { identifiable in
+                    ActivityView(activityItems: [identifiable.url])
+                }
+                .alert("Export Error", isPresented: $showExportError) {
+                    Button("OK", role: .cancel) { }
+                } message: {
+                    Text(exportError ?? "Unknown error occurred.")
+                }
             }
         }
+    }
+
+    @State private var pdfURL: IdentifiableURL?
+    @State private var exportWebView: WKWebView?
+    @State private var exportError: String?
+    @State private var showExportError = false
+    
+    private func exportAction() {
+        if outputType == .slides {
+            exportToPPTX()
+        } else {
+            exportToPDF()
+        }
+    }
+    
+    private func exportToPPTX() {
+        #if os(macOS)
+        Task {
+            do {
+                let url = try await AISynthesisService.shared.convertToPPTX(markdown: generatedContent, title: outputType.title)
+                await MainActor.run {
+                    self.pdfURL = IdentifiableURL(url: url)
+                    HapticManager.shared.trigger(.success)
+                }
+            } catch {
+                await MainActor.run {
+                    self.exportError = error.localizedDescription
+                    self.showExportError = true
+                }
+            }
+        }
+        #else
+        // iOS Fallback: Export as PDF since native zip is unavailable
+        exportToPDF()
+        #endif
+    }
+
+    private func exportToPDF() {
+        // 使用强引用的 WKWebView 来渲染 Markdown 并导出 PDF，防止被提前释放
+        let webView = WKWebView()
+        self.exportWebView = webView
+        let html = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { font-family: -apple-system, 'PingFang SC', sans-serif; padding: 40px; line-height: 1.6; color: #333; }
+                h1 { color: #000; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+                h2 { color: #444; margin-top: 30px; border-left: 4px solid #007AFF; padding-left: 12px; }
+                p { margin-bottom: 12px; }
+                li { margin-bottom: 8px; }
+                code { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+                pre { background: #f4f4f4; padding: 15px; border-radius: 8px; overflow-x: auto; margin: 15px 0; }
+                blockquote { border-left: 4px solid #ddd; padding-left: 20px; color: #666; font-style: italic; margin: 15px 0; }
+                table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                th { background-color: #f8f8f8; }
+            </style>
+        </head>
+        <body>
+            \(formatMarkdownToHTML(generatedContent))
+        </body>
+        </html>
+        """
+        webView.loadHTMLString(html, baseURL: nil)
+        
+        // 等待加载完成后导出
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            let config = WKPDFConfiguration()
+            webView.createPDF(configuration: config) { result in
+                if case .success(let data) = result {
+                    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(outputType.title).pdf")
+                    try? data.write(to: tempURL)
+                    self.pdfURL = IdentifiableURL(url: tempURL)
+                }
+                // 清理强引用
+                self.exportWebView = nil
+            }
+        }
+    }
+    
+    private func formatMarkdownToHTML(_ markdown: String) -> String {
+        var html = markdown
+        // 简单替换常见的 Markdown 语法为 HTML
+        html = html.replacingOccurrences(of: "\n# ", with: "<h1>")
+        html = html.replacingOccurrences(of: "\n## ", with: "<h2>")
+        html = html.replacingOccurrences(of: "\n- ", with: "<li>")
+        html = html.replacingOccurrences(of: "\n* ", with: "<li>")
+        html = html.replacingOccurrences(of: "\n", with: "<br>")
+        
+        // 处理标题结尾
+        // 注意：这是一个非常基础的转换，生产环境建议集成真正的 Markdown 解析库
+        return html
     }
     
     private func synthesisButton(type: OutputType) -> some View {
@@ -266,17 +372,17 @@ struct SynthesisView: View {
         let pagesToProcess = store.pages.filter { selectedPages.contains($0.id) }
         let combinedContent = pagesToProcess.map { "# \($0.title)\n\($0.content)" }.joined(separator: "\n\n---\n\n")
         
-        let prompt: String
-        switch type {
-        case .mindmap: prompt = promptService.mindmapPrompt
-        case .slides: prompt = promptService.slidesPrompt
-        case .quiz: prompt = promptService.quizPrompt
-        case .report: prompt = promptService.reportPrompt
-        }
-        
         Task {
             do {
-                let response = try await store.llmService.generate(prompt: prompt, systemPrompt: "You are a knowledge synthesis expert. Use the following sources:\n\n\(combinedContent)")
+                let service = AISynthesisService.shared
+                let response: String
+                switch type {
+                case .mindmap: response = try await service.generateMindMap(content: combinedContent)
+                case .slides: response = try await service.generatePresentation(content: combinedContent)
+                case .quiz: response = try await service.generateQuiz(content: combinedContent)
+                case .report: response = try await service.generateReport(content: combinedContent)
+                }
+
                 await MainActor.run {
                     self.generatedContent = response
                     self.isGenerating = false
