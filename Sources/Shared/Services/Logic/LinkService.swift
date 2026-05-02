@@ -28,11 +28,36 @@ actor LinkService {
     func search(query: String, in pages: [WikiPage]) -> [WikiPage] {
         guard !query.isEmpty else { return pages }
         let q = query.lowercased()
-        return pages.filter { page in
+        
+        let filtered = pages.filter { page in
             page.title.lowercased().contains(q) ||
             page.content.lowercased().contains(q) ||
             page.tags.contains(where: { $0.lowercased().contains(q) }) ||
             page.aliases.contains(where: { $0.lowercased().contains(q) })
+        }
+        
+        // 强制相关性排序：精确标题 > 包含标题 > 别名 > 正文
+        return filtered.sorted { p1, p2 in
+            let t1 = p1.title.lowercased()
+            let t2 = p2.title.lowercased()
+            
+            // 1. 标题完全一致
+            let exact1 = (t1 == q)
+            let exact2 = (t2 == q)
+            if exact1 != exact2 { return exact1 }
+            
+            // 2. 标题前缀匹配
+            let prefix1 = t1.hasPrefix(q)
+            let prefix2 = t2.hasPrefix(q)
+            if prefix1 != prefix2 { return prefix1 }
+            
+            // 3. 标题包含
+            let contains1 = t1.contains(q)
+            let contains2 = t2.contains(q)
+            if contains1 != contains2 { return contains1 }
+            
+            // 如果层级相同，保持原有稳定性
+            return false
         }
     }
     

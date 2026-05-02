@@ -2,6 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 // MARK: - On-Device LLM Settings View
+@MainActor
 struct OnDeviceLLMSettingsView: View {
     @StateObject private var onDeviceService = OnDeviceLLMService()
     @EnvironmentObject var store: KMStore

@@ -102,16 +102,6 @@ struct LintViewContent: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .padding(.horizontal)
                     }
-                } else {
-                    // 无问题时的提示
-                    VStack(spacing: 12) {
-                        Image(systemName: "sparkles")
-                            .font(.title)
-                            .foregroundStyle(.green)
-                        Text(Localized.tr("lint.noIssues"))
-                            .font(.subheadline.bold())
-                    }
-                    .padding(.top, 20)
                 }
             }
             .padding(.bottom, 20)

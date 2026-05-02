@@ -48,6 +48,7 @@ enum SyncStatus: Equatable {
 ///   - "pagesData": JSON-encoded [WikiPage]
 ///   - "logEntriesData": JSON-encoded [LogEntry]
 ///   - "lastModified": Date
+@MainActor
 class iCloudSyncService: ObservableObject {
     @Published var syncStatus: SyncStatus = .idle
     @Published var lastSyncDate: Date?

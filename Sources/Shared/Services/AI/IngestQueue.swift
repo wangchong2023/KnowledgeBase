@@ -4,6 +4,7 @@ import BackgroundTasks
 
 /// 离线处理队列 (Architect 视角：高并发与后台解耦)
 /// 负责在大规模导入文档时，将向量化与 AI 编译任务压入后台队列，不阻塞前台 UI。
+@MainActor
 final class IngestQueue: ObservableObject {
     static let shared = IngestQueue()
     

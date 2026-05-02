@@ -1,10 +1,11 @@
 import Foundation
-import Speech
+@preconcurrency import Speech
 import AVFoundation
 
 // MARK: - Speech Service
 /// Speech-to-text service using Apple's Speech framework.
 /// Supports real-time transcription and audio file transcription.
+@MainActor
 final class SpeechService: ObservableObject {
     @Published var isRecording = false
     @Published var isTranscribing = false

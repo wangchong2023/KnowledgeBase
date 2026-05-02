@@ -9,6 +9,7 @@ import AppKit
 // MARK: - Tappable Scene View Representable
 /// SceneKit 视图的可点击封装，支持节点点击检测
 #if canImport(UIKit)
+@MainActor
 struct TappableSceneView: UIViewRepresentable {
     let scene: SCNScene?
     let onNodeTap: (UUID) -> Void

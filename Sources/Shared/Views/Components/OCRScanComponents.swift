@@ -3,6 +3,7 @@ import PhotosUI
 
 // MARK: - OCR Image Picker Area
 /// OCR 图片选择区域：显示选中图片或占位符 + 相册选择按钮 + 识别按钮
+@MainActor
 struct OCRImagePickerArea: View {
     let selectedImage: WikiImage?
     let isProcessing: Bool

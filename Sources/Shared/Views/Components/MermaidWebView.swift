@@ -2,6 +2,7 @@ import SwiftUI
 import WebKit
 
 /// Mermaid 图表渲染视图 (高级可视化视角：所见即所得)
+@MainActor
 struct MermaidWebView: View {
     let mermaidCode: String
     

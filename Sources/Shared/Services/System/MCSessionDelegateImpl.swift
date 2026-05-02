@@ -1,5 +1,5 @@
 import Foundation
-import MultipeerConnectivity
+@preconcurrency import MultipeerConnectivity
 
 // MARK: - MCSession Delegate Implementation
 /// Extracted from CollaborationService to reduce class size and improve testability.
@@ -108,3 +108,8 @@ final class MCBrowserDelegateImpl: NSObject, MCNearbyServiceBrowserDelegate {
         }
     }
 }
+
+
+extension MCSessionDelegateImpl: @unchecked Sendable {}
+extension MCAdvertiserDelegateImpl: @unchecked Sendable {}
+extension MCBrowserDelegateImpl: @unchecked Sendable {}

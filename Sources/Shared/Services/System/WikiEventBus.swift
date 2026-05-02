@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 /// 系统级事件总线 (Architect 视角：解耦服务间通信)
+@MainActor
 final class WikiEventBus {
     static let shared = WikiEventBus()
     private init() {}

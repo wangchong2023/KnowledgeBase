@@ -1,5 +1,5 @@
 import SwiftUI
-import Vision
+@preconcurrency import Vision
 import PhotosUI
 
 // MARK: - OCR Service
@@ -26,6 +26,7 @@ import PhotosUI
 /// // async/await 方式
 /// let text = try await ocrService.recognizeText(from: image)
 /// ```
+@MainActor
 class OCRService: ObservableObject {
     static let shared = OCRService()
     

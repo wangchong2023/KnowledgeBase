@@ -11,6 +11,8 @@ import Combine
 /// let store = KMStore()
 /// let newPage = store.createPage(title: "新灵感", type: .idea)
 /// ```
+/// [Facade] 外观模式：统一向 UI 层暴露的服务总线
+@MainActor
 class KMStore: ObservableObject, GraphDataProvider {
     // MARK: - GraphDataProvider Conformance
     var isAIProcessing: Bool { llmService.isProcessing }
@@ -419,7 +421,7 @@ class KMStore: ObservableObject, GraphDataProvider {
         guard llmService.isEnabled else { return }
         
         await MainActor.run { isScanningAI = true }
-        let taskID = TaskCenter.shared.addTask(type: .ai, name: Localized.tr("aitask.scanTaskName"), target: "System")
+        let taskID = await TaskCenter.shared.addTask(type: .ai, name: Localized.tr("aitask.scanTaskName"), target: "System")
         
         do {
             // 1. 获取重构建议（随机抽取一部分页面进行分析，避免 Token 过载）

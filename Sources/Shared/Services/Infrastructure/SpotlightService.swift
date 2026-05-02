@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 
 /// Spotlight 索引服务 (Expert Design Item #3)
 /// 将 Wiki 页面索引至 iOS/macOS 系统搜索。
+@MainActor
 final class SpotlightService {
     static let shared = SpotlightService()
     

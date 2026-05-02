@@ -3,6 +3,7 @@ import Combine
 
 /// iCloud 配置同步管理器 (PM 视角：跨设备连续性)
 /// 负责在设备间自动同步用户设置（如 LLM 配置、主题偏好等）。
+@MainActor
 final class iCloudSyncManager {
     static let shared = iCloudSyncManager()
     

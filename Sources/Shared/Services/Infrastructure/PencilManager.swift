@@ -5,6 +5,7 @@ import UIKit
 
 /// Apple Pencil 交互管理器 (Expert Design Item #3)
 /// 支持双击切换工具（如在图谱中切换“全库”与“聚类”模式）。
+@MainActor
 final class PencilManager: NSObject {
     static let shared = PencilManager()
     

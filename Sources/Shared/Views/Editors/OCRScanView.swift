@@ -2,6 +2,7 @@ import SwiftUI
 import PhotosUI
 
 // MARK: - OCR Scanner View
+@MainActor
 struct OCRScanView: View {
     @EnvironmentObject var store: KMStore
     @State private var selectedPhoto: PhotosPickerItem?

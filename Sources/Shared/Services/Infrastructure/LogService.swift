@@ -24,6 +24,7 @@ extension LogServiceProtocol {
 
 // MARK: - Log Service (Operation Logging)
 /// [L1] 领域层：管理审计日志的持久化与内存缓存
+@MainActor
 final class LogService: ObservableObject, LogServiceProtocol {
     static let shared = LogService() // 全局共享实例 (用于底层非注入场景)
     

@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Wiki Navigation (Main Wiki Browser)
+@MainActor
 struct NavigationView: View {
     @EnvironmentObject var store: KMStore
     @Binding var selectedTab: ContentView.AppTab

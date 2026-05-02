@@ -361,56 +361,56 @@ final class CollaborationService: NSObject, ObservableObject {
     // MARK: - Remote Page Sync
     /// Apply a remote page update with last-write-wins conflict resolution
     private func applyRemotePage(_ pageData: [String: Any]) {
-        guard let idString = pageData["id"] as? String,
-              let pageID = UUID(uuidString: idString),
-              let title = pageData["title"] as? String,
-              let content = pageData["content"] as? String,
-              let typeRaw = pageData["type"] as? String,
-              let pageType = PageType(rawValue: typeRaw),
-              let tags = pageData["tags"] as? [String],
-              let statusRaw = pageData["status"] as? String,
-              let status = PageStatus(rawValue: statusRaw),
-              let updatedTs = pageData["updated"] as? TimeInterval
-        else { return }
+        Task { @MainActor in
+            guard let idString = pageData["id"] as? String,
+                  let pageID = UUID(uuidString: idString),
+                  let title = pageData["title"] as? String,
+                  let content = pageData["content"] as? String,
+                  let typeRaw = pageData["type"] as? String,
+                  let pageType = PageType(rawValue: typeRaw),
+                  let tags = pageData["tags"] as? [String],
+                  let statusRaw = pageData["status"] as? String,
+                  let status = PageStatus(rawValue: statusRaw),
+                  let updatedTs = pageData["updated"] as? TimeInterval
+            else { return }
 
-        let remoteUpdated = Date(timeIntervalSince1970: updatedTs)
-        // handleDataReceived is already called on main thread via MCSessionDelegateImpl
-        // so we can directly update the store without additional dispatch
-        guard let store = store else { return }
+            let remoteUpdated = Date(timeIntervalSince1970: updatedTs)
+            guard let store = self.store else { return }
 
-        // Last-write-wins conflict resolution
-        if let existingPage = store.pages.first(where: { $0.id == pageID }) {
-            if remoteUpdated > existingPage.updated {
-                var updated = existingPage
-                updated.title = title
-                updated.content = content
-                updated.type = pageType
-                updated.tags = tags
-                updated.status = status
-                updated.updated = remoteUpdated
-                store.updatePage(updated, forceDeepScan: false)
-                statusMessage = Localized.tr("collab.status.pageReceived")
+            // Last-write-wins conflict resolution
+            if let existingPage = store.pages.first(where: { $0.id == pageID }) {
+                if remoteUpdated > existingPage.updated {
+                    var updated = existingPage
+                    updated.title = title
+                    updated.content = content
+                    updated.type = pageType
+                    updated.tags = tags
+                    updated.status = status
+                    updated.updated = remoteUpdated
+                    store.updatePage(updated, forceDeepScan: false)
+                    self.statusMessage = Localized.tr("collab.status.pageReceived")
+                }
+            } else {
+                // New page from remote — create it
+                let newPage = WikiPage(
+                    id: pageID,
+                    title: title,
+                    type: pageType,
+                    content: content,
+                    aliases: [],
+                    tags: tags,
+                    status: status,
+                    confidence: .medium,
+                    sources: [],
+                    relatedPageIDs: [],
+                    isPinned: false,
+                    contentHash: nil,
+                    created: remoteUpdated,
+                    updated: remoteUpdated
+                )
+                store.insertRemotePage(newPage)
+                self.statusMessage = Localized.tr("collab.status.pageReceived")
             }
-        } else {
-            // New page from remote — create it
-            let newPage = WikiPage(
-                id: pageID,
-                title: title,
-                type: pageType,
-                content: content,
-                aliases: [],
-                tags: tags,
-                status: status,
-                confidence: .medium,
-                sources: [],
-                relatedPageIDs: [],
-                isPinned: false,
-                contentHash: nil,
-                created: remoteUpdated,
-                updated: remoteUpdated
-            )
-            store.insertRemotePage(newPage)
-            statusMessage = Localized.tr("collab.status.pageReceived")
         }
     }
 }

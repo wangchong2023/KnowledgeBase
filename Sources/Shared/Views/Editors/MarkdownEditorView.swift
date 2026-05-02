@@ -42,6 +42,7 @@ enum EditorPendingAction: Equatable {
 /// 2. `onChange(of: pendingAction)` 监听到变化
 /// 3. 调用 `executeAction()` 执行实际操作
 /// 4. 将 `pendingAction` 置为 nil
+@MainActor
 struct MarkdownEditorView: View {
     @Binding var page: WikiPage  ///< 绑定的页面对象，编辑结果直接写回此对象
     @Binding var isEditing: Bool  ///< 绑定外部的编辑状态

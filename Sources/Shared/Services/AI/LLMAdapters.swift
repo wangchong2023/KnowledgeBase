@@ -1,6 +1,7 @@
 import Foundation
 
 /// OpenAI 兼容适配器 (DeepSeek, SiliconFlow 等)
+@MainActor
 struct OpenAICompatibleAdapter: LLMAdapter {
     let id: String
     let displayName: String

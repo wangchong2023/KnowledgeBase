@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - LLM Settings View
+@MainActor
 struct LLMSettingsView: View {
     @EnvironmentObject var llmService: LLMService
     @State private var testing = false

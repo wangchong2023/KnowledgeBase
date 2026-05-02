@@ -8,8 +8,8 @@ struct ShortcutManager {
     
     // MARK: - 快速记录 Intent
     struct CaptureIntent: AppIntent {
-        static var title: LocalizedStringResource = "在智元中记录"
-        static var description = LocalizedStringResource("快速将文本存入智元知识库")
+        nonisolated(unsafe) static var title: LocalizedStringResource = "在智元中记录"
+        nonisolated(unsafe) static var description = LocalizedStringResource("快速将文本存入智元知识库")
         
         @Parameter(title: "内容")
         var content: String
@@ -22,9 +22,9 @@ struct ShortcutManager {
     
     // MARK: - 搜索知识库 Intent
     struct SearchWikiIntent: AppIntent {
-        static var title: LocalizedStringResource = "在智元中搜索"
-        static var description = LocalizedStringResource("搜索知识库内容")
-        static var openAppWhenRun: Bool = true
+        nonisolated(unsafe) static var title: LocalizedStringResource = "在智元中搜索"
+        nonisolated(unsafe) static var description = LocalizedStringResource("搜索知识库内容")
+        nonisolated(unsafe) static var openAppWhenRun: Bool = true
         
         @Parameter(title: "关键词")
         var query: String
@@ -37,8 +37,8 @@ struct ShortcutManager {
     
     // MARK: - 获取统计 Intent
     struct GetWikiStatsIntent: AppIntent {
-        static var title: LocalizedStringResource = "查看智元统计"
-        static var description = LocalizedStringResource("获取知识库概览信息")
+        nonisolated(unsafe) static var title: LocalizedStringResource = "查看智元统计"
+        nonisolated(unsafe) static var description = LocalizedStringResource("获取知识库概览信息")
         
         func perform() async throws -> some IntentResult & ReturnsValue<String> {
             return .result(value: "您的知识库目前运行良好")

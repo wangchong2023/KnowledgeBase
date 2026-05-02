@@ -3,6 +3,7 @@ import Foundation
 
 // MARK: - Accessibility Service
 /// Provides accessibility enhancements, VoiceOver support, and dynamic type scaling.
+@MainActor
 final class AccessibilityService: ObservableObject {
     @Published var preferredContentSizeCategory: ContentSizeCategory = .large
     @Published var isVoiceOverRunning: Bool = false

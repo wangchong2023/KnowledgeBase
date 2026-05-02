@@ -2,6 +2,7 @@ import SwiftUI
 
 // MARK: - Wiki Tooltip
 /// 引导提示组件，用于首次使用时的操作引导。
+@MainActor
 struct WikiTooltip: View {
     let title: String
     let description: String

@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Theme Manager
+@MainActor
 class ThemeManager: ObservableObject {
     static let shared = ThemeManager()
 

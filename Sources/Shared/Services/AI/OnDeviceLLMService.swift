@@ -5,6 +5,7 @@ import Combine
 // MARK: - On-Device LLM Service
 /// Local LLM inference using Core ML for on-device AI capabilities.
 /// Supports Apple's on-device models (since iOS 17) and custom .mlmodelc models.
+@MainActor
 final class OnDeviceLLMService: ObservableObject {
     @Published var isAvailable: Bool = false
     @Published var isModelLoaded: Bool = false

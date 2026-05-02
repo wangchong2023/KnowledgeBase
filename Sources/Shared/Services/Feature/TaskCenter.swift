@@ -46,6 +46,7 @@ struct GlobalTask: Identifiable {
 
 /// 全局任务管理中心 (单例)
 /// 负责全库异步 AI 任务及导入任务的生命周期管理、状态追踪与自动清理。
+@MainActor
 class TaskCenter: ObservableObject {
     static let shared = TaskCenter()
     
@@ -54,9 +55,7 @@ class TaskCenter: ObservableObject {
     
     /// 更新全局最新状态文案 (用于触发 UI 脉搏动效)
     func updateLatestStatus(_ text: String) {
-        DispatchQueue.main.async {
-            self.latestStatus = text
-        }
+        self.latestStatus = text
     }
     
     /// 未读已完成任务数
@@ -74,10 +73,8 @@ class TaskCenter: ObservableObject {
     
     func addTask(type: TaskType = .ai, name: String, target: String) -> UUID {
         let task = GlobalTask(type: type, name: name, target: target, status: .pending)
-        DispatchQueue.main.async {
-            self.tasks.insert(task, at: 0)
-            self.latestStatus = Localized.trf("aitask.status.startingFormat", name, target)
-        }
+        self.tasks.insert(task, at: 0)
+        self.latestStatus = Localized.trf("aitask.status.startingFormat", name, target)
         
         // 灵动岛适配：启动实时活动
         ActivityService.shared.startActivity(name: name, target: target)
@@ -86,36 +83,34 @@ class TaskCenter: ObservableObject {
     }
     
     func updateTask(_ id: UUID, status: TaskStatus, associatedPageID: UUID? = nil) {
-        DispatchQueue.main.async {
-            if let index = self.tasks.firstIndex(where: { $0.id == id }) {
-                self.tasks[index].status = status
-                if let pageID = associatedPageID {
-                    self.tasks[index].associatedPageID = pageID
-                }
-                
-                let task = self.tasks[index]
-                switch status {
-                case .running(let progress):
-                    self.latestStatus = Localized.trf("aitask.status.runningFormat", task.name, task.target)
-                    ActivityService.shared.updateProgress(progress, message: self.latestStatus)
-                case .completed:
-                    self.latestStatus = Localized.trf("aitask.status.completedFormat", task.name)
-                    // 发送本地通知（如果用户不在任务中心）
-                    NotificationCenter.default.post(name: .taskCompleted, object: task)
-                    ActivityService.shared.endActivity()
-                case .failed:
-                    self.latestStatus = Localized.trf("aitask.status.failedFormat", task.name)
-                    NotificationCenter.default.post(name: .taskCompleted, object: task)
-                    ActivityService.shared.endActivity()
-                case .pending:
-                    break
-                }
-                
-                // 如果成功且任务过多，清理旧任务
-                if case .completed = status {
-                    if self.tasks.count > 20 {
-                        self.tasks.removeLast()
-                    }
+        if let index = self.tasks.firstIndex(where: { $0.id == id }) {
+            self.tasks[index].status = status
+            if let pageID = associatedPageID {
+                self.tasks[index].associatedPageID = pageID
+            }
+            
+            let task = self.tasks[index]
+            switch status {
+            case .running(let progress):
+                self.latestStatus = Localized.trf("aitask.status.runningFormat", task.name, task.target)
+                ActivityService.shared.updateProgress(progress, message: self.latestStatus)
+            case .completed:
+                self.latestStatus = Localized.trf("aitask.status.completedFormat", task.name)
+                // 发送本地通知（如果用户不在任务中心）
+                NotificationCenter.default.post(name: .taskCompleted, object: task)
+                ActivityService.shared.endActivity()
+            case .failed:
+                self.latestStatus = Localized.trf("aitask.status.failedFormat", task.name)
+                NotificationCenter.default.post(name: .taskCompleted, object: task)
+                ActivityService.shared.endActivity()
+            case .pending:
+                break
+            }
+            
+            // 如果成功且任务过多，清理旧任务
+            if case .completed = status {
+                if self.tasks.count > 20 {
+                    self.tasks.removeLast()
                 }
             }
         }
@@ -130,10 +125,8 @@ class TaskCenter: ObservableObject {
     }
     
     func markAllAsRead() {
-        DispatchQueue.main.async {
-            for i in 0..<self.tasks.count {
-                self.tasks[i].isRead = true
-            }
+        for i in 0..<self.tasks.count {
+            self.tasks[i].isRead = true
         }
     }
     

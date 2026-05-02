@@ -1,6 +1,7 @@
 import Foundation
 
 /// 页面 Schema：定义特定类型页面必须包含的内容结构
+@MainActor
 struct PageSchema: Codable {
     let type: PageType
     let requiredFields: [String]

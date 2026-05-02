@@ -7,6 +7,7 @@ import PDFKit
 ///
 /// 存储 PDF 文档的元数据，包括标题、页数、阅读进度、高亮内容和关联的知识库页面。
 /// 用于在知识库中管理和追踪用户导入的 PDF 文档。
+@MainActor
 struct PDFDocumentInfo: Identifiable, Codable {
     let id: UUID
     var title: String

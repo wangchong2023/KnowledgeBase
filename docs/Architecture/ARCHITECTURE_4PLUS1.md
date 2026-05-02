@@ -196,13 +196,20 @@ sequenceDiagram
 
 ### 模块组织结构
 - **Sources/Shared**: 跨端共用的核心逻辑。
-    - **Models**: 数据实体（WikiPage, QuizModel）。
+    - **Models**: 数据实体（WikiPage, AsyncStatus）。
     - **Services**: 核心逻辑抽象层。
         - `AI`: 大模型通信 (LLMService)、向量计算、知识合成 (AISynthesisService)。
-        - `Infrastructure`: 基础设施 (SQLite, Security, Log)。
-        - `Feature`: 业务功能编排 (IngestService, LinkService)。
-    - **Views**: SwiftUI 响应式通用组件（Markdown 渲染、LOD 图谱、SidebarView）。
-- **Sources/Platforms**: 平台特有入口实现（EntryPoints）。
+        - `Storage`: 数据持久化与备份 (SQLiteStore, KMStore, VaultService)。
+        - `Logic`: 业务逻辑编排 (IngestService, LinkService, RecursiveChunker)。
+        - `Infrastructure`: 基础设施 (Log, Analytics, Haptic, Spotlight)。
+        - `Core`: 服务容器与基础协议 (ServiceContainer, Protocols)。
+        - `System`: 任务调度与系统事件 (ActivityService, WikiEventBus)。
+    - **Views**: SwiftUI 响应式通用视图。
+        - `Components`: 原子化 UI 组件。
+        - `Pages`: 业务功能页面 (PageDetail, GraphView, ChatView)。
+        - `Editors`: Markdown 渲染与编辑器。
+    - **Infrastructure**: 全局工具与常量 (Utilities, Constants)。
+- **Sources/Platforms**: 平台特有入口实现 (App Delegates & Launchers)。
     - **iOS**: iPhone/iPad App 代理与启动逻辑。
     - **macOS**: Mac 专属多窗口与 Spotlight 插件集成。
     - **watchOS**: Apple Watch 独立界面与 WCSession 通讯。
@@ -273,22 +280,21 @@ graph LR
 
 为了确保系统的可维护性与测试性，我们对功能进行了逻辑解耦，形成了四层垂直模型：
 
-### 🟢 L0: 基础设施层 (Sources/Shared/Services/Infrastructure)
-*   **定位**: 底层能力的封装。
-*   **组件**: `SQLiteStore`, `SnapshotService`, `FileSystemSyncService`。
+### 🟢 L0: 基础设施层 (Sources/Shared/Services/Infrastructure & Storage)
+*   **定位**: 底层能力的封装与数据持久化。
+*   **组件**: `SQLiteStore`, `LogService`, `VaultService`, `FileSystemSyncService`。
 
-### 🔵 L1: 核心领域层 (Sources/Shared/Models & Services/Feature)
+### 🔵 L1: 核心领域层 (Sources/Shared/Models & Services/Logic)
 *   **定位**: 纯粹的业务逻辑与原子操作。
-*   **组件**: `KMStore (Facade)`, `LinkService`, `IngestService`。
+*   **组件**: `KMStore (Facade)`, `LinkService`, `IngestService`, `RecursiveChunker`。
 
-### 🟣 L2: 应用能力层 (Sources/Shared/Services/AI)
+### 🟣 L2: 应用能力层 (Sources/Shared/Services/AI & System)
 *   **定位**: 高级功能与智能调度。
 *   **组件**: `LLMService` (模型调度), `AISynthesisService` (业务合成), `AITaskCenter` (异步任务)。
 
-### 🟡 L3: 交互展现层 (Sources/Platforms)
-*   **iOS**: `Sources/Platforms/iOS` (分栏视图)。
-*   **macOS**: `Sources/Platforms/macOS` (多窗口)。
-*   **watchOS**: `Sources/Platforms/watchOS` (手表采集)。
+### 🟡 L3: 交互展现层 (Sources/Shared/Views)
+*   **定位**: 跨平台响应式视图。
+*   **组件**: `GraphView`, `PageDetailView`, `ChatView`。
 
 ---
 

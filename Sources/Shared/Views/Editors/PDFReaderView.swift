@@ -3,6 +3,7 @@ import PDFKit
 import UniformTypeIdentifiers
 
 // MARK: - PDF Library View
+@MainActor
 struct PDFLibraryView: View {
     @EnvironmentObject var store: KMStore
     @State private var documents: [PDFDocumentInfo] = []

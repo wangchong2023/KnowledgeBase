@@ -3,6 +3,7 @@ import LocalAuthentication
 import SwiftUI
 
 /// 金库安全服务 (QA & Security 视角：保护用户隐私)
+@MainActor
 final class VaultSecurityService: ObservableObject {
     @Published var isLocked = false
     @Published var biometricsAvailable = false

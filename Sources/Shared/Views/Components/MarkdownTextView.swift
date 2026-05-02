@@ -6,6 +6,7 @@ import UIKit
 // MARK: - Coordinator State Container
 /// 用 class 封装光标状态，避免 struct @Binding 在闭包中的捕获问题。
 /// 同时作为 EditorActionExecutor 的访问点（coordinator 在 makeCoordinator 时注入）。
+@MainActor
 final class CursorState: ObservableObject {
     @Published var cursorPosition: Int = 0
     @Published var selectedRange: NSRange = NSRange(location: 0, length: 0)

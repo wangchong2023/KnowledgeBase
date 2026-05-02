@@ -2,6 +2,7 @@ import Foundation
 
 /// AI 知识综合服务 (L1 领域层)
 /// 负责具体的业务 Prompt 编排与结果解析，解耦 LLMService。
+@MainActor
 final class AISynthesisService {
     static let shared = AISynthesisService()
     private let llm: LLMService

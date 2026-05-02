@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - On-Device Test View
+@MainActor
 struct OnDeviceTestView: View {
     @ObservedObject var onDeviceService: OnDeviceLLMService
     @Environment(\.dismiss) private var dismiss

@@ -1,22 +1,5 @@
 import Foundation
 
-// MARK: - Character Extension for CJK
-extension Character {
-    var isCJKCharacter: Bool {
-        let scalars = unicodeScalars
-        return scalars.contains { scalar in
-            // CJK Unified Ideographs and common CJK ranges
-            (0x4E00...0x9FFF).contains(scalar.value) ||  // CJK Unified Ideographs
-            (0x3400...0x4DBF).contains(scalar.value) ||  // CJK Extension A
-            (0x3000...0x303F).contains(scalar.value) ||  // CJK Symbols and Punctuation
-            (0xFF00...0xFFEF).contains(scalar.value) ||  // Halfwidth and Fullwidth Forms
-            (0x2E80...0x2EFF).contains(scalar.value) ||  // CJK Radicals Supplement
-            (0x3040...0x309F).contains(scalar.value) ||  // Hiragana
-            (0x30A0...0x30FF).contains(scalar.value) ||  // Katakana
-            (0xAC00...0xD7AF).contains(scalar.value)     // Korean Syllables
-        }
-    }
-}
 
 // MARK: - Wiki Page
 struct WikiPage: Identifiable, Codable, Hashable {
@@ -142,18 +125,6 @@ struct WikiPage: Identifiable, Codable, Hashable {
         content.count < 100
     }
     
-    /// 语义缩放层级 (PM & UI 视角：根据视角深度动态展示)
-    enum LODLevel {
-        case macro    // 仅展示聚类点
-        case normal   // 展示标题与链接
-        case micro    // 展示内容摘要与元数据
-    }
-    
-    func getLOD(for zoomScale: Double) -> LODLevel {
-        if zoomScale < 0.5 { return .macro }
-        if zoomScale > 2.0 { return .micro }
-        return .normal
-    }
     
     var folderName: String {
         switch type {

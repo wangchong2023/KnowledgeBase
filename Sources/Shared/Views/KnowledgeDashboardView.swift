@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// 知识资产仪表盘 (Designer & PM 视角：可视化知识价值)
+@MainActor
 struct KnowledgeDashboardView: View {
     @EnvironmentObject var store: KMStore
     

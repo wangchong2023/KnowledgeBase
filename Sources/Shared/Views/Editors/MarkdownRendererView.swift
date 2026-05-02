@@ -4,6 +4,7 @@ import LocalAuthentication
 // MARK: - Markdown Renderer View
 /// Renders structured Markdown blocks using MarkdownParser.
 /// Parsing logic is extracted to MarkdownParser service for reuse.
+@MainActor
 struct MarkdownRendererView: View {
     @EnvironmentObject var store: KMStore
     let content: String

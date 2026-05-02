@@ -3,6 +3,7 @@ import WatchConnectivity
 import Combine
 
 /// 跨端通信服务 (Shared across iOS & watchOS)
+@MainActor
 final class WatchConnectivityService: NSObject, ObservableObject, WCSessionDelegate {
     static let shared = WatchConnectivityService()
     

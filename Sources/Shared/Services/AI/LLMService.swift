@@ -4,6 +4,7 @@ import Combine
 // MARK: - LLM 服务 (轻量级编排器)
 /// 组合了 LLMConfigStore (配置) + LLMContextBuilder (上下文) + ChatHistoryStore (历史) + LLMClient (客户端)。
 /// 暴露与之前相同的公共接口，以确保视图层的零修改兼容性。
+@MainActor
 final class LLMService: ObservableObject, LLMServiceProtocol {
     
     // MARK: - UI 状态属性 (向后兼容)
@@ -306,11 +307,11 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
         await MainActor.run { isProcessing = true }
         defer { Task { await MainActor.run { isProcessing = false } } }
         
-        TaskCenter.shared.updateLatestStatus("🔍 \(Localized.tr("ai.status.preprocessing")): \(title)")
+        await TaskCenter.shared.updateLatestStatus("🔍 \(Localized.tr("ai.status.preprocessing")): \(title)")
         let prompt = contextBuilder.buildIngestPrompt(title: title, rawContent: rawContent, pages: pages)
         let systemPrompt = Localized.tr("llm.ingest.systemPrompt")
         
-        TaskCenter.shared.updateLatestStatus("🧠 \(Localized.tr("ai.status.analyzing")): \(title)")
+        await TaskCenter.shared.updateLatestStatus("🧠 \(Localized.tr("ai.status.analyzing")): \(title)")
         let requestBody: [String: Any] = [
             "model": model,
             "messages": [
@@ -514,7 +515,7 @@ final class LLMService: ObservableObject, LLMServiceProtocol {
     
     /// 智能重排 (AI Re-rank)
     func rerank(query: String, candidates: [WikiPage]) async throws -> [WikiPage] {
-        guard isEnabled, !candidates.isEmpty, let adapter = activeAdapter else { return candidates }
+        guard isEnabled, !candidates.isEmpty, let _ = activeAdapter else { return candidates }
         // 暂使用通用的 generate 进行重排逻辑模拟或调用专门的 Rerank API
         return candidates
     }

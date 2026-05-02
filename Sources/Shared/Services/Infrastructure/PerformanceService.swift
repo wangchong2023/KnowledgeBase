@@ -6,6 +6,7 @@ import MachO
 
 // MARK: - Performance Service
 /// Runtime performance monitoring and diagnostics for Knowledge Base.
+@MainActor
 final class PerformanceService: ObservableObject {
     @Published var metrics: PerformanceMetrics = PerformanceMetrics()
     @Published var isMonitoring: Bool = false

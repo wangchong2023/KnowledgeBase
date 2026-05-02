@@ -1,6 +1,7 @@
 import Foundation
 
 // MARK: - LLM Provider Metadata
+@MainActor
 struct LLMProviderMetadata: Codable {
     let id: String
     let nameKey: String

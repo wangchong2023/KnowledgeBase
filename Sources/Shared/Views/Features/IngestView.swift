@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 // MARK: - Activity Item Model
 /// Single activity log entry for the ingest activity panel.
+@MainActor
 struct ActivityItem: Identifiable {
     let id = UUID()
     let title: String

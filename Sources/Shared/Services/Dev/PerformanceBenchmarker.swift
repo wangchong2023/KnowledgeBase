@@ -2,6 +2,7 @@ import Foundation
 
 /// 性能压测工具 (仅限 Debug/Internal 使用)
 /// 专门用于验证 50,000+ 文档规模下的系统承载力
+@MainActor
 final class PerformanceBenchmarker {
     static let shared = PerformanceBenchmarker()
     

@@ -6,7 +6,7 @@ import SwiftUI
 enum AppConfig {
     
     // MARK: - 动态配置加载器
-    private static var configData: [String: Any] = {
+    private nonisolated(unsafe) static var configData: [String: Any] = {
         guard let url = Bundle.main.url(forResource: "AppConfig", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {

@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 /// 插件市场条目模型
+@MainActor
 struct MarketPlugin: Codable, Identifiable {
     let id: String
     let name: String

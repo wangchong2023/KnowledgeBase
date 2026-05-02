@@ -6,6 +6,7 @@ import UIKit
 #endif
 
 /// 系统级触感管理器 (Designer 视角：建立触感反馈语言)
+@MainActor
 final class HapticManager {
     static let shared = HapticManager()
     

@@ -3,6 +3,7 @@ import SQLite3
 
 /// 数据库迁移管理器 (Reliability Item)
 /// 负责处理 SQLite 架构的版本化升级。
+@MainActor
 final class DatabaseMigrationManager {
     static let shared = DatabaseMigrationManager()
     private let currentSchemaVersion = 2 // 当前代码预期的架构版本

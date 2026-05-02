@@ -5,6 +5,7 @@ import ActivityKit
 
 /// 灵动岛与实时活动管理服务 (iOS 专属)
 /// 负责在 Dynamic Island 展示 AI 扫描、导出、同步等长时任务的进度。
+@MainActor
 final class ActivityService {
     static let shared = ActivityService()
     

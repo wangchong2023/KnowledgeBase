@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 struct ExternalPage {
     let url: URL
     let title: String

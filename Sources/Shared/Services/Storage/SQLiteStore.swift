@@ -5,6 +5,7 @@ import NaturalLanguage
 // MARK: - SQLite 存储门面 (组合了核心、迁移与种子数据)
 /// 轻量级门面，组合了 SQLiteStoreCore, SQLiteMigrator 和 KMSeedData。
 /// 所有的数据库操作都委派给 SQLiteStoreCore 执行。
+@MainActor
 final class SQLiteStore: ObservableObject {
     @Published var pages: [WikiPage] = []
 

@@ -2,6 +2,7 @@ import Foundation
 import Combine
 
 /// 插件注册中心 (L2 层：中枢管理)
+@MainActor
 final class PluginRegistry: ObservableObject {
     static let shared = PluginRegistry()
     
@@ -15,7 +16,7 @@ final class PluginRegistry: ObservableObject {
     var pagesProvider: (() -> [WikiPage])?
     
     // 内核版本定义
-    let currentHostVersion = "2.0.0"
+    nonisolated let currentHostVersion = "2.0.0"
     
     // 超时配置：单插件最大执行时间 0.5s
     private let pluginTimeout: TimeInterval = 0.5
@@ -67,7 +68,7 @@ final class PluginRegistry: ObservableObject {
                 LogService.shared.error("🛡️ [安全拦截] 插件 \(manifest.id) 尝试查询页面，但未声明 'pages.read' 权限。", error: nil)
                 return []
             }
-            let pages = PluginRegistry.shared.pagesProvider?() ?? []
+            let pages = await PluginRegistry.shared.pagesProvider?() ?? []
             return await ServiceContainer.shared.resolve(LinkService.self).search(query: query, in: pages)
         }
     }
@@ -95,7 +96,8 @@ final class PluginRegistry: ObservableObject {
             pluginCallCounts[intercepter.manifest.id] = callCount + 1
             
             // 异步重置计数器 (简易窗口期)
-            DispatchQueue.global().asyncAfter(deadline: .now() + throttlingWindow) {
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(throttlingWindow * 1_000_000_000))
                 self.pluginCallCounts[intercepter.manifest.id] = 0
             }
 

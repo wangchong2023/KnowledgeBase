@@ -4,6 +4,7 @@ import Accelerate
 
 /// 商用级向量管理中心
 /// 负责向量的异步计算、持久化同步以及基于 Accelerate 框架的高性能检索。
+@MainActor
 final class EmbeddingManager {
     private let core: SQLiteStoreCore
     private let embeddingModel: NLEmbedding?

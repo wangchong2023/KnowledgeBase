@@ -9,7 +9,6 @@ struct SettingsView: View {
     @StateObject private var syncService = iCloudSyncService()
     @State private var selectedLanguage: LanguageMode = Localized.languageMode
     @Binding var languageForceUpdate: Bool
-    @State private var showFolderImporter = false
     @State private var showFolderImporterForImport = false
     
     var body: some View {
@@ -94,12 +93,6 @@ struct SettingsView: View {
                     SettingsNavigationRow(icon: "externaldrive.fill", title: Localized.tr("backup.title"), identifier: "数据-备份") {
                         BackupView()
                     }
-
-                    Button(action: { showFolderImporter = true }) {
-                        Label(Localized.tr("settings.exportToFolder"), systemImage: "square.and.arrow.up")
-                            .foregroundStyle(.wikiText)
-                    }
-                    .accessibilityIdentifier("数据-导出知识库")
                 } header: {
                     Text(Localized.tr("settings.section.data"))
                 }
@@ -176,38 +169,6 @@ struct SettingsView: View {
                 Button(Localized.tr("settings.cancel"), role: .cancel) {}
             } message: {
                 Text(Localized.tr("settings.resetWarning"))
-            }
-            // 导出文件夹
-            .fileImporter(
-                isPresented: $showFolderImporter,
-                allowedContentTypes: [.folder],
-                allowsMultipleSelection: false
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    if let url = urls.first {
-                        let taskID = TaskCenter.shared.addTask(type: .ingest, name: "导出全库", target: url.lastPathComponent)
-                        Task {
-                            let _ = url.startAccessingSecurityScopedResource()
-                            defer { url.stopAccessingSecurityScopedResource() }
-                            do {
-                                try store.exportToFolder(at: url)
-                                await MainActor.run {
-                                    TaskCenter.shared.updateTask(taskID, status: .completed)
-                                    HapticManager.shared.trigger(.success)
-                                }
-                            } catch {
-                                await MainActor.run {
-                                    TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
-                                    HapticManager.shared.trigger(.error)
-                                }
-                            }
-                        }
-                    }
-                case .failure(let error):
-                    HapticManager.shared.trigger(.error)
-                    print("Export failed: \(error.localizedDescription)")
-                }
             }
             // 导入文件夹
             .fileImporter(
