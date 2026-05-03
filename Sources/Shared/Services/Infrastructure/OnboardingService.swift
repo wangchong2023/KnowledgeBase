@@ -7,40 +7,32 @@ final class OnboardingService: ObservableObject {
     @Published var currentStep: OnboardingStep?
     
     enum OnboardingStep: Int, CaseIterable, Identifiable {
-        case welcome = 0
-        case linking = 1
-        case aiLab = 2
-        case graph = 3
-        case vault = 4
+        case graph = 0
+        case aiLab = 1
+        case vault = 2
         
         var id: Int { self.rawValue }
         
         var title: String {
             switch self {
-            case .welcome: return Localized.trf("onboarding.step.welcome.title", Localized.tr("app.name"))
-            case .linking: return Localized.tr("onboarding.step.linking.title")
-            case .aiLab: return Localized.tr("onboarding.step.aiLab.title")
             case .graph: return Localized.tr("onboarding.step.graph.title")
+            case .aiLab: return Localized.tr("onboarding.step.aiLab.title")
             case .vault: return Localized.tr("onboarding.step.vault.title")
             }
         }
         
         var description: String {
             switch self {
-            case .welcome: return Localized.tr("onboarding.step.welcome.desc")
-            case .linking: return Localized.tr("onboarding.step.linking.desc")
-            case .aiLab: return Localized.tr("onboarding.step.aiLab.desc")
             case .graph: return Localized.tr("onboarding.step.graph.desc")
+            case .aiLab: return Localized.tr("onboarding.step.aiLab.desc")
             case .vault: return Localized.tr("onboarding.step.vault.desc")
             }
         }
 
         var icon: String {
             switch self {
-            case .welcome: return "brain.head.profile"
-            case .linking: return "link"
-            case .aiLab: return "flask"
             case .graph: return "network"
+            case .aiLab: return "sparkles"
             case .vault: return "lock.shield"
             }
         }
@@ -50,7 +42,7 @@ final class OnboardingService: ObservableObject {
         if let current = currentStep, let next = OnboardingStep(rawValue: current.rawValue + 1) {
             withAnimation { currentStep = next }
         } else if currentStep == nil {
-            withAnimation { currentStep = .welcome }
+            withAnimation { currentStep = .graph }
         } else {
             completeOnboarding()
         }
@@ -60,6 +52,13 @@ final class OnboardingService: ObservableObject {
         withAnimation {
             currentStep = nil
             hasCompletedOnboarding = true
+        }
+    }
+    
+    func reset() {
+        withAnimation {
+            hasCompletedOnboarding = false
+            currentStep = nil
         }
     }
 }

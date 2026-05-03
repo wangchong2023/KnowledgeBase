@@ -61,6 +61,7 @@ struct AdaptiveDetailView: View {
     @Binding var selectedTab: ContentView.AppTab
     @Binding var selection: SidebarSelection?
     @Binding var languageForceUpdate: Bool
+    @ObservedObject var onboardingService: OnboardingService
     var heroNamespace: Namespace.ID
     
     var body: some View {
@@ -84,7 +85,7 @@ struct AdaptiveDetailView: View {
         case .ingest:
             IngestView(selectedTab: $selectedTab)
         case .settings:
-            SettingsView(languageForceUpdate: $languageForceUpdate)
+            SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
         }
     }
 }

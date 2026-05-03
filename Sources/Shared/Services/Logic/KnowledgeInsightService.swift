@@ -40,13 +40,8 @@ final class KnowledgeInsightService: @unchecked Sendable {
         let recap: DailyRecap
         if !candidates.isEmpty {
             let target = candidates.randomElement()!
-            let prompt = """
-            你是一个贴心的知识复习伙伴。用户最近在关注：\(recentFocus)。
-            推荐复习旧笔记《\(target.title)》，内容摘要：\(target.content.prefix(500))。
-            请用自然亲切的口吻写一句推荐语，点明重读这篇笔记对当前学习的价值。不超过50字。
-            返回JSON: {"insight": "...", "suggestedConnection": "..."}
-            """
-            let response = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个贴心的知识复习伙伴，用温暖自然的口吻帮助用户发现知识间的联系。")
+            let prompt = Localized.trf("insight.daily.prompt.recent", recentFocus, target.title, String(target.content.prefix(500)))
+            let response = try await llmService.generate(prompt: prompt, systemPrompt: Localized.tr("insight.daily.systemPrompt"))
             let data = response.data(using: .utf8)!
             let json = try JSONDecoder().decode([String: String].self, from: data)
             recap = DailyRecap(
@@ -57,8 +52,8 @@ final class KnowledgeInsightService: @unchecked Sendable {
         } else {
             let sorted = pages.sorted { $0.updated < $1.updated }
             let target = sorted.first!
-            let prompt = "用自然的口吻写一句推荐语，建议复习《\(target.title)》这篇笔记，说明复习价值。不超过50字。内容：\(target.content.prefix(300))"
-            let response = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个贴心的知识复习伙伴，用温暖自然的口吻帮助用户。")
+            let prompt = Localized.trf("insight.daily.prompt.oldest", target.title, String(target.content.prefix(300)))
+            let response = try await llmService.generate(prompt: prompt, systemPrompt: Localized.tr("insight.daily.systemPrompt"))
             recap = DailyRecap(targetPageTitle: target.title, insight: response, suggestedConnection: Localized.tr("insight.recap.tip"))
         }
 
@@ -69,7 +64,8 @@ final class KnowledgeInsightService: @unchecked Sendable {
     private func cacheKey() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd"
-        return "daily_recap_\(formatter.string(from: Date()))"
+        let lang = Localized.currentLanguage
+        return "daily_recap_\(formatter.string(from: Date()))_\(lang)"
     }
 
     private func loadCachedDailyRecap() -> DailyRecap? {
@@ -96,17 +92,14 @@ final class KnowledgeInsightService: @unchecked Sendable {
         let newPages = pages.filter { $0.created >= lastWeek }
         let newTitles = newPages.map { $0.title }.joined(separator: ", ")
         
-        let prompt = """
-        # Role: 资深知识架构师
-        # Context: 用户添加了节点：[\(newTitles)]。
-        # Task: 生成周度报告，包含认知锚点、关联密度等。要求 250 字以内。
-        """
+        let prompt = Localized.trf("insight.weekly.prompt", newTitles)
         
-        let summary = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个资深知识架构师，擅长总结知识体系。")
+        let summary = try await llmService.generate(prompt: prompt, systemPrompt: Localized.tr("insight.weekly.systemPrompt"))
         let keywords = Array(newPages.flatMap { $0.tags }.prefix(5))
         
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
+        formatter.locale = Locale(identifier: Localized.currentLanguage)
         let dateRange = "\(formatter.string(from: lastWeek)) - \(formatter.string(from: Date()))"
         
         return WeeklyInsight(

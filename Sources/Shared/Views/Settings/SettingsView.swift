@@ -6,7 +6,13 @@ struct SettingsView: View {
     @Environment(KMStore.self) var store
     @EnvironmentObject var themeManager: ThemeManager
     @EnvironmentObject var llmService: LLMService
+    @ObservedObject var onboardingService: OnboardingService
     @State private var showResetConfirmation = false
+    @State private var showInjectConfirmation = false
+    @State private var showInjectSuccess = false
+    @State private var injectedCount: Int = 0
+    @State private var showResetOnboardingConfirmation = false
+    @State private var isExportingAll = false
     @StateObject private var syncService = iCloudSyncService()
     @State private var selectedLanguage: LanguageMode = Localized.languageMode
     @Binding var languageForceUpdate: Bool
@@ -143,6 +149,20 @@ struct SettingsView: View {
                             .foregroundStyle(.red)
                     }
                     .accessibilityIdentifier("settings.reset")
+                    .confirmationDialog(
+                        Localized.tr("settings.confirmReset"),
+                        isPresented: $showResetConfirmation,
+                        titleVisibility: .visible
+                    ) {
+                        Button(Localized.tr("settings.resetAllData"), role: .destructive) {
+                            store.resetAllData()
+                            store.seedDefaultContent()
+                            HapticManager.shared.trigger(.success)
+                        }
+                        Button(Localized.tr("misc.cancel"), role: .cancel) { }
+                    } message: {
+                        Text(Localized.tr("settings.resetWarning"))
+                    }
                 } header: {
                     Text(Localized.tr("settings.section.data"))
                 }
@@ -173,6 +193,10 @@ struct SettingsView: View {
                         }
                     }
                     .accessibilityIdentifier("settings.biometric")
+
+                    SettingsNavigationRow(icon: "clock.arrow.circlepath", title: Localized.tr("settings.operationLog"), identifier: "settings.log") {
+                        LogView()
+                    }
                 } header: {
                     Text(Localized.tr("settings.section.security"))
                 }
@@ -181,23 +205,53 @@ struct SettingsView: View {
                 #if DEBUG
                 Section {
                     Button(action: {
-                        DemoDataGenerator.generate(in: store.sqliteStore)
-                        HapticManager.shared.trigger(.success)
+                        showInjectConfirmation = true
                     }) {
                         Label(Localized.tr("settings.injectDemoData"), systemImage: "testtube.2")
                     }
                     .accessibilityIdentifier("settings.injectDemo")
+                    .alert(Localized.tr("settings.injectConfirm.title"), isPresented: $showInjectConfirmation) {
+                        Button(Localized.tr("misc.confirm")) {
+                            injectedCount = DemoDataGenerator.generate(in: store.sqliteStore)
+                            store.refresh()
+                            HapticManager.shared.trigger(.success)
+                            showInjectSuccess = true
+                        }
+                        Button(Localized.tr("misc.cancel"), role: .cancel) { }
+                    } message: {
+                        Text(Localized.tr("settings.injectConfirm.message"))
+                    }
                     
                     Button(role: .destructive, action: { showClearAllConfirmation = true }) {
-                        Label(Localized.tr("settings.clearAllDataOnly"), systemImage: "trash.slash.fill")
+                        Label(Localized.tr("settings.clearAll"), systemImage: "trash.slash.fill")
                     }
                     .accessibilityIdentifier("settings.clearAll")
+                    .confirmationDialog(Localized.tr("settings.clearAll.confirmTitle"), isPresented: $showClearAllConfirmation, titleVisibility: .visible) {
+                        Button(Localized.tr("settings.clearAll.action"), role: .destructive) {
+                            store.sqliteStore.clearAllData()
+                            store.refresh()
+                            HapticManager.shared.trigger(.success)
+                            ToastManager.shared.show(type: .success, message: Localized.tr("settings.clearAll.success"))
+                        }
+                        Button(Localized.tr("misc.cancel"), role: .cancel) { }
+                    } message: {
+                        Text(Localized.tr("settings.clearAll.message"))
+                    }
 
                     Button(action: {
-                        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
-                        HapticManager.shared.trigger(.success)
+                        showResetOnboardingConfirmation = true
                     }) {
-                        Label("重置引导流程", systemImage: "arrow.triangle.2.circlepath")
+                        Label(Localized.tr("settings.resetOnboarding"), systemImage: "arrow.triangle.2.circlepath")
+                    }
+                    .alert(Localized.tr("settings.resetOnboarding.title"), isPresented: $showResetOnboardingConfirmation) {
+                        Button(Localized.tr("misc.confirm"), role: .destructive) {
+                            onboardingService.reset()
+                            HapticManager.shared.trigger(.success)
+                            ToastManager.shared.show(type: .success, message: Localized.tr("settings.resetOnboarding.success"))
+                        }
+                        Button(Localized.tr("misc.cancel"), role: .cancel) { }
+                    } message: {
+                        Text(Localized.tr("settings.resetOnboarding.message"))
                     }
                     
                     #if os(macOS)
@@ -208,12 +262,13 @@ struct SettingsView: View {
                     }
                     .accessibilityIdentifier("settings.runPython")
                     #endif
-                    
-                    ShareLink(item: exportAllAsMarkdown()) {
-                        Label(Localized.tr("settings.exportMarkdown"), systemImage: "doc.text.fill")
-                    }
                 } header: {
                     Text(Localized.tr("settings.section.developer"))
+                }
+                .alert(Localized.tr("misc.success"), isPresented: $showInjectSuccess) {
+                    Button(Localized.tr("misc.awesome"), role: .cancel) { }
+                } message: {
+                    Text(Localized.trf("settings.injectDemo.successMessage", injectedCount))
                 }
                 #endif
 
@@ -223,31 +278,12 @@ struct SettingsView: View {
                     }
                 }
             }
-            #if DEBUG
-            .confirmationDialog(Localized.tr("settings.clearAllDataOnly"), isPresented: $showClearAllConfirmation) {
-                Button(Localized.tr("misc.delete"), role: .destructive) {
-                    store.sqliteStore.removeAllPages()
-                }
-                Button(Localized.tr("settings.cancel"), role: .cancel) {}
-            } message: {
-                Text(Localized.tr("settings.confirmClearAll"))
-            }
-            #endif
 #if os(iOS)
             .listStyle(.insetGrouped)
 #endif
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
             .navigationTitle(Localized.tr("settings.settings"))
-            .confirmationDialog(Localized.tr("settings.confirmReset"), isPresented: $showResetConfirmation) {
-                Button(Localized.tr("settings.resetAllData"), role: .destructive) {
-                    store.resetAllData()
-                    store.seedDefaultContent()
-                }
-                Button(Localized.tr("settings.cancel"), role: .cancel) {}
-            } message: {
-                Text(Localized.tr("settings.resetWarning"))
-            }
             // 导入文件夹
             .fileImporter(
                 isPresented: $showFolderImporterForImport,

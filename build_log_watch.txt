@@ -1,0 +1,23 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -scheme KMWatch -project KM.xcodeproj -destination generic/platform=watchOS CODE_SIGN_IDENTITY= CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = 
+    CODE_SIGNING_ALLOWED = NO
+    CODE_SIGNING_REQUIRED = NO
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.9.0
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 603.0.1
+  swift-custom-dump: https://github.com/pointfreeco/swift-custom-dump @ 1.5.0
+  swift-snapshot-testing: https://github.com/pointfreeco/swift-snapshot-testing @ 1.19.2
+
+2026-05-04 03:44:10.670 xcodebuild[37156:326702] Writing error result bundle to /var/folders/rs/v67zrdbx553gsp0ngtvd9pw80000gn/T/ResultBundle_2026-04-05_03-44-0010.xcresult
+xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+		{ generic:1, platform:watchOS }
+
+	Ineligible destinations for the "KMWatch" scheme:
+		{ platform:watchOS, id:dvtdevice-DVTiOSDevicePlaceholder-watchos:placeholder, name:Any watchOS Device, error:watchOS 26.4 is not installed. Please download and install the platform from Xcode > Settings > Components. }

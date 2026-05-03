@@ -490,8 +490,14 @@ struct ChatViewContent: View {
                 
                 await MainActor.run {
                     // 完成后处理
+                    let finalContent = llmService.streamingContent
                     llmService.streamingContent = ""
                     isLoading = false
+                    
+                    if !hasReceivedFirstChunk && finalContent.isEmpty {
+                        errorMessage = Localized.tr("chat.error.noResponse")
+                        showError = true
+                    }
                 }
             } catch {
                 await MainActor.run {
@@ -530,7 +536,7 @@ struct ChatViewContent: View {
             
         var mdString = "# \(Localized.tr("chat.conversationHistory"))\n\n"
         for message in history {
-            let roleName = message.role == .user ? "You" : "AI"
+            let roleName = message.role == .user ? Localized.tr("chat.role.user") : Localized.tr("chat.role.ai")
             mdString += "### \(roleName)\n"
             mdString += "\(message.content)\n\n"
         }
@@ -551,7 +557,7 @@ struct ChatViewContent: View {
 
         var htmlContent = ""
         for message in history {
-            let roleName = message.role == .user ? "You" : "AI"
+            let roleName = message.role == .user ? Localized.tr("chat.role.user") : Localized.tr("chat.role.ai")
             let color = message.role == .user ? "#007AFF" : "#333"
             let bgColor = message.role == .user ? "#F0F8FF" : "#F9F9F9"
             htmlContent += """

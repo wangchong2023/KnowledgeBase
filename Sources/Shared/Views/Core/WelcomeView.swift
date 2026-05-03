@@ -4,6 +4,8 @@ import Charts
 struct WelcomeView: View {
     @Environment(KMStore.self) var store
     @Binding var selectedTab: ContentView.AppTab
+    @State private var showInjectSuccess = false
+    @State private var injectedCount = 0
     
     var body: some View {
         @Bindable var store = store
@@ -15,13 +17,18 @@ struct WelcomeView: View {
                     WelcomeGrowthChartSection(data: store.growthSeries)
                     WelcomeRecentUpdatesSection(selectedTab: $selectedTab)
                 } else {
-                    WelcomeQuickStartGuideSection()
+                    WelcomeQuickStartGuideSection(showInjectSuccess: $showInjectSuccess, injectedCount: $injectedCount)
                 }
                 WelcomeQuickActionsSection(selectedTab: $selectedTab)
             }
             .padding(.bottom, 40)
         }
         .background(Color.wikiBackground)
+        .alert(Localized.tr("misc.success"), isPresented: $showInjectSuccess) {
+            Button(Localized.tr("misc.awesome"), role: .cancel) { }
+        } message: {
+            Text(Localized.trf("settings.injectDemo.successMessage", injectedCount))
+        }
     }
 }
 
@@ -99,6 +106,9 @@ struct WelcomeRecentUpdatesSection: View {
 
 struct WelcomeQuickStartGuideSection: View {
     @Environment(KMStore.self) var store
+    @Binding var showInjectSuccess: Bool
+    @Binding var injectedCount: Int
+    
     var body: some View {
         VStack(spacing: 20) {
             HStack {
@@ -115,15 +125,17 @@ struct WelcomeQuickStartGuideSection: View {
             // 快捷注入演示数据入口
             Button(action: {
                 HapticManager.shared.trigger(.selection)
-                DemoDataGenerator.generate(in: store.sqliteStore)
+                injectedCount = DemoDataGenerator.generate(in: store.sqliteStore)
+                store.refresh()
                 HapticManager.shared.trigger(.success)
+                showInjectSuccess = true
             }) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("探索 AI 代理演示数据")
+                        Text(Localized.tr("welcome.demo.title"))
                             .font(.subheadline.bold())
                             .foregroundStyle(.wikiAccent)
-                        Text("一键注入示例，快速体验图谱与 AI 合成")
+                        Text(Localized.tr("welcome.demo.desc"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }

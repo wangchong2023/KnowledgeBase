@@ -94,6 +94,18 @@ final class KMStore: @preconcurrency GraphDataProvider {
     var lastSearchDiagnostic: SearchDiagnosticInfo?
     var weeklyInsight: KnowledgeInsightService.WeeklyInsight?
     var selectedTool: ToolItem?
+    
+    func refresh() {
+        print("🔄 [KMStore] Refreshing store... Current pages: \(sqliteStore.pages.count)")
+        sqliteStore.reloadFromDisk()
+        refreshTrigger = UUID()
+        
+        // 同步检查成就 (Platinum Experience Item #6)
+        let totalLinks = sqliteStore.pages.reduce(0) { $0 + $1.outgoingLinks.count }
+        MedalService.shared.checkAchievements(nodeCount: sqliteStore.pages.count, linkCount: totalLinks)
+        
+        print("🔄 [KMStore] Refreshed. New pages count: \(sqliteStore.pages.count)")
+    }
 
     @ObservationIgnored private var _lastLintScore: Int = UserDefaults.standard.integer(forKey: "lastLintScore")
     var lastLintScore: Int {
@@ -116,6 +128,7 @@ final class KMStore: @preconcurrency GraphDataProvider {
         case graphDiscovery // 发现图谱关联
     }
     var pendingCoachMark: CoachMarkType?
+    var refreshTrigger = UUID()
 
     // MARK: - Synthesis Management
     struct SynthesisDocument: Codable, Identifiable {
@@ -290,7 +303,10 @@ final class KMStore: @preconcurrency GraphDataProvider {
         return formatter.string(from: date)
     }
     
-    var pages: [WikiPage] { sqliteStore.pages }
+    var pages: [WikiPage] {
+        _ = refreshTrigger
+        return sqliteStore.pages
+    }
     var logEntries: [LogEntry] { (logService as? LogService)?.logEntries ?? [] }
     var totalPages: Int { pages.count }
     var entityCount: Int { pages.filter { $0.type == .entity }.count }
@@ -323,6 +339,10 @@ final class KMStore: @preconcurrency GraphDataProvider {
     }
 
     init() { 
+        print("🏪 [KMStore] init called. sqliteStore address: \(Unmanaged.passUnretained(sqliteStore).toOpaque())")
+        sqliteStore.onLog = { [weak self] a, t, d in
+            self?.addLog(action: a, target: t, details: d)
+        }
         seedDefaultContent() 
         loadSynthesisResults()
     }
@@ -390,7 +410,7 @@ final class KMStore: @preconcurrency GraphDataProvider {
     }
     func loadFromDisk() { sqliteStore.reloadFromDisk(); logService.loadFromDisk() }
     
-    func addLog(action: String, target: String, details: String) { logService.addLog(action: action, target: target, details: details) }
+    func addLog(action: LogAction, target: String, details: String) { logService.addLog(action: action, target: target, details: details) }
     func clearLogs() { logService.clearAllLogs() }
 }
 
@@ -414,9 +434,34 @@ extension KMStore {
     
     func insertRemotePage(_ page: WikiPage) { if !pages.contains(where: { $0.id == page.id }) { sqliteStore.pages.append(page) } }
     func clearAllData() throws {
-        sqliteStore.pages.removeAll(); undoService.clear()
+        sqliteStore.pages.removeAll()
+        undoService.clear()
+        
+        // 1. 关闭数据库连接
+        sqliteStore.close()
+        
+        // 2. 删除物理文件
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        try? FileManager.default.removeItem(at: docs.appendingPathComponent("km.sqlite3"))
+        let dbURL = docs.appendingPathComponent("km.sqlite3")
+        try? FileManager.default.removeItem(at: dbURL)
+        
+        // 3. 重置成就系统 (MedalService)
+        MedalService.shared.reset()
+        
+        // 4. 清理核心业务相关的 UserDefaults
+        let keysToClear = [
+            "lastLintIssues", "lastLintScore", "lastLintDate",
+            "hasShownGraphCoachMark", "has_seeded_initial_content"
+        ]
+        keysToClear.forEach { UserDefaults.standard.removeObject(forKey: $0) }
+        
+        // 5. 清理合成文档
+        SynthesisType.allCases.forEach { type in
+            UserDefaults.standard.removeObject(forKey: "synthesis_docs_\(type.rawValue)")
+        }
+        
+        // 重新初始化连接和表结构
+        refresh()
     }
     
     func pageByTitle(_ title: String) async -> WikiPage? { await linkService.pageByTitle(title, in: pages) }
@@ -450,7 +495,7 @@ extension KMStore {
     
     func runAIScan() async {
         guard llmService.isEnabled else { 
-            logService.addLog(action: Localized.tr("log.action.aiscan.skipped"), target: "System", details: "LLM service disabled")
+            logService.addLog(action: .aiscanSkipped, target: "System", details: "LLM service disabled")
             return 
         }
         
@@ -488,7 +533,7 @@ extension KMStore {
                 TaskCenter.shared.updateTask(taskID, status: .completed)
             }
         } catch {
-            logService.addLog(action: Localized.tr("log.action.aiscan.failed"), target: "System", details: error.localizedDescription)
+            logService.addLog(action: .aiscanFailed, target: "System", details: error.localizedDescription)
             await MainActor.run { 
                 isScanningAI = false 
                 TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
@@ -519,7 +564,8 @@ extension KMStore {
     private func weeklyCacheKey() -> String {
         let calendar = Calendar.current
         let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
-        return "weekly_insight_\(components.yearForWeekOfYear ?? 0)_\(components.weekOfYear ?? 0)"
+        let lang = Localized.currentLanguage
+        return "weekly_insight_\(components.yearForWeekOfYear ?? 0)_\(components.weekOfYear ?? 0)_\(lang)"
     }
 
     private func loadCachedWeeklyInsight() -> KnowledgeInsightService.WeeklyInsight? {

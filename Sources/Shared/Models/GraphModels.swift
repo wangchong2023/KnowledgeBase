@@ -3,14 +3,14 @@ import Foundation
 // MARK: - Log Entry
 struct LogEntry: Identifiable, Codable {
     var id: UUID
-    var action: String
+    var action: LogAction
     var target: String
     var details: String
     var timestamp: Date
     
     init(
         id: UUID = UUID(),
-        action: String,
+        action: LogAction,
         target: String,
         details: String = "",
         timestamp: Date = Date()

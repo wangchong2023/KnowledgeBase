@@ -98,6 +98,12 @@ struct ContentView: View {
                 onboardingService.nextStep()
             }
         }
+        .onChange(of: onboardingService.hasCompletedOnboarding) { _, newValue in
+            if !newValue && onboardingService.currentStep == nil {
+                onboardingService.nextStep()
+            }
+        }
+        .wikiToast()
     }
     
     // MARK: - iPad/Mac Adaptive SplitView
@@ -115,7 +121,7 @@ struct ContentView: View {
             }
         } detail: {
             // 详情列：显示主要内容
-            AdaptiveDetailView(selectedTab: $selectedTab, selection: $sidebarSelection, languageForceUpdate: $languageForceUpdate, heroNamespace: heroNamespace)
+            AdaptiveDetailView(selectedTab: $selectedTab, selection: $sidebarSelection, languageForceUpdate: $languageForceUpdate, onboardingService: onboardingService, heroNamespace: heroNamespace)
         }
         .tint(tintColor)
         .sheet(isPresented: $showCommandPalette) {
@@ -153,7 +159,7 @@ struct ContentView: View {
             }
 
             Tab(AppTab.settings.displayTitle, systemImage: AppTab.settings.icon, value: AppTab.settings) {
-                SettingsView(languageForceUpdate: $languageForceUpdate)
+                SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
             }
         }
         .tint(tintColor)
@@ -212,7 +218,7 @@ struct ContentView: View {
                 }
                 .tag(AppTab.graph)
 
-            SettingsView(languageForceUpdate: $languageForceUpdate)
+            SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
                 .accessibilityIdentifier("Settings")
                 .tabItem {
                     Label(AppTab.settings.displayTitle, systemImage: AppTab.settings.icon)
@@ -312,6 +318,139 @@ struct ContentView: View {
                 .id(languageForceUpdate)
         } else {
             IngestView(selectedTab: $selectedTab)
+        }
+    }
+}
+
+#Preview {
+    ContentView()
+        .environment(KMStore())
+        .environmentObject(ThemeManager())
+        .environmentObject(LLMService())
+}
+
+// MARK: - Coach Mark Overlay
+struct CoachMarkOverlay: View {
+    let type: KMStore.CoachMarkType
+    @Binding var selectedTab: ContentView.AppTab
+    let onDismiss: () -> Void
+    
+    @State private var isAnimating = false
+    
+    var body: some View {
+        ZStack {
+            // 半透明背景
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture { dismissWithAnimation() }
+            
+            VStack(spacing: 24) {
+                // 图标
+                ZStack {
+                    Circle()
+                        .fill(LinearGradient(colors: [.wikiAccent, .wikiSource], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .frame(width: 80, height: 80)
+                        .shadow(color: .wikiAccent.opacity(0.3), radius: 10, y: 5)
+                    
+                    Image(systemName: iconName)
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+                .scaleEffect(isAnimating ? 1 : 0.8)
+                .opacity(isAnimating ? 1 : 0)
+                
+                VStack(spacing: 12) {
+                    Text(Localized.tr(titleKey))
+                        .font(.title3.bold())
+                        .foregroundStyle(.wikiText)
+                    
+                    Text(Localized.tr(descKey))
+                        .font(.subheadline)
+                        .foregroundStyle(.wikiSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .offset(y: isAnimating ? 0 : 20)
+                .opacity(isAnimating ? 1 : 0)
+                
+                Button(action: performAction) {
+                    Text(Localized.tr(actionKey))
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 12)
+                        .background(
+                            Capsule()
+                                .fill(Color.wikiAccent)
+                        )
+                }
+                .scaleEffect(isAnimating ? 1 : 0.9)
+                .opacity(isAnimating ? 1 : 0)
+                
+                Button(action: dismissWithAnimation) {
+                    Text(Localized.tr("misc.skip"))
+                        .font(.caption)
+                        .foregroundStyle(.wikiSecondary)
+                }
+                .padding(.top, 4)
+            }
+            .padding(32)
+            .background(
+                RoundedRectangle(cornerRadius: 24)
+                    .fill(Color.wikiCard)
+                    .shadow(color: .black.opacity(0.2), radius: 30, x: 0, y: 15)
+            )
+            .padding(24)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
+                isAnimating = true
+            }
+        }
+    }
+    
+    private var iconName: String {
+        switch type {
+        case .graphDiscovery: return "circle.hexagongrid.fill"
+        }
+    }
+    
+    private var titleKey: String {
+        switch type {
+        case .graphDiscovery: return "coachmark.graphDiscovery.title"
+        }
+    }
+    
+    private var descKey: String {
+        switch type {
+        case .graphDiscovery: return "coachmark.graphDiscovery.desc"
+        }
+    }
+    
+    private var actionKey: String {
+        switch type {
+        case .graphDiscovery: return "coachmark.graphDiscovery.action"
+        }
+    }
+    
+    private func performAction() {
+        HapticManager.shared.trigger(.success)
+        switch type {
+        case .graphDiscovery:
+            UserDefaults.standard.set(true, forKey: "hasShownGraphCoachMark")
+            withAnimation {
+                selectedTab = .graph
+            }
+        }
+        dismissWithAnimation()
+    }
+    
+    private func dismissWithAnimation() {
+        withAnimation(.easeIn(duration: 0.2)) {
+            isAnimating = false
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            onDismiss()
         }
     }
 }

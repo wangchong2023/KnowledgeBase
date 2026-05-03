@@ -14,6 +14,9 @@ struct SidebarView: View {
     @ObservedObject var taskCenter = TaskCenter.shared
     var heroNamespace: Namespace.ID
     var selection: Binding<SidebarSelection?>? = nil
+    
+    @State private var showDeleteConfirmation = false
+    @State private var pageToDelete: WikiPage?
 
     /// 状态恢复 (Platinum Experience Item #3)
     @SceneStorage("sidebar.selectedPageID") private var restoredPageID: String?
@@ -176,10 +179,6 @@ struct SidebarView: View {
                     Label(Localized.tr("sidebar.tagManager"), systemImage: "tag.fill")
                 }
 
-                NavigationLink(value: SidebarSelection.tool(.log)) {
-                    Label(Localized.tr("sidebar.operationLog"), systemImage: "clock.arrow.circlepath")
-                }
-
                 NavigationLink(value: SidebarSelection.tool(.taskCenter)) {
                     HStack {
                         Label(Localized.tr("aitask.center.title"), systemImage: "arrow.triangle.2.circlepath")
@@ -201,6 +200,23 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
+        .confirmationDialog(
+            pageToDelete.map { Localized.trf("page.deletePageTitle", $0.title) } ?? Localized.tr("page.deletePage"),
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(Localized.tr("page.deletePage"), role: .destructive) {
+                if let page = pageToDelete {
+                    store.deletePage(page)
+                    HapticManager.shared.trigger(.success)
+                }
+            }
+            Button(Localized.tr("misc.cancel"), role: .cancel) {
+                pageToDelete = nil
+            }
+        } message: {
+            Text(Localized.tr("settings.clearAll.message")) // 复用不可恢复的警告文案
+        }
         #if os(macOS)
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
             importDroppedFiles(providers: providers)
@@ -260,7 +276,8 @@ struct SidebarView: View {
         Divider()
         
         Button(role: .destructive, action: {
-            store.deletePage(page)
+            pageToDelete = page
+            showDeleteConfirmation = true
         }) {
             Label(Localized.tr("page.deletePage"), systemImage: "trash")
         }

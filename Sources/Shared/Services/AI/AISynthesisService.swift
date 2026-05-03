@@ -13,13 +13,13 @@ final class AISynthesisService {
     
     /// 生成语义总结
     func summarize(content: String) async throws -> String {
-        let prompt = PromptService.shared.summaryPrompt + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.summaryPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         return try await llm.generate(prompt: prompt, systemPrompt: "")
     }
     
     /// 生成思维导图 (Mermaid)
     func generateMindMap(content: String) async throws -> String {
-        let prompt = PromptService.shared.mindmapPrompt + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.mindmapPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         let result = try await llm.generate(prompt: prompt, systemPrompt: "You are a Mermaid mindmap expert. Output ONLY valid mindmap code. Start strictly with 'mindmap'. Use root((Title)) for root node. Indent with 2 spaces. Do not use colons or parentheses in node text unless quoted.")
         
         var cleaned = result
@@ -78,13 +78,13 @@ final class AISynthesisService {
     
     /// 提取行动项
     func extractActions(content: String) async throws -> String {
-        let prompt = PromptService.shared.actionPrompt + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.actionPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         return try await llm.generate(prompt: prompt, systemPrompt: "")
     }
     
     /// 生成演示文稿大纲 (Markdown Slides)
     func generatePresentation(content: String) async throws -> String {
-        let prompt = PromptService.shared.slidesPrompt + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.slidesPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         return try await llm.generate(prompt: prompt, systemPrompt: "You are a presentation expert. Use Markdown. Use '# ' for Title slide, '## ' for new slides. Use bullet points.")
     }
 
@@ -95,9 +95,14 @@ final class AISynthesisService {
     
     /// 生成测验题
     func generateQuiz(content: String) async throws -> String {
-        let prompt = PromptService.shared.quizPrompt + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.quizPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
+        let quizTitle = Localized.tr("prompt.quiz.defaultTitle")
+        let questionLabel = Localized.tr("prompt.quiz.question")
+        let optionLabel = Localized.tr("prompt.quiz.option")
+        let explanationLabel = Localized.tr("prompt.quiz.explanation")
+        
         let jsonFormat = """
-        {"title":"测验标题","questions":[{"id":0,"text":"问题？","options":["A选项","B选项","C选项","D选项"],"answer":0,"explanation":"解释"}]}
+        {"title":"\(quizTitle)","questions":[{"id":0,"text":"\(questionLabel)?","options":["\(optionLabel) A","\(optionLabel) B","\(optionLabel) C","\(optionLabel) D"],"answer":0,"explanation":"\(explanationLabel)"}]}
         """
         let result = try await llm.generate(prompt: prompt, systemPrompt: "You are a quiz generator. Output ONLY valid JSON (no markdown fences) in this exact format: \(jsonFormat). answer is 0-based index (0=A,1=B,2=C,3=D). explanation tells why the answer is correct. Do NOT wrap in ```json```.")
 
@@ -171,18 +176,18 @@ final class AISynthesisService {
 
         guard let quiz = try? JSONDecoder().decode(QuizJSON.self, from: data) else { return nil }
         
-        var md = "# \(quiz.title ?? "知识测验")\n\n"
+        var md = "# \(quiz.title ?? Localized.tr("quiz.title"))\n\n"
         for (index, q) in quiz.questions.enumerated() {
             md += "## \(index + 1). \(q.text)\n\n"
             for opt in q.options {
                 md += "* \(opt)\n"
             }
-            md += "\n<details>\n<summary>查看答案与解析</summary>\n\n"
+            md += "\n<details>\n<summary>\(Localized.tr("quiz.showAnswer"))</summary>\n\n"
             if let ans = q.answer {
-                md += "**正确答案：** \(ans.stringValue)\n\n"
+                md += "**\(Localized.tr("quiz.correctAnswer"))：** \(ans.stringValue)\n\n"
             }
             if let exp = q.explanation {
-                md += "**解析：** \(exp)\n"
+                md += "**\(Localized.tr("quiz.explanation"))：** \(exp)\n"
             }
             md += "\n</details>\n\n"
         }
@@ -192,35 +197,36 @@ final class AISynthesisService {
 
     /// 生成信息图表 (Mermaid)
     func generateInfographic(content: String) async throws -> String {
-        let prompt = PromptService.shared.infographicPrompt + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.infographicPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         return try await llm.generate(prompt: prompt, systemPrompt: "")
     }
 
     /// 生成深度报告
     func generateReport(content: String) async throws -> String {
-        let prompt = PromptService.shared.reportPrompt + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.reportPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         return try await llm.generate(prompt: prompt, systemPrompt: "You are a report writer. First line MUST be '# <title>' summarizing the report topic. Use Markdown headings for sections.")
     }
 
     /// 针对具体的 Lint 问题提供 AI 修复建议
     func suggestFix(issue: LintIssue, pages: [WikiPage]) async throws -> String {
-        let pageTitle = pages.first(where: { $0.id == issue.pageID })?.title ?? "未知页面"
+        let pageTitle = pages.first(where: { $0.id == issue.pageID })?.title ?? Localized.tr("misc.unknown")
         let pageContent = pages.first(where: { $0.title == pageTitle })?.content ?? ""
         let otherTitles = pages.map { $0.title }.filter { $0 != pageTitle }
         
         let prompt = """
         \(PromptService.shared.fixSuggestionPrompt)
+        \(PromptService.shared.languageInstruction)
         
-        页面标题：\(pageTitle)
-        问题描述：\(issue.message)
-        问题类型：\(issue.type.icon)
+        \(Localized.tr("llm.prompt.pageTitle"))：\(pageTitle)
+        \(Localized.tr("llm.prompt.issueDesc"))：\(issue.message)
+        \(Localized.tr("llm.prompt.issueType"))：\(issue.type.icon)
         
-        当前页面部分内容：
+        \(Localized.tr("llm.prompt.pageContentSnippet"))：
         \"\"\"
         \(pageContent.prefix(500))
         \"\"\"
         
-        知识库中的其他页面标题：
+        \(Localized.tr("llm.prompt.otherPageTitles"))：
         \(otherTitles.prefix(50).joined(separator: ", "))
         """
         
@@ -238,6 +244,7 @@ final class AISynthesisService {
         
         let prompt = """
         \(PromptService.shared.insightQuestionsPrompt)
+        \(PromptService.shared.languageInstruction)
         
         要求：
         1. 仅返回 JSON 数组格式，例如: ["问题1", "问题2", "问题3"]

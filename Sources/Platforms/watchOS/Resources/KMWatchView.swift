@@ -75,7 +75,7 @@ struct WatchWikiStatsView: View {
             }
             .padding()
         }
-        .navigationTitle("KnowledgeBase")
+        .navigationTitle("KM")
         .onAppear {
             loadData()
         }

@@ -345,28 +345,6 @@ struct PageDetailView: View {
             PageHistoryView(page: page)
         }
         .quizPresentation(activeQuiz: $activeQuiz)
-        .overlay {
-            if isLoadingAI && aiResult == nil {
-                ZStack {
-                    Color.black.opacity(0.001) // 极低透明度捕获触摸，防止点击底层
-                        .ignoresSafeArea()
-                        .onTapGesture { /* 拦截点击 */ }
-                    
-                    VStack(spacing: 12) {
-                        ProgressView()
-                            .tint(.white)
-                        Text(Localized.tr("misc.aiThinking"))
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.white)
-                    }
-                    .padding(.horizontal, 30)
-                    .padding(.vertical, 20)
-                    .background(.ultraThinMaterial.opacity(0.95))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .shadow(color: .black.opacity(0.2), radius: 20)
-                }
-            }
-        }
     }
     
     // MARK: - AI Result Display Section
@@ -702,27 +680,37 @@ struct PageDetailView: View {
     // MARK: - AI Actions Implementation
     
     private func runAISummary() {
+        ToastManager.shared.show(type: .processing, message: Localized.tr("misc.aiThinking"), duration: 0)
         Task {
             isLoadingAI = true
-            defer { isLoadingAI = false }
+            defer { 
+                isLoadingAI = false
+                ToastManager.shared.dismiss()
+            }
             do {
                 let summary = try await AISynthesisService.shared.summarize(content: page.content)
                 aiResult = summary
+                HapticManager.shared.trigger(.success)
             } catch {
-                print("AI Summary failed: \(error)")
+                ToastManager.shared.show(type: .error, message: error.localizedDescription)
             }
         }
     }
     
     private func extractActions() {
+        ToastManager.shared.show(type: .processing, message: Localized.tr("misc.aiThinking"), duration: 0)
         Task {
             isLoadingAI = true
-            defer { isLoadingAI = false }
+            defer { 
+                isLoadingAI = false
+                ToastManager.shared.dismiss()
+            }
             do {
                 let actions = try await AISynthesisService.shared.extractActions(content: page.content)
                 aiResult = actions
+                HapticManager.shared.trigger(.success)
             } catch {
-                print("AI Actions failed: \(error)")
+                ToastManager.shared.show(type: .error, message: error.localizedDescription)
             }
         }
     }
@@ -743,9 +731,13 @@ struct PageDetailView: View {
         
         let taskID = TaskCenter.shared.addTask(type: .ai, name: title, target: page.title)
         
+        ToastManager.shared.show(type: .processing, message: Localized.tr("misc.aiThinking"), duration: 0)
         Task {
             isLoadingAI = true
-            defer { isLoadingAI = false }
+            defer { 
+                isLoadingAI = false
+                ToastManager.shared.dismiss()
+            }
             do {
                 let result: String
                 switch type {

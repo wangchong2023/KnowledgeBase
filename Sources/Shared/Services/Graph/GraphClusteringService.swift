@@ -44,7 +44,7 @@ final class GraphClusteringService {
         
         return (0..<k).map { i in
             Cluster(
-                name: "主题簇 \(i + 1)",
+                name: Localized.trf("graph.cluster.name", i + 1),
                 pageIDs: Set(clusters[i]),
                 centroid: centroids[i],
                 color: clusterColors[i % clusterColors.count]

@@ -168,7 +168,7 @@ struct PDFIngestSheet: View {
             content: content,
             tags: ["PDF", Localized.tr("logAction.ingest")]
         )
-        store.addLog(action: Localized.tr("logAction.importPDF"), target: targetTitle, details: Localized.trf("pdf.ingestModeFormat", ingestMode))
+        store.addLog(action: .importPDF, target: targetTitle, details: Localized.trf("pdf.ingestModeFormat", ingestMode))
         store.saveToDisk()
         dismiss()
     }

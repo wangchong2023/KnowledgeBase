@@ -124,7 +124,17 @@ struct KnowledgeDashboardView: View {
         .background(Color.wikiBackground)
         .navigationTitle(Localized.tr("sidebar.dashboard"))
         .task {
-            self.tags = await store.getAllTags()
+            await loadTags()
+        }
+        .onChange(of: store.refreshTrigger) { _, _ in
+            Task { await loadTags() }
+        }
+    }
+    
+    private func loadTags() async {
+        let allTags = await store.getAllTags()
+        await MainActor.run {
+            self.tags = allTags
         }
     }
 }

@@ -80,21 +80,6 @@ struct IngestView: View {
                 VStack(spacing: 20) {
                     IngestHeroSection()
 
-                    if isExtracting {
-                        VStack(spacing: 12) {
-                            ProgressView()
-                                .tint(.wikiAccent)
-                            Text(Localized.tr("ingest.processing"))
-                                .font(.subheadline)
-                                .foregroundStyle(.wikiSecondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 40)
-                        .background(Color.wikiCard.opacity(0.5))
-                        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
-                        .padding(.horizontal)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                    }
 
                     IngestEntryCardsSection(
                         showManualForm: Binding(
@@ -396,10 +381,11 @@ struct IngestView: View {
             await MainActor.run {
                 store.updatePage(updatedPage, forceDeepScan: false)
 
-                store.addLog(action: Localized.tr("logAction.smartIngest"), target: newTitle, details: Localized.trf("ingest.smartIngestDoneDesc", type.displayName))
+                store.addLog(action: .smartIngest, target: newTitle, details: Localized.trf("ingest.smartIngestDoneDesc", type.displayName))
 
                 smartResult = nil
                 ingestSuccess = true
+                ToastManager.shared.show(type: .success, message: Localized.tr("ingest.success"))
                 HapticManager.shared.trigger(.success)
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -470,6 +456,7 @@ struct IngestView: View {
         newURL = ""
         showURLImport = false
         isExtracting = true
+        ToastManager.shared.show(type: .processing, message: Localized.tr("ingest.processing"), duration: 0)
         
         Task {
             do {
@@ -479,12 +466,15 @@ struct IngestView: View {
                     self.newContent = extracted.content
                     self.manualFormTitle = Localized.tr("ingest.urlImport")
                     self.isExtracting = false
+                    ToastManager.shared.dismiss()
                     self.showManualForm = true
+                    ToastManager.shared.show(type: .success, message: Localized.tr("ingest.success"))
                     HapticManager.shared.trigger(.success)
                 }
             } catch {
                 await MainActor.run {
                     self.isExtracting = false
+                    ToastManager.shared.show(type: .error, message: error.localizedDescription)
                     self.errorMessage = error.localizedDescription
                     self.showError = true
                 }

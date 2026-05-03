@@ -58,7 +58,7 @@ final class PluginMarketService: ObservableObject {
         } catch {
             print("❌ [Market] 获取插件失败: \(error.localizedDescription)")
             await MainActor.run {
-                self.errorMessage = "无法连接至插件市场 (影子服务器)，请确保已启动 python3 -m http.server 8000"
+                self.errorMessage = Localized.tr("plugin.market.connectionError")
                 self.isLoading = false
             }
         }

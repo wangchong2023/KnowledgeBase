@@ -6,7 +6,7 @@ final class PromptService: ObservableObject, @unchecked Sendable {
     static let shared = PromptService()
     
     private init() {
-        load()
+        reload()
     }
     
     private func load() {
@@ -46,11 +46,35 @@ final class PromptService: ObservableObject, @unchecked Sendable {
 
     // MARK: - 用户资产
     
-    @Published var userShortcuts: [ShortcutItem] = [
-        ShortcutItem(text: Localized.tr("prompt.shortcut.deepReview")),
-        ShortcutItem(text: Localized.tr("prompt.shortcut.findGaps")),
-        ShortcutItem(text: Localized.tr("prompt.shortcut.studyPath"))
-    ]
+    @Published var userShortcuts: [ShortcutItem] = []
+    
+    func updateLocalizables() {
+        userShortcuts = [
+            ShortcutItem(text: Localized.tr("prompt.shortcut.deepReview")),
+            ShortcutItem(text: Localized.tr("prompt.shortcut.findGaps")),
+            ShortcutItem(text: Localized.tr("prompt.shortcut.studyPath"))
+        ]
+        
+        // 刷新其他提示词
+        queryRewritePrompt = Localized.tr("prompt.queryRewrite")
+        rerankPrompt = Localized.tr("prompt.rerank")
+        potentialLinksPrompt = Localized.tr("prompt.potentialLinks")
+        foldingPrompt = Localized.tr("prompt.folding")
+        refactorPrompt = Localized.tr("prompt.refactor")
+        fixSuggestionPrompt = Localized.tr("prompt.fixSuggestion")
+        
+        // 默认提示词（如果没有保存过）
+        let defaults = UserDefaults.standard
+        if defaults.string(forKey: "prompt_mindmap") == nil { mindmapPrompt = Localized.tr("prompt.default.mindmap") }
+        if defaults.string(forKey: "prompt_quiz") == nil { quizPrompt = Localized.tr("prompt.default.quiz") }
+        if defaults.string(forKey: "prompt_slides") == nil { slidesPrompt = Localized.tr("prompt.default.slides") }
+        if defaults.string(forKey: "prompt_report") == nil { reportPrompt = Localized.tr("prompt.default.report") }
+    }
+    
+    func reload() {
+        load()
+        updateLocalizables()
+    }
     
     func save() {
         let defaults = UserDefaults.standard
@@ -73,6 +97,15 @@ final class PromptService: ObservableObject, @unchecked Sendable {
         self.slidesPrompt = Localized.tr("prompt.default.slides")
         self.reportPrompt = Localized.tr("prompt.default.report")
         print("Prompt configurations reset to default.")
+    }
+    
+    /// 根据当前界面语言生成的 AI 回复指令
+    var languageInstruction: String {
+        if Localized.isChinese {
+            return "\n\n请使用中文回复。"
+        } else {
+            return "\n\nPlease reply in English."
+        }
     }
 }
 

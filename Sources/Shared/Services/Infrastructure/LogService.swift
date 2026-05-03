@@ -5,7 +5,7 @@ import Combine
 protocol LogServiceProtocol: AnyObject, Sendable {
     var logEntries: [LogEntry] { get }
     var logEntriesPublisher: AnyPublisher<[LogEntry], Never> { get }
-    func addLog(action: String, target: String, details: String)
+    func addLog(action: LogAction, target: String, details: String)
     func debug(_ message: String, file: String, function: String, line: Int)
     func error(_ message: String, error: Error?, file: String, function: String, line: Int)
     func saveToDisk()
@@ -47,7 +47,7 @@ final class LogService: ObservableObject, LogServiceProtocol, @unchecked Sendabl
         print("❌ [ERROR] [\(fileName):\(line)] \(function) -> \(message) (Error: \(errorDesc))")
         
         // 重要错误也记录到审计日志
-        addLog(action: "ERROR", target: fileName, details: "\(message): \(errorDesc)")
+        addLog(action: .error, target: fileName, details: "\(message): \(errorDesc)")
     }
 
     private let logKey = "knowledge-management_logs"
@@ -68,7 +68,7 @@ final class LogService: ObservableObject, LogServiceProtocol, @unchecked Sendabl
     }
 
     // MARK: - Add Entry
-    func addLog(action: String, target: String, details: String = "") {
+    func addLog(action: LogAction, target: String, details: String = "") {
         let entry = LogEntry(action: action, target: target, details: details)
         Task { @MainActor in
             logEntries.insert(entry, at: 0)
@@ -118,7 +118,10 @@ final class LogService: ObservableObject, LogServiceProtocol, @unchecked Sendabl
     func clearAllLogs() {
         Task { @MainActor in
             logEntries.removeAll()
-            saveToDisk()
+            // 异步执行磁盘操作，避免阻塞主线程
+            DispatchQueue.global(qos: .background).async {
+                self.saveToDisk()
+            }
         }
     }
 }

@@ -12,6 +12,9 @@ struct IndexView: View {
 struct IndexViewContent: View {
     @Environment(KMStore.self) var store
     var filterType: PageType? = nil
+    
+    @State private var showDeleteConfirmation = false
+    @State private var pageToDelete: WikiPage?
 
     var body: some View {
         let _ = print("🔍 [NAV-DIAG] IndexViewContent rendering.")
@@ -42,6 +45,14 @@ struct IndexViewContent: View {
                             NavigationLink(destination: PageDetailView(page: page)) {
                                 IndexRowView(page: page)
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    pageToDelete = page
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label(Localized.tr("page.deletePage"), systemImage: "trash")
+                                }
+                            }
                         }
                     } header: {
                         Label(Localized.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
@@ -58,6 +69,14 @@ struct IndexViewContent: View {
                         ForEach(concepts) { page in
                             NavigationLink(destination: PageDetailView(page: page)) {
                                 IndexRowView(page: page)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    pageToDelete = page
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label(Localized.tr("page.deletePage"), systemImage: "trash")
+                                }
                             }
                         }
                     } header: {
@@ -76,6 +95,14 @@ struct IndexViewContent: View {
                             NavigationLink(destination: PageDetailView(page: page)) {
                                 IndexRowView(page: page)
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    pageToDelete = page
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label(Localized.tr("page.deletePage"), systemImage: "trash")
+                                }
+                            }
                         }
                     } header: {
                         Label(Localized.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
@@ -93,6 +120,14 @@ struct IndexViewContent: View {
                             NavigationLink(destination: PageDetailView(page: page)) {
                                 IndexRowView(page: page)
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    pageToDelete = page
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label(Localized.tr("page.deletePage"), systemImage: "trash")
+                                }
+                            }
                         }
                     } header: {
                         Label(Localized.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
@@ -101,13 +136,40 @@ struct IndexViewContent: View {
                 }
             }
         }
-#if os(iOS)
+        .confirmationDialog(
+            pageToDelete.map { Localized.trf("page.deletePageTitle", $0.title) } ?? Localized.tr("page.deletePage"),
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(Localized.tr("page.deletePage"), role: .destructive) {
+                if let page = pageToDelete {
+                    store.deletePage(page)
+                    HapticManager.shared.trigger(.success)
+                }
+            }
+            Button(Localized.tr("misc.cancel"), role: .cancel) {
+                pageToDelete = nil
+            }
+        } message: {
+            Text(Localized.tr("settings.clearAll.message"))
+        }
+        #if os(iOS)
         .listStyle(.insetGrouped)
 #endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
         .navigationTitle(filterType?.displayName ?? Localized.tr("sidebar.masterIndex"))
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    HapticManager.shared.trigger(.selection)
+                    store.refresh()
+                } label: {
+                    Label(Localized.tr("misc.refresh"), systemImage: "arrow.clockwise")
+                }
+            }
+        }
     }
 }
 

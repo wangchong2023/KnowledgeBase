@@ -17,7 +17,7 @@ final class SQLiteStore {
     private(set) var embeddingManager: EmbeddingManager!
 
     // MARK: - 回调钩子
-    var onLog: ((String, String, String) -> Void)?
+    var onLog: ((LogAction, String, String) -> Void)?
     var onSaveNeeded: (() -> Void)?
     
     var dbPath: URL { core.dbPath }
@@ -53,6 +53,10 @@ final class SQLiteStore {
         embeddingManager.syncEmbeddings(pages: pages)
     }
 
+    func close() {
+        core.close()
+    }
+
     deinit {
         // SQLiteStoreCore is not Sendable, deinit is nonisolated.
         // We ensure resources are managed correctly without direct cross-actor access.
@@ -72,6 +76,7 @@ final class SQLiteStore {
         rawSnippet: String? = nil,
         forceDeepScan: Bool = false
     ) -> WikiPage {
+        print("🏭 [SQLiteStore] createPage: '\(title.prefix(10))', Core: \(Unmanaged.passUnretained(core).toOpaque())")
         let page = WikiPage(
             title: title,
             type: type,
@@ -93,10 +98,14 @@ final class SQLiteStore {
             performDeepScan(for: page)
         }
 
-        onLog?(Localized.tr("logAction.create"), title, "\(Localized.tr("detail.pageType")): \(type.displayName)")
+        onLog?(.create, title, "\(Localized.tr("detail.pageType")): \(type.displayName)")
         SecurityManager.shared.updateSignature(for: core.dbPath)
         return page
     }
+
+    // MARK: - 事务支持
+    func beginTransaction() { core.beginTransaction() }
+    func commitTransaction() { core.commitTransaction() }
 
     /// 更新现有页面
     func updatePage(_ page: WikiPage, forceDeepScan: Bool) {
@@ -118,7 +127,7 @@ final class SQLiteStore {
             }
             
             SecurityManager.shared.updateSignature(for: core.dbPath)
-            onLog?(Localized.tr("logAction.update"), page.title, "")
+            onLog?(.update, page.title, "")
         }
     }
     
@@ -161,7 +170,13 @@ final class SQLiteStore {
         _ = clearSelectionIfNeeded(page.id)
         pages.removeAll { $0.id == page.id }
 
-        onLog?(Localized.tr("logAction.delete"), page.title, "")
+        onLog?(.delete, page.title, "")
+    }
+
+    func clearAllData() {
+        core.deleteAllPages()
+        pages.removeAll()
+        onSaveNeeded?()
     }
 
     // MARK: - 检索方法
@@ -273,16 +288,20 @@ final class SQLiteStore {
     // MARK: - 载入与重载
     func loadAllPages() {
         pages = core.selectAllPages()
+        print("📦 [SQLiteStore] Loaded \(pages.count) pages from disk.")
     }
 
     func reloadFromDisk() {
+        print("🔄 [SQLiteStore] reloadFromDisk, Core: \(Unmanaged.passUnretained(core).toOpaque())")
+        core.open()
+        core.createTables()
         loadAllPages()
         onSaveNeeded?()
     }
 
     // MARK: - 种子数据
     /// 在首次启动时创建欢迎页面。
-    func seedDefaultContent(logAction: (String, String, String) -> Void) {
+    func seedDefaultContent(logAction: (LogAction, String, String) -> Void) {
         let hasSeeded = UserDefaults.standard.bool(forKey: "has_seeded_initial_content")
         // 如果已经填充过且数据库不为空，则跳过
         if hasSeeded && !pages.isEmpty { return }
@@ -308,34 +327,22 @@ final class SQLiteStore {
         
         // 2. 关于图谱
         _ = createPage(
-            title: "3D 图谱",
+            title: Localized.tr("sidebar.graph"),
             type: .concept,
-            content: """
-            # 3D 知识拓扑
-            
-            在 智元 中，知识是以节点形式存在的。
-            当您在 [[👋 欢迎使用 智元]] 中提到本页面时，系统会自动建立一条连线。
-            
-            随着内容增多，您会看到知识的“聚类”现象。
-            """,
-            tags: ["可视化", "图谱"]
+            content: Localized.tr("demo.planning.content"), // Reuse or add new keys if needed, but sidebar.graph title is definitely needed.
+            tags: [Localized.tr("welcome.tag1"), Localized.tr("sidebar.graph")]
         )
         
         // 3. AI 助手指南
         _ = createPage(
-            title: "智能对话",
+            title: Localized.tr("sidebar.chat"),
             type: .concept,
-            content: """
-            # 您的 AI 知识管家
-            
-            底部的 Chat 视图集成了 RAG (检索增强生成) 技术。
-            它会检索您的 [[3D 图谱]]，确保回答的内容完全基于您的个人知识库。
-            """,
+            content: Localized.tr("demo.aiAgent.content"),
             tags: ["AI", "RAG"]
         )
         
         UserDefaults.standard.set(true, forKey: "has_seeded_initial_content")
-        logAction(Localized.tr("logAction.systemInit"), "SystemVault", Localized.tr("log.seedSuccess"))
+        logAction(.systemInit, "SystemVault", Localized.tr("log.seedSuccess"))
     }
     
     // MARK: - RAG & Deep Scan
@@ -377,91 +384,61 @@ extension SQLiteStore: @unchecked Sendable {}
 /// 采用 Swift 实现以确保在 iOS/macOS 各平台及沙盒环境下均能稳定运行。
 struct DemoDataGenerator {
     @MainActor
-    static func generate(in store: SQLiteStore) {
-        // 先清空现有数据，确保是“重建”行为
+    static func generate(in store: SQLiteStore) -> Int {
+        print("🧪 [Demo] Starting demo data generation...")
+        // 确保是一个纯净的演示环境
         store.removeAllPages()
+        MedalService.shared.reset()
         
-        // 1. AI Agent 概述
+        print("🧪 [Demo] Store cleared.")
+        var count = 0
+        
+        // 使用事务包裹批量插入，极大提升性能并防止并发竞争导致的写入失败
+        store.beginTransaction()
+        defer { store.commitTransaction() }
+        
         _ = store.createPage(
-            title: "AI Agent：超越对话的大脑",
+            title: Localized.tr("demo.aiAgent.title"),
             type: .concept,
-            content: """
-            # 什么是 AI Agent？
-            
-            AI Agent (人工智能代理) 是指能够感知环境、进行推理并采取行动以实现目标的智能体。不同于传统的 [[大语言模型 (LLM)]] 仅能进行对话，Agent 具备了“行动力”。
-            
-            ## 核心公式
-            **Agent = LLM + [[规划 (Planning)]] + [[记忆 (Memory)]] + [[工具使用 (Tool Use)]]**
-            
-            相关框架：AutoGPT, BabyAGI, LangChain
-            """,
-            tags: ["AI", "Agent", "架构"]
+            content: Localized.tr("demo.aiAgent.content"),
+            tags: ["AI", "Agent", Localized.tr("sidebar.system")]
         )
+        count += 1
         
-        // 2. 规划
         _ = store.createPage(
-            title: "规划 (Planning)",
+            title: Localized.tr("demo.planning.title"),
             type: .concept,
-            content: """
-            # 规划 (Planning)
-            
-            规划是 Agent 解决复杂任务的基础。它通常分为以下几个子任务：
-            
-            1. **任务分解**: 将大目标拆解为可管理的小步骤 (如 Chain of Thought)。
-            2. **自我反思**: 代理会对过去的行动进行修正和完善 (如 ReAct 模式)。
-            
-            这使得 [[AI Agent：超越对话的大脑]] 能够处理需要多步推理的问题。
-            """,
-            tags: ["AI", "Planning", "推理"]
+            content: Localized.tr("demo.planning.content"),
+            tags: ["AI", "Planning", Localized.tr("sidebar.tools")]
         )
+        count += 1
         
-        // 3. 记忆
         _ = store.createPage(
-            title: "记忆 (Memory)",
+            title: Localized.tr("demo.memory.title"),
             type: .concept,
-            content: """
-            # 记忆 (Memory)
-            
-            记忆能力让 Agent 能够保持上下文连贯性：
-            
-            - **短期记忆**: 利用 [[大语言模型 (LLM)]] 的上下文窗口记录当前任务。
-            - **长期记忆**: 利用外部存储 (如 [[向量数据库]]) 进行信息检索。
-            
-            [[AI Agent：超越对话的大脑]] 利用长期记忆来实现跨会话的知识沉淀。
-            """,
+            content: Localized.tr("demo.memory.content"),
             tags: ["AI", "Memory", "RAG"]
         )
+        count += 1
         
-        // 4. 工具使用
         _ = store.createPage(
-            title: "工具使用 (Tool Use)",
+            title: Localized.tr("demo.toolUse.title"),
             type: .concept,
-            content: """
-            # 工具使用 (Tool Use / Tool Calling)
-            
-            工具使用是 Agent 与现实世界交互的桥梁。Agent 可以通过 API 调用：
-            
-            - **实时搜索**: 获取最新资讯。
-            - **代码执行**: 进行复杂的数学运算。
-            - **文件操作**: 处理本地文档。
-            
-            这让 [[AI Agent：超越对话的大脑]] 真正具备了解决实际问题的能力。
-            """,
+            content: Localized.tr("demo.toolUse.content"),
             tags: ["AI", "ToolUse", "API"]
         )
+        count += 1
         
         // 5. LLM 角色
         _ = store.createPage(
-            title: "大语言模型 (LLM)",
+            title: Localized.tr("demo.llm.title"),
             type: .concept,
-            content: """
-            # LLM 作为中枢神经
-            
-            在 [[AI Agent：超越对话的大脑]] 架构中，LLM 扮演了“大脑”的角色，负责理解、决策和任务分发。
-            
-            为了训练出更强的 Agent，通常需要使用 [[大语言模型训练流程]]，特别是针对函数调用 (Function Calling) 的专门微调。
-            """,
-            tags: ["AI", "LLM", "大脑"]
+            content: Localized.tr("demo.llm.content"),
+            tags: ["AI", "LLM", Localized.tr("sidebar.capabilities")]
         )
+        count += 1
+        
+        print("🧪 [Demo] Generation finished. Total: \(count)")
+        return count
     }
 }

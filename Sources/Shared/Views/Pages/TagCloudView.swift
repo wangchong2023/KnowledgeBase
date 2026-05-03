@@ -132,15 +132,19 @@ struct TagCloudViewContent: View {
                 Text(Localized.trf("tag.renameMessage", tagToRename ?? ""))
             }
             // 删除确认对话框
-            .alert(Localized.tr("tag.deleteTag"), isPresented: $showDeleteConfirm) {
-                Button(Localized.tr("misc.cancel"), role: .cancel) { tagToDelete = nil }
+            .confirmationDialog(
+                tagToDelete.map { Localized.trf("tag.deleteMessage", $0) } ?? Localized.tr("tag.deleteTag"),
+                isPresented: $showDeleteConfirm,
+                titleVisibility: .visible
+            ) {
                 Button(Localized.tr("misc.delete"), role: .destructive) {
                     performDelete()
                 }
+                Button(Localized.tr("misc.cancel"), role: .cancel) { tagToDelete = nil }
             } message: {
-                Text(Localized.trf("tag.deleteMessage", tagToDelete ?? ""))
+                Text(Localized.tr("settings.clearAll.message"))
             }
-            // 新增标签对话框
+            // 新增标签对话框 (保持 alert 因为需要文本输入)
             .alert(Localized.tr("tags.addNew"), isPresented: $showAddTagDialog) {
                 TextField(Localized.tr("tags.inputName"), text: $addTagName)
                 Button(Localized.tr("misc.cancel"), role: .cancel) { addTagName = "" }
@@ -151,17 +155,22 @@ struct TagCloudViewContent: View {
                 Text(Localized.tr("tags.createHint"))
             }
             // 批量删除确认
-            .alert(Localized.tr("tags.confirmBulkDelete"), isPresented: $showBulkDeleteConfirm) {
-                Button(Localized.tr("misc.cancel"), role: .cancel) { }
+            .confirmationDialog(
+                Localized.trf("tags.bulkDeleteWarning", selectedTagsForBulk.count),
+                isPresented: $showBulkDeleteConfirm,
+                titleVisibility: .visible
+            ) {
                 Button(Localized.tr("misc.deleteAll"), role: .destructive) {
                     for tag in selectedTagsForBulk {
                         store.deleteTag(tag)
                     }
                     selectedTagsForBulk.removeAll()
                     isEditMode = false
+                    HapticManager.shared.trigger(.success)
                 }
+                Button(Localized.tr("misc.cancel"), role: .cancel) { }
             } message: {
-                Text(Localized.trf("tags.bulkDeleteWarning", selectedTagsForBulk.count))
+                Text(Localized.tr("settings.clearAll.message"))
             }
     }
 

@@ -11,6 +11,7 @@ struct LogView: View {
 struct LogViewContent: View {
     @Environment(KMStore.self) var store
     @State private var expandedEntryIDs: Set<UUID> = []
+    @State private var showConfirmation = false
 
     var body: some View {
         List {
@@ -59,9 +60,25 @@ struct LogViewContent: View {
 #endif
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(role: .destructive) { store.clearLogs() }
-                label: { Label(Localized.tr("misc.clear"), systemImage: "trash") }
+                Button(role: .destructive) {
+                    showConfirmation = true
+                } label: {
+                    Label(Localized.tr("misc.clear"), systemImage: "trash.slash.fill")
+                }
             }
+        }
+        .confirmationDialog(
+            Localized.tr("log.clearConfirmTitle"),
+            isPresented: $showConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button(Localized.tr("misc.clearAll"), role: .destructive) {
+                HapticManager.shared.trigger(.warning)
+                store.clearLogs()
+            }
+            Button(Localized.tr("misc.cancel"), role: .cancel) {}
+        } message: {
+            Text(Localized.tr("log.clearConfirmMessage"))
         }
 #if os(iOS)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -78,24 +95,25 @@ private struct LogEntryRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 12) {
-                Circle()
-                    .fill(actionColor(entry.action))
-                    .frame(width: 32, height: 32)
-                    .overlay(
-                        Image(systemName: actionIcon(entry.action))
-                            .font(.caption)
-                            .foregroundStyle(.white)
-                    )
-
+                // 动作图标
+                ZStack {
+                    Circle()
+                        .fill(entry.action.color.opacity(0.1))
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: entry.action.icon)
+                        .foregroundStyle(entry.action.color)
+                        .font(.system(size: 14, weight: .bold))
+                }
+                
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 6) {
-                        Text(Localized.tr(entry.action))
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(actionColor(entry.action))
-                        Text("·")
-                            .foregroundStyle(.wikiSecondary)
+                    HStack {
+                        Text(entry.action.localizedName)
+                            .font(.headline)
+                            .foregroundStyle(entry.action.color)
+                        
                         Text(entry.target)
-                            .font(.caption)
+                            .font(.headline)
                             .foregroundStyle(.wikiText)
                             .lineLimit(1)
                     }
@@ -134,43 +152,4 @@ private struct LogEntryRow: View {
         .padding(.vertical, 8)
     }
 
-    private func actionColor(_ action: String) -> Color {
-        switch action {
-        case "创建", Localized.tr("logAction.create"): return .green
-        case "更新", Localized.tr("logAction.update"): return .blue
-        case "删除", Localized.tr("logAction.delete"): return .red
-        case "Lint", Localized.tr("logAction.lint"), Localized.tr("logAction.healthCheck"): return .orange
-        case "导入", Localized.tr("logAction.ingest"): return .wikiSource
-        case "智能导入", Localized.tr("logAction.smartIngest"): return .wikiAccent
-        case "撤销操作", Localized.tr("logAction.undo"): return .purple
-        case "重做操作", Localized.tr("logAction.redo"): return .purple
-        case "同步", Localized.tr("logAction.sync"): return .teal
-        case "导入PDF", Localized.tr("logAction.importPDF"), Localized.tr("logAction.ingestPDF"): return .wikiSource
-        case "删除PDF", Localized.tr("logAction.deletePDF"): return .red
-        case "高亮标注", Localized.tr("logAction.highlight"): return .wikiAccent
-        case "OCR识别", Localized.tr("logAction.ocrRecognize"): return .wikiConcept
-        case Localized.tr("logAction.systemInit"): return .purple
-        default: return .wikiSecondary
-        }
-    }
-
-    private func actionIcon(_ action: String) -> String {
-        switch action {
-        case "创建", Localized.tr("logAction.create"): return "plus"
-        case "更新", Localized.tr("logAction.update"): return "pencil"
-        case "删除", Localized.tr("logAction.delete"): return "trash"
-        case "Lint", Localized.tr("logAction.lint"), Localized.tr("logAction.healthCheck"): return "stethoscope"
-        case "导入", Localized.tr("logAction.ingest"): return "arrow.down.doc"
-        case "智能导入", Localized.tr("logAction.smartIngest"): return "sparkles"
-        case "撤销操作", Localized.tr("logAction.undo"): return "arrow.uturn.backward"
-        case "重做操作", Localized.tr("logAction.redo"): return "arrow.uturn.forward"
-        case "同步", Localized.tr("logAction.sync"): return "icloud"
-        case "导入PDF", Localized.tr("logAction.importPDF"), Localized.tr("logAction.ingestPDF"): return "arrow.down.doc"
-        case "删除PDF", Localized.tr("logAction.deletePDF"): return "trash"
-        case "高亮标注", Localized.tr("logAction.highlight"): return "highlighter"
-        case "OCR识别", Localized.tr("logAction.ocrRecognize"): return "text.viewfinder"
-        case Localized.tr("logAction.systemInit"): return "sparkles"
-        default: return "circle"
-        }
-    }
 }

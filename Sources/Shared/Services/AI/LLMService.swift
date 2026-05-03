@@ -137,7 +137,8 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
     // MARK: - 请求体构造
     /// Builds the messages array for chat completions, including system prompt + history + query.
     private func buildChatMessages(systemPrompt: String, query: String) -> [[String: Any]] {
-        var messages: [[String: Any]] = [["role": "system", "content": systemPrompt]]
+        let fullSystemPrompt = systemPrompt + PromptService.shared.languageInstruction
+        var messages: [[String: Any]] = [["role": "system", "content": fullSystemPrompt]]
         for msg in historyStore.recent(10) {
             messages.append(["role": msg.role.rawValue, "content": msg.content])
         }
@@ -236,9 +237,12 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
                     
                     for try await line in streamResult.lines {
                         if Task.isCancelled { break }
-                        guard line.hasPrefix("data: ") else { continue }
-                        let dataString = String(line.dropFirst(6))
-                        if dataString == "[DONE]" { break }
+                        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if trimmed.isEmpty { continue }
+                        
+                        if trimmed.hasPrefix("data: ") {
+                            let dataString = String(trimmed.dropFirst(6))
+                            if dataString == "[DONE]" { break }
                         
                         guard let data = dataString.data(using: .utf8),
                               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -248,8 +252,12 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
                             continue
                         }
                         
-                        fullContent += content
-                        continuation.yield(content)
+                            fullContent += content
+                            continuation.yield(content)
+                        } else if !trimmed.hasPrefix(":") {
+                            // 非注释行且非 data: 行，可能是错误 JSON
+                            LogService.shared.debug("ChatStream received unexpected line: \(trimmed)")
+                        }
                     }
                     
                     let linkedTitles = self.extractWikiLinks(from: fullContent)
@@ -276,9 +284,10 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
     // MARK: - Adapter Pattern (Expert Optimization)
     
     func generate(prompt: String, systemPrompt: String) async throws -> String {
+        let fullSystemPrompt = systemPrompt + (systemPrompt.isEmpty ? "" : PromptService.shared.languageInstruction)
         if let adapter = activeAdapter {
             let capturedAdapter = adapter
-            return try await capturedAdapter.generate(prompt: prompt, systemPrompt: systemPrompt)
+            return try await capturedAdapter.generate(prompt: prompt, systemPrompt: fullSystemPrompt)
         }
         
         // Fallback to legacy implementation if no adapter is set
@@ -292,7 +301,7 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
         let requestBody: [String: Any] = [
             "model": model,
             "messages": [
-                ["role": "system", "content": systemPrompt],
+                ["role": "system", "content": fullSystemPrompt],
                 ["role": "user", "content": prompt]
             ],
             "temperature": 0.7
@@ -520,7 +529,7 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
     /// 查询改写 (Query Rewrite)
     func rewriteQuery(_ query: String) async -> String {
         guard isEnabled, let adapter = activeAdapter else { return query }
-        return (try? await adapter.generate(prompt: "请对以下查询进行改写以提升检索效果：\(query)", systemPrompt: "你是一个查询改写专家")) ?? query
+        return (try? await adapter.generate(prompt: "Query: \(query)", systemPrompt: Localized.tr("prompt.queryRewrite.instruction"))) ?? query
     }
     
     /// 智能重排 (AI Re-rank)

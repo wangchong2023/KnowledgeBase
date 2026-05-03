@@ -40,33 +40,35 @@ enum Localized {
         get { LanguageMode(rawValue: languageModeRaw) ?? .system }
         set {
             languageModeRaw = newValue.rawValue
-            // Update AppleLanguages to trigger language change
-            let preferred: String
-            switch newValue {
-            case .system:
-                preferred = Locale.preferredLanguages.first ?? "en"
-            case .chinese:
-                preferred = "zh-Hans"
-            case .english:
-                preferred = "en"
+            
+            if newValue == .system {
+                UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+            } else {
+                let preferred = (newValue == .chinese) ? "zh-Hans" : "en"
+                UserDefaults.standard.set([preferred], forKey: "AppleLanguages")
             }
-            UserDefaults.standard.set([preferred], forKey: "AppleLanguages")
+            
+            // 立即刷新提示词服务
+            PromptService.shared.updateLocalizables()
         }
     }
 
     static var currentLanguage: String {
-        // 优先读 UserDefaults 中的 AppleLanguages（用户手动设置的语言）
-        if let appleLanguages = UserDefaults.standard.stringArray(forKey: "AppleLanguages"),
-           let preferred = appleLanguages.first {
+        // 如果设置为跟随系统，或者没有 AppleLanguages 覆盖，则读取系统首选语言
+        if languageMode == .system || UserDefaults.standard.stringArray(forKey: "AppleLanguages") == nil {
+            let preferred = Locale.preferredLanguages.first ?? "en"
             if preferred.hasPrefix("zh") {
                 return "zh-Hans"
             }
             return "en"
         }
-        // 否则跟随系统
-        let preferred = Locale.preferredLanguages.first ?? "en"
-        if preferred.hasPrefix("zh-Hans") || preferred.hasPrefix("zh-CN") || preferred.hasPrefix("zh_Hans") {
-            return "zh-Hans"
+        
+        // 读取手动覆盖的语言
+        if let appleLanguages = UserDefaults.standard.stringArray(forKey: "AppleLanguages"),
+           let preferred = appleLanguages.first {
+            if preferred.hasPrefix("zh") {
+                return "zh-Hans"
+            }
         }
         return "en"
     }
@@ -77,13 +79,15 @@ enum Localized {
     /// 动态读取 .strings 文件，确保能响应运行时语言切换
     static func tr(_ key: String) -> String {
         let lang = currentLanguage
-        // 直接从 bundle 路径读取 .strings 文件，绕过 Bundle 的缓存
-        if let url = Bundle.main.url(forResource: "Localizable", withExtension: "strings", subdirectory: "\(lang).lproj"),
-           let data = try? Data(contentsOf: url),
-           let dict = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? [String: String] {
-            return dict[key] ?? key
+        
+        // 尝试加载对应语言的 Bundle 以支持运行时语言切换
+        if let path = Bundle.main.path(forResource: lang, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            return NSLocalizedString(key, bundle: bundle, comment: "")
         }
-        return key
+        
+        // Fallback 到标准方式
+        return NSLocalizedString(key, comment: "")
     }
 
     /// 使用 String Catalog 进行格式化翻译

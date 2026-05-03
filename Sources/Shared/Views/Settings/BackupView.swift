@@ -83,14 +83,17 @@ struct BackupView: View {
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
-            .alert(Localized.tr("backup.restoreTitle"), isPresented: $showRestoreConfirmation) {
+            .confirmationDialog(
+                Localized.tr("backup.restoreTitle"),
+                isPresented: $showRestoreConfirmation,
+                titleVisibility: .visible
+            ) {
                 Button(Localized.tr("backup.restore"), role: .destructive) {
                     restoreFromBackup()
                 }
-                Button(Localized.tr("misc.cancel"), role: .cancel) {}
+                Button(Localized.tr("misc.cancel"), role: .cancel) { selectedEntry = nil }
             } message: {
-                Text(Localized.tr("backup.restoreMessage")
-                )
+                Text(Localized.tr("backup.restoreMessage"))
             }
         }
     }

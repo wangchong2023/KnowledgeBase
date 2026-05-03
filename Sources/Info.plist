@@ -16,7 +16,9 @@
 		<string>zh-Hans</string>
 	</array>
 	<key>CFBundleName</key>
-	<string>智元</string>
+	<string>ZhiYuan</string>
+	<key>CFBundleDisplayName</key>
+	<string>ZhiYuan</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -68,19 +70,19 @@
 		</dict>
 	</array>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>智元需要麦克风权限来录制语音笔记。</string>
+	<string>ZhiYuan needs microphone access to record voice notes.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>智元需要语音识别来转录你的语音笔记。</string>
+	<string>ZhiYuan needs speech recognition to transcribe your voice notes.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>智元需要相机权限来扫描文档文字（OCR）。</string>
+	<string>ZhiYuan needs camera access to scan document text (OCR).</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>智元需要相册权限来进行 OCR 文字扫描。</string>
+	<string>ZhiYuan needs photo library access for OCR text scanning.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
 	<key>NSSpotlightUsageDescription</key>
-	<string>智元将索引您的知识库，以便您可以通过系统搜索直接找到页面。</string>
+	<string>ZhiYuan will index your knowledge vault so you can find pages directly via system search.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 KM. All rights reserved.</string>
 </dict>

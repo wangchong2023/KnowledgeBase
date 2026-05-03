@@ -157,18 +157,17 @@ final class LLMContextBuilder {
     // MARK: - Query Rewrite Builder
     func buildRewritePrompt(query: String) -> String {
         """
-        你是一位知识检索专家。请分析以下“用户原始查询”，并将其改写为一组更专业的“结构化检索词”。
+        \(Localized.tr("prompt.queryRewrite.instruction"))
         
-        要求：
-        1. 识别查询中的核心概念、实体和技术术语。
-        2. 补全缩写（如“AI”改为“人工智能”，“Karpathy”改为“Andrej Karpathy”）。
-        3. 扩展相关的近义词或相关领域词。
-        4. 如果查询带有时间属性（如“最近”），请考虑上下文含义。
+        \(Localized.tr("prompt.queryRewrite.rules"))
+        1. \(Localized.tr("prompt.queryRewrite.rule1"))
+        2. \(Localized.tr("prompt.queryRewrite.rule2"))
+        3. \(Localized.tr("prompt.queryRewrite.rule3"))
+        4. \(Localized.tr("prompt.queryRewrite.rule4"))
         
-        用户原始查询：\(query)
+        \(Localized.tr("prompt.queryRewrite.userQuery")): \(query)
         
-        请直接输出改写后的检索字符串，各关键词以逗号分隔，不要返回任何解释。
-        检索集合：
+        \(Localized.tr("prompt.queryRewrite.footer"))
         """
     }
 }

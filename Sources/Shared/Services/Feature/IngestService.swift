@@ -135,9 +135,10 @@ final class IngestService {
     /// 对 Markdown 中的图表进行语义增强，提升 RAG 召回率
     func enrichRichContent(_ content: String, llm: any LLMServiceProtocol) async -> String {
         let prompt = String(format: Localized.tr("ingest.enrichRichContentPrompt"), content)
+        let systemPrompt = Localized.tr("llm.ingest.enrichSystemPrompt")
         
         do {
-            return try await llm.generate(prompt: prompt, systemPrompt: "你是一个专业的知识提取专家。")
+            return try await llm.generate(prompt: prompt, systemPrompt: systemPrompt)
         } catch {
             print("[Ingest] Enrichment failed: \(error)")
             return content

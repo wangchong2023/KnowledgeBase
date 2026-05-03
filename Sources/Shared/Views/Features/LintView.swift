@@ -149,7 +149,7 @@ struct LintViewContent: View {
                             .font(.headline)
                             .padding(.horizontal)
                         
-                        VStack(spacing: 0) {
+                        VStack(alignment: .leading, spacing: 0) {
                             issueSection(title: Localized.trf("lint.errors", store.lintIssues.filter { $0.severity == .error }.count), 
                                          issues: store.lintIssues.filter { $0.severity == .error }, 
                                          icon: "xmark.circle.fill", color: .red)
@@ -163,7 +163,11 @@ struct LintViewContent: View {
                                          icon: "info.circle.fill", color: .blue)
                         }
                         .background(Color.wikiCard)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .clipShape(RoundedRectangle(cornerRadius: 16))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.primary.opacity(0.05), lineWidth: 1)
+                        }
                         .padding(.horizontal)
                     }
                 }
@@ -593,6 +597,7 @@ struct LintIssueRow: View {
                     .font(.subheadline)
                     .foregroundStyle(.wikiText)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             if !issue.suggestion.isEmpty {
                 HStack(spacing: 4) {

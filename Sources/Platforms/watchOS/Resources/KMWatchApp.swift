@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct KnowledgeBaseWatchApp: App {
+struct KMWatchApp: App {
     var body: some Scene {
         WindowGroup {
             WatchWikiStatsView()

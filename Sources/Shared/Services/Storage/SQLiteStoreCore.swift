@@ -28,6 +28,13 @@ final class SQLiteStoreCore {
         static let created = "created"
         static let updated = "updated"
         
+        /// 核心页面表的所有列定义 (用于自动化 SQL 生成)
+        static let allPages = [
+            id, title, type, icon, content, aliases, tags, 
+            status, confidence, sources, relatedIDs, isPinned, 
+            hash, sourceURL, rawSnippet, created, updated
+        ]
+        
         // Embeddings Table
         static let embeddingTable = "page_embeddings"
         static let embeddingBlob = "vector_blob"
@@ -46,10 +53,37 @@ final class SQLiteStoreCore {
 
     // MARK: - 数据库生命周期
     func open() {
-        guard sqlite3_open(dbPath.path, &db) == SQLITE_OK else {
-            LogService.shared.error("[SQLiteStore] 无法打开数据库", error: nil)
+        let path = dbPath.path
+        
+        // 始终记录文件大小，辅助排查物理状态
+        if let attributes = try? FileManager.default.attributesOfItem(atPath: path),
+           let size = attributes[.size] as? Int64 {
+            print("📊 [SQLiteStore] 数据库物理文件大小: \(size) bytes")
+        } else {
+            print("📊 [SQLiteStore] 数据库物理文件尚未创建")
+        }
+
+        if db != nil { 
+            print("ℹ️ [SQLiteStore] 数据库连接已活跃: \(dbPath.lastPathComponent)")
+            return 
+        }
+        
+        print("📂 [SQLiteStore] 正在尝试建立新连接: \(path)")
+        
+        // 检查目录权限
+        let dir = dbPath.deletingLastPathComponent()
+        if !FileManager.default.fileExists(atPath: dir.path) {
+            print("⚠️ [SQLiteStore] 目标目录不存在，执行创建: \(dir.path)")
+            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        }
+
+        let status = sqlite3_open(path, &db)
+        guard status == SQLITE_OK else {
+            let error = db != nil ? String(cString: sqlite3_errmsg(db)) : "Handle nil"
+            print("❌ [SQLiteStore] 数据库打开失败 (Code: \(status)): \(error)")
             return
         }
+        
         applyPerformancePragmas()
     }
 
@@ -63,6 +97,7 @@ final class SQLiteStoreCore {
         executeSQL("PRAGMA journal_mode=WAL") // 启用预写日志模式，提高并发性能
         executeSQL("PRAGMA synchronous=NORMAL") // 兼顾安全与速度的同步模式
         executeSQL("PRAGMA cache_size=-4096") // 设置缓存大小为 4MB
+        executeSQL("PRAGMA busy_timeout=5000") // 设置忙碌超时为 5 秒，解决并发锁定问题
     }
 
     // MARK: - 架构
@@ -170,45 +205,83 @@ final class SQLiteStoreCore {
         (page.aliases, page.tags, page.sources, page.relatedPageIDs.map(\.uuidString))
     }
     
+    /// 将页面持久化到磁盘 (采用结构化动态绑定)
     func insertPage(_ page: WikiPage) {
-        let sql = """
-        INSERT OR REPLACE INTO pages (
-            \(Columns.id), \(Columns.title), \(Columns.type), \(Columns.icon), \(Columns.content), \(Columns.aliases), \(Columns.tags),
-            \(Columns.status), \(Columns.confidence), \(Columns.sources), \(Columns.relatedIDs), \(Columns.isPinned), \(Columns.hash),
-            \(Columns.sourceURL), \(Columns.rawSnippet), \(Columns.created), \(Columns.updated)
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """
-
+        let columns = Columns.allPages.joined(separator: ", ")
+        let placeholders = Array(repeating: "?", count: Columns.allPages.count).joined(separator: ", ")
+        let sql = "INSERT OR REPLACE INTO pages (\(columns)) VALUES (\(placeholders));"
+        
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }
-        defer { sqlite3_finalize(stmt) }
-
-        let arrays = pageArrayFields(page)
-
-        sqlite3_bind_text(stmt, 1, page.id.uuidString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
-        sqlite3_bind_text(stmt, 2, page.title, -1, transient())
-        sqlite3_bind_text(stmt, 3, page.type.rawValue, -1, staticDestructor())
-        sqlite3_bind_text(stmt, 4, page.customIcon ?? "", -1, transient())
-        sqlite3_bind_text(stmt, 5, page.content, -1, transient())
-        bindJSONString(stmt, 6, arrays.0)
-        bindJSONString(stmt, 7, arrays.1)
-        sqlite3_bind_text(stmt, 8, page.status.rawValue, -1, staticDestructor())
-        sqlite3_bind_text(stmt, 9, page.confidence.rawValue, -1, staticDestructor())
-        bindJSONString(stmt, 10, arrays.2)
-        bindJSONString(stmt, 11, arrays.3)
-        sqlite3_bind_int(stmt, 12, page.isPinned ? 1 : 0)
-        if let hash = page.contentHash {
-            sqlite3_bind_text(stmt, 13, hash, -1, transient())
-        } else {
-            sqlite3_bind_null(stmt, 13)
+        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else {
+            let error = db != nil ? String(cString: sqlite3_errmsg(db)) : "Handle nil"
+            print("❌ [SQLiteStore] Prepare 插入失败: \(error)")
+            return 
         }
-        sqlite3_bind_text(stmt, 14, page.sourceURL ?? "", -1, transient())
-        sqlite3_bind_text(stmt, 15, page.rawTextSnippet ?? "", -1, transient())
-        sqlite3_bind_double(stmt, 16, page.created.timeIntervalSince1970)
-        sqlite3_bind_double(stmt, 17, page.updated.timeIntervalSince1970)
+        defer { sqlite3_finalize(stmt) }
+        
+        // 动态绑定助手：根据字段名自动定位索引 (Platinum Experience Item #4)
+        func bindText(_ value: String, for field: String) {
+            if let idx = Columns.allPages.firstIndex(of: field) {
+                sqlite3_bind_text(stmt, Int32(idx + 1), value, -1, transient())
+            }
+        }
+        
+        func bindOptionalText(_ value: String?, for field: String) {
+            if let idx = Columns.allPages.firstIndex(of: field) {
+                if let v = value {
+                    sqlite3_bind_text(stmt, Int32(idx + 1), v, -1, transient())
+                } else {
+                    sqlite3_bind_null(stmt, Int32(idx + 1))
+                }
+            }
+        }
+        
+        func bindJSON(_ values: [String], for field: String) {
+            if let idx = Columns.allPages.firstIndex(of: field),
+               let data = try? JSONEncoder().encode(values),
+               let json = String(data: data, encoding: .utf8) {
+                sqlite3_bind_text(stmt, Int32(idx + 1), json, -1, transient())
+            }
+        }
 
-        if sqlite3_step(stmt) != SQLITE_DONE {
-            LogService.shared.error("[SQLiteStore] 插入失败", error: nil)
+        // 核心字段绑定
+        bindText(page.id.uuidString, for: Columns.id)
+        bindText(page.title, for: Columns.title)
+        bindText(page.type.rawValue, for: Columns.type)
+        bindOptionalText(page.customIcon, for: Columns.icon)
+        bindText(page.content, for: Columns.content)
+        
+        bindJSON(page.aliases, for: Columns.aliases)
+        bindJSON(page.tags, for: Columns.tags)
+        
+        bindText(page.status.rawValue, for: Columns.status)
+        bindText(page.confidence.rawValue, for: Columns.confidence)
+        
+        bindJSON(page.sources, for: Columns.sources)
+        bindJSON(page.relatedPageIDs.map { $0.uuidString }, for: Columns.relatedIDs)
+        
+        if let idx = Columns.allPages.firstIndex(of: Columns.isPinned) {
+            sqlite3_bind_int(stmt, Int32(idx + 1), page.isPinned ? 1 : 0)
+        }
+        
+        bindOptionalText(page.contentHash, for: Columns.hash)
+        bindOptionalText(page.sourceURL, for: Columns.sourceURL)
+        bindOptionalText(page.rawTextSnippet, for: Columns.rawSnippet)
+        
+        if let idx = Columns.allPages.firstIndex(of: Columns.created) {
+            sqlite3_bind_double(stmt, Int32(idx + 1), page.created.timeIntervalSince1970)
+        }
+        
+        if let idx = Columns.allPages.firstIndex(of: Columns.updated) {
+            sqlite3_bind_double(stmt, Int32(idx + 1), page.updated.timeIntervalSince1970)
+        }
+
+        let stepStatus = sqlite3_step(stmt)
+        if stepStatus != SQLITE_DONE {
+            let error = db != nil ? String(cString: sqlite3_errmsg(db)) : "Handle nil"
+            print("❌ [SQLiteStore] 页面 '\(page.title.prefix(10))' 持久化失败: \(error)")
+        } else {
+            print("✅ [SQLiteStore] 页面 '\(page.title.prefix(10))' 已成功持久化到磁盘")
         }
     }
 
@@ -222,7 +295,11 @@ final class SQLiteStoreCore {
         """
 
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }
+        let status = sqlite3_prepare_v2(db, sql, -1, &stmt, nil)
+        guard status == SQLITE_OK else {
+            LogService.shared.error("[SQLiteStore] Prepare 更新失败: \(status)", error: nil)
+            return 
+        }
         defer { sqlite3_finalize(stmt) }
 
         let arrays = pageArrayFields(page)
@@ -294,7 +371,11 @@ final class SQLiteStoreCore {
     func deletePage(id: UUID) {
         var stmt: OpaquePointer?
         let sql = "DELETE FROM pages WHERE \(Columns.id) = ?;"
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return }
+        let status = sqlite3_prepare_v2(db, sql, -1, &stmt, nil)
+        guard status == SQLITE_OK else {
+            LogService.shared.error("[SQLiteStore] Prepare 删除失败: \(status)", error: nil)
+            return 
+        }
         defer { sqlite3_finalize(stmt) }
         sqlite3_bind_text(stmt, 1, id.uuidString, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
         sqlite3_step(stmt)
@@ -361,22 +442,68 @@ final class SQLiteStoreCore {
         return result
     }
 
+    /// 全量删除所有数据 (原子操作)
     func deleteAllPages() {
+        print("🧨 [SQLiteStore] 正在执行全量数据销毁...")
+        beginTransaction()
+        
         executeSQL("DELETE FROM pages;")
+        executeSQL("DELETE FROM \(Columns.linksTable);")
+        executeSQL("DELETE FROM \(Columns.embeddingTable);")
+        executeSQL("DELETE FROM page_chunks;")
+        executeSQL("DELETE FROM pages_fts;") // 清理全文搜索索引
+        
+        commitTransaction()
+        print("✅ [SQLiteStore] 数据库已完全重置")
     }
 
     func selectAllPages() -> [WikiPage] {
-        let sql = "SELECT * FROM pages ORDER BY is_pinned DESC, updated DESC;"
+        guard let db = db else {
+            print("❌ [SQLiteStore] selectAllPages 失败: 数据库连接未打开")
+            return []
+        }
+        
+        // 使用显式列名，避免模式演变导致的索引偏移 (Platinum Experience Item #4)
+        let sql = """
+        SELECT 
+            \(Columns.id), \(Columns.title), \(Columns.type), \(Columns.icon), \(Columns.content),
+            \(Columns.aliases), \(Columns.tags), \(Columns.status), \(Columns.confidence),
+            \(Columns.sources), \(Columns.relatedIDs), \(Columns.isPinned), \(Columns.hash),
+            \(Columns.sourceURL), \(Columns.rawSnippet), \(Columns.created), \(Columns.updated)
+        FROM pages 
+        ORDER BY is_pinned DESC, updated DESC;
+        """
+        
         var stmt: OpaquePointer?
-        guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK else { return [] }
+        let status = sqlite3_prepare_v2(db, sql, -1, &stmt, nil)
+        guard status == SQLITE_OK else {
+            let error = String(cString: sqlite3_errmsg(db))
+            print("❌ [SQLiteStore] Prepare 查询所有页面失败: \(status), Error: \(error)")
+            return []
+        }
         defer { sqlite3_finalize(stmt) }
-
+        
+        // 调试：打印实际列顺序
+        let colCount = sqlite3_column_count(stmt)
+        if colCount > 0 {
+            var colNames: [String] = []
+            for i in 0..<colCount {
+                colNames.append(String(cString: sqlite3_column_name(stmt, i)))
+            }
+            print("📊 [SQLiteStore] 实际查询列映射: \(colNames.enumerated().map { "\($0):\($1)" }.joined(separator: ", "))")
+        }
+        
         var result: [WikiPage] = []
+        var stepCount = 0
         while sqlite3_step(stmt) == SQLITE_ROW {
+            stepCount += 1
             if let page = decodePage(stmt) {
                 result.append(page)
+            } else {
+                print("⚠️ [SQLiteStore] selectAllPages: 第 \(stepCount) 行解码失败")
             }
         }
+        print("🔍 [SQLiteStore] selectAllPages: 总步进数 \(stepCount), 最终加载记录数 \(result.count)")
         return result
     }
 
@@ -453,7 +580,11 @@ final class SQLiteStoreCore {
     private func decodePage(_ stmt: OpaquePointer?) -> WikiPage? {
         guard let stmt = stmt else { return nil }
 
-        let idString = String(cString: sqlite3_column_text(stmt, 0))
+        guard let idRaw = sqlite3_column_text(stmt, 0) else {
+            print("❌ [SQLiteStore] decodePage: ID 字段为 NULL")
+            return nil
+        }
+        let idString = String(cString: idRaw)
         let title = columnText(stmt, 1)
         let typeRaw = columnText(stmt, 2)
         let customIcon = columnOptionalText(stmt, 3)
@@ -471,10 +602,20 @@ final class SQLiteStoreCore {
         let created = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 15))
         let updated = Date(timeIntervalSince1970: sqlite3_column_double(stmt, 16))
 
-        guard let uuid = UUID(uuidString: idString),
-              let type = PageType(rawValue: typeRaw),
-              let status = PageStatus(rawValue: statusRaw),
-              let confidence = Confidence(rawValue: confidenceRaw) else {
+        guard let uuid = UUID(uuidString: idString) else {
+            print("❌ [SQLiteStore] decodePage: ID 格式错误: \(idString)")
+            return nil
+        }
+        guard let type = PageType(rawValue: typeRaw) else {
+            print("❌ [SQLiteStore] decodePage: PageType 格式错误: \(typeRaw)")
+            return nil
+        }
+        guard let status = PageStatus(rawValue: statusRaw) else {
+            print("❌ [SQLiteStore] decodePage: PageStatus 格式错误: \(statusRaw)")
+            return nil
+        }
+        guard let confidence = Confidence(rawValue: confidenceRaw) else {
+            print("❌ [SQLiteStore] decodePage: Confidence 格式错误: \(confidenceRaw)")
             return nil
         }
 
@@ -502,19 +643,29 @@ final class SQLiteStoreCore {
     // MARK: - SQL 辅助方法
     func executeSQL(_ sql: String) {
         var errMsg: UnsafeMutablePointer<CChar>?
-        guard sqlite3_exec(db, sql, nil, nil, &errMsg) != SQLITE_OK else { return }
-        if let msg = errMsg {
-            print("[SQLiteStore] SQL 错误: \(String(cString: msg))")
-            sqlite3_free(errMsg)
+        let status = sqlite3_exec(db, sql, nil, nil, &errMsg)
+        if status != SQLITE_OK {
+            if let msg = errMsg {
+                print("❌ [SQLiteStore] SQL 执行异常 (\(status)): \(String(cString: msg)) | SQL: \(sql)")
+                sqlite3_free(errMsg)
+            }
         }
     }
 
     func beginTransaction() {
-        sqlite3_exec(db, "BEGIN TRANSACTION", nil, nil, nil)
+        print("🔨 [SQLiteStore] BEGIN TRANSACTION")
+        executeSQL("BEGIN TRANSACTION")
     }
 
     func commitTransaction() {
-        sqlite3_exec(db, "COMMIT TRANSACTION", nil, nil, nil)
+        print("🔨 [SQLiteStore] COMMIT TRANSACTION")
+        let status = sqlite3_exec(db, "COMMIT TRANSACTION", nil, nil, nil)
+        if status != SQLITE_OK {
+            let error = db != nil ? String(cString: sqlite3_errmsg(db)) : "Handle nil"
+            print("❌ [SQLiteStore] COMMIT 失败 (Code: \(status)): \(error)")
+        } else {
+            print("✅ [SQLiteStore] COMMIT 成功")
+        }
     }
 
     // MARK: - 绑定辅助方法

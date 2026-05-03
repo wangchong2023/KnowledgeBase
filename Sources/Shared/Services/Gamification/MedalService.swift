@@ -86,4 +86,11 @@ final class MedalService: ObservableObject {
             earnedMedalIDs = decoded
         }
     }
+    
+    /// 重置所有勋章数据 (Platinum Experience Item #6)
+    func reset() {
+        earnedMedalIDs.removeAll()
+        newlyEarnedMedal = nil
+        UserDefaults.standard.removeObject(forKey: "earned_medals")
+    }
 }

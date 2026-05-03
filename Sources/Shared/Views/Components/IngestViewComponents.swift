@@ -226,12 +226,67 @@ struct IngestManualFormSection: View {
         }
         .padding(.horizontal)
 
-        // Smart ingest toggle
-        if llmService.isEnabled && !llmService.apiKey.isEmpty {
-            smartIngestToggle
+        // Advanced Options Card
+        VStack(spacing: 0) {
+            if llmService.isEnabled && !llmService.apiKey.isEmpty {
+                Toggle(isOn: $useSmartIngest) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .foregroundStyle(.wikiAccent)
+                            .frame(width: 20)
+                        Text(Localized.tr("ingest.smartToggle"))
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.wikiText)
+                    }
+                }
+                .tint(.wikiAccent)
+                .padding(.vertical, 12)
+                .padding(.horizontal, 16)
+                .accessibilityIdentifier("ingest.smartToggleAction")
+                
+                Divider().padding(.leading, 44)
+            }
+            
+            Toggle(isOn: $useDeepScan) {
+                HStack(spacing: 8) {
+                    Image(systemName: "cpu")
+                        .foregroundStyle(.wikiSource)
+                        .frame(width: 20)
+                    Text(Localized.tr("ingest.deepScan"))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.wikiText)
+                }
+            }
+            .tint(.wikiSource)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            
+            if useSmartIngest || useDeepScan {
+                VStack(alignment: .leading, spacing: 4) {
+                    if useSmartIngest {
+                        Text(Localized.tr("ingest.smartToggleHint"))
+                            .font(.caption)
+                            .foregroundStyle(.wikiSecondary)
+                    }
+                    if useDeepScan {
+                        Text(Localized.tr("ingest.deepScanDesc"))
+                            .font(.caption)
+                            .foregroundStyle(.wikiSource)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
+                .transition(.opacity)
+            }
         }
-        
-        deepScanToggle
+        .background(Color.wikiCard.opacity(0.6))
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: WikiUI.cardRadius)
+                .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
+        )
+        .padding(.horizontal)
 
         // Smart preview
         if let result = smartResult {
@@ -251,11 +306,6 @@ struct IngestManualFormSection: View {
         .opacity(newTitle.isEmpty || newContent.isEmpty ? 0.5 : 1)
         .padding(.horizontal)
 
-        // Success banner
-        if ingestSuccess {
-            WikiSuccessBanner(message: Localized.tr("ingest.success"))
-                .padding(.horizontal)
-        }
     }
 
     private var smartIngestToggle: some View {

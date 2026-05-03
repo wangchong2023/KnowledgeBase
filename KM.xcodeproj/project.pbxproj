@@ -16,6 +16,7 @@
 		04D008FDFDD59A4C22BF6553 /* NavigationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C08CAD47570A7662961A58A /* NavigationView.swift */; };
 		075298D2150D20F1B9B817AC /* IconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A59E9031AE94C017C1E348 /* IconPickerView.swift */; };
 		07FC299EF04626FE0BB680EF /* MarkdownEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8176C9298DAB1B032F745CF /* MarkdownEditorView.swift */; };
+		08067CAC3D43713E5412830B /* WikiToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9916BD51C6D5FFA90B394E7E /* WikiToast.swift */; };
 		08617DEB16AAA0098841983F /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D8E4788BCBAFEB344F59B2F /* SearchView.swift */; };
 		089159C8F8B7D448B2250473 /* CollaborationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79AF2799B5869937329B42CB /* CollaborationService.swift */; };
 		08BABC449BFED3E2ADF45061 /* DeepLinkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B32EF8568ACE00DEE448DA /* DeepLinkService.swift */; };
@@ -89,6 +90,7 @@
 		2353A687AD466516B75956CB /* SQLiteMigrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AF1174E3832470979E9308 /* SQLiteMigrator.swift */; };
 		2358200BB1EE2735D89E53CB /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C13595834963DBC4C7C2AF /* AppConfig.swift */; };
 		23EFDB2F1A82BC539CFE7A59 /* CollaborationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70730A629332394C43485072 /* CollaborationModels.swift */; };
+		24A4663038AC6761805479D8 /* LogAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFCC6171C50ADFC8ED5727DA /* LogAction.swift */; };
 		251C501723F66E4CB5ECA8C7 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF54C2FEF984F48B4C2FE36 /* ServiceContainer.swift */; };
 		25F1FACA63CE1FE0250EBCC9 /* PPTXGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9137381323688A7B6799223F /* PPTXGenerator.swift */; };
 		270A243127A052AD0CA791D8 /* EmbeddingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6298662D257C895193B9010E /* EmbeddingProvider.swift */; };
@@ -198,6 +200,7 @@
 		51ED62E6F9C91D595E946635 /* KMStoreStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5578D077EC5505D229C87650 /* KMStoreStorageTests.swift */; };
 		521E1E000709A0B6F07FA034 /* PageSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367E164613B3E4D1B5686C07 /* PageSchema.swift */; };
 		5398C06795DD4472DA9FD755 /* WatchConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9417C892BE3E006B9C59665 /* WatchConnectivityService.swift */; };
+		541DA19875E8EAB831F4140C /* WikiToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9916BD51C6D5FFA90B394E7E /* WikiToast.swift */; };
 		5476B9A422F543525D8238C8 /* HostingSetupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D852B9830A9CEC2268636BE /* HostingSetupSheet.swift */; };
 		5476E0BD2A5D5938B63C3C78 /* LLMProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80175A420CAA21801B788E44 /* LLMProtocols.swift */; };
 		5496C0DBE6ED430D84130ADC /* GraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F08E2400462FE699A048994F /* GraphView.swift */; };
@@ -280,6 +283,7 @@
 		7A3E2658A81119BBB1BC4EA1 /* GraphLayoutEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE03540DC4F9B47B5E826585 /* GraphLayoutEngine.swift */; };
 		7AA73C0A4EC7DADB6FBD0B4C /* ActivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EDB602C9E2192E5ACCBF924 /* ActivityService.swift */; };
 		7B060813758C6A3C1D5B985B /* PageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFA21F8CD4E23FCDFBD3A843 /* PageType.swift */; };
+		7B586A61C6D4F7E382237CE2 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5748CAAC5B0081D90B435DAD /* InfoPlist.xcstrings */; };
 		7BDFE18319082C7794C49F54 /* OnDeviceComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E677993F59A1D409726BB92 /* OnDeviceComponents.swift */; };
 		7C320FCC5EDE11A772756638 /* WeeklyInsightCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46C3F22525485362B908DE39 /* WeeklyInsightCard.swift */; };
 		7D1018395997754A8CB3D826 /* OnDeviceComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E677993F59A1D409726BB92 /* OnDeviceComponents.swift */; };
@@ -340,6 +344,7 @@
 		93E5DE85D077399F757D2037 /* RecursiveChunker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6220AC139B3FCCC2092152B /* RecursiveChunker.swift */; };
 		93FE43CC8BFBAA243B77EC5B /* VoiceNoteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B862DCF5F1034FC9ECD26 /* VoiceNoteView.swift */; };
 		94007B2C04D0BA3BC2E4E3A7 /* MarkdownParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 461B39DD791E2DB4CD98B8B0 /* MarkdownParser.swift */; };
+		94711BBE5F89132D35ADD7D6 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5748CAAC5B0081D90B435DAD /* InfoPlist.xcstrings */; };
 		95FA8309F0C2E13753E9F701 /* GraphModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0934A80A49DF8A45BA9FBB88 /* GraphModels.swift */; };
 		96358D59DB0ECAD2C452F13A /* LintService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C00EBBBCD6753103965D3F /* LintService.swift */; };
 		96E8BAD003B5C3C37229C9D2 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77D53C074CA98F909F6B8D9 /* WelcomeView.swift */; };
@@ -359,6 +364,7 @@
 		9CBC13C565290C83A8BAFA61 /* LinkScraperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97470AEB7224A9C3B7B5233 /* LinkScraperService.swift */; };
 		9CE35DF23845EFB757AD353A /* CreatePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CB2EE05C4BFC5738B7E645B /* CreatePageView.swift */; };
 		9D5D87DF690A52DF1929CD38 /* IngestViewComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C30610EE7EA858817A228915 /* IngestViewComponents.swift */; };
+		9D78325B6EA923D793E01954 /* WikiToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9916BD51C6D5FFA90B394E7E /* WikiToast.swift */; };
 		9EBE6CF0DA220DE48AA2523B /* LockOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C3EFB146FA9DBAF2F7CAD29 /* LockOverlayView.swift */; };
 		A017BB3DE0094D159861C7A0 /* OnDeviceLLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96231F813095BF4B39EF8C45 /* OnDeviceLLMService.swift */; };
 		A068CD3329034133EF2E806C /* DeepLinkService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17B32EF8568ACE00DEE448DA /* DeepLinkService.swift */; };
@@ -474,6 +480,7 @@
 		D477A04A6EEBE36C82AD2939 /* PDFComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4904A05036D1BD81416C4223 /* PDFComponents.swift */; };
 		D4A3803E55191C8B43046C32 /* SpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90E9DEF1102A87377D0BE934 /* SpeechService.swift */; };
 		D59CFC05529A936713285E7A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51BEFECC0371AF8BC2024F4A /* ContentView.swift */; };
+		D5FD73BA7A968EBBC185105C /* LogAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFCC6171C50ADFC8ED5727DA /* LogAction.swift */; };
 		D62DD958900D44CAD6606ECC /* OnDeviceLLMSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 384672CCAA12F48DA1F2616A /* OnDeviceLLMSettingsView.swift */; };
 		D6B2FBA0B43DDD7BBFFD2764 /* AdaptiveSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE25935B39D40DD143D70ACD /* AdaptiveSidebarView.swift */; };
 		D76ADB27480FA01DC48F7F38 /* LogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6869D91DA00FE775745D9AB3 /* LogService.swift */; };
@@ -487,6 +494,7 @@
 		DBA298C44D2DD5E7E3202523 /* SettingsAboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE5B39868C8E30E96E036E60 /* SettingsAboutView.swift */; };
 		DC1D3353CA4C99796E3DEFFF /* BackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9B4C36F50AD3615EBD7ED4F /* BackupView.swift */; };
 		DC4E84FF1F1FD9F929078E3B /* WatchConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9417C892BE3E006B9C59665 /* WatchConnectivityService.swift */; };
+		DE92561230C28F16B3EA9E35 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5748CAAC5B0081D90B435DAD /* InfoPlist.xcstrings */; };
 		DF5EA7447F4309DF66191685 /* WikiLoadingOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCB6C3B2981E7B646F959299 /* WikiLoadingOverlay.swift */; };
 		DFB7FBD2166FE84997071974 /* Graph3DComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F4D126CA4C7E6B4323231BA /* Graph3DComponents.swift */; };
 		E02077B01F688F5DB1C88107 /* Localized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1F16B1E8503AF326C0F248 /* Localized.swift */; };
@@ -518,6 +526,7 @@
 		EBB8682EA952B09D7BDAE090 /* IngestQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B012D95DE5278A90B442150 /* IngestQueue.swift */; };
 		EC40F948ECF625F1B927D416 /* LLMServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A924ED8A26D271A514513844 /* LLMServiceProtocol.swift */; };
 		EC5370E413407C39B4A21345 /* AccessibilityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68CEE2E0327101F18F1C591B /* AccessibilityService.swift */; };
+		ED36B95BAC2BEE3810E91065 /* LogAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFCC6171C50ADFC8ED5727DA /* LogAction.swift */; };
 		ED37EC0B463C51FB2F8899BF /* LLMProviders.json in Resources */ = {isa = PBXBuildFile; fileRef = 45668E99328891F0178BFAC7 /* LLMProviders.json */; };
 		ED9D88163905369AC12BA4A9 /* GraphClusteringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F5CF040B8872098AD0578DF /* GraphClusteringService.swift */; };
 		EE639419F2217D1EE5265D55 /* KMBackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1005462979635FD09D96A9C /* KMBackupService.swift */; };
@@ -602,7 +611,6 @@
 		3664A4089D8AF68201731BB2 /* Shimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shimmer.swift; sourceTree = "<group>"; };
 		367E164613B3E4D1B5686C07 /* PageSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageSchema.swift; sourceTree = "<group>"; };
 		3781709258AF6A58C97E5EF7 /* SecurityReinforcement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecurityReinforcement.swift; sourceTree = "<group>"; };
-		381F9FAD680B3B5D862D5F0D /* KnowledgeBase.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KnowledgeBase.entitlements; sourceTree = "<group>"; };
 		384672CCAA12F48DA1F2616A /* OnDeviceLLMSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceLLMSettingsView.swift; sourceTree = "<group>"; };
 		389167E7846F497938512DB2 /* CrossPlatform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPlatform.swift; sourceTree = "<group>"; };
 		38E94B333C5DE6F6E0FA757B /* LLMServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMServiceTests.swift; sourceTree = "<group>"; };
@@ -636,6 +644,7 @@
 		5578D077EC5505D229C87650 /* KMStoreStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMStoreStorageTests.swift; sourceTree = "<group>"; };
 		55A59E9031AE94C017C1E348 /* IconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconPickerView.swift; sourceTree = "<group>"; };
 		560893DAEE51D9232B263133 /* WatchContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchContentView.swift; sourceTree = "<group>"; };
+		5748CAAC5B0081D90B435DAD /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		5D8E4788BCBAFEB344F59B2F /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		5E2292F7344076F169765B4C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		603835DE66478FA4D6283183 /* ShortcutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutManager.swift; sourceTree = "<group>"; };
@@ -680,6 +689,7 @@
 		874CA3E79BA7D0BF12B9BE62 /* PluginMarketService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PluginMarketService.swift; sourceTree = "<group>"; };
 		89BFD2242D3DD0F4B38E0942 /* KnowledgeDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KnowledgeDashboardView.swift; sourceTree = "<group>"; };
 		8AED08CEC01C0235BE60E97C /* LLMChatService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMChatService.swift; sourceTree = "<group>"; };
+		8B7A8ACCD92672740ECDF3B1 /* KM.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = KM.entitlements; sourceTree = "<group>"; };
 		8CD93259D45CCD552001F165 /* LLMSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMSettingsView.swift; sourceTree = "<group>"; };
 		8D010DE47CF85BF2AD3F6153 /* WatchConnectivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityTests.swift; sourceTree = "<group>"; };
 		8E2300BF9C559411CA314B59 /* AppNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppNotifications.swift; sourceTree = "<group>"; };
@@ -697,6 +707,7 @@
 		974813529F3E444AA2443C04 /* KMKeyboardShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMKeyboardShortcuts.swift; sourceTree = "<group>"; };
 		97A0DB92CD641F2AD1CFF423 /* WikiColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiColors.swift; sourceTree = "<group>"; };
 		97B9165FA18BE560F82960C7 /* KMTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9916BD51C6D5FFA90B394E7E /* WikiToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiToast.swift; sourceTree = "<group>"; };
 		99AE09ED3A146EF9288BD8A0 /* LintIssue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LintIssue.swift; sourceTree = "<group>"; };
 		9C08CAD47570A7662961A58A /* NavigationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationView.swift; sourceTree = "<group>"; };
 		9C3EFB146FA9DBAF2F7CAD29 /* LockOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockOverlayView.swift; sourceTree = "<group>"; };
@@ -780,6 +791,7 @@
 		FDAEE93977C5F631B128C843 /* WatchWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchWidgets.swift; sourceTree = "<group>"; };
 		FE824DFEF8D07C8541269CFB /* RAG_GoldenSet.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = RAG_GoldenSet.json; sourceTree = "<group>"; };
 		FFA21F8CD4E23FCDFBD3A843 /* PageType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageType.swift; sourceTree = "<group>"; };
+		FFCC6171C50ADFC8ED5727DA /* LogAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogAction.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -809,8 +821,8 @@
 			children = (
 				952F8F3447628F4FA28D8EC2 /* Assets.xcassets */,
 				5E2292F7344076F169765B4C /* Info.plist */,
+				8B7A8ACCD92672740ECDF3B1 /* KM.entitlements */,
 				7CBE8568B739D46111B0E3DF /* KMApp.swift */,
-				381F9FAD680B3B5D862D5F0D /* KnowledgeBase.entitlements */,
 				D6B5DEA8822A933F4CBD27B0 /* MacInfo.plist */,
 				76C7BC144EC2AA9B443B1D39 /* LaunchScreen.storyboard */,
 				462676CD26F7702463FF6FE5 /* Localization */,
@@ -1004,6 +1016,7 @@
 		462676CD26F7702463FF6FE5 /* Localization */ = {
 			isa = PBXGroup;
 			children = (
+				5748CAAC5B0081D90B435DAD /* InfoPlist.xcstrings */,
 				833FAE0C1E07B4C6AAAD7748 /* Localizable.xcstrings */,
 			);
 			path = Localization;
@@ -1157,6 +1170,7 @@
 				70730A629332394C43485072 /* CollaborationModels.swift */,
 				0934A80A49DF8A45BA9FBB88 /* GraphModels.swift */,
 				99AE09ED3A146EF9288BD8A0 /* LintIssue.swift */,
+				FFCC6171C50ADFC8ED5727DA /* LogAction.swift */,
 				367E164613B3E4D1B5686C07 /* PageSchema.swift */,
 				FFA21F8CD4E23FCDFBD3A843 /* PageType.swift */,
 				E8FE7CDE2ECD2F38D80CF395 /* SearchDiagnosticInfo.swift */,
@@ -1201,6 +1215,7 @@
 				40A9681E7F2A5FB2F09840B0 /* WikiDecorators.swift */,
 				E256C465D0D0EF82F0A0F032 /* WikiEmptyState.swift */,
 				DCB6C3B2981E7B646F959299 /* WikiLoadingOverlay.swift */,
+				9916BD51C6D5FFA90B394E7E /* WikiToast.swift */,
 				08DDA3B1A6B16410CF3B3A50 /* WikiTooltip.swift */,
 				CF2F5F7043E67893D5DB9BAC /* Medals */,
 			);
@@ -1615,6 +1630,7 @@
 			files = (
 				2E6BA20A6A06280ECE63281C /* AppConfig.json in Resources */,
 				44640E237369C63BAA29648C /* Assets.xcassets in Resources */,
+				94711BBE5F89132D35ADD7D6 /* InfoPlist.xcstrings in Resources */,
 				6F312AFDCF3ABED85DC7790A /* LLMProviders.json in Resources */,
 				1510CDF7108CE8BFDBC83C25 /* Localizable.xcstrings in Resources */,
 				35546FCA6ECAB93AF1AA1949 /* marked.min.js in Resources */,
@@ -1629,6 +1645,7 @@
 			files = (
 				370CEE81963DD8EEDF540913 /* AppConfig.json in Resources */,
 				CFED032189E9579ED3C58CC6 /* Assets.xcassets in Resources */,
+				7B586A61C6D4F7E382237CE2 /* InfoPlist.xcstrings in Resources */,
 				0961341BAB676DAB84B340A3 /* LLMProviders.json in Resources */,
 				54B0FBAB14336EFA55D46A13 /* LaunchScreen.storyboard in Resources */,
 				2BD81A269C507FCE59931059 /* Localizable.xcstrings in Resources */,
@@ -1644,6 +1661,7 @@
 			files = (
 				7994EDF0B7AB84937D05A6DB /* AppConfig.json in Resources */,
 				F86CF7DC58F255197BEFB64E /* Assets.xcassets in Resources */,
+				DE92561230C28F16B3EA9E35 /* InfoPlist.xcstrings in Resources */,
 				ED37EC0B463C51FB2F8899BF /* LLMProviders.json in Resources */,
 				B2AF3EF56E61D21391835EC1 /* Localizable.xcstrings in Resources */,
 				324C3559F1CD8365D8E1EA55 /* marked.min.js in Resources */,
@@ -1736,6 +1754,7 @@
 				A49273DF4D14B3BC68524E76 /* LocalAnalyticsService.swift in Sources */,
 				0171568305C8148AEC71DFC4 /* Localized.swift in Sources */,
 				9EBE6CF0DA220DE48AA2523B /* LockOverlayView.swift in Sources */,
+				24A4663038AC6761805479D8 /* LogAction.swift in Sources */,
 				EEBB5513502B7C25139C8965 /* LogService.swift in Sources */,
 				E2228A57F9F753FA0AF0FE3D /* LogView.swift in Sources */,
 				0FE7DA7CD2CFA26528A9F270 /* MCSessionDelegateImpl.swift in Sources */,
@@ -1820,6 +1839,7 @@
 				68EBBC273FAF8CB6978DB2C2 /* WikiEventBus.swift in Sources */,
 				F4973F72147A288DE61A4C2C /* WikiLoadingOverlay.swift in Sources */,
 				99686BCD35B740E4141293EB /* WikiPage.swift in Sources */,
+				541DA19875E8EAB831F4140C /* WikiToast.swift in Sources */,
 				C885252131E1C03FCD1C1496 /* WikiTooltip.swift in Sources */,
 				355FEA75E6AE319F84F6F1CE /* WikiUI.swift in Sources */,
 				2738B8BEC0F77EF124F82B33 /* WorkflowService.swift in Sources */,
@@ -1940,6 +1960,7 @@
 				AF55255AE59C8AE23819007C /* LocalAnalyticsService.swift in Sources */,
 				E02077B01F688F5DB1C88107 /* Localized.swift in Sources */,
 				4D2F89264275201B0284336A /* LockOverlayView.swift in Sources */,
+				D5FD73BA7A968EBBC185105C /* LogAction.swift in Sources */,
 				E0B28D8C9976C01D31A3B9F3 /* LogService.swift in Sources */,
 				A67A013B63CD11058466291C /* LogView.swift in Sources */,
 				883F06459842C74448B330DD /* MCSessionDelegateImpl.swift in Sources */,
@@ -2027,6 +2048,7 @@
 				F45EB2E8290A4AB8AADD014D /* WikiEventBus.swift in Sources */,
 				DF5EA7447F4309DF66191685 /* WikiLoadingOverlay.swift in Sources */,
 				CEAFE4C24851C47BAD741EE7 /* WikiPage.swift in Sources */,
+				08067CAC3D43713E5412830B /* WikiToast.swift in Sources */,
 				C669BA0F5078948A07EC01F4 /* WikiTooltip.swift in Sources */,
 				64E7ECFD18C7BE927D5DBC47 /* WikiUI.swift in Sources */,
 				B10F8064C1540EE25DEBBC19 /* WorkflowService.swift in Sources */,
@@ -2117,6 +2139,7 @@
 				8D5BB2D1818957296419C304 /* LocalAnalyticsService.swift in Sources */,
 				28670A9B8D443722BAD567C7 /* Localized.swift in Sources */,
 				AE7F9A86D6C3EFC6D60E2B93 /* LockOverlayView.swift in Sources */,
+				ED36B95BAC2BEE3810E91065 /* LogAction.swift in Sources */,
 				D76ADB27480FA01DC48F7F38 /* LogService.swift in Sources */,
 				81C179CC9F16498DACBABBF0 /* LogView.swift in Sources */,
 				01CDAE79DA10F23F1CF27069 /* MCSessionDelegateImpl.swift in Sources */,
@@ -2201,6 +2224,7 @@
 				00948C5197E975E31C516421 /* WikiEventBus.swift in Sources */,
 				1777E976DF5ADDA8950ADD79 /* WikiLoadingOverlay.swift in Sources */,
 				B629AB31111F2FFE9696EB6C /* WikiPage.swift in Sources */,
+				9D78325B6EA923D793E01954 /* WikiToast.swift in Sources */,
 				FC0FDD696B8DCF55882B518B /* WikiTooltip.swift in Sources */,
 				8BD9F4E118D874E16AF05F31 /* WikiUI.swift in Sources */,
 				CFEEEA4FE1C8D0C4F600E912 /* WorkflowService.swift in Sources */,
@@ -2236,6 +2260,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2351,6 +2376,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Sources/MacInfo.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -2369,6 +2395,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Sources/MacInfo.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -2450,6 +2477,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (

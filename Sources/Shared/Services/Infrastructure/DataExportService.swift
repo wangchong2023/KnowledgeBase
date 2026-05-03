@@ -14,8 +14,8 @@ final class DataExportService {
         
         // 记录操作日志
         LogService.shared.addLog(
-            action: Localized.tr("action.export"),
-            target: Localized.tr("export.allMarkdown"),
+            action: .export,
+            target: "export.allMarkdown",
             details: Localized.trf("export.countFormat", pages.count)
         )
     }
@@ -29,7 +29,7 @@ final class DataExportService {
         let url = try await WebViewExportService.shared.exportToPDF(markdown: markdown, fileName: fileName)
         
         LogService.shared.addLog(
-            action: Localized.tr("action.export"),
+            action: .export,
             target: "PDF Report",
             details: Localized.trf("export.countFormat", pages.count)
         )

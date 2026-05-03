@@ -21,7 +21,7 @@ final class VaultSecurityService: ObservableObject {
     
     /// 执行生物识别解锁
     func unlock() {
-        let reason = "解锁您的知识金库"
+        let reason = Localized.tr("security.unlockReason")
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, error in
             DispatchQueue.main.async {
                 if success {

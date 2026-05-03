@@ -70,11 +70,11 @@ struct PDFLibraryView: View {
                 )
                 documents.append(docInfo)
                 PDFService.shared.saveDocumentsInfo(documents)
-                store.addLog(action: Localized.tr("logAction.importPDF"), target: docInfo.title, details: Localized.trf("pdf.pageCountFormat", docInfo.pageCount))
+                store.addLog(action: .importPDF, target: docInfo.title, details: Localized.trf("pdf.pageCountFormat", docInfo.pageCount))
             }
 
         case .failure(let error):
-            store.addLog(action: Localized.tr("logAction.importPDFFailed"), target: "", details: error.localizedDescription)
+            store.addLog(action: .importPDFFailed, target: "", details: error.localizedDescription)
         }
     }
 
@@ -82,7 +82,7 @@ struct PDFLibraryView: View {
         _ = PDFService.shared.deletePDF(fileName: doc.fileName)
         documents.removeAll { $0.id == doc.id }
         PDFService.shared.saveDocumentsInfo(documents)
-        store.addLog(action: Localized.tr("logAction.deletePDF"), target: doc.title, details: "")
+        store.addLog(action: .deletePDF, target: doc.title, details: "")
     }
 
     private func ingestPDF(_ doc: PDFDocumentInfo) {
@@ -96,7 +96,7 @@ struct PDFLibraryView: View {
                 content: text,
                 tags: ["PDF", Localized.tr("logAction.ingest")]
             )
-            store.addLog(action: Localized.tr("logAction.importPDF"), target: doc.title, details: Localized.trf("pdf.createdPage", page.title))
+            store.addLog(action: .importPDF, target: doc.title, details: Localized.trf("pdf.createdPage", page.title))
             store.saveToDisk()
         }
     }
@@ -313,7 +313,7 @@ struct PDFReaderView: View {
         highlightNote = ""
         showHighlightPanel = false
 
-        store.addLog(action: Localized.tr("logAction.highlight"), target: documentInfo.title, details: Localized.trf("pdf.pageNumber", currentPage + 1))
+        store.addLog(action: .highlight, target: documentInfo.title, details: Localized.trf("pdf.pageNumber", currentPage + 1))
     }
 }
 

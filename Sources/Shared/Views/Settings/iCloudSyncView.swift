@@ -10,6 +10,7 @@ struct iCloudSyncView: View {
     @State private var errorMessage = ""
     @State private var showConflictAlert = false
     @State private var showPullConfirmation = false
+    @State private var showClearCloudConfirmation = false
     @State private var showAutoSyncError = false
     @State private var autoSyncErrorMessage = ""
     @State private var conflictResolution: ConflictResolution = {
@@ -74,7 +75,7 @@ struct iCloudSyncView: View {
             // MARK: - Danger Section
             Section {
                 Button(role: .destructive) {
-                    clearCloudData()
+                    showClearCloudConfirmation = true
                 } label: {
                     Label(Localized.tr("icloud.clearCloudData"), systemImage: "trash.icloud")
                         .foregroundStyle(.red)
@@ -112,13 +113,22 @@ struct iCloudSyncView: View {
         } message: {
             Text(Localized.tr("icloud.conflictMessage"))
         }
-        .alert(Localized.tr("icloud.pullWillOverwrite"), isPresented: $showPullConfirmation) {
+        .confirmationDialog(Localized.tr("icloud.pullWillOverwrite"), isPresented: $showPullConfirmation, titleVisibility: .visible) {
             Button(Localized.tr("icloud.download"), role: .destructive) {
                 performActualPull()
             }
             Button(Localized.tr("misc.cancel"), role: .cancel) {}
         } message: {
             Text(Localized.tr("icloud.pullOverwriteMessage"))
+        }
+        .confirmationDialog(Localized.tr("icloud.clearCloudData"), isPresented: $showClearCloudConfirmation, titleVisibility: .visible) {
+            Button(Localized.tr("misc.clearAll"), role: .destructive) {
+                clearCloudData()
+                HapticManager.shared.trigger(.success)
+            }
+            Button(Localized.tr("misc.cancel"), role: .cancel) {}
+        } message: {
+            Text(Localized.tr("icloud.clearCloudDataMessage")) // 确保 Localized 有此 Key
         }
         .alert(Localized.tr("icloud.autoSyncFailed"), isPresented: $showAutoSyncError) {
             Button(Localized.tr("misc.ok"), role: .cancel) {}
