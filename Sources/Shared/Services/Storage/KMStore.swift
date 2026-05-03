@@ -31,6 +31,7 @@ final class KMStore: @preconcurrency GraphDataProvider {
     }
     var searchResults: [WikiPage] = []
     var selectedPageID: UUID?
+    var showCreateSheet = false
     var navigationHistory: [WikiPage] = []
     
     @ObservationIgnored private var _lintIssues: [LintIssue] = {
@@ -52,7 +53,11 @@ final class KMStore: @preconcurrency GraphDataProvider {
         }
     }
 
-    var navigationPath = NavigationPath()
+    var navigationPath = NavigationPath() {
+        didSet {
+            print("🔍 [NAV-DIAG] KMStore navigationPath changed. Count: \(navigationPath.count)")
+        }
+    }
     var showPerfDashboard = false
     @ObservationIgnored private var _isPrivacyModeEnabled: Bool = UserDefaults.standard.object(forKey: "isPrivacyModeEnabled") as? Bool ?? true
     var isPrivacyModeEnabled: Bool {
@@ -105,6 +110,12 @@ final class KMStore: @preconcurrency GraphDataProvider {
     enum ToolItem: String, CaseIterable, Hashable {
         case index, chat, log, lint, tagCloud, collab, taskCenter, weeklyReport, dashboard, pluginMarket, synthesis
     }
+
+    // MARK: - Coach Marks
+    enum CoachMarkType: String {
+        case graphDiscovery // 发现图谱关联
+    }
+    var pendingCoachMark: CoachMarkType?
 
     // MARK: - Synthesis Management
     struct SynthesisDocument: Codable, Identifiable {
@@ -170,8 +181,10 @@ final class KMStore: @preconcurrency GraphDataProvider {
         }
     }
 
-    @ObservationIgnored private var _synthesisResults: [SynthesisType: SynthesisDocument] = [:]
-    var synthesisResults: [SynthesisType: SynthesisDocument] {
+    let maxSynthesisDocsPerType = 5
+
+    @ObservationIgnored private var _synthesisResults: [SynthesisType: [SynthesisDocument]] = [:]
+    var synthesisResults: [SynthesisType: [SynthesisDocument]] {
         get { access(keyPath: \.synthesisResults); return _synthesisResults }
         set { withMutation(keyPath: \.synthesisResults) { _synthesisResults = newValue } }
     }
@@ -184,24 +197,91 @@ final class KMStore: @preconcurrency GraphDataProvider {
     
     func loadSynthesisResults() {
         for type in SynthesisType.allCases {
-            let key = "synthesis_doc_\(type.rawValue)"
+            let key = "synthesis_docs_\(type.rawValue)"
             if let data = UserDefaults.standard.data(forKey: key),
-               let doc = try? JSONDecoder().decode(SynthesisDocument.self, from: data) {
-                _synthesisResults[type] = doc
+               let docs = try? JSONDecoder().decode([SynthesisDocument].self, from: data),
+               !docs.isEmpty {
+                _synthesisResults[type] = Array(docs.prefix(maxSynthesisDocsPerType))
                 synthesisStates[type] = .completed
             }
         }
     }
 
     func saveSynthesisResult(type: SynthesisType, content: String) {
-        let name = "\(type.title) - \(formatDateShort(Date()))"
+        let title = extractTitle(from: content, type: type)
+        let name = "\(title) - \(formatDateFull(Date()))"
         let doc = SynthesisDocument(id: UUID(), type: type, name: name, content: content, createdAt: Date())
-        _synthesisResults[type] = doc
+        var existing = _synthesisResults[type] ?? []
+        existing.insert(doc, at: 0)
+        _synthesisResults[type] = existing
         synthesisStates[type] = .completed
-        
-        if let data = try? JSONEncoder().encode(doc) {
-            UserDefaults.standard.set(data, forKey: "synthesis_doc_\(type.rawValue)")
+
+        if let data = try? JSONEncoder().encode(existing) {
+            UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
         }
+    }
+
+    func renameSynthesisDoc(type: SynthesisType, docID: UUID, newName: String) {
+        guard var docs = _synthesisResults[type],
+              let idx = docs.firstIndex(where: { $0.id == docID }) else { return }
+        docs[idx] = SynthesisDocument(id: docs[idx].id, type: docs[idx].type, name: newName, content: docs[idx].content, createdAt: docs[idx].createdAt)
+        _synthesisResults[type] = docs
+        if let data = try? JSONEncoder().encode(docs) {
+            UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
+        }
+    }
+
+    func deleteSynthesisDoc(type: SynthesisType, docID: UUID) {
+        guard var docs = _synthesisResults[type] else { return }
+        docs.removeAll { $0.id == docID }
+        _synthesisResults[type] = docs
+        if let data = try? JSONEncoder().encode(docs) {
+            UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
+        }
+    }
+    
+    func batchDeleteSynthesisDocs(ids: Set<UUID>) {
+        for type in SynthesisType.allCases {
+            guard var docs = _synthesisResults[type], !docs.isEmpty else { continue }
+            let originalCount = docs.count
+            docs.removeAll { ids.contains($0.id) }
+            
+            if docs.count != originalCount {
+                _synthesisResults[type] = docs
+                if let data = try? JSONEncoder().encode(docs) {
+                    UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
+                }
+            }
+        }
+    }
+
+    private func extractTitle(from content: String, type: SynthesisType) -> String {
+        // 针对 Quiz 类型尝试解析 JSON 标题
+        if type == .quiz {
+            let cleaned = content.trimmingCharacters(in: .whitespacesAndNewlines)
+                .replacingOccurrences(of: "```json", with: "")
+                .replacingOccurrences(of: "```", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if let data = cleaned.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let title = json["title"] as? String {
+                return title
+            }
+        }
+        
+        let firstLine = content.components(separatedBy: .newlines).first?.trimmingCharacters(in: .whitespaces) ?? ""
+        let stripped = firstLine
+            .replacingOccurrences(of: #"^#+\s*"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespaces)
+        return stripped.isEmpty ? type.title : stripped
+    }
+
+    private func formatDateFull(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd-HHmm"
+        return formatter.string(from: date)
     }
     
     private func formatDateShort(_ date: Date) -> String {
@@ -268,6 +348,18 @@ final class KMStore: @preconcurrency GraphDataProvider {
         undoService.pushSnapshot(pages)
         let page = sqliteStore.createPage(title: title, type: type, customIcon: customIcon, content: content, tags: tags, forceDeepScan: forceDeepScan)
         backupService.markDirty()
+        
+        // 自动引导触发逻辑：当用户拥有 3 个以上的页面且未显示过引导时
+        if totalPages >= 3 && !UserDefaults.standard.bool(forKey: "hasShownGraphCoachMark") {
+            // 延迟一秒弹出，避免与创建成功的视觉反馈冲突
+            Task {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                await MainActor.run {
+                    self.pendingCoachMark = .graphDiscovery
+                }
+            }
+        }
+        
         return page
     }
 
@@ -299,69 +391,7 @@ final class KMStore: @preconcurrency GraphDataProvider {
     func loadFromDisk() { sqliteStore.reloadFromDisk(); logService.loadFromDisk() }
     
     func addLog(action: String, target: String, details: String) { logService.addLog(action: action, target: target, details: details) }
-}
-
-// MARK: - 奖章系统服务
-/// 负责追踪用户成就并触发奖励弹窗
-@MainActor
-final class MedalService: ObservableObject {
-    static let shared = MedalService()
-    
-    struct Medal: Identifiable, Codable, Equatable {
-        let id: String
-        let titleKey: String
-        let descKey: String
-        let icon: String
-        let colorHex: String
-        let threshold: Int
-        let category: Category
-        
-        enum Category: String, Codable {
-            case accumulation, connection, explore
-        }
-    }
-    
-    @Published var newlyEarnedMedal: Medal?
-    @Published var earnedMedalIDs: Set<String> = []
-    
-    let allMedals: [Medal] = [
-        Medal(id: "first_page", titleKey: "medal.first_page.title", descKey: "medal.first_page.desc", icon: "sparkles", colorHex: "#FFD700", threshold: 1, category: .explore),
-        Medal(id: "nodes_5", titleKey: "medal.nodes_5.title", descKey: "medal.nodes_5.desc", icon: "doc.badge.plus", colorHex: "#4FACFE", threshold: 5, category: .accumulation),
-        Medal(id: "nodes_10", titleKey: "medal.nodes_10.title", descKey: "medal.nodes_10.desc", icon: "books.vertical.fill", colorHex: "#00F2FE", threshold: 10, category: .accumulation),
-        Medal(id: "nodes_100", titleKey: "medal.nodes_100.title", descKey: "medal.nodes_100.desc", icon: "archivebox.fill", colorHex: "#A8EDEA", threshold: 100, category: .accumulation),
-        Medal(id: "links_5", titleKey: "medal.links_5.title", descKey: "medal.links_5.desc", icon: "link", colorHex: "#F093FB", threshold: 5, category: .connection),
-        Medal(id: "links_10", titleKey: "medal.links_10.title", descKey: "medal.links_10.desc", icon: "link.badge.plus", colorHex: "#F5576C", threshold: 10, category: .connection),
-        Medal(id: "links_100", titleKey: "medal.links_100.title", descKey: "medal.links_100.desc", icon: "hubball.fill", colorHex: "#8EC5FC", threshold: 100, category: .connection)
-    ]
-    
-    private init() { loadEarnedMedals() }
-    
-    func checkAchievements(nodeCount: Int, linkCount: Int) {
-        for medal in allMedals {
-            if earnedMedalIDs.contains(medal.id) { continue }
-            var isEarned = false
-            switch medal.category {
-            case .explore where medal.id == "first_page": isEarned = nodeCount >= 1
-            case .accumulation: isEarned = nodeCount >= medal.threshold
-            case .connection: isEarned = linkCount >= medal.threshold
-            default: break
-            }
-            if isEarned {
-                earnedMedalIDs.insert(medal.id)
-                newlyEarnedMedal = medal
-                saveEarnedMedals()
-                HapticManager.shared.trigger(.success)
-            }
-        }
-    }
-    
-    private func saveEarnedMedals() {
-        if let data = try? JSONEncoder().encode(earnedMedalIDs) { UserDefaults.standard.set(data, forKey: "earned_medals") }
-    }
-    private func loadEarnedMedals() {
-        if let data = UserDefaults.standard.data(forKey: "earned_medals"),
-           let decoded = try? JSONDecoder().decode(Set<String>.self, from: data) { earnedMedalIDs = decoded }
-    }
+    func clearLogs() { logService.clearAllLogs() }
 }
 
 // MARK: - KMStore 补充方法（DeepLink、数据操作等）
@@ -466,15 +496,45 @@ extension KMStore {
         }
     }
     
-    func generateWeeklyInsight() async {
+    func generateWeeklyInsight(forceRefresh: Bool = false) async {
         guard llmService.isEnabled else { return }
+
+        // 周缓存：非强制刷新时返回缓存
+        if !forceRefresh, let cached = loadCachedWeeklyInsight() {
+            await MainActor.run { self.weeklyInsight = cached }
+            return
+        }
+
         do {
             let insight = try await insightService.generateWeeklyInsight(pages: sqliteStore.pages, llmService: llmService)
             await MainActor.run {
                 self.weeklyInsight = insight
             }
+            saveCachedWeeklyInsight(insight)
         } catch {
             print("[Weekly Insight] Error: \(error)")
+        }
+    }
+
+    private func weeklyCacheKey() -> String {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+        return "weekly_insight_\(components.yearForWeekOfYear ?? 0)_\(components.weekOfYear ?? 0)"
+    }
+
+    private func loadCachedWeeklyInsight() -> KnowledgeInsightService.WeeklyInsight? {
+        let key = weeklyCacheKey()
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let insight = try? JSONDecoder().decode(KnowledgeInsightService.WeeklyInsight.self, from: data) else {
+            return nil
+        }
+        return insight
+    }
+
+    private func saveCachedWeeklyInsight(_ insight: KnowledgeInsightService.WeeklyInsight) {
+        let key = weeklyCacheKey()
+        if let data = try? JSONEncoder().encode(insight) {
+            UserDefaults.standard.set(data, forKey: key)
         }
     }
     
@@ -529,6 +589,13 @@ extension KMStore {
     func performSynthesis(type: SynthesisType) {
         guard llmService.isEnabled else { return }
         guard synthesisStates[type] != .generating else { return }
+        
+        // 数量上限预检
+        let existingCount = _synthesisResults[type]?.count ?? 0
+        if existingCount >= maxSynthesisDocsPerType {
+            synthesisStates[type] = .error(Localized.tr("synthesis.error.limitReached"))
+            return
+        }
         
         synthesisStates[type] = .generating
         let taskID = TaskCenter.shared.addTask(type: .synthesis, name: type.title, target: Localized.tr("sidebar.synthesis"))

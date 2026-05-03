@@ -4,7 +4,7 @@ import SwiftUI
 struct GraphContainerView: View {
     @Environment(KMStore.self) var store
     var heroNamespace: Namespace.ID
-    @State private var selectedTab: GraphMode = .graph2D
+    @Binding var selectedTab: ContentView.AppTab
     @State private var selectedNodeID: UUID?
     @State private var nodes: [GraphNode] = []
     @State private var edges: [GraphEdge] = []
@@ -17,19 +17,9 @@ struct GraphContainerView: View {
     @State private var showLegend = false
     @State private var showInsights = false
     @State private var useClustering = false
+    @State private var show3D = false
     @State private var filterType: PageType?
     @StateObject private var tooltipManager = TooltipManager.shared
-    
-    enum GraphMode: String, CaseIterable, Identifiable {
-        case graph2D, graph3D
-        var id: String { rawValue }
-        var title: String {
-            switch self {
-            case .graph2D: return Localized.tr("graph.mode.2d")
-            case .graph3D: return Localized.tr("graph.mode.3d")
-            }
-        }
-    }
     
     @State private var insightSurprising: [UUID] = []
     @State private var insightOrphans: [UUID] = []
@@ -53,97 +43,134 @@ struct GraphContainerView: View {
     var body: some View {
         let currentFilteredNodes = getFilteredNodes()
         let currentFilteredEdges = getFilteredEdges(for: currentFilteredNodes)
-        
+
         ZStack {
-            if selectedTab == .graph2D {
-                ZStack {
-                    Color.wikiBackground.ignoresSafeArea()
-                    WikiDotPattern(dotColor: .wikiBorder, spacing: 24, dotSize: 2)
-                        .opacity(0.35)
+            // 3D 图谱同款渐变底色
+            ZStack {
+                Color.wikiBackground
 
-                    if nodes.isEmpty {
-                        GraphEmptyStateView()
-                    } else {
-                        GraphCanvasView(
-                            filteredNodes: currentFilteredNodes,
-                            filteredEdges: currentFilteredEdges,
-                            provider: store,
-                            useClustering: useClustering,
-                            selectedNodeID: $selectedNodeID,
-                            isAnimating: $isAnimating,
-                            scale: $scale,
-                            lastScale: $lastScale,
-                            offset: $offset,
-                            lastOffset: $lastOffset,
-                            graphSize: $graphSize,
-                            heroNamespace: heroNamespace
-                        ) { node in
-                            withAnimation(.spring(response: 0.5)) {
-                                selectedNodeID = selectedNodeID == node.id ? nil : node.id
-                                isAnimating = selectedNodeID != nil
-                            }
-                        }
-                    }
+                LinearGradient(
+                    colors: [
+                        Color.wikiAccent.opacity(0.12),
+                        Color.wikiAccent.opacity(0.04),
+                        Color.clear,
+                        Color.wikiAccent.opacity(0.06)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .blur(radius: 50)
 
-                    if !nodes.isEmpty {
-                        // 顶部控件区域：统计栏 + 筛选药丸（Tab 下方，不重叠）
-                        VStack(alignment: .leading, spacing: 8) {
-                            graphStatsBar
-                                .padding(.leading, 16)
-                                .padding(.top, 8)
+                RadialGradient(
+                    gradient: Gradient(colors: [Color.wikiAccent.opacity(0.08), Color.clear]),
+                    center: .topTrailing,
+                    startRadius: 0,
+                    endRadius: 500
+                )
+            }
+            .ignoresSafeArea()
 
-                            GraphFilterPillsView(
-                                filterType: $filterType,
-                                tooltipManager: tooltipManager
-                            )
-
-                            Spacer()
-                        }
-
-                        GraphZoomControlsView(
-                            scale: $scale,
-                            lastScale: $lastScale,
-                            offset: $offset,
-                            lastOffset: $lastOffset,
-                            onRelayout: layoutGraph
-                        )
-                    }
-
-                    if showLegend && !nodes.isEmpty {
-                        GraphLegendView(useClustering: useClustering, clusters: store.clusters)
-                    }
-                    
-                    if let selectedID = selectedNodeID,
-                       let page = store.pages.first(where: { $0.id == selectedID }) {
-                        VStack {
-                            Spacer()
-                            GraphSelectedNodeCard(page: page)
-                        }
+            if nodes.isEmpty {
+                GraphEmptyStateView(selectedTab: $selectedTab)
+            } else {
+                GraphCanvasView(
+                    filteredNodes: currentFilteredNodes,
+                    filteredEdges: currentFilteredEdges,
+                    provider: store,
+                    useClustering: useClustering,
+                    selectedNodeID: $selectedNodeID,
+                    isAnimating: $isAnimating,
+                    scale: $scale,
+                    lastScale: $lastScale,
+                    offset: $offset,
+                    lastOffset: $lastOffset,
+                    graphSize: $graphSize,
+                    heroNamespace: heroNamespace
+                ) { node in
+                    withAnimation(.spring(response: 0.5)) {
+                        selectedNodeID = selectedNodeID == node.id ? nil : node.id
+                        isAnimating = selectedNodeID != nil
                     }
                 }
-            } else {
-                Graph3DView()
+
+                // 顶部控件区域
+                VStack(alignment: .leading, spacing: 8) {
+                    graphStatsBar
+                        .padding(.leading, 16)
+                        .padding(.top, 8)
+
+                    GraphFilterPillsView(
+                        filterType: $filterType,
+                        tooltipManager: tooltipManager
+                    )
+
+                    Spacer()
+                }
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            if !nodes.isEmpty {
+                // 右下角统一控制组
+                HStack(spacing: 0) {
+                    GraphZoomControls(
+                        scale: $scale,
+                        lastScale: $lastScale,
+                        offset: $offset,
+                        lastOffset: $lastOffset,
+                        onRelayout: layoutGraph
+                    )
+
+                    Divider().frame(width: 1, height: 24).background(Color.wikiBorder)
+
+                    Button(action: { show3D = true }) {
+                        Image(systemName: "view.3d")
+                            .font(.body)
+                            .foregroundStyle(.wikiAccent)
+                            .frame(width: 36, height: 36)
+                            .background(Color.wikiCard)
+                    }
+                    .accessibilityIdentifier("graph-3d")
+                }
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
+                .padding(.trailing, 16)
+                .padding(.bottom, selectedNodeID != nil ? 140 : 16)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if !nodes.isEmpty, let selectedID = selectedNodeID,
+               let page = store.pages.first(where: { $0.id == selectedID }) {
+                GraphSelectedNodeCard(page: page)
+            }
+        }
+        .overlay(alignment: .topTrailing) {
+            if !nodes.isEmpty, showLegend {
+                GraphLegendView(useClustering: useClustering, clusters: store.clusters)
+                    .padding(.trailing, 16)
+                    .padding(.top, 100)
             }
         }
         .navigationTitle(Localized.tr("graph.title"))
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Picker("", selection: $selectedTab) {
-                    ForEach(GraphMode.allCases) { mode in
-                        Text(mode.title).tag(mode)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 160)
-            }
-        }
         .onAppear { layoutGraph() }
         .onChange(of: store.pages.count) { _, _ in
             withAnimation(.spring(response: 0.6)) { layoutGraph() }
         }
         .navigationDestination(for: WikiPage.self) { destination in
             PageDetailView(page: destination)
+        }
+        .sheet(isPresented: $showInsights) {
+            insightsPanel
+        }
+        .fullScreenCover(isPresented: $show3D) {
+            Graph3DView(
+                selectedNodeID: $selectedNodeID,
+                isFullScreen: Binding(
+                    get: { true },
+                    set: { if !$0 { show3D = false } }
+                )
+            )
         }
     }
     
@@ -280,6 +307,13 @@ struct GraphCanvasView: View {
         }
     }
     
+    private func getNodeSize(for node: GraphNode) -> CGFloat {
+        let isSelected = selectedNodeID == node.id
+        let linkCount = filteredEdges.filter { $0.source == node.id || $0.target == node.id }.count
+        let baseSize: CGFloat = 20
+        return isSelected ? 40 : max(24, min(40, baseSize + CGFloat(linkCount) * 3))
+    }
+
     private func drawEdges(in context: GraphicsContext, size: CGSize) {
         // LOD: 远景模式下降低连线亮度
         let baseOpacity: Double = scale < 0.8 ? 0.15 : 0.35
@@ -288,9 +322,30 @@ struct GraphCanvasView: View {
             guard let sourceNode = filteredNodes.first(where: { $0.id == edge.source }),
                   let targetNode = filteredNodes.first(where: { $0.id == edge.target }) else { continue }
 
+            let sPos = sourceNode.position
+            let tPos = targetNode.position
+            
+            // 计算节点半径，使连线只连到圆圈边缘而非中心图标
+            let sRadius = getNodeSize(for: sourceNode) / 2
+            let tRadius = getNodeSize(for: targetNode) / 2
+            
+            // 计算方向向量和距离
+            let dx = tPos.x - sPos.x
+            let dy = tPos.y - sPos.y
+            let distance = sqrt(dx * dx + dy * dy)
+            
+            // 如果节点重合，跳过
+            if distance < (sRadius + tRadius) { continue }
+            
+            // 计算缩进后的起点和终点
+            let startX = sPos.x + dx * (sRadius / distance)
+            let startY = sPos.y + dy * (sRadius / distance)
+            let endX = tPos.x - dx * (tRadius / distance)
+            let endY = tPos.y - dy * (tRadius / distance)
+            
             var path = Path()
-            path.move(to: sourceNode.position)
-            path.addLine(to: targetNode.position)
+            path.move(to: CGPoint(x: startX, y: startY))
+            path.addLine(to: CGPoint(x: endX, y: endY))
 
             let isHighlighted = selectedNodeID == edge.source || selectedNodeID == edge.target
             
@@ -298,8 +353,8 @@ struct GraphCanvasView: View {
                 // 选中状态：使用高亮渐变色
                 let gradient = GraphicsContext.Shading.linearGradient(
                     Gradient(colors: [sourceNode.type.themedColor, targetNode.type.themedColor]),
-                    startPoint: sourceNode.position,
-                    endPoint: targetNode.position
+                    startPoint: CGPoint(x: startX, y: startY),
+                    endPoint: CGPoint(x: endX, y: endY)
                 )
                 context.stroke(path, with: gradient, lineWidth: 2.5)
             } else {
@@ -328,8 +383,7 @@ struct GraphCanvasView: View {
                 scale: scale
             )
             
-            let baseSize: CGFloat = 20
-            let nodeSize = isSelected ? 40 : max(24, min(40, baseSize + CGFloat(linkCount) * 3))
+            let nodeSize = getNodeSize(for: node)
             GraphNodeLabel(node: node, isSelected: isSelected, nodeSize: nodeSize)
         }
     }
@@ -380,6 +434,7 @@ struct GraphCanvasView: View {
 // MARK: - Subviews
 private struct GraphEmptyStateView: View {
     @Environment(KMStore.self) var store
+    @Binding var selectedTab: ContentView.AppTab
     
     var body: some View {
         VStack(spacing: 32) {
@@ -417,28 +472,37 @@ private struct GraphEmptyStateView: View {
                     .foregroundStyle(.wikiSecondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
+                    .opacity(0.8)
             }
 
             Button(action: {
-                // 切换到导入 Tab
-                // 假设 TabView 绑定在 ContentView 的 selectedTab
-                // 我们可以通过通知或 store 状态来切换
-                NotificationCenter.default.post(name: NSNotification.Name("SwitchToIngestTab"), object: nil)
+                HapticManager.shared.trigger(.selection)
+                // 方案 A：跳转到 Wiki 并自动唤起新建页面表单
+                DispatchQueue.main.async {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        selectedTab = .wiki
+                    }
+                    // 延迟一瞬确保 Tab 切换完成后再弹出 Sheet，避免视觉冲突
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        store.showCreateSheet = true
+                    }
+                }
             }) {
-                HStack {
+                HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
                     Text(Localized.tr("graph.startBuilding"))
                 }
                 .font(.headline)
                 .foregroundStyle(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
+                .padding(.horizontal, 32)
+                .padding(.vertical, 16)
                 .background(
                     Capsule()
-                        .fill(LinearGradient(colors: [.wikiAccent, .wikiSource], startPoint: .leading, endPoint: .trailing))
+                        .fill(LinearGradient(colors: [Color.wikiAccent, Color.wikiSource], startPoint: .leading, endPoint: .trailing))
                 )
-                .shadow(color: .wikiAccent.opacity(0.4), radius: 10, y: 5)
+                .shadow(color: Color.wikiAccent.opacity(0.3), radius: 12, y: 6)
             }
+            .buttonStyle(PlainButtonStyle()) // 防止全局按钮样式干扰
             
             Text(Localized.tr("graph.tip.biLink"))
                 .font(.caption2)

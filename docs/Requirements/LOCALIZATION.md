@@ -3,7 +3,7 @@
 为了让 Knowledge Management 走向全球，我们采用“双层本地化”架构。
 
 ## 1. 核心应用翻译 (App i18n)
-*   **资产位置**: `KnowledgeBase/Resources/Localizable.strings`
+*   **资产位置**: `Sources/Localization/Localizable.xcstrings` (String Catalog 格式)
 *   **工作流**:
     1.  开发者在代码中使用 `Localized.tr("key")`。
     2.  翻译者在 `.strings` 文件中对应各语言。
@@ -22,4 +22,4 @@
     ```
 
 ## 3. 动态扩展
-新增语言需在 `ThemeManager` 中注册对应的 Locale，确保日期格式、搜索分词器（如日语 MeCab）同步切换。
+新增语言需在 `Localized.swift` 中注册对应的 Locale，确保日期格式与搜索分词器同步切换。`ThemeManager` 仅负责暗/亮色彩方案与主题色管理，不参与语言环境切换。

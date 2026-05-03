@@ -47,7 +47,7 @@ struct ShortcutManager {
 }
 
 @available(iOS 16.0, macOS 13.0, *)
-struct ZhiMindShortcuts: AppShortcutsProvider {
+struct ZhiYuanShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: ShortcutManager.CaptureIntent(),

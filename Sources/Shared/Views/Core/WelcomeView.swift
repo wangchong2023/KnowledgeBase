@@ -4,9 +4,9 @@ import Charts
 struct WelcomeView: View {
     @Environment(KMStore.self) var store
     @Binding var selectedTab: ContentView.AppTab
-    @State private var showCreateSheet = false
     
     var body: some View {
+        @Bindable var store = store
         ScrollView {
             VStack(spacing: 32) {
                 WelcomeHeroSection()
@@ -17,14 +17,11 @@ struct WelcomeView: View {
                 } else {
                     WelcomeQuickStartGuideSection()
                 }
-                WelcomeQuickActionsSection(selectedTab: $selectedTab, showCreateSheet: $showCreateSheet)
+                WelcomeQuickActionsSection(selectedTab: $selectedTab)
             }
             .padding(.bottom, 40)
         }
         .background(Color.wikiBackground)
-        .sheet(isPresented: $showCreateSheet) {
-            CreatePageView()
-        }
     }
 }
 
@@ -101,25 +98,63 @@ struct WelcomeRecentUpdatesSection: View {
 }
 
 struct WelcomeQuickStartGuideSection: View {
+    @Environment(KMStore.self) var store
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             HStack {
                 Image(systemName: "sparkles").font(.caption.weight(.semibold)).foregroundStyle(.wikiText)
                 Text(Localized.tr("welcome.quickStart")).font(.headline).foregroundStyle(.wikiText)
                 Spacer()
             }
-            GuideStepRow(number: 1, text: Localized.tr("welcome.guide.createPage"), icon: "doc.badge.plus")
-            GuideStepRow(number: 2, text: Localized.tr("welcome.guide.wikiLink"), icon: "link")
-        }.padding(20).background(Color.wikiCard).clipShape(RoundedRectangle(cornerRadius: WikiUI.medium)).padding(.horizontal)
+            
+            VStack(alignment: .leading, spacing: 12) {
+                GuideStepRow(number: 1, text: Localized.tr("welcome.guide.createPage"), icon: "doc.badge.plus")
+                GuideStepRow(number: 2, text: Localized.tr("welcome.guide.wikiLink"), icon: "link")
+            }
+            
+            // 快捷注入演示数据入口
+            Button(action: {
+                HapticManager.shared.trigger(.selection)
+                DemoDataGenerator.generate(in: store.sqliteStore)
+                HapticManager.shared.trigger(.success)
+            }) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("探索 AI 代理演示数据")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.wikiAccent)
+                        Text("一键注入示例，快速体验图谱与 AI 合成")
+                            .font(.caption2)
+                            .foregroundStyle(.wikiSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.wikiAccent)
+                }
+                .padding()
+                .background(Color.wikiAccent.opacity(0.05))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.wikiAccent.opacity(0.1), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(20)
+        .background(Color.wikiCard)
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.medium))
+        .padding(.horizontal)
     }
 }
 
 struct WelcomeQuickActionsSection: View {
+    @Environment(KMStore.self) var store
     @Binding var selectedTab: ContentView.AppTab
-    @Binding var showCreateSheet: Bool
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            QuickActionRow(icon: "plus.circle.fill", title: Localized.tr("action.createPage"), subtitle: Localized.tr("action.createPage.subtitle"), color: .wikiAccent) { showCreateSheet = true }
+            QuickActionRow(icon: "plus.circle.fill", title: Localized.tr("action.createPage"), subtitle: Localized.tr("action.createPage.subtitle"), color: .wikiAccent) { store.showCreateSheet = true }
             QuickActionRow(icon: "tray.and.arrow.down.fill", title: Localized.tr("action.ingestKnowledge"), subtitle: Localized.tr("action.ingestKnowledge.subtitle"), color: .wikiSource) { selectedTab = .ingest }
         }.padding(.horizontal)
     }

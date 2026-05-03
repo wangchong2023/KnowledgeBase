@@ -52,9 +52,7 @@ struct MedalWallView: View {
     }
     
     private func getMedals(for category: MedalService.Medal.Category) -> [MedalService.Medal] {
-        // 这里的 medals 列表应与 MedalService 中的一致，或者直接从 MedalService 获取
-        // 为了简化，这里先手动列出（实际生产中应由服务暴露列表）
-        MedalService.shared.allMedals.filter { $0.category == category }
+        medalService.allMedals.filter { $0.category == category }
     }
     
     private func statBox(title: String, value: String, icon: String, color: Color) -> some View {
@@ -74,20 +72,5 @@ struct MedalWallView: View {
         .background(Color.wikiCard)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
-    }
-}
-
-// 需要在 MedalService 中添加 allMedals 暴露
-extension MedalService {
-    var allMedals: [Medal] {
-        return [
-            Medal(id: "first_page", titleKey: "medal.first_page.title", descKey: "medal.first_page.desc", icon: "sparkles", colorHex: "#FFD700", threshold: 1, category: .explore),
-            Medal(id: "nodes_5", titleKey: "medal.nodes_5.title", descKey: "medal.nodes_5.desc", icon: "doc.badge.plus", colorHex: "#4FACFE", threshold: 5, category: .accumulation),
-            Medal(id: "nodes_10", titleKey: "medal.nodes_10.title", descKey: "medal.nodes_10.desc", icon: "books.vertical.fill", colorHex: "#00F2FE", threshold: 10, category: .accumulation),
-            Medal(id: "nodes_100", titleKey: "medal.nodes_100.title", descKey: "medal.nodes_100.desc", icon: "archivebox.fill", colorHex: "#A8EDEA", threshold: 100, category: .accumulation),
-            Medal(id: "links_5", titleKey: "medal.links_5.title", descKey: "medal.links_5.desc", icon: "link", colorHex: "#F093FB", threshold: 5, category: .connection),
-            Medal(id: "links_10", titleKey: "medal.links_10.title", descKey: "medal.links_10.desc", icon: "link.badge.plus", colorHex: "#F5576C", threshold: 10, category: .connection),
-            Medal(id: "links_100", titleKey: "medal.links_100.title", descKey: "medal.links_100.desc", icon: "hubball.fill", colorHex: "#8EC5FC", threshold: 100, category: .connection)
-        ]
     }
 }

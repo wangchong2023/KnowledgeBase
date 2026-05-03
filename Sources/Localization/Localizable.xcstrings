@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "zh-Hans",
   "strings" : {
-    "" : {
-
-    },
     " " : {
 
     },
@@ -723,6 +720,95 @@
         }
       }
     },
+    "synthesis.noDocsDesc" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generate mindmaps, slides, and reports using AI to see the bigger picture."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用 AI 生成思维导图、演示文稿和深度报告，从更高维度洞察知识。"
+          }
+        }
+      }
+    },
+    "welcome.title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Welcome to" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "欢迎使用" } }
+      }
+    },
+    "welcome.header" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Welcome to your second brain" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "欢迎来到您的第二大脑" } }
+      }
+    },
+    "welcome.desc1" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "is an AI-native knowledge evolution engine. It doesn't just store notes, it helps discover hidden links via the" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "是一个“AI 原生”的知识进化引擎。它不仅能帮您存储笔记，还能通过" } }
+      }
+    },
+    "welcome.desc2" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "发现知识间的隐秘联系。" } }
+      }
+    },
+    "welcome.startTitle" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Quick Start" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "快速开始" } }
+      }
+    },
+    "welcome.start1" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Try clicking the" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "尝试点击右侧的" } }
+      }
+    },
+    "welcome.start2" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "button and ask: 'What's in my library?'" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "按钮，问我：“我库里有哪些内容？”" } }
+      }
+    },
+    "welcome.start3" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Drag a PDF into the 'Import' page to experience AI auto-decomposition." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "拖入一个 PDF 到“导入”页面，体验 AI 自动拆解。" } }
+      }
+    },
+    "welcome.start4" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Type `[[` on any page to try creating a link." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "在任意页面输入 `[[` 尝试创建链接。" } }
+      }
+    },
+    "welcome.tag1" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Getting Started" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "入门" } }
+      }
+    },
+    "welcome.tag2" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Welcome" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "欢迎" } }
+      }
+    },
+    "synthesis.error.noPages" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No knowledge found. Please create or import some pages first." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "未发现任何知识。请先创建或导入一些页面。" } }
+      }
+    },
     "aitask.guide.synthesis" : {
       "localizations" : {
         "en" : {
@@ -943,6 +1029,7 @@
       }
     },
     "aitask.tools" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1048,13 +1135,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "KM Lingdong"
+            "value" : "ZhiYuan"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "知识灵动"
+            "value" : "智元"
           }
         }
       }
@@ -2035,7 +2122,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind AI Assistant"
+            "value" : "ZhiYuan AI Assistant"
           }
         },
         "zh-Hans" : {
@@ -2133,7 +2220,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind Room"
+            "value" : "ZhiYuan Room"
           }
         },
         "zh-Hans" : {
@@ -2439,7 +2526,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind Room"
+            "value" : "ZhiYuan Room"
           }
         },
         "zh-Hans" : {
@@ -3814,6 +3901,22 @@
         }
       }
     },
+    "export.defaultSlideTitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slide %lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "幻灯片 %lld"
+          }
+        }
+      }
+    },
     "export.exportTime" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3831,13 +3934,29 @@
         }
       }
     },
+    "export.generatedBy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generated by %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "由 %@ 生成"
+          }
+        }
+      }
+    },
     "export.header" : {
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind Export"
+            "value" : "ZhiYuan Export"
           }
         },
         "zh-Hans" : {
@@ -4359,6 +4478,7 @@
       }
     },
     "graph.mode.2d" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4375,6 +4495,7 @@
       }
     },
     "graph.mode.3d" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4412,13 +4533,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start Building"
+            "value" : "Import Content Now"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开始构建网络"
+            "value" : "立即导入内容"
           }
         }
       }
@@ -4467,7 +4588,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在沉浸式 3D 空间中探索您的知识宇宙。"
+            "value" : "探索您的知识宇宙。点击节点查看详情，拖拽旋转视野，缩放深度探索关联。"
           }
         }
       }
@@ -7968,7 +8089,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You are a ZhiMind compiler. Compile raw material into structured content. Return only JSON, no other text."
+            "value" : "You are a ZhiYuan compiler. Compile raw material into structured content. Return only JSON, no other text."
           }
         },
         "zh-Hans" : {
@@ -8206,7 +8327,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You are a ZhiMind assistant, running on the Karpathy LLM Wiki methodology."
+            "value" : "You are a ZhiYuan assistant, running on the Karpathy LLM Wiki methodology."
           }
         },
         "zh-Hans" : {
@@ -8625,6 +8746,38 @@
         }
       }
     },
+    "log.action.aiscan.failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Scan Failed"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI 扫描失败"
+          }
+        }
+      }
+    },
+    "log.action.aiscan.skipped" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI Scan Skipped"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AI 扫描已跳过"
+          }
+        }
+      }
+    },
     "log.error.saveFailed" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8672,6 +8825,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "暂无操作日志"
+          }
+        }
+      }
+    },
+    "log.seedSuccess" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Initial example content seeded"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "成功生成初始示例内容"
           }
         }
       }
@@ -8927,6 +9096,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "同步"
+          }
+        }
+      }
+    },
+    "logAction.systemInit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System Initialization"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统初始化"
           }
         }
       }
@@ -9317,6 +9502,23 @@
         }
       }
     },
+    "misc.add" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加标签"
+          }
+        }
+      }
+    },
     "misc.aiThinking" : {
       "localizations" : {
         "zh-Hans" : {
@@ -9356,6 +9558,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消"
+          }
+        }
+      }
+    },
+    "misc.clear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清空"
           }
         }
       }
@@ -9400,6 +9618,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷贝"
+          }
+        }
+      }
+    },
+    "misc.correct" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correct"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正确"
+          }
+        }
+      }
+    },
+    "misc.create" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "创建"
           }
         }
       }
@@ -9464,6 +9714,22 @@
         }
       }
     },
+    "misc.edit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑"
+          }
+        }
+      }
+    },
     "misc.error" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9508,6 +9774,22 @@
         }
       }
     },
+    "misc.incorrect" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incorrect"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "错误"
+          }
+        }
+      }
+    },
     "misc.loading" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -9521,6 +9803,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "加载中..."
+          }
+        }
+      }
+    },
+    "misc.nextQuestion" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next Question"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一题"
           }
         }
       }
@@ -9586,6 +9884,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "查看"
+          }
+        }
+      }
+    },
+    "misc.viewResults" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View Results"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看结果"
           }
         }
       }
@@ -9991,13 +10305,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Let AI help you scan, summarize and synthesize"
+            "value" : "Open AI Lab to let intelligence scan, summarize and synthesize insights for you"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "让 AI 帮您深度扫描、总结和合成知识"
+            "value" : "点击 AI 实验室，让智能助理帮您深度扫描、总结并合成知识洞察"
           }
         }
       }
@@ -10023,13 +10337,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Oversee your knowledge universe in 2D and 3D"
+            "value" : "Enter Dynamic Graph to oversee your knowledge universe in 2D and 3D perspectives"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 2D 和 3D 空间中俯瞰您的知识宇宙"
+            "value" : "进入动态图谱，以全方位视角俯瞰您的知识宇宙，洞察关联脉络"
           }
         }
       }
@@ -10055,13 +10369,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Discover hidden connections via [[links]]"
+            "value" : "Use [[links]] to discover hidden connections and build your personal neural network"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "通过 [[链接]] 发现想法之间的隐藏联系"
+            "value" : "使用 [[链接]] 建立想法之间的隐藏联系，打造您的个人神经元网络"
           }
         }
       }
@@ -10119,13 +10433,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Start your new era of knowledge management"
+            "value" : "Start your new era of knowledge management and build your own second brain"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开启您的知识管理新纪元"
+            "value" : "开启您的知识管理新纪元，打造个人专属的第二大脑"
           }
         }
       }
@@ -10216,7 +10530,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You are a ZhiMind assistant. Answer based on the following content."
+            "value" : "You are a ZhiYuan assistant. Answer based on the following content."
           }
         },
         "zh-Hans" : {
@@ -10518,7 +10832,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Compile the following content into a structured ZhiMind page. Existing pages"
+            "value" : "Compile the following content into a structured ZhiYuan page. Existing pages"
           }
         },
         "zh-Hans" : {
@@ -10620,7 +10934,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind LLM (Bundled)"
+            "value" : "ZhiYuan LLM (Bundled)"
           }
         },
         "zh-Hans" : {
@@ -11328,7 +11642,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Welcome to ZhiMind"
+            "value" : "Welcome to ZhiYuan"
           }
         },
         "zh-Hans" : {
@@ -11705,7 +12019,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind"
+            "value" : "ZhiYuan"
           }
         },
         "zh-Hans" : {
@@ -13060,6 +13374,12 @@
     },
     "prompt.default.mindmap" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please generate a Mermaid mindmap. Requirements:\n1. Start with the `mindmap` keyword.\n2. Root node format: `root((Title))`.\n3. Do NOT include parentheses `()` or colons `:` in node labels. Use quotes for special characters, e.g., `\"Text (Bracket)\"`.\n4. Use 2-space indentation for levels. Do NOT use `-` or `*` prefixes.\n5. Output ONLY the code block."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13073,13 +13393,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Generate quiz with 3 MCQs and 1 short answer. Use beautiful Markdown, ## for titles, and fold answers in <details> tags. NEVER output JSON."
+            "value" : "Generate a quiz with 3 MCQs about the content. Output in JSON format: {\"title\":\"...\",\"questions\":[{\"id\":0,\"text\":\"...\",\"options\":[\"A\",\"B\",\"C\",\"D\"],\"answer\":0,\"explanation\":\"...\"}]}. answer is 0-based (0=A,1=B,2=C,3=D)."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "生成知识测验。要求：1. 严禁输出 JSON，直接输出精美 Markdown。2. 包含 3 道选择题和 1 道简答题。3. 题目用 ##，答案解析用 <details> 折叠。"
+            "value" : "基于内容生成知识测验，输出JSON格式：{\"title\":\"标题\",\"questions\":[{\"id\":0,\"text\":\"问题\",\"options\":[\"选项A\",\"选项B\",\"选项C\",\"选项D\"],\"answer\":0,\"explanation\":\"解释\"}]}。answer为0起始索引（0=A,1=B,2=C,3=D）。3道选择题。"
           }
         }
       }
@@ -13711,13 +14031,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind"
+            "value" : "ZhiYuan"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "智元 (ZhiMind)"
+            "value" : "智元 (ZhiYuan)"
           }
         }
       }
@@ -13727,13 +14047,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Automatically generated by ZhiMind AI Engine | Privacy priority, local storage"
+            "value" : "Automatically generated by ZhiYuan AI Engine | Privacy priority, local storage"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "由 ZhiMind AI 引擎自动生成 | 隐私优先，本地存储"
+            "value" : "由 ZhiYuan AI 引擎自动生成 | 隐私优先，本地存储"
           }
         }
       }
@@ -13766,6 +14086,150 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "知识库深度总结报告"
+          }
+        }
+      }
+    },
+    "schema.concept.field.applications" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Applications"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用场景"
+          }
+        }
+      }
+    },
+    "schema.concept.field.theory" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Principles"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原理"
+          }
+        }
+      }
+    },
+    "schema.concept.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For concept types, focus on explaining underlying principles and practical application scenarios. Content should be concise and professional."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对于概念类型，重点解释其底层原理和实际应用场景。内容要求高度概括且专业。"
+          }
+        }
+      }
+    },
+    "schema.concept.template" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "# {title}\n\n## Principles\n{theory}\n\n## Application Scenarios\n- Scenario 1\n- Scenario 2"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "# {title}\n\n## 原理\n{theory}\n\n## 应用场景\n- 场景1\n- 场景2"
+          }
+        }
+      }
+    },
+    "schema.entity.field.attributes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Core Attributes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "核心属性"
+          }
+        }
+      }
+    },
+    "schema.entity.field.definition" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definition"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "定义"
+          }
+        }
+      }
+    },
+    "schema.entity.field.relations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Related Entities"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关联实体"
+          }
+        }
+      }
+    },
+    "schema.entity.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For entity types, extract a clear definition and at least 3 core attributes. Establish bidirectional links with other entities."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对于实体类型，必须提取其明确的定义，并列出至少3个核心属性。必须发现并建立与其他实体的双向链接。"
+          }
+        }
+      }
+    },
+    "schema.entity.template" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "# {title}\n\n## Definition\n{definition}\n\n## Core Attributes\n- Attr 1: \n- Attr 2: \n\n## Related Entities\n- [[Related Entity]]"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "# {title}\n\n## 定义\n{definition}\n\n## 核心属性\n- 属性1: \n- 属性2: \n\n## 关联实体\n- [[相关实体]]"
           }
         }
       }
@@ -14156,7 +14620,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind"
+            "value" : "ZhiYuan"
           }
         },
         "zh-Hans" : {
@@ -14694,7 +15158,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reset ZhiMind"
+            "value" : "Reset ZhiYuan"
           }
         },
         "zh-Hans" : {
@@ -14891,7 +15355,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind Statistics"
+            "value" : "ZhiYuan Statistics"
           }
         },
         "zh-Hans" : {
@@ -14917,6 +15381,60 @@
             "value" : "系统设置"
           }
         }
+      }
+    },
+    "settings.section.developer" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Developer Options" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "开发者选项" } }
+      }
+    },
+    "settings.injectDemoData" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Inject Demo Data" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "注入演示数据" } }
+      }
+    },
+    "settings.clearAllDataOnly" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Clear All Data (Pure)" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "纯清空所有数据" } }
+      }
+    },
+    "settings.confirmClearAll" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This will delete all pages without injecting any demo data. Continue?" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "这将删除所有页面且不注入任何演示数据。确定继续吗？" } }
+      }
+    },
+    "coachmark.graphDiscovery.title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "New Connections Discovered!" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "发现新的知识关联！" } }
+      }
+    },
+    "coachmark.graphDiscovery.desc" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "You've created several pages. Let's see how they connect in the Graph view." } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "您已创建了数条笔记，去图谱中看看它们是如何交织成网的吧。" } }
+      }
+    },
+    "coachmark.graphDiscovery.action" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Go to Graph" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "前往查看" } }
+      }
+    },
+    "settings.runPythonSeed" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Execute Script Injection" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "执行脚本注入" } }
+      }
+    },
+    "settings.exportMarkdown" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Export all as Markdown" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "导出所有为 Markdown" } }
       }
     },
     "settings.settings" : {
@@ -16464,7 +16982,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind"
+            "value" : "ZhiYuan"
           }
         },
         "zh-Hans" : {
@@ -16839,12 +17357,34 @@
         }
       }
     },
-    "synthesis.generatedAt" : {
+    "synthesis.error.limitReached" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synthesis limit reached. Please delete old ones."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "生成于: 刚刚"
+            "value" : "已达到合成上限（5个），请先删除旧文档。"
+          }
+        }
+      }
+    },
+    "synthesis.generatedAt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generated: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生成于: %@"
           }
         }
       }
@@ -16877,6 +17417,22 @@
         }
       }
     },
+    "synthesis.mindmap.renderError" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed to render mindmap. Please try regenerating."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法渲染思维导图，请重试生成。"
+          }
+        }
+      }
+    },
     "synthesis.noDocs" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -16888,7 +17444,25 @@
         }
       }
     },
+    "synthesis.noDocsDesc" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select pages from your library to synthesize new knowledge."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从您的知识库中选择页面以合成新知识。"
+          }
+        }
+      }
+    },
     "synthesis.noDocsThisType" : {
+      "extractionState" : "stale",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -17119,13 +17693,30 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind"
+            "value" : "ZhiYuan"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "知识库"
+          }
+        }
+      }
+    },
+    "tag.countFormat" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d tags total"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %d 个标签"
           }
         }
       }
@@ -17279,6 +17870,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重命名标签"
+          }
+        }
+      }
+    },
+    "tag.searchPlaceholder" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search tags..."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索标签..."
           }
         }
       }
@@ -17459,7 +18067,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新增标签"
+            "value" : "添加标签"
           }
         }
       }
@@ -17521,6 +18129,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "输入标签名称"
+          }
+        }
+      }
+    },
+    "tags.manageHint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage your knowledge tags and categorize your pages."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理您的知识标签，为页面进行分类归纳。"
           }
         }
       }
@@ -17989,7 +18614,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ZhiMind"
+            "value" : "ZhiYuan"
           }
         },
         "zh-Hans" : {

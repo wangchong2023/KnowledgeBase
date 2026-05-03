@@ -6,10 +6,12 @@ import SwiftUI
 enum SidebarSelection: Hashable {
     case page(UUID)
     case tool(KMStore.ToolItem)
+    case filteredIndex(PageType)
 }
 
 struct SidebarView: View {
     @Environment(KMStore.self) var store
+    @ObservedObject var taskCenter = TaskCenter.shared
     var heroNamespace: Namespace.ID
     var selection: Binding<SidebarSelection?>? = nil
 
@@ -18,37 +20,68 @@ struct SidebarView: View {
     @SceneStorage("sidebar.selectedTool") private var restoredTool: String?
     @SceneStorage("sidebar.isRecentExpanded") private var isRecentExpanded: Bool = true
 
+    /// 合并外部绑定与 store/SceneStorage 副作用的自定义绑定
+    private var effectiveBinding: Binding<SidebarSelection?> {
+        if let externalBinding = selection {
+            return Binding(
+                get: { 
+                    let val = externalBinding.wrappedValue
+                    // print("🔍 [NAV-DIAG] SidebarView effectiveBinding (external) get: \(String(describing: val))")
+                    return val
+                },
+                set: { newValue in
+                    print("🔍 [NAV-DIAG] SidebarView effectiveBinding (external) set: \(String(describing: newValue))")
+                    externalBinding.wrappedValue = newValue
+                    applySelectionSideEffects(newValue)
+                }
+            )
+        }
+        return selectionBinding
+    }
+
     private var selectionBinding: Binding<SidebarSelection?> {
         Binding(
             get: {
-                if let toolStr = restoredTool, let tool = KMStore.ToolItem(rawValue: toolStr) { return .tool(tool) }
+                let toolStr = restoredTool ?? KMStore.ToolItem.index.rawValue
+                if let tool = KMStore.ToolItem(rawValue: toolStr) { return .tool(tool) }
                 if let idStr = restoredPageID, let id = UUID(uuidString: idStr) { return .page(id) }
-                return nil
+                return .tool(.index)
             },
             set: { newValue in
-                switch newValue {
-                case .page(let id):
-                    restoredTool = nil
-                    restoredPageID = id.uuidString
-                    store.selectedPageID = id
-                    store.selectedTool = nil
-                case .tool(let tool):
-                    restoredPageID = nil
-                    restoredTool = tool.rawValue
-                    store.selectedTool = tool
-                    store.selectedPageID = nil
-                case .none:
-                    restoredPageID = nil
-                    restoredTool = nil
-                    store.selectedPageID = nil
-                    store.selectedTool = nil
-                }
+                print("🔍 [NAV-DIAG] SidebarView selectionBinding (internal) set: \(String(describing: newValue))")
+                applySelectionSideEffects(newValue)
             }
         )
     }
 
+    /// 将选择变更同步到 SceneStorage 和 store
+    private func applySelectionSideEffects(_ newValue: SidebarSelection?) {
+        switch newValue {
+        case .page(let id):
+            restoredTool = nil
+            restoredPageID = id.uuidString
+            store.selectedPageID = id
+            store.selectedTool = nil
+        case .tool(let tool):
+            restoredPageID = nil
+            restoredTool = tool.rawValue
+            store.selectedTool = tool
+            store.selectedPageID = nil
+        case .filteredIndex:
+            restoredPageID = nil
+            restoredTool = nil
+            store.selectedTool = nil
+            store.selectedPageID = nil
+        case .none:
+            restoredPageID = nil
+            restoredTool = nil
+            store.selectedPageID = nil
+            store.selectedTool = nil
+        }
+    }
+
     var body: some View {
-        List(selection: selection ?? selectionBinding) {
+        List(selection: effectiveBinding) {
             // ══ 1. 仪表盘与核心能力 ══
             Section {
                 NavigationLink(value: SidebarSelection.tool(.dashboard)) {
@@ -83,7 +116,7 @@ struct SidebarView: View {
                 ForEach(PageType.allCases) { type in
                     let count = store.pages.filter { $0.type == type }.count
                     if count > 0 {
-                        NavigationLink(value: SidebarSelection.tool(.index)) {
+                        NavigationLink(value: SidebarSelection.filteredIndex(type)) {
                             Label {
                                 HStack {
                                     Text(type.displayName)
@@ -143,12 +176,16 @@ struct SidebarView: View {
                     Label(Localized.tr("sidebar.tagManager"), systemImage: "tag.fill")
                 }
 
+                NavigationLink(value: SidebarSelection.tool(.log)) {
+                    Label(Localized.tr("sidebar.operationLog"), systemImage: "clock.arrow.circlepath")
+                }
+
                 NavigationLink(value: SidebarSelection.tool(.taskCenter)) {
                     HStack {
                         Label(Localized.tr("aitask.center.title"), systemImage: "arrow.triangle.2.circlepath")
                         Spacer()
-                        if TaskCenter.shared.unreadCount > 0 {
-                            Text("\(TaskCenter.shared.unreadCount)")
+                        if taskCenter.unreadCount > 0 {
+                            Text("\(taskCenter.unreadCount)")
                                 .font(.caption2.bold())
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)

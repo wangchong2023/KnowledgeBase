@@ -11,6 +11,7 @@ struct SettingsView: View {
     @State private var selectedLanguage: LanguageMode = Localized.languageMode
     @Binding var languageForceUpdate: Bool
     @State private var showFolderImporterForImport = false
+    @State private var showClearAllConfirmation = false
     
     @MainActor
     private func authenticate() async -> Bool {
@@ -176,16 +177,45 @@ struct SettingsView: View {
                     Text(Localized.tr("settings.section.security"))
                 }
                 
-                // ── 更多功能 ──
+                // ── 开发者选项 ──
+                #if DEBUG
                 Section {
-                    SettingsNavigationRow(icon: "puzzlepiece.extension.fill", title: Localized.tr("sidebar.pluginMarket"), identifier: "settings.plugins") {
-                        PluginCenterView()
+                    Button(action: {
+                        DemoDataGenerator.generate(in: store.sqliteStore)
+                        HapticManager.shared.trigger(.success)
+                    }) {
+                        Label(Localized.tr("settings.injectDemoData"), systemImage: "testtube.2")
+                    }
+                    .accessibilityIdentifier("settings.injectDemo")
+                    
+                    Button(role: .destructive, action: { showClearAllConfirmation = true }) {
+                        Label(Localized.tr("settings.clearAllDataOnly"), systemImage: "trash.slash.fill")
+                    }
+                    .accessibilityIdentifier("settings.clearAll")
+
+                    Button(action: {
+                        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                        HapticManager.shared.trigger(.success)
+                    }) {
+                        Label("重置引导流程", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                    
+                    #if os(macOS)
+                    Button(action: {
+                        runPythonSeedScript()
+                    }) {
+                        Label(Localized.tr("settings.runPythonSeed"), systemImage: "terminal.fill")
+                    }
+                    .accessibilityIdentifier("settings.runPython")
+                    #endif
+                    
+                    ShareLink(item: exportAllAsMarkdown()) {
+                        Label(Localized.tr("settings.exportMarkdown"), systemImage: "doc.text.fill")
                     }
                 } header: {
-                    Text(Localized.tr("settings.section.moreFeatures"))
+                    Text(Localized.tr("settings.section.developer"))
                 }
-                
-
+                #endif
 
                 Section {
                     SettingsNavigationRow(icon: "books.vertical.circle.fill", title: Localized.tr("settings.aboutApp"), identifier: "settings.about") {
@@ -193,6 +223,16 @@ struct SettingsView: View {
                     }
                 }
             }
+            #if DEBUG
+            .confirmationDialog(Localized.tr("settings.clearAllDataOnly"), isPresented: $showClearAllConfirmation) {
+                Button(Localized.tr("misc.delete"), role: .destructive) {
+                    store.sqliteStore.removeAllPages()
+                }
+                Button(Localized.tr("settings.cancel"), role: .cancel) {}
+            } message: {
+                Text(Localized.tr("settings.confirmClearAll"))
+            }
+            #endif
 #if os(iOS)
             .listStyle(.insetGrouped)
 #endif
@@ -237,6 +277,32 @@ struct SettingsView: View {
         }
     }
     
+#if os(macOS)
+    private func runPythonSeedScript() {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
+        
+        // 尝试定位脚本路径
+        let scriptPath = Bundle.main.bundleURL.deletingLastPathComponent().appendingPathComponent("Tools/seed_data.py").path
+        
+        process.arguments = [scriptPath, "--path", store.sqliteStore.dbPath.path]
+        
+        do {
+            try process.run()
+            process.waitUntilExit()
+            if process.terminationStatus == 0 {
+                store.sqliteStore.reloadFromDisk()
+                HapticManager.shared.trigger(.success)
+            } else {
+                HapticManager.shared.trigger(.error)
+            }
+        } catch {
+            print("Failed to run python script: \(error)")
+            HapticManager.shared.trigger(.error)
+        }
+    }
+#endif
+
     private func exportAllAsMarkdown() -> String {
         var output = "# \(Localized.tr("export.header"))\n\n"
         output += "\(Localized.tr("export.exportTime")): \(Date().formatted())\n"

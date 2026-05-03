@@ -6,14 +6,13 @@ struct ContentView: View {
     @EnvironmentObject var themeManager: ThemeManager
     @StateObject private var tooltipManager = TooltipManager.shared
     @State private var selectedTab: AppTab = .wiki
-    @State private var showCreateSheet = false
     @State private var showCommandPalette = false
     @State private var languageForceUpdate: Bool = false
     @Namespace private var heroNamespace
     @StateObject private var medalService = MedalService.shared
     @State private var searchPath = NavigationPath()
     @State private var graphPath = NavigationPath()
-    @State private var sidebarSelection: SidebarSelection? = .tool(.dashboard)
+    @State private var sidebarSelection: SidebarSelection? = nil
     
     enum AppTab: String, CaseIterable {
         case wiki
@@ -63,6 +62,9 @@ struct ContentView: View {
                     }
                 }
             }
+            .sheet(isPresented: $store.showCreateSheet) {
+                CreatePageView()
+            }
 
             if store.securityService.isLocked {
                 LockOverlayView()
@@ -81,6 +83,14 @@ struct ContentView: View {
                 }
                 .zIndex(200)
                 .transition(.asymmetric(insertion: .opacity, removal: .scale.combined(with: .opacity)))
+            }
+            
+            // 功能引导弹窗 (Coach Marks)
+            if let coachMark = store.pendingCoachMark {
+                CoachMarkOverlay(type: coachMark, selectedTab: $selectedTab) {
+                    store.pendingCoachMark = nil
+                }
+                .zIndex(300)
             }
         }
         .onAppear {
@@ -250,10 +260,10 @@ struct ContentView: View {
         NavigationStack(path: $graphPath) {
             Group {
                 if languageForceUpdate {
-                    GraphContainerView(heroNamespace: heroNamespace)
+                    GraphContainerView(heroNamespace: heroNamespace, selectedTab: $selectedTab)
                         .id(languageForceUpdate)
                 } else {
-                    GraphContainerView(heroNamespace: heroNamespace)
+                    GraphContainerView(heroNamespace: heroNamespace, selectedTab: $selectedTab)
                 }
             }
             .navigationDestination(for: WikiPage.self) { page in
@@ -298,10 +308,10 @@ struct ContentView: View {
     @ViewBuilder
     private var ingestTabContent: some View {
         if languageForceUpdate {
-            IngestView()
+            IngestView(selectedTab: $selectedTab)
                 .id(languageForceUpdate)
         } else {
-            IngestView()
+            IngestView(selectedTab: $selectedTab)
         }
     }
 }

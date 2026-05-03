@@ -1,4 +1,4 @@
-# 智元 (ZhiMind) 架构 4+1 视图
+# 智元 (ZhiYuan) 架构 4+1 视图
 
 本文件采用 Kruchten 的 4+1 视图模型，从多个维度深入解析智元系统的技术架构。
 
@@ -111,9 +111,9 @@ graph LR
 
 *   **用例：双向链接自动发现**
     *   用户编辑文本 -> L2 捕获输入 -> L1 (LinkService) 执行反向索引查询 -> 发现潜在关联 -> UI 反馈。
-# 智元 (ZhiMind) 架构设计文档 (4+1 View Model)
+# 智元 (ZhiYuan) 架构设计文档 (4+1 View Model)
 
-本文件采用 Philippe Kruchten 提出的 **4+1 视图模型**，旨在从多个维度解析 智元 (ZhiMind) 的 AI 原生架构设计。
+本文件采用 Philippe Kruchten 提出的 **4+1 视图模型**，旨在从多个维度解析 智元 (ZhiYuan) 的 AI 原生架构设计。
 
 ---
 
@@ -223,7 +223,7 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    subgraph "Apple Sandbox (智元 (ZhiMind) App)"
+    subgraph "Apple Sandbox (智元 (ZhiYuan) App)"
         DB[(km.sqlite3)]
         VectorIndex[(Vector Store)]
         BookmarkStore[UserDefaults Bookmarks]
@@ -241,8 +241,8 @@ graph LR
     
     BookmarkStore -- Scoped URL --> Obsidian
     BookmarkStore -- Scoped URL --> Documents
-    智元 (ZhiMind) -- Accelerate.framework --> VectorIndex
-    智元 (ZhiMind) -- Dynamic Load --> P1
+    智元 (ZhiYuan) -- Accelerate.framework --> VectorIndex
+    智元 (ZhiYuan) -- Dynamic Load --> P1
 ```
 
 ---
@@ -250,7 +250,7 @@ graph LR
 ## 6. 核心技术深度解析 (Core Technical Deep Dive)
 
 ### 6.1 混合检索与 RRF 融合 (Hybrid RAG)
-智元 (ZhiMind) 采用 **“两阶段检索”** 架构以平衡查准率与查全率：
+智元 (ZhiYuan) 采用 **“两阶段检索”** 架构以平衡查准率与查全率：
 - **阶段一：混合召回 (Hybrid Recall)**
     - **FTS5 关键词检索**：利用 SQLite 原生引擎进行 BM25 类加权搜索，擅长处理人名、专有名词等精确匹配。
     - **向量相似度检索**：利用 Accelerate 框架计算余弦相似度，擅长处理“意图匹配”（如搜索“怎么做”能搜到“操作手册”）。
@@ -317,7 +317,7 @@ graph LR
 *   **非阻塞异步**：视图层通过 `await` 发起请求，确保 UI 线程（MainActor）在等待计算结果时依然保持 60 FPS 的响应性。
 
 ### 10.2 混合检索算法 (Hybrid RAG: RRF)
-智元 (ZhiMind) 采用倒数排名融合（Reciprocal Rank Fusion, RRF）来合并 FTS5 与向量搜索结果：
+智元 (ZhiYuan) 采用倒数排名融合（Reciprocal Rank Fusion, RRF）来合并 FTS5 与向量搜索结果：
 *   **策略**：k 默认取值 60，平衡了关键词匹配的“刚性”与语义关联的“柔性”。
 *   **流程**：`LinkService` 同时触发两条链路查询，汇总后进行 RRF 打分，最后由 `LLMService` 对 Top-K 结果执行精排（Rerank）。
 
@@ -334,4 +334,121 @@ graph LR
 ### 10.5 全局指令中枢模式 (Command Hub Pattern)
 引入了 `Cmd + K` 模式的全局快捷键中心：
 - **解耦交互**: 视图层通过 `keyboardShortcut` 监听指令，由 `CommandPaletteView` 统一委派动作。
-- **语义唤起**: 支持对全库页面、近期任务与系统指令的模糊检索，实现了从“点击驱动”到“意图驱动”的跨越。
+- **语义唤起**: 支持对全库页面、近期任务与系统指令的模糊检索，实现了从”点击驱动”到”意图驱动”的跨越。
+
+---
+
+## 11. 页面-视图路由映射 (Page-View Routing Map)
+
+本节完整记录从顶层 Tab 到最终渲染视图的导航链路，以及 WikiPage 数据在各视图间的流转关系。
+
+### 11.1 导航路由链路 (Navigation Routing Chain)
+
+```
+AppTab (Tab Bar)
+  └─ SidebarSelection (侧边栏选中项)
+       └─ DetailContentView.destinationView() (路由分发)
+            └─ 具体 SwiftUI View
+```
+
+**层级一：AppTab** — 底部/侧边 Tab 栏（5 个 Tab）
+
+| AppTab | displayTitle | 说明 |
+|--------|-------------|------|
+| `.wiki` | tab.wiki | 知识库主页，包含侧边栏二级导航 |
+| `.ingest` | tab.ingest | 数据摄入页面 |
+| `.search` | tab.search | 全局搜索页面 |
+| `.graph` | tab.graph | 知识图谱可视化页面 |
+| `.settings` | tab.settings | 系统设置页面 |
+
+**层级二：SidebarSelection** — Wiki Tab 内的侧边栏路由枚举
+
+```swift
+enum SidebarSelection: Hashable {
+    case page(UUID)              // 直接导航到指定页面详情
+    case tool(KMStore.ToolItem)  // 导航到侧边栏工具视图
+    case filteredIndex(PageType) // 按页面类型过滤的列表视图
+}
+```
+
+**层级三：ToolItem** — 侧边栏工具项（11 个）
+
+| ToolItem | rawValue | 说明 |
+|----------|----------|------|
+| `.index` | index | 全部页面列表（启动默认页） |
+| `.dashboard` | dashboard | 知识仪表盘 |
+| `.chat` | chat | AI 对话 |
+| `.synthesis` | synthesis | 知识合成实验室 |
+| `.weeklyReport` | weeklyReport | 每周洞察报告 |
+| `.lint` | lint | 知识库健康检查 |
+| `.taskCenter` | taskCenter | AI 任务中心 |
+| `.tagCloud` | tagCloud | 标签管理 |
+| `.pluginMarket` | pluginMarket | 插件市场（占位） |
+| `.log` | log | 系统日志 |
+| `.collab` | collab | 协作功能 |
+
+### 11.2 SidebarSelection → View 完整映射表
+
+路由分发入口位于 `DetailContentView.destinationView(for:)`（NavigationView.swift:66-101）：
+
+| SidebarSelection | 目标 View | 文件位置 |
+|------------------|----------|---------|
+| `.tool(.index)` / `.none` | `IndexView()` | Views/Pages/ |
+| `.tool(.dashboard)` | `KnowledgeDashboardView()` | Views/Core/ |
+| `.tool(.chat)` | `ChatViewContent(selectedTab:)` | Views/Features/ |
+| `.tool(.synthesis)` | `SynthesisView(selection:selectedTab:)` | Views/Core/NavigationView.swift |
+| `.tool(.weeklyReport)` | `WeeklyReportView()` | Views/Features/ |
+| `.tool(.lint)` | `LintView(selection:)` | Views/Features/ |
+| `.tool(.taskCenter)` | `TaskCenterView()` | Views/Features/ |
+| `.tool(.tagCloud)` | `TagCloudView()` | Views/Features/ |
+| `.tool(.pluginMarket)` | `Text(placeholder)` | 内联占位 |
+| `.tool(.log)` | `LogView()` | Views/Features/ |
+| `.tool(.collab)` | `CollaborationView()` | Views/Features/ |
+| `.filteredIndex(let type)` | `IndexView(filterType: type)` | Views/Pages/ |
+| `.page(let id)` | `PageDetailView(page:)` 或空状态 | Views/Pages/ |
+
+### 11.3 WikiPage 数据流
+
+```
+KMStore.pages (数据源, @Observable)
+  │
+  ├─→ IndexView(filterType:?)
+  │     └─ ForEach(store.pages) → IndexRow
+  │           └─ 用户点击 → store.navigationPath.append(page)
+  │                 └─ .navigationDestination(for: WikiPage.self) → PageDetailView(page:)
+  │
+  ├─→ SidebarView (已收藏列表)
+  │     └─ ForEach(pinnedPages) → NavigationLink(value: .page(id))
+  │           └─ DetailContentView → PageDetailView(page:)
+  │
+  └─→ GraphView / Graph3DView (图谱节点)
+        └─ 节点点击 → graphPath.append(page)
+              └─ .navigationDestination(for: WikiPage.self) → PageDetailView(page:)
+```
+
+**关键数据绑定：**
+
+- `KMStore.selectedPageID: UUID?` — 当前选中的页面 ID，由 `SidebarView.applySelectionSideEffects()` 同步更新
+- `KMStore.selectedTool: ToolItem?` — 当前选中的工具项
+- `@SceneStorage(“sidebar.selectedPageID”)` — 状态恢复，应用重启后保持选中
+- `@SceneStorage(“sidebar.selectedTool”)` — 工具项状态恢复
+
+**PageType 过滤：** `IndexView(filterType:)` 根据 `PageType`（如 `.note`, `.doc`, `.code`）过滤 `store.pages`，仅在侧边栏该类型计数 > 0 时显示对应导航项。
+
+### 11.4 跨 Tab 页面导航
+
+WikiPage 详情页可从多个 Tab 进入：
+
+| 来源 Tab | 导航方式 | 详情页路径 |
+|----------|---------|-----------|
+| **Wiki** | 侧边栏 `.page(id)` 或 IndexView 点击 | `NavigationStack(path: $store.navigationPath)` → `PageDetailView` |
+| **Graph** | 图谱节点点击 | `NavigationStack(path: $graphPath)` → `PageDetailView` |
+| **Search** | 搜索结果点击 | `NavigationStack(path: $searchPath)` → `PageDetailView` |
+
+每个 Tab 维护独立的 `NavigationPath`，通过 `.navigationDestination(for: WikiPage.self)` 共享同一 `PageDetailView` 渲染。`NavigateAction` 环境值支持页面内深度跳转（如从 PageDetailView 内链导航到另一个 WikiPage）。
+
+**启动默认路由：**
+- `selectedTab: AppTab = .wiki`（ContentView.swift:8）
+- `sidebarSelection: SidebarSelection? = .tool(.index)`（ContentView.swift:16）
+- `NavigationView.selection: SidebarSelection? = .tool(.index)`（NavigationView.swift:10）
+- 启动落地页：**IndexView（全部页面列表）**

@@ -44,15 +44,26 @@ extension Color {
 
 // MARK: - Adaptive Knowledge Base Color Palette
 extension Color {
+    // Adaptive initializer — must precede static let declarations (Swift 6 compiler bug workaround)
+    init(light: Color, dark: Color) {
+        self.init(UIColor { traitCollection in
+            switch traitCollection.userInterfaceStyle {
+            case .dark:
+                return UIColor(dark)
+            default:
+                return UIColor(light)
+            }
+        })
+    }
+
     // Adaptive colors that respond to light/dark mode
-    static let wikiBackground = Color(
-        light: Color(hex: "f5f5fa"),
-        dark: Color(hex: "1a1b2e")
-    )
-    static let wikiCard = Color(
-        light: Color(hex: "ffffff"),
-        dark: Color(hex: "252640")
-    )
+    // Uses computed properties to work around a Swift 6 compiler bug with static let + custom Color init
+    static var wikiBackground: Color {
+        Color(light: Color(hex: "f5f5fa"), dark: Color(hex: "1a1b2e"))
+    }
+    static var wikiCard: Color {
+        Color(light: Color(hex: "ffffff"), dark: Color(hex: "252640"))
+    }
 
     // Dynamic accent color: reads from ThemeManager's cached value.
     // Uses the shared ThemeManager singleton for consistency and caching.
@@ -65,54 +76,34 @@ extension Color {
         }
     }
 
-    static let wikiText = Color(
-        light: Color(hex: "1a1a2e"),
-        dark: Color(hex: "e8e8f0")
-    )
-    static let wikiSecondary = Color(
-        light: Color(hex: "6b6b87"),
-        dark: Color(hex: "8b8ba7")
-    )
-    static let wikiBorder = Color(
-        light: Color(hex: "e0e0ea"),
-        dark: Color(hex: "3a3a5c")
-    )
-    static let wikiEntity = Color(
-        light: Color(hex: "3a8aee"),
-        dark: Color(hex: "4a9eff")
-    )
-    static let wikiConcept = Color(
-        light: Color(hex: "9a4ee6"),
-        dark: Color(hex: "b46eff")
-    )
-    static let wikiSource = Color(
-        light: Color(hex: "3ab8b0"),
-        dark: Color(hex: "4ecdc4")
-    )
-    static let wikiComparison = Color(
-        light: Color(hex: "ee8a30"),
-        dark: Color(hex: "ff9f43")
-    )
-    static let wikiMap = Color(
-        light: Color(hex: "ee5555"),
-        dark: Color(hex: "ff6b6b")
-    )
-    static let wikiRaw = Color(
-        light: Color(hex: "7a8a8c"),
-        dark: Color(hex: "95a5a6")
-    )
-
-    // Adaptive initializer
-    init(light: Color, dark: Color) {
-        self.init(UIColor { traitCollection in
-            switch traitCollection.userInterfaceStyle {
-            case .dark:
-                return UIColor(dark)
-            default:
-                return UIColor(light)
-            }
-        })
+    static var wikiText: Color {
+        Color(light: Color(hex: "1a1a2e"), dark: Color(hex: "e8e8f0"))
     }
+    static var wikiSecondary: Color {
+        Color(light: Color(hex: "6b6b87"), dark: Color(hex: "8b8ba7"))
+    }
+    static var wikiBorder: Color {
+        Color(light: Color(hex: "e0e0ea"), dark: Color(hex: "3a3a5c"))
+    }
+    static var wikiEntity: Color {
+        Color(light: Color(hex: "3a8aee"), dark: Color(hex: "4a9eff"))
+    }
+    static var wikiConcept: Color {
+        Color(light: Color(hex: "9a4ee6"), dark: Color(hex: "b46eff"))
+    }
+    static var wikiSource: Color {
+        Color(light: Color(hex: "3ab8b0"), dark: Color(hex: "4ecdc4"))
+    }
+    static var wikiComparison: Color {
+        Color(light: Color(hex: "ee8a30"), dark: Color(hex: "ff9f43"))
+    }
+    static var wikiMap: Color {
+        Color(light: Color(hex: "ee5555"), dark: Color(hex: "ff6b6b"))
+    }
+    static var wikiRaw: Color {
+        Color(light: Color(hex: "7a8a8c"), dark: Color(hex: "95a5a6"))
+    }
+
 }
 
 // MARK: - Page Type Color Helper

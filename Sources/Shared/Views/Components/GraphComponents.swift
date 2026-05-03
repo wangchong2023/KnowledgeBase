@@ -155,10 +155,9 @@ struct GraphNodeView: View {
                 .font(.system(size: isSelected ? 16 : 12, weight: .bold))
                 .foregroundStyle(.white)
         }
-        .position(node.position)
-        .onTapGesture { 
+        .onTapGesture {
             HapticManager.shared.trigger(.link)
-            onSelect() 
+            onSelect()
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(node.title), \(node.type.displayName)")

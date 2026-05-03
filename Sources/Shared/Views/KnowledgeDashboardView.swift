@@ -175,13 +175,13 @@ private struct HotTopicCard: View {
     
     private var tagIcon: String {
         let t = tag.lowercased()
-        if t.contains("ai") || t.contains("智能") { return "sparkles" }
-        if t.contains("rag") || t.contains("检索") { return "magnifyingglass.circle" }
-        if t.contains("图谱") || t.contains("graph") { return "circle.hexagongrid.fill" }
-        if t.contains("入门") || t.contains("guide") { return "map" }
-        if t.contains("开发") || t.contains("code") { return "terminal" }
-        if t.contains("欢迎") { return "hand.wave" }
-        if t.contains("可视化") || t.contains("chart") { return "chart.bar" }
+        if t.contains("ai") || t.contains("智能") || t.contains("artificial intelligence") { return "sparkles" }
+        if t.contains("rag") || t.contains("检索") || t.contains("retrieval") { return "magnifyingglass.circle" }
+        if t.contains("图谱") || t.contains("graph") || t.contains("knowledge base") { return "circle.hexagongrid.fill" }
+        if t.contains("入门") || t.contains("guide") || t.contains("tutorial") { return "map" }
+        if t.contains("开发") || t.contains("code") || t.contains("dev") { return "terminal" }
+        if t.contains("欢迎") || t.contains("welcome") { return "hand.wave" }
+        if t.contains("可视化") || t.contains("chart") || t.contains("visual") { return "chart.bar" }
         return "tag"
     }
     
@@ -297,7 +297,7 @@ struct DailyRecapSection: View {
                     await MainActor.run { isLoading = false }
                     return
                 }
-                let result = try await store.insightService.generateDailyRecap(pages: pages, llmService: store.llmService)
+                let result = try await store.insightService.generateDailyRecap(pages: pages, llmService: store.llmService, forceRefresh: true)
                 await MainActor.run {
                     self.recap = result
                     self.isLoading = false

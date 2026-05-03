@@ -13,7 +13,7 @@ final class RAGPipelineTests: XCTestCase {
     
     func testFullRAGPipeline() async throws {
         // 1. 导入 (Ingest)
-        let testContent = "智元 (ZhiMind) 是一款基于 RAG 架构的知识管理软件，支持双向链接。"
+        let testContent = "智元 (ZhiYuan) 是一款基于 RAG 架构的知识管理软件，支持双向链接。"
         let pageID = try await store.ingestService.importText(testContent, title: "智元简介")
         
         XCTAssertNotNil(pageID)

@@ -371,32 +371,31 @@ struct FilterPill: View {
     let action: () -> Void
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    /// 大屏幕下使用 subheadline 字体（约 15pt），小屏幕用 caption（约 12pt）
+    /// 大屏幕下使用 body 字体（约 17pt），小屏幕用 subheadline（约 15pt）
     private var pillFont: Font {
-        horizontalSizeClass == .regular ? .subheadline : .caption
+        horizontalSizeClass == .regular ? .body : .subheadline
     }
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 4) {
-                if let icon = icon {
-                    Image(systemName: icon)
-                        .font(.caption2)
-                }
-                Text(title)
-                    .font(pillFont.weight(isSelected ? .semibold : .regular))
+        HStack(spacing: 6) {
+            if let icon = icon {
+                Image(systemName: icon)
+                    .font(horizontalSizeClass == .regular ? .subheadline : .caption)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(isSelected ? color.opacity(0.25) : Color.wikiCard)
-            .clipShape(Capsule())
-            .foregroundStyle(isSelected ? color : .wikiSecondary)
-            .overlay(
-                Capsule()
-                    .stroke(isSelected ? color.opacity(0.4) : Color.clear, lineWidth: 1)
-            )
+            Text(title)
+                .font(pillFont.weight(isSelected ? .semibold : .regular))
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(isSelected ? color.opacity(0.25) : Color.wikiCard)
+        .clipShape(Capsule())
+        .foregroundStyle(isSelected ? color : .wikiSecondary)
+        .overlay(
+            Capsule()
+                .stroke(isSelected ? color.opacity(0.4) : Color.clear, lineWidth: 1)
+        )
+        .contentShape(Capsule())
+        .onTapGesture(perform: action)
         .accessibilityIdentifier(accessibilityIdentifier ?? title)
     }
 }

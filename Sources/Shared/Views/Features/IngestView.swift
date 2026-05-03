@@ -43,6 +43,7 @@ struct ActivityItem: Identifiable {
 struct IngestView: View {
     @Environment(KMStore.self) var store
     @EnvironmentObject var llmService: LLMService
+    @Binding var selectedTab: ContentView.AppTab
 
     @State private var newTitle = ""
     @State private var newContent = ""
@@ -64,6 +65,7 @@ struct IngestView: View {
     @State private var newURL = ""
     @State private var useDeepScan = false
     @State private var isExtracting = false
+    @State private var ingestPath = NavigationPath()
     
     // File Import State
     @State private var showFileImporter = false
@@ -73,7 +75,7 @@ struct IngestView: View {
 
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $ingestPath) {
             ScrollView {
                 VStack(spacing: 20) {
                     IngestHeroSection()
@@ -174,6 +176,11 @@ struct IngestView: View {
             .onReceive(NotificationCenter.default.publisher(for: .importFromClipboard)) { _ in
                 performClipboardImport()
             }
+            .navigationDestination(for: String.self) { value in
+                if value == "taskCenter" {
+                    TaskCenterView()
+                }
+            }
         }
     }
 
@@ -219,7 +226,7 @@ struct IngestView: View {
 
     // MARK: - Task Center Link Section
     private var taskCenterLinkSection: some View {
-        Button(action: { store.selectedTool = .taskCenter }) {
+        Button(action: { ingestPath.append("taskCenter") }) {
             HStack {
                 Image(systemName: "tray.full.fill")
                     .foregroundStyle(.wikiAccent)
@@ -431,7 +438,7 @@ struct IngestView: View {
                                 status: mapTaskStatus(task.status),
                                 timestamp: task.startTime,
                                 associatedPageID: task.associatedPageID
-                            ), isCurrent: false)
+                            ), isCurrent: false, selectedTab: $selectedTab)
                         }
                     }
                     .padding(.horizontal)
@@ -526,6 +533,7 @@ struct ActivityRow: View {
     @Environment(KMStore.self) var store
     let item: ActivityItem
     let isCurrent: Bool
+    @Binding var selectedTab: ContentView.AppTab
     
     var body: some View {
         HStack(spacing: 10) {
@@ -565,8 +573,9 @@ struct ActivityRow: View {
             
             if let pageID = item.associatedPageID {
                 Button(action: {
-                    withAnimation {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                         store.selectedPageID = pageID
+                        selectedTab = .wiki
                     }
                 }) {
                     Text(Localized.tr("misc.view"))

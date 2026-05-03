@@ -19,6 +19,8 @@ final class SQLiteStore {
     // MARK: - 回调钩子
     var onLog: ((String, String, String) -> Void)?
     var onSaveNeeded: (() -> Void)?
+    
+    var dbPath: URL { core.dbPath }
 
     // MARK: - 初始化
     init() {
@@ -281,21 +283,27 @@ final class SQLiteStore {
     // MARK: - 种子数据
     /// 在首次启动时创建欢迎页面。
     func seedDefaultContent(logAction: (String, String, String) -> Void) {
+        let hasSeeded = UserDefaults.standard.bool(forKey: "has_seeded_initial_content")
+        // 如果已经填充过且数据库不为空，则跳过
+        if hasSeeded && !pages.isEmpty { return }
+        
+        let appName = Localized.tr("app.name")
+        
         // 1. 欢迎页
         _ = createPage(
-            title: "👋 欢迎使用 智元",
+            title: "👋 \(Localized.tr("welcome.title")) \(appName)",
             type: .concept,
             content: """
-            # 欢迎来到您的第二大脑
+            # \(Localized.tr("welcome.header"))
             
-            智元 是一个“AI 原生”的知识进化引擎。它不仅能帮您存储笔记，还能通过 [[3D 图谱]] 发现知识间的隐秘联系。
+            \(appName) \(Localized.tr("welcome.desc1")) [[3D \(Localized.tr("sidebar.graph"))]] \(Localized.tr("welcome.desc2"))
             
-            ### 快速开始
-            - 尝试点击右侧的 [[智能对话]] 按钮，问我：“我库里有哪些内容？”
-            - 拖入一个 PDF 到“导入”页面，体验 AI 自动拆解。
-            - 在任意页面输入 `[[` 尝试创建链接。
+            ### \(Localized.tr("welcome.startTitle"))
+            - \(Localized.tr("welcome.start1")) [[\(Localized.tr("sidebar.chat"))]] \(Localized.tr("welcome.start2"))
+            - \(Localized.tr("welcome.start3"))
+            - \(Localized.tr("welcome.start4"))
             """,
-            tags: ["入门", "欢迎"]
+            tags: [Localized.tr("welcome.tag1"), Localized.tr("welcome.tag2")]
         )
         
         // 2. 关于图谱
@@ -326,7 +334,8 @@ final class SQLiteStore {
             tags: ["AI", "RAG"]
         )
         
-        logAction("SEED", "WelcomeVault", "Success")
+        UserDefaults.standard.set(true, forKey: "has_seeded_initial_content")
+        logAction(Localized.tr("logAction.systemInit"), "SystemVault", Localized.tr("log.seedSuccess"))
     }
     
     // MARK: - RAG & Deep Scan
@@ -360,4 +369,99 @@ extension SQLiteStore: AnyPageStore {
     }
 }
 
+
 extension SQLiteStore: @unchecked Sendable {}
+
+/// 演示数据生成器
+/// 用于快速填充知识库，展示图谱、检索及 AI 分析能力。
+/// 采用 Swift 实现以确保在 iOS/macOS 各平台及沙盒环境下均能稳定运行。
+struct DemoDataGenerator {
+    @MainActor
+    static func generate(in store: SQLiteStore) {
+        // 先清空现有数据，确保是“重建”行为
+        store.removeAllPages()
+        
+        // 1. AI Agent 概述
+        _ = store.createPage(
+            title: "AI Agent：超越对话的大脑",
+            type: .concept,
+            content: """
+            # 什么是 AI Agent？
+            
+            AI Agent (人工智能代理) 是指能够感知环境、进行推理并采取行动以实现目标的智能体。不同于传统的 [[大语言模型 (LLM)]] 仅能进行对话，Agent 具备了“行动力”。
+            
+            ## 核心公式
+            **Agent = LLM + [[规划 (Planning)]] + [[记忆 (Memory)]] + [[工具使用 (Tool Use)]]**
+            
+            相关框架：AutoGPT, BabyAGI, LangChain
+            """,
+            tags: ["AI", "Agent", "架构"]
+        )
+        
+        // 2. 规划
+        _ = store.createPage(
+            title: "规划 (Planning)",
+            type: .concept,
+            content: """
+            # 规划 (Planning)
+            
+            规划是 Agent 解决复杂任务的基础。它通常分为以下几个子任务：
+            
+            1. **任务分解**: 将大目标拆解为可管理的小步骤 (如 Chain of Thought)。
+            2. **自我反思**: 代理会对过去的行动进行修正和完善 (如 ReAct 模式)。
+            
+            这使得 [[AI Agent：超越对话的大脑]] 能够处理需要多步推理的问题。
+            """,
+            tags: ["AI", "Planning", "推理"]
+        )
+        
+        // 3. 记忆
+        _ = store.createPage(
+            title: "记忆 (Memory)",
+            type: .concept,
+            content: """
+            # 记忆 (Memory)
+            
+            记忆能力让 Agent 能够保持上下文连贯性：
+            
+            - **短期记忆**: 利用 [[大语言模型 (LLM)]] 的上下文窗口记录当前任务。
+            - **长期记忆**: 利用外部存储 (如 [[向量数据库]]) 进行信息检索。
+            
+            [[AI Agent：超越对话的大脑]] 利用长期记忆来实现跨会话的知识沉淀。
+            """,
+            tags: ["AI", "Memory", "RAG"]
+        )
+        
+        // 4. 工具使用
+        _ = store.createPage(
+            title: "工具使用 (Tool Use)",
+            type: .concept,
+            content: """
+            # 工具使用 (Tool Use / Tool Calling)
+            
+            工具使用是 Agent 与现实世界交互的桥梁。Agent 可以通过 API 调用：
+            
+            - **实时搜索**: 获取最新资讯。
+            - **代码执行**: 进行复杂的数学运算。
+            - **文件操作**: 处理本地文档。
+            
+            这让 [[AI Agent：超越对话的大脑]] 真正具备了解决实际问题的能力。
+            """,
+            tags: ["AI", "ToolUse", "API"]
+        )
+        
+        // 5. LLM 角色
+        _ = store.createPage(
+            title: "大语言模型 (LLM)",
+            type: .concept,
+            content: """
+            # LLM 作为中枢神经
+            
+            在 [[AI Agent：超越对话的大脑]] 架构中，LLM 扮演了“大脑”的角色，负责理解、决策和任务分发。
+            
+            为了训练出更强的 Agent，通常需要使用 [[大语言模型训练流程]]，特别是针对函数调用 (Function Calling) 的专门微调。
+            """,
+            tags: ["AI", "LLM", "大脑"]
+        )
+    }
+}

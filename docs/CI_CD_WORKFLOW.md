@@ -15,7 +15,7 @@
 ## 3. 发布标准
 - **Crash Free Rate**: > 99.9%
 - **Documentation**: 所有新增 Service 必须具备 L0-L3 分层说明。
-- **Test Coverage**: 核心业务逻辑（Storage, AI, Search）覆盖率 > 80%。
+- **Test Coverage**: 核心业务逻辑（Storage, AI, Search）覆盖率 >= 85%。
 
 为了确保 Knowledge Management 在快速迭代中始终保持“工业级稳定性”，我们定义以下自动化流水线。
 
@@ -25,7 +25,7 @@
 *   **L1: 静态检查 (Linting)**: 
     *   使用 `swiftlint --strict` 强制执行代码规范。任何警告都将被视为错误并阻断构建。
 *   **L2: 单元测试 (XCTest)**: 
-    *   全库代码覆盖率阈值强制设定为 **85%**。
+    *   全库代码覆盖率阈值强制设定为 **85%**（与发布标准一致）。
     *   核心算法（LWW-Element-Set, RAG 分块, 向量相似度计算）必须 100% 通过。
 *   **L3: 性能红线 (Benchmark Automation)**:
     *   自动对比 `Docs/Testing/PERFORMANCE_BENCHMARK.md` 中的基准数据。

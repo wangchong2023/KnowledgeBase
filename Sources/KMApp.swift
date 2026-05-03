@@ -59,8 +59,11 @@ struct KMApp: App {
 
                 if !hasSeenSplash {
                     SplashView(onDismiss: {
+                        if hasSeenSplash { return } // 防重触发
                         withAnimation(.easeInOut(duration: 0.6)) {
+                            print("🔍 [NAV-DIAG] Splash dismissed. Posting notification.")
                             hasSeenSplash = true
+                            NotificationCenter.default.post(name: NSNotification.Name("splashDismissed"), object: nil)
                         }
                     })
                     .transition(.opacity)

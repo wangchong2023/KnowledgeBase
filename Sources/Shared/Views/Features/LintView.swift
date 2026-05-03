@@ -2,13 +2,15 @@ import SwiftUI
 
 // MARK: - 健康检查视图 (导航入口)
 struct LintView: View {
+    @Binding var selection: SidebarSelection?
     var body: some View {
-        LintViewContent()
+        LintViewContent(selection: $selection)
     }
 }
 
 // MARK: - 健康检查核心内容 ( Dashboard 模式)
 struct LintViewContent: View {
+    @Binding var selection: SidebarSelection?
     @Environment(KMStore.self) var store
     @Environment(\.dismiss) var dismiss // 新增：用于强制退出层级
     @State private var isRunning = false
@@ -43,6 +45,7 @@ struct LintViewContent: View {
     }
 
     var body: some View {
+        let _ = print("🔍 [NAV-DIAG] LintViewContent rendering.")
         VStack(spacing: 0) {
             // 选项卡切换
             Picker("", selection: $selectedTab) {
@@ -72,6 +75,9 @@ struct LintViewContent: View {
                 Button(action: {
                     HapticManager.shared.trigger(.selection)
                     // 1. 重置选择，回到主侧边栏或主页
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        selection = nil
+                    }
                     store.selectedTool = nil
                     // 2. 同时清除所有层级路径，确保彻底返回
                     if !store.navigationPath.isEmpty {
@@ -116,6 +122,7 @@ struct LintViewContent: View {
                     .clipShape(Capsule())
                     .animation(nil, value: isRunning || store.isScanningAI) // 禁止内容内部动画，彻底杜绝重影
                 }
+                .buttonStyle(.plain)
                 .disabled(isRunning || store.isScanningAI)
                 .transaction { transaction in
                     transaction.animation = nil // 强制禁用过渡动画，从事务层面防止重影

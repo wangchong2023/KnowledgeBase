@@ -10,6 +10,7 @@ protocol LogServiceProtocol: AnyObject, Sendable {
     func error(_ message: String, error: Error?, file: String, function: String, line: Int)
     func saveToDisk()
     func loadFromDisk()
+    func clearAllLogs()
 }
 
 extension LogServiceProtocol {
@@ -111,6 +112,13 @@ final class LogService: ObservableObject, LogServiceProtocol, @unchecked Sendabl
                     UserDefaults.standard.removeObject(forKey: self.logKey)
                 }
             }
+        }
+    }
+
+    func clearAllLogs() {
+        Task { @MainActor in
+            logEntries.removeAll()
+            saveToDisk()
         }
     }
 }

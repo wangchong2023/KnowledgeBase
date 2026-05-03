@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-/// 智元 (ZhiMind) 全局配置中心
+/// 智元 (ZhiYuan) 全局配置中心
 /// 采用“动态读取 + 静态分区”模式，确保系统的高可配置性与类型安全。
 enum AppConfig {
     

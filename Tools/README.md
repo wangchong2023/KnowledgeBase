@@ -1,6 +1,6 @@
-# ZhiMind 开发者工具箱 (Developer Tools)
+# ZhiYuan 开发者工具箱 (Developer Tools)
 
-本目录包含用于加速 ZhiMind 开发与测试的辅助脚本与工具。
+本目录包含用于加速 ZhiYuan 开发与测试的辅助脚本与工具。
 
 ## 1. 数据库种子工具 (`seed_data.py`)
 

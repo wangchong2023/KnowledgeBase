@@ -18,9 +18,7 @@ struct IngestHeroSection: View {
                         endPoint: .bottomTrailing
                     )
                 )
-            Text(Localized.tr("ingest.hero.title"))
-                .font(.title2.weight(.bold))
-                .foregroundStyle(.wikiText)
+            // 移除重复的标题，因为导航栏已经有了
             Text(Localized.tr("ingest.hero.subtitle"))
                 .font(.caption)
                 .foregroundStyle(.wikiSecondary)

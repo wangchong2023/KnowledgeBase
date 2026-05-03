@@ -1,4 +1,4 @@
-# 智元 (ZhiMind) 安全规范与隐私架构 (Security & Privacy Spec)
+# 智元 (ZhiYuan) 安全规范与隐私架构 (Security & Privacy Spec)
 
 本文档阐述了智元系统的安全设计原则、数据隔离机制及隐私保护措施。
 

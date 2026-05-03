@@ -3,7 +3,7 @@ import Foundation
 /// 简易原生 PPTX 生成器 (OpenXML 架构)
 /// 遵循微软 OpenXML 标准，通过生成 XML 目录结构并使用系统 zip 工具打包。
 final class PPTXGenerator {
-    static let shared = PPTXGenerator()
+    nonisolated(unsafe) static let shared = PPTXGenerator()
     
     struct Slide {
         let title: String
@@ -40,15 +40,14 @@ final class PPTXGenerator {
         process.executableURL = URL(fileURLWithPath: "/usr/bin/zip")
         process.currentDirectoryURL = tempDir
         process.arguments = ["-r", outputURL.path, "."]
-        
+
         try process.run()
         process.waitUntilExit()
+        return outputURL
         #else
         // iOS 逻辑：目前无法在没有第三方库的情况下原生 ZIP
         throw NSError(domain: "PPTXGenerator", code: 405, userInfo: [NSLocalizedDescriptionKey: "iOS requires macOS toolchain for native zipping"])
         #endif
-        
-        return outputURL
     }
     
     private func parseMarkdown(_ markdown: String) -> [Slide] {

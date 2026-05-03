@@ -3,7 +3,7 @@ import XCTest
 
 /// 核心状态管理器测试 (Expert QA Item #4)
 /// 验证 KMStore 的 CRUD 逻辑、发布订阅一致性及内存状态安全。
-final class KMStoreTests: XCTestCase {
+final class KMStoreStorageTests: XCTestCase {
     var store: KMStore!
     
     override func setUp() {

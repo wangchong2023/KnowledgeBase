@@ -31,6 +31,7 @@ struct TagCloudViewContent: View {
     @State private var isEditMode = false
     @State private var selectedTagsForBulk = Set<String>()
     @State private var showBulkDeleteConfirm = false
+    @State private var searchText = ""
 
     /// 从存储中心获取所有标签及其计数
     @State private var tags: [(tag: String, count: Int)] = []
@@ -42,6 +43,12 @@ struct TagCloudViewContent: View {
         }
     }
 
+    /// 筛选后的标签列表
+    var filteredTags: [(tag: String, count: Int)] {
+        if searchText.isEmpty { return tags }
+        return tags.filter { $0.tag.localizedCaseInsensitiveContains(searchText) }
+    }
+
     /// 根据选中的标签筛选页面
     var filteredPages: [WikiPage] {
         guard let tag = selectedTag else { return store.pages }
@@ -51,47 +58,8 @@ struct TagCloudViewContent: View {
     var body: some View {
         mainContent
             .background(Color.wikiBackground)
-            .navigationTitle(isEditMode ? Localized.tr("tags.manageTitle") : Localized.tr("tag.title"))
+            .navigationTitle(Localized.tr("tag.title"))
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 10) {
-                        // 编辑模式开关
-                        Button(action: {
-                            withAnimation {
-                                isEditMode.toggle()
-                                if !isEditMode { selectedTagsForBulk.removeAll() }
-                            }
-                        }) {
-                            HStack(spacing: 6) {
-                                Image(systemName: isEditMode ? "checkmark.circle.fill" : "checklist")
-                                Text(isEditMode ? Localized.tr("misc.done") : Localized.tr("tags.bulkManage"))
-                            }
-                        }
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(.wikiAccent)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color.wikiAccent.opacity(0.1))
-                        .clipShape(Capsule())
-                        
-                        if !isEditMode {
-                            Button(action: { showAddTagDialog = true }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "plus.circle.fill")
-                                    Text(Localized.tr("misc.add"))
-                                }
-                            }
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.wikiAccent)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(Color.wikiAccent.opacity(0.1))
-                            .clipShape(Capsule())
-                        }
-                    }
-                }
-            }
             .background(alertLayer)
             .task {
                 await fetchData()
@@ -103,19 +71,45 @@ struct TagCloudViewContent: View {
 
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // 顶部标签云展示区
+            // 操作栏：添加与管理按钮
+            HStack(spacing: 20) {
+                Spacer()
+                if !isEditMode {
+                    Button(action: { showAddTagDialog = true }) {
+                        Label(Localized.tr("tags.addNew"), systemImage: "plus.circle")
+                            .font(.footnote.weight(.medium))
+                    }
+                }
+                
+                Button(action: {
+                    withAnimation(.spring(response: 0.3)) {
+                        isEditMode.toggle()
+                        if !isEditMode { selectedTagsForBulk.removeAll() }
+                    }
+                }) {
+                    Label(isEditMode ? Localized.tr("misc.done") : Localized.tr("tags.manageTitle"), 
+                          systemImage: isEditMode ? "checkmark.circle" : "checklist")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(isEditMode ? .green : .wikiAccent)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+
+            // 标签云展示区
             if tags.isEmpty {
                 emptyTagsView
             } else {
                 tagScrollView
+                    .background(Color.wikiCard.opacity(0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .padding(.horizontal, 16)
                     .overlay(alignment: .bottom) {
                         if isEditMode && !selectedTagsForBulk.isEmpty {
                             bulkActionBar
                         }
                     }
             }
-
-            Divider().background(Color.wikiBorder)
 
             // 下方页面列表区
             pagesListView
@@ -173,6 +167,8 @@ struct TagCloudViewContent: View {
 
     // MARK: - 子视图组件
 
+
+
     private var bulkActionBar: some View {
         HStack {
             Text(Localized.trf("tags.selectedCount", selectedTagsForBulk.count))
@@ -214,20 +210,24 @@ struct TagCloudViewContent: View {
 
     private var tagScrollView: some View {
         ScrollView {
-            FlowLayout(spacing: 8) {
-                ForEach(tags, id: \.tag) { tagItem in
+            FlowLayout(spacing: 12) {
+                ForEach(filteredTags, id: \.tag) { tagItem in
                     tagCapsule(tagItem)
                 }
             }
-            .padding()
+            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
         }
+        .frame(minHeight: 40)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxHeight: 280)
     }
 
     private func tagCapsule(_ item: (tag: String, count: Int)) -> some View {
         let isSelected = isEditMode ? selectedTagsForBulk.contains(item.tag) : selectedTag == item.tag
         
         return Button(action: {
-            withAnimation(.spring(response: 0.3)) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                 if isEditMode {
                     if selectedTagsForBulk.contains(item.tag) {
                         selectedTagsForBulk.remove(item.tag)
@@ -238,43 +238,54 @@ struct TagCloudViewContent: View {
                     selectedTag = selectedTag == item.tag ? nil : item.tag
                 }
             }
+            HapticManager.shared.trigger(.selection)
         }) {
-            HStack(spacing: 4) {
+            HStack(spacing: 6) {
                 Text("#\(item.tag)")
-                    .font(.subheadline.weight(isSelected ? .bold : .regular))
+                    .font(.system(.subheadline, design: .rounded).weight(isSelected ? .semibold : .regular))
+                
                 Text("\(item.count)")
-                    .font(.caption2)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 1)
-                    .background(Color.wikiAccent.opacity(0.2))
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(isSelected ? Color.wikiAccent.opacity(0.15) : Color.wikiSecondary.opacity(0.08))
                     .clipShape(Capsule())
             }
-            .padding(.horizontal, 16) // 始终保持一致的间距
-            .padding(.vertical, 8)
-            .background(isSelected ? Color.wikiAccent.opacity(0.15) : Color.wikiCard)
-            .overlay(
-                RoundedRectangle(cornerRadius: 100) // 使用大圆角
-                    .stroke(isSelected ? Color.wikiAccent.opacity(0.5) : Color.clear, lineWidth: 1)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 7)
+            .background(
+                Capsule()
+                    .fill(isSelected ? Color.wikiAccent.opacity(0.08) : Color.wikiCard.opacity(0.6))
             )
-            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? Color.wikiAccent.opacity(0.4) : Color.wikiBorder.opacity(0.35), lineWidth: 0.5)
+            )
+            .scaleEffect(isSelected ? 1.04 : 1.0)
+            .shadow(color: isSelected ? Color.wikiAccent.opacity(0.12) : Color.clear, radius: 10, y: 4)
             .overlay(alignment: .topTrailing) {
-                if isEditMode && isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.wikiAccent)
-                        .background(Circle().fill(Color.wikiCard))
-                        .offset(x: 6, y: -6)
-                } else if isEditMode {
-                    Circle()
-                        .stroke(Color.wikiSecondary.opacity(0.5), lineWidth: 1)
-                        .frame(width: 14, height: 14)
-                        .background(Circle().fill(Color.wikiCard.opacity(0.5)))
-                        .offset(x: 6, y: -6)
+                if isEditMode {
+                    ZStack {
+                        Circle()
+                            .fill(isSelected ? Color.wikiAccent : Color.wikiCard)
+                            .frame(width: 18, height: 18)
+                        
+                        if isSelected {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 10, weight: .black))
+                                .foregroundStyle(.white)
+                        } else {
+                            Circle()
+                                .stroke(Color.wikiBorder, lineWidth: 1)
+                                .frame(width: 18, height: 18)
+                        }
+                    }
+                    .offset(x: 8, y: -8)
                 }
             }
-            .foregroundStyle(isSelected ? .wikiAccent : .wikiText)
         }
         .buttonStyle(.plain)
+        .foregroundStyle(isSelected ? .wikiAccent : .wikiText)
         .contextMenu {
             if !isEditMode {
                 Button(action: {
@@ -301,35 +312,47 @@ struct TagCloudViewContent: View {
                         ForEach(filteredPages) { page in
                             NavigationLink(destination: PageDetailView(page: page)) {
                                 PageRowView(page: page, compact: true)
+                                    .padding(.vertical, 4)
                             }
-                            .listRowBackground(Color.clear)
+                            .listRowBackground(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color.wikiCard.opacity(0.4))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                            )
                             .listRowSeparator(.hidden)
                         }
                     } header: {
                         HStack {
                             Text(tag)
-                                .font(.headline)
-                                .foregroundStyle(.wikiText)
+                                .font(.subheadline.bold())
+                                .foregroundStyle(.wikiAccent)
                             Spacer()
                             Text(Localized.trf("tag.tagPages", filteredPages.count))
-                                .font(.caption)
+                                .font(.caption2)
                                 .foregroundStyle(.wikiSecondary)
                         }
-                        .padding(.vertical, 4)
+                        .textCase(nil)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
                     }
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
             } else {
-                VStack(spacing: 8) {
+                VStack(spacing: 12) {
                     Image(systemName: isEditMode ? "checklist" : "tag")
-                        .font(.title)
-                        .foregroundStyle(.wikiSecondary)
+                        .font(.system(size: 32))
+                        .foregroundStyle(.wikiSecondary.opacity(0.5))
                     Text(isEditMode ? Localized.tr("tags.selectToManage") : Localized.tr("tagcloud.selectTag"))
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                 }
                 .frame(maxHeight: .infinity)
+                .background(Color.wikiBackground.opacity(0.01)) // 响应点击
+                .onTapGesture {
+                    if isEditMode { isEditMode = false }
+                }
             }
         }
     }

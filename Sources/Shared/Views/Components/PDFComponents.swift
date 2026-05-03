@@ -230,6 +230,24 @@ struct PDFDocumentRow: View {
     }
 }
 
+// MARK: - PDF Preview Wrapper
+struct PDFPreviewWrapper: UIViewRepresentable {
+    let url: URL
+    
+    func makeUIView(context: Context) -> PDFView {
+        let pdfView = PDFView()
+        pdfView.document = PDFKit.PDFDocument(url: url)
+        pdfView.autoScales = true
+        return pdfView
+    }
+    
+    func updateUIView(_ uiView: PDFView, context: Context) {
+        if uiView.document?.documentURL != url {
+            uiView.document = PDFKit.PDFDocument(url: url)
+        }
+    }
+}
+
 // MARK: - Highlight Color Extension
 extension Color {
     static func pdfHighlight(_ name: String) -> Color {

@@ -2,89 +2,102 @@ import SwiftUI
 
 // MARK: - Index View (entry point with NavigationStack)
 struct IndexView: View {
+    var filterType: PageType? = nil
     var body: some View {
-        IndexViewContent()
+        IndexViewContent(filterType: filterType)
     }
 }
 
 // MARK: - Index View Content (for use inside parent NavigationStack)
 struct IndexViewContent: View {
     @Environment(KMStore.self) var store
+    var filterType: PageType? = nil
 
     var body: some View {
+        let _ = print("🔍 [NAV-DIAG] IndexViewContent rendering.")
         List {
-            // Summary
-            Section {
-                HStack(spacing: 10) {
-                    IndexStatView(label: Localized.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
-                    IndexStatView(label: Localized.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
-                    IndexStatView(label: Localized.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
-                    IndexStatView(label: Localized.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
+            if filterType == nil {
+                // Summary
+                Section {
+                    HStack(spacing: 10) {
+                        IndexStatView(label: Localized.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
+                        IndexStatView(label: Localized.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
+                        IndexStatView(label: Localized.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
+                        IndexStatView(label: Localized.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
+                    }
+                    .padding(.vertical, 4)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10))
+                    .listRowBackground(Color.clear)
+                } header: {
+                    Text(Localized.tr("index.overview"))
                 }
-                .padding(.vertical, 4)
-                .listRowInsets(EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10))
-                .listRowBackground(Color.clear)
-            } header: {
-                Text(Localized.tr("index.overview"))
             }
 
             // Entities
-            let entities = store.pages.filter { $0.type == .entity }.sorted { $0.title < $1.title }
-            if !entities.isEmpty {
-                Section {
-                    ForEach(entities) { page in
-                        NavigationLink(destination: PageDetailView(page: page)) {
-                            IndexRowView(page: page)
+            if filterType == nil || filterType == .entity {
+                let entities = store.pages.filter { $0.type == .entity }.sorted { $0.title < $1.title }
+                if !entities.isEmpty {
+                    Section {
+                        ForEach(entities) { page in
+                            NavigationLink(destination: PageDetailView(page: page)) {
+                                IndexRowView(page: page)
+                            }
                         }
+                    } header: {
+                        Label(Localized.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
+                            .foregroundStyle(.wikiEntity)
                     }
-                } header: {
-                    Label(Localized.trf("index.entityCount", entities.count), systemImage: "person.text.rectangle.fill")
-                        .foregroundStyle(.wikiEntity)
                 }
             }
 
             // Concepts
-            let concepts = store.pages.filter { $0.type == .concept }.sorted { $0.title < $1.title }
-            if !concepts.isEmpty {
-                Section {
-                    ForEach(concepts) { page in
-                        NavigationLink(destination: PageDetailView(page: page)) {
-                            IndexRowView(page: page)
+            if filterType == nil || filterType == .concept {
+                let concepts = store.pages.filter { $0.type == .concept }.sorted { $0.title < $1.title }
+                if !concepts.isEmpty {
+                    Section {
+                        ForEach(concepts) { page in
+                            NavigationLink(destination: PageDetailView(page: page)) {
+                                IndexRowView(page: page)
+                            }
                         }
+                    } header: {
+                        Label(Localized.trf("index.conceptCount", concepts.count), systemImage: "lightbulb.fill")
+                            .foregroundStyle(.wikiConcept)
                     }
-                } header: {
-                    Label(Localized.trf("index.conceptCount", concepts.count), systemImage: "lightbulb.fill")
-                        .foregroundStyle(.wikiConcept)
                 }
             }
 
             // Sources
-            let sources = store.pages.filter { $0.type == .source }.sorted { $0.title < $1.title }
-            if !sources.isEmpty {
-                Section {
-                    ForEach(sources) { page in
-                        NavigationLink(destination: PageDetailView(page: page)) {
-                            IndexRowView(page: page)
+            if filterType == nil || filterType == .source {
+                let sources = store.pages.filter { $0.type == .source }.sorted { $0.title < $1.title }
+                if !sources.isEmpty {
+                    Section {
+                        ForEach(sources) { page in
+                            NavigationLink(destination: PageDetailView(page: page)) {
+                                IndexRowView(page: page)
+                            }
                         }
+                    } header: {
+                        Label(Localized.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
+                            .foregroundStyle(.wikiSource)
                     }
-                } header: {
-                    Label(Localized.trf("index.sourceCount", sources.count), systemImage: "doc.richtext.fill")
-                        .foregroundStyle(.wikiSource)
                 }
             }
 
             // Comparisons
-            let comparisons = store.pages.filter { $0.type == .comparison }.sorted { $0.title < $1.title }
-            if !comparisons.isEmpty {
-                Section {
-                    ForEach(comparisons) { page in
-                        NavigationLink(destination: PageDetailView(page: page)) {
-                            IndexRowView(page: page)
+            if filterType == nil || filterType == .comparison {
+                let comparisons = store.pages.filter { $0.type == .comparison }.sorted { $0.title < $1.title }
+                if !comparisons.isEmpty {
+                    Section {
+                        ForEach(comparisons) { page in
+                            NavigationLink(destination: PageDetailView(page: page)) {
+                                IndexRowView(page: page)
+                            }
                         }
+                    } header: {
+                        Label(Localized.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
+                            .foregroundStyle(.wikiComparison)
                     }
-                } header: {
-                    Label(Localized.trf("index.comparisonCount", comparisons.count), systemImage: "arrow.left.arrow.right.circle.fill")
-                        .foregroundStyle(.wikiComparison)
                 }
             }
         }
@@ -93,7 +106,8 @@ struct IndexViewContent: View {
 #endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle(Localized.tr("sidebar.masterIndex"))
+        .navigationTitle(filterType?.displayName ?? Localized.tr("sidebar.masterIndex"))
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 

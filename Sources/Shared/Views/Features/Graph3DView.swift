@@ -7,25 +7,28 @@ import SceneKit
 struct Graph3DView: View {
     @Environment(KMStore.self) var store
     @State private var scene: SCNScene?
-    @State private var selectedNodeID: UUID?
-    @State private var cameraDistance: Float = 140 // 增加默认距离，确保边缘节点也能展示出来
-    @State private var autoRotate = false // 默认关闭，由用户按需开启
+    @State private var cameraDistance: Float = 140
+    @State private var autoRotate = false
     @State private var filterType: PageType? = nil
     @State private var showNodeInfo = false
     @State private var infoPage: WikiPage?
     @State private var showPageDetail = false
     @State private var cameraNode: SCNNode?
-    @State private var isFullScreen = false
+    @Binding var selectedNodeID: UUID?
+    @Binding var isFullScreen: Bool
     
     var body: some View {
         TappableSceneView(scene: scene) { uuid in
             handleNodeTap(uuid)
         }
-        .ignoresSafeArea(edges: isFullScreen ? .all : [])
-        .overlay(alignment: .top) {
-            if isFullScreen {
+        .onChange(of: selectedNodeID) { oldValue, newValue in
+            buildScene()
+        }
+        .overlay(alignment: .topLeading) {
+            if !isFullScreen {
                 headerOverlay
-                    .padding(.top, 40)
+                    .padding(.top, 16)
+                    .padding(.leading, 20)
             }
         }
         .overlay(alignment: .topTrailing) {
@@ -40,8 +43,39 @@ struct Graph3DView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .background(Color.black)
-        .preferredColorScheme(.dark)
+        .background {
+            if isFullScreen {
+                Color.black
+            } else {
+                ZStack {
+                    Color.wikiBackground
+                    
+                    // 高级感渐变背景：融合品牌色的星云感
+                    LinearGradient(
+                        colors: [
+                            Color.wikiAccent.opacity(0.12),
+                            Color.wikiAccent.opacity(0.04),
+                            Color.clear,
+                            Color.wikiAccent.opacity(0.06)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    .blur(radius: 50)
+                    
+                    // 辅助光晕
+                    RadialGradient(
+                        gradient: Gradient(colors: [Color.wikiAccent.opacity(0.08), Color.clear]),
+                        center: .topTrailing,
+                        startRadius: 0,
+                        endRadius: 500
+                    )
+                }
+            }
+        }
+        .ignoresSafeArea(edges: isFullScreen ? .all : [])
+        .statusBarHidden(isFullScreen)
+        .preferredColorScheme(isFullScreen ? .dark : nil)
         .toolbar(isFullScreen ? .hidden : .visible, for: .tabBar)
 #if os(iOS)
         .navigationBarBackButtonHidden(isFullScreen)
@@ -61,17 +95,20 @@ struct Graph3DView: View {
     }
     
     private var headerOverlay: some View {
-        VStack(alignment: .center, spacing: 4) {
+        VStack(alignment: isFullScreen ? .center : .leading, spacing: 4) {
             Text(Localized.tr("graph3d.title"))
                 .font(.subheadline.bold())
-                .foregroundStyle(.white)
+                .foregroundStyle(isFullScreen ? .white : .wikiText)
             
-            Text(Localized.tr("graph3d.desc"))
-                .font(.system(size: 10))
-                .foregroundStyle(.white.opacity(0.6))
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 200)
+            if isFullScreen {
+                Text(Localized.tr("graph3d.desc"))
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .multilineTextAlignment(isFullScreen ? .center : .leading)
+                    .frame(maxWidth: 240)
+            }
         }
+        .padding(.top, isFullScreen ? 20 : 0)
         .allowsHitTesting(false)
     }
 
@@ -80,7 +117,11 @@ struct Graph3DView: View {
             autoRotate: $autoRotate,
             filterType: $filterType,
             isFullScreen: $isFullScreen,
-            onAutoRotateToggle: { autoRotate.toggle(); updateAutoRotation() },
+            onAutoRotateToggle: { 
+                let newValue = !autoRotate
+                autoRotate = newValue
+                updateAutoRotation(isRotating: newValue) 
+            },
             onResetCamera: { resetCamera() },
             onZoomIn: { zoom(in: true) },
             onZoomOut: { zoom(in: false) }
@@ -95,8 +136,8 @@ struct Graph3DView: View {
     
     private func buildScene() {
         let newScene = SCNScene()
-        // Deep space background
-        newScene.background.contents = UIColor.black
+        // Deep space background - only in fullscreen
+        newScene.background.contents = isFullScreen ? UIColor.black : nil
         
         // Add stars
         addStarfield(to: newScene)
@@ -119,13 +160,14 @@ struct Graph3DView: View {
         addGridFloor(scene: newScene)
 
         scene = newScene
-        updateAutoRotation()
+        updateAutoRotation(isRotating: autoRotate)
     }
 
     private func addStarfield(to scene: SCNScene) {
         let starCount = 500
         let starGeometry = SCNSphere(radius: 0.1)
-        starGeometry.firstMaterial?.emission.contents = UIColor.white
+        starGeometry.firstMaterial?.emission.contents = UIColor(Color.wikiAccent).withAlphaComponent(0.8)
+        starGeometry.firstMaterial?.diffuse.contents = UIColor(Color.wikiAccent).withAlphaComponent(0.5)
         
         for _ in 0..<starCount {
             let node = SCNNode(geometry: starGeometry)
@@ -254,13 +296,35 @@ struct Graph3DView: View {
     }
 
     private func createEdgeNodes(pages: [WikiPage], nodeMap: [UUID: SCNNode], scene: SCNScene) {
+        var processedEdges = Set<String>() // 用来去重 "ID1-ID2"
+        
         for page in pages {
+            // 1. 处理 outgoingLinks
             for linkTitle in page.outgoingLinks {
                 if let linkedPage = store.pages.first(where: { $0.title == linkTitle }),
                    let sourceNode = nodeMap[page.id],
                    let targetNode = nodeMap[linkedPage.id] {
-                    let edge = createEdgeNode(from: sourceNode.position, to: targetNode.position)
-                    scene.rootNode.addChildNode(edge)
+                    
+                    let edgeKey = [page.id.uuidString, linkedPage.id.uuidString].sorted().joined(separator: "-")
+                    if !processedEdges.contains(edgeKey) && page.id != linkedPage.id {
+                        let edge = createEdgeNode(from: sourceNode.position, to: targetNode.position, sourceID: page.id, targetID: linkedPage.id)
+                        scene.rootNode.addChildNode(edge)
+                        processedEdges.insert(edgeKey)
+                    }
+                }
+            }
+            
+            // 2. 处理 relatedPageIDs (对应 GraphLayoutEngine 逻辑)
+            for relatedID in page.relatedPageIDs {
+                if let targetNode = nodeMap[relatedID],
+                   let sourceNode = nodeMap[page.id] {
+                    
+                    let edgeKey = [page.id.uuidString, relatedID.uuidString].sorted().joined(separator: "-")
+                    if !processedEdges.contains(edgeKey) && page.id != relatedID {
+                        let edge = createEdgeNode(from: sourceNode.position, to: targetNode.position, sourceID: page.id, targetID: relatedID)
+                        scene.rootNode.addChildNode(edge)
+                        processedEdges.insert(edgeKey)
+                    }
                 }
             }
         }
@@ -290,18 +354,25 @@ struct Graph3DView: View {
         return positions
     }
     
-    private func createEdgeNode(from: SCNVector3, to: SCNVector3) -> SCNNode {
+    private func createEdgeNode(from: SCNVector3, to: SCNVector3, sourceID: UUID, targetID: UUID) -> SCNNode {
         let source = SCNVector3(from.x, from.y, from.z)
         let target = SCNVector3(to.x, to.y, to.z)
         
         let vector = SCNVector3(target.x - source.x, target.y - source.y, target.z - source.z)
         let length = sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
         
-        let cylinder = SCNCylinder(radius: 0.05, height: CGFloat(length))
-        cylinder.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.1)
-        cylinder.firstMaterial?.emission.contents = UIColor.white.withAlphaComponent(0.05)
+        let isHighlighted = selectedNodeID == sourceID || selectedNodeID == targetID
+        let radius: CGFloat = isHighlighted ? 0.15 : 0.05
+        
+        let cylinder = SCNCylinder(radius: radius, height: CGFloat(length))
+        let baseColor = UIColor(Color.wikiAccent)
+        let opacity: CGFloat = isHighlighted ? 1.0 : 0.2
+        
+        cylinder.firstMaterial?.diffuse.contents = baseColor.withAlphaComponent(opacity)
+        cylinder.firstMaterial?.emission.contents = isHighlighted ? baseColor.withAlphaComponent(0.8) : baseColor.withAlphaComponent(0.1)
         
         let node = SCNNode(geometry: cylinder)
+        node.name = "edge_\(sourceID.uuidString)_\(targetID.uuidString)"
         node.position = SCNVector3(
             (source.x + target.x) / 2,
             (source.y + target.y) / 2,
@@ -347,7 +418,7 @@ struct Graph3DView: View {
         let element = SCNGeometryElement(indices: indices, primitiveType: .line)
         
         let geometry = SCNGeometry(sources: [source], elements: [element])
-        geometry.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.1)
+        geometry.firstMaterial?.diffuse.contents = UIColor(Color.wikiAccent).withAlphaComponent(0.2)
         
         return SCNNode(geometry: geometry)
     }
@@ -383,12 +454,13 @@ struct Graph3DView: View {
         }
     }
 
-    private func updateAutoRotation() {
+    private func updateAutoRotation(isRotating: Bool) {
         guard let scene = scene else { return }
         scene.rootNode.removeAction(forKey: "autoRotate")
-        if autoRotate {
-            // 加快旋转速度 (从 0.5 增加到 2.0)，增加视觉动感
-            let rotate = SCNAction.rotateBy(x: 0, y: 2.0, z: 0, duration: 10)
+        if isRotating {
+            // 优化：使用更短的单位旋转时长 (1s)，并开启线性计时模式以实现零延迟启动
+            let rotate = SCNAction.rotateBy(x: 0, y: 0.2, z: 0, duration: 1.0)
+            rotate.timingMode = .linear
             scene.rootNode.runAction(SCNAction.repeatForever(rotate), forKey: "autoRotate")
         }
     }

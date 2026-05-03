@@ -1,18 +1,36 @@
-# 知识灵动 (ZhiMind)
+# 智元 (ZhiYuan)
 > 基于 Karpathy LLM Wiki 方法论的 AI 原生知识管理进化引擎。
 
 ---
 
 ## 📚 深度文档 (Documentation)
 
-- [📖 产品规格说明书 (Specifications)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Requirements/PRD.md)
-- [🏗️ 架构设计文档 (Architecture)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Architecture/ARCHITECTURE_4PLUS1.md)
-- [🎨 视觉设计系统 (Design System)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Design/VISUAL_SYSTEM.md)
-- [🚨 异常处理规范 (Error Handling)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Design/ERROR_POLICY.md)
-- [🤝 贡献指南 (Contributing)](file:///Users/constantine/Documents/work/code/projects/km/Docs/CONTRIBUTING.md)
-- [🚀 进化路线图 (Roadmap)](file:///Users/constantine/Documents/work/code/projects/km/Docs/Requirements/ROADMAP.md)
-- [📖 用户操作指南 (User Guide)](file:///Users/constantine/Documents/work/code/projects/km/Docs/USER_GUIDE.md)
-- [🛠️ 开发者工具指南 (Developer Tools)](file:///Users/constantine/Documents/work/code/projects/km/Tools/README.md)
+### 产品与需求
+- [产品需求文档](Docs/Requirements/PRODUCT_REQUIREMENTS.md)
+- [软件需求规格说明书](Docs/Requirements/SOFTWARE_REQUIREMENTS_SPECIFICATION.md)
+- [全量特性清单](Docs/Requirements/FEATURE_LIST.md)
+- [测试指引](Docs/Requirements/TEST_GUIDE.md)
+- [进化路线图](Docs/Requirements/ROADMAP.md)
+- [本地化规范](Docs/Requirements/LOCALIZATION.md)
+
+### 架构与设计
+- [架构 4+1 视图](Docs/Architecture/ARCHITECTURE_4PLUS1.md)
+- [L0-L3 分层定义](Docs/Architecture/LAYERING_L0_L3.md)
+- [详细设计文档](Docs/Design/DETAILED_DESIGN.md)
+- [可视化设计系统](Docs/Design/VISUAL_SYSTEM.md)
+- [安全设计](Docs/Design/SECURITY_DESIGN.md)
+- [插件 SDK](Docs/Design/PLUGIN_SDK.md)
+
+### 测试与质量
+- [系统测试计划](Docs/Testing/SYSTEM_TEST_PLAN.md)
+- [性能基准报告](Docs/Testing/PERFORMANCE_BENCHMARK.md)
+- [测试用例库](Docs/Testing/TEST_CASES.md)
+- [CI/CD 工作流](Docs/CI_CD_WORKFLOW.md)
+
+### 开发与社区
+- [贡献指南](Docs/CONTRIBUTING.md)
+- [用户操作指南](Docs/USER_GUIDE.md)
+- [致谢](Docs/ACKNOWLEDGMENTS.md)
 
 ---
 

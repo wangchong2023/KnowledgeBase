@@ -57,6 +57,12 @@ struct LogViewContent: View {
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #endif
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button(role: .destructive) { store.clearLogs() }
+                label: { Label(Localized.tr("misc.clear"), systemImage: "trash") }
+            }
+        }
 #if os(iOS)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarBackground(Color.wikiBackground, for: .navigationBar)
@@ -106,24 +112,26 @@ private struct LogEntryRow: View {
             }
 
             if isExpanded {
-                if !entry.details.isEmpty {
-                    Text(entry.details)
-                        .font(.caption)
-                        .foregroundStyle(.wikiSecondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                        .background(Color.wikiCard)
-                        .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
-                        .padding(.leading, 44)
-                } else {
-                    Text(Localized.tr("log.noDetails"))
-                        .font(.caption)
-                        .foregroundStyle(.wikiSecondary)
-                        .padding(.leading, 44)
+                VStack(alignment: .leading, spacing: 8) {
+                    if !entry.details.isEmpty {
+                        Text(entry.details)
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.wikiSecondary)
+                            .padding(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.wikiBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } else {
+                        Text(Localized.tr("log.noDetails"))
+                            .font(.caption2)
+                            .foregroundStyle(.wikiSecondary.opacity(0.6))
+                    }
                 }
+                .padding(.leading, 44)
+                .padding(.top, 4)
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
     }
 
     private func actionColor(_ action: String) -> Color {
@@ -141,6 +149,7 @@ private struct LogEntryRow: View {
         case "删除PDF", Localized.tr("logAction.deletePDF"): return .red
         case "高亮标注", Localized.tr("logAction.highlight"): return .wikiAccent
         case "OCR识别", Localized.tr("logAction.ocrRecognize"): return .wikiConcept
+        case Localized.tr("logAction.systemInit"): return .purple
         default: return .wikiSecondary
         }
     }
@@ -160,6 +169,7 @@ private struct LogEntryRow: View {
         case "删除PDF", Localized.tr("logAction.deletePDF"): return "trash"
         case "高亮标注", Localized.tr("logAction.highlight"): return "highlighter"
         case "OCR识别", Localized.tr("logAction.ocrRecognize"): return "text.viewfinder"
+        case Localized.tr("logAction.systemInit"): return "sparkles"
         default: return "circle"
         }
     }

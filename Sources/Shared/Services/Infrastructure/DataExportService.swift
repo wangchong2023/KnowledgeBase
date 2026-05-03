@@ -23,23 +23,10 @@ final class DataExportService {
     /// 生成 AI 驱动的 PDF 知识报告
     @MainActor
     func generatePDFReport(pages: [WikiPage]) async throws -> URL {
-        let reportView = ExportReportView(pages: pages)
-        let renderer = ImageRenderer(content: reportView)
+        let markdown = pages.map { "# \($0.title)\n\n\($0.content)" }.joined(separator: "\n\n---\n\n")
+        let fileName = "ZhiYuan_Knowledge_Report_\(Int(Date().timeIntervalSince1970))"
         
-        let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ZhiMind_Knowledge_Report_\(Int(Date().timeIntervalSince1970)).pdf")
-        
-        renderer.render { size, context in
-            var box = CGRect(origin: .zero, size: size)
-            guard let pdfContext = CGContext(tempURL as CFURL, mediaBox: &box, nil) else {
-                return
-            }
-            
-            pdfContext.beginPDFPage(nil)
-            context(pdfContext)
-            pdfContext.endPDFPage()
-            pdfContext.closePDF()
-        }
+        let url = try await WebViewExportService.shared.exportToPDF(markdown: markdown, fileName: fileName)
         
         LogService.shared.addLog(
             action: Localized.tr("action.export"),
@@ -47,7 +34,7 @@ final class DataExportService {
             details: Localized.trf("export.countFormat", pages.count)
         )
         
-        return tempURL
+        return url
     }
     
     /// 备份金库到 ZIP 压缩包

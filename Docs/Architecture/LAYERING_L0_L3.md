@@ -16,30 +16,49 @@ graph TD
 
 ## L0: Infrastructure Layer (基础设施层)
 **职责**：提供与操作系统和第三方库的最底层交互。
-- **CoreData / SQLite (GRDB)**：物理存储引擎。
-- **Networking**：基础 URLSession 封装。
-- **Security Utilities**：Keychain 访问、生物识别 (LocalAuthentication) 底层封装。
-- **Logger**：全库统一日志服务。
+
+**子目录** (`Sources/Shared/Services/`):
+| 目录 | 内容 | 关键组件 |
+| :--- | :--- | :--- |
+| `Infrastructure/` | 系统级工具与平台桥接 | `LogService`, `SecurityManager`, `HapticManager`, `SpotlightService`, `DeepLinkService`, `PencilManager`, `AccessibilityService`, `OnboardingService`, `DataExportService`, `LocalAnalyticsService`, `PerformanceService`, `WorkflowService`, `WatchConnectivityService`, `SnapshotService`, `ShortcutManager`, `WebViewExportService` |
+| `Storage/` | 物理存储引擎 | `SQLiteStore`, `KMStore`, `VaultService`, `VaultSecurityService`, `BackupService`, `SQLiteMigrator` |
 
 ## L1: Service Layer (基础服务层)
 **职责**：对底层技术进行原子化抽象，提供跨业务的通用能力。
-- **KMStore (Persistence)**：负责 WikiPage 的 CRUD 原子操作。
-- **LLMClient**：负责 OpenAI 兼容协议的 HTTP 通信。
-- **EmbeddingManager**：负责文本到向量的转换逻辑。
-- **LinkScraper**：负责 HTML/Markdown 的基础爬取与解析。
+
+**子目录**:
+| 目录 | 内容 | 关键组件 |
+| :--- | :--- | :--- |
+| `Logic/` | 纯业务逻辑与算法 | `LinkService`, `KnowledgeInsightService`, `RecursiveChunker` |
+| `Processors/` | 文档解析与媒体处理 | `MarkdownParser`, `LinkScraperService`, `OCRService`, `PDFService`, `SpeechService` |
+| `Plugins/` | 插件协议与注册中心 | `PluginProtocols`, `PluginRegistry`, `PluginMarketService` |
+| `Sync/` | 多端同步引擎 | `iCloudSyncManager`, `KMiCloudSyncService`, `FileSystemSyncService` |
+| `Graph/` | 图谱布局与聚类 | `GraphLayoutEngine`, `GraphClusteringService` |
 
 ## L2: Domain / Feature Layer (业务领域层)
 **职责**：封装核心业务逻辑，实现复杂的功能闭环。
-- **LinkScraperService**：处理网页抓取、YouTube 解析及 Markdown 转换的业务流。
-- **KnowledgeInsightService**：执行复杂的 RAG 查询、生成每日闪念与周报。
-- **AISynthesisService**：处理思维导图生成、知识测验、摘要提取等 AI 实验室功能。
-- **IngestService**：负责数据导入的完整生命周期（下载 -> 预处理 -> 存储 -> 索引）。
+
+**子目录**:
+| 目录 | 内容 | 关键组件 |
+| :--- | :--- | :--- |
+| `AI/` | 大模型通信与推理 | `LLMService`, `LLMClient`, `AISynthesisService`, `EmbeddingManager`, `IngestQueue`, `OnDeviceLLMService`, `PromptService` |
+| `Feature/` | 高级功能编排 | `IngestService`, `CollaborationService`, `LintService`, `TaskCenter`, `UndoService` |
+| `Gamification/` | 用户激励系统 | `MedalService` |
+| `System/` | 系统级事件与调度 | `ActivityService`, `WikiEventBus` |
 
 ## L3: Presentation Layer (表现层)
 **职责**：响应用户交互，展示状态，驱动导航。
-- **SwiftUI Views**：Dashboard, Search, PageDetail 等视图组件。
-- **ViewModels (Observable)**：负责视图状态管理（逐步迁移至 @Observable）。
-- **NavigationCenter**：负责跨 Tab 和深层链接的导航调度。
+
+**子目录** (`Sources/Shared/Views/`):
+| 目录 | 内容 |
+| :--- | :--- |
+| `Core/` | 主框架：`ContentView`, `NavigationView`, `SidebarView`, `DashboardView`, `SearchView` |
+| `Pages/` | 业务页面：页面列表、详情、历史版本 |
+| `Editors/` | Markdown 编辑器与源码模式 |
+| `Features/` | 高级功能视图：`GraphView`, `Graph3DView`, AI 合成视图 |
+| `Components/` | 原子化可复用 UI 组件 |
+| `CommandPalette/` | `Cmd+K` 全局指令面板 |
+| `Settings/` | 设置相关视图 |
 
 ---
 

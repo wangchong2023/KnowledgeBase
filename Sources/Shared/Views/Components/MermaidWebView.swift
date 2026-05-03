@@ -79,7 +79,7 @@ struct MermaidWebView: View {
         webView.createPDF(configuration: config) { result in
             switch result {
             case .success(let data):
-                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Mindmap.pdf")
+                let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(Localized.tr("synthesis.mindmap.title")).pdf")
                 try? data.write(to: tempURL)
                 self.identifiablePDFURL = IdentifiableURL(url: tempURL)
             case .failure(let error):
@@ -125,16 +125,22 @@ struct MermaidWKWebView: UIViewRepresentable {
             </style>
         </head>
         <body>
-            <div class="mermaid">
-                \(mermaidCode)
-            </div>
+            <div id="mermaid-root"></div>
             <script>
-                mermaid.initialize({ 
-                    startOnLoad: true, 
-                    theme: 'neutral', 
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'neutral',
                     securityLevel: 'loose',
                     mindmap: { useMaxWidth: true }
                 });
+                (async () => {
+                    try {
+                        const { svg } = await mermaid.render('mindmap-svg', `\(mermaidCode.replacingOccurrences(of: "`", with: "\\`").replacingOccurrences(of: "$", with: "\\$"))`);
+                        document.getElementById('mermaid-root').innerHTML = svg;
+                    } catch (e) {
+                        document.getElementById('mermaid-root').innerHTML = '<div style="color:#999;text-align:center;padding:40px 20px;font-size:14px">\(Localized.tr("synthesis.mindmap.renderError"))</div>';
+                    }
+                })();
             </script>
         </body>
         </html>

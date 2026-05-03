@@ -1,4 +1,4 @@
-# 智元 (ZhiMind) 系统测试计划 & 验收标准
+# 智元 (ZhiYuan) 系统测试计划 & 验收标准
 
 本文件定义了智元在发布前的质量检查红线与验收准则 (Acceptance Criteria)。
 
@@ -33,8 +33,8 @@
 *   **内存占用**：正常运行期间内存抖动 < 50MB。
 
 ### 3.2 兼容性矩阵
-*   **iOS**: 适配 iOS 16 - iOS 18，完美支持动态字体 (Dynamic Type)。
-*   **macOS**: 支持 macOS 13 (Ventura) 及以上版本，适配“台前调度 (Stage Manager)”。
+*   **iOS**: 适配 iOS 17 - iOS 18，完美支持动态字体 (Dynamic Type)。
+*   **macOS**: 支持 macOS 14 (Sonoma) 及以上版本，适配”台前调度 (Stage Manager)”。
 
 ---
 

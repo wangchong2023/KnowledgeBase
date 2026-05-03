@@ -27,10 +27,12 @@ enum WikiUI {
     static let hairlineRadius: CGFloat = tiny // 4
     static let sidebarRadius: CGFloat = small // 8
 
-    /// Padding
-    static let cardPadding: CGFloat = 16
-    static let sectionPadding: CGFloat = 12
+    /// Padding — 遵循 Apple HIG 8/16/20 规则
+    static let standardPadding: CGFloat = 16
+    static let widePadding: CGFloat = 20
     static let tightPadding: CGFloat = 8
+    static let cardPadding: CGFloat = standardPadding
+    static let sectionPadding: CGFloat = widePadding
 
     /// Animation
     static let standardAnimation: Animation = .easeInOut(duration: 0.25)

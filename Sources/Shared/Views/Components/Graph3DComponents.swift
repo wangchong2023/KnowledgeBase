@@ -134,34 +134,43 @@ struct Graph3DControlsOverlay: View {
     let onZoomOut: () -> Void
 
     var body: some View {
+        let iconColor: Color = isFullScreen ? .white : .wikiText
+        
         VStack(spacing: 8) {
             // Fullscreen toggle
-            Button(action: { withAnimation(.spring()) { isFullScreen.toggle() } }) {
+            Button(action: { 
+                withAnimation(.spring()) { 
+                    isFullScreen.toggle() 
+                    showFilterPopup = false // 切换模式时自动折叠菜单
+                } 
+            }) {
                 Image(systemName: isFullScreen ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right")
                     .font(.title3)
-                    .foregroundStyle(isFullScreen ? Color.wikiAccent : .wikiText)
+                    .foregroundStyle(iconColor)
                     .padding(10)
                     .background(.ultraThinMaterial)
                     .clipShape(Circle())
             }
             .accessibilityIdentifier("graph3d-fullscreen")
 
-            // Auto-rotate toggle
-            Button(action: onAutoRotateToggle) {
-                Image(systemName: autoRotate ? "arrow.clockwise.circle.fill" : "arrow.clockwise.circle")
-                    .font(.title3)
-                    .foregroundStyle(autoRotate ? Color.wikiAccent : .wikiText)
-                    .padding(10)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
+            // Auto-rotate toggle - 仅在全屏模式下显示
+            if isFullScreen {
+                Button(action: onAutoRotateToggle) {
+                    Image(systemName: autoRotate ? "arrow.clockwise.circle.fill" : "arrow.clockwise.circle")
+                        .font(.title3)
+                        .foregroundStyle(autoRotate ? Color.wikiAccent : iconColor)
+                        .padding(10)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                }
+                .accessibilityIdentifier("graph3d-auto-rotate")
             }
-            .accessibilityIdentifier("graph3d-auto-rotate")
 
             // Reset camera
             Button(action: onResetCamera) {
                 Image(systemName: "scope")
                     .font(.title3)
-                    .foregroundStyle(.wikiText)
+                    .foregroundStyle(iconColor)
                     .padding(10)
                     .background(.ultraThinMaterial)
                     .clipShape(Circle())
@@ -172,7 +181,7 @@ struct Graph3DControlsOverlay: View {
             Button(action: onZoomIn) {
                 Image(systemName: "plus.magnifyingglass")
                     .font(.title3)
-                    .foregroundStyle(.wikiText)
+                    .foregroundStyle(iconColor)
                     .padding(10)
                     .background(.ultraThinMaterial)
                     .clipShape(Circle())
@@ -183,86 +192,100 @@ struct Graph3DControlsOverlay: View {
             Button(action: onZoomOut) {
                 Image(systemName: "minus.magnifyingglass")
                     .font(.title3)
-                    .foregroundStyle(.wikiText)
+                    .foregroundStyle(iconColor)
                     .padding(10)
                     .background(.ultraThinMaterial)
                     .clipShape(Circle())
             }
             .accessibilityIdentifier("graph3d-zoom-out")
 
-            // Filter
-            Button(action: { withAnimation(.spring(response: 0.35)) { showFilterPopup.toggle() } }) {
-                Image(systemName: "line.3.horizontal.decrease.circle")
-                    .font(.title3)
-                    .foregroundStyle(filterType == nil ? .wikiText : .white)
-                    .padding(10)
-                    .background(filterType == nil ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.wikiAccent))
-                    .clipShape(Circle())
-                    .shadow(color: .black.opacity(filterType == nil ? 0.1 : 0.3), radius: 4)
-            }
-            .overlay(alignment: .bottomTrailing) {
-                if showFilterPopup {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(Localized.tr("graph.filter"))
-                            .font(.caption.bold())
-                            .foregroundStyle(.wikiSecondary)
-                            .padding(.horizontal, 16)
-                            .padding(.top, 12)
-                            .padding(.bottom, 8)
-                        
-                        Divider().background(Color.white.opacity(0.1))
-                        
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Button(action: { filterType = nil; showFilterPopup = false }) {
-                                    HStack {
-                                        Label(Localized.tr("graph.all"), systemImage: "square.grid.2x2")
-                                        Spacer()
-                                        if filterType == nil {
-                                            Image(systemName: "checkmark")
-                                                .font(.caption.bold())
-                                        }
-                                    }
-                                    .padding()
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundStyle(filterType == nil ? Color.wikiAccent : .white)
-                                
-                                ForEach(PageType.allCases) { type in
-                                    Button(action: { filterType = type; showFilterPopup = false }) {
+            // Filter - 全屏模式下根据用户要求隐藏
+            if !isFullScreen {
+                Button(action: { withAnimation(.spring(response: 0.35)) { showFilterPopup.toggle() } }) {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                        .font(.title3)
+                        .foregroundStyle(filterType == nil ? iconColor : Color.wikiAccent)
+                        .padding(10)
+                        .background(.ultraThinMaterial)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(filterType == nil ? 0 : 0.2), radius: 4)
+                }
+                .overlay(alignment: .bottomTrailing) {
+                    if showFilterPopup {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(Localized.tr("graph.filter"))
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(.wikiSecondary)
+                                .padding(.horizontal, 12)
+                                .padding(.top, 10)
+                                .padding(.bottom, 6)
+                            
+                            Divider().background(Color.wikiBorder.opacity(0.3))
+                            
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 0) {
+                                    Button(action: { filterType = nil; showFilterPopup = false }) {
                                         HStack {
-                                            Label(type.displayName, systemImage: type.icon)
+                                            Image(systemName: "square.grid.2x2")
+                                                .font(.system(size: 12))
+                                            Text(Localized.tr("graph.all"))
+                                                .font(.system(size: 13))
                                             Spacer()
-                                            if filterType == type {
+                                            if filterType == nil {
                                                 Image(systemName: "checkmark")
-                                                    .font(.caption.bold())
+                                                    .font(.system(size: 10, weight: .bold))
                                             }
                                         }
-                                        .padding()
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 10)
                                         .contentShape(Rectangle())
                                     }
                                     .buttonStyle(.plain)
-                                    .foregroundStyle(filterType == type ? Color.wikiAccent : .white)
+                                    .foregroundStyle(filterType == nil ? Color.wikiAccent : .wikiText)
+                                    
+                                    ForEach(PageType.allCases) { type in
+                                        Button(action: { filterType = type; showFilterPopup = false }) {
+                                            HStack {
+                                                Image(systemName: type.icon)
+                                                    .font(.system(size: 12))
+                                                Text(type.displayName)
+                                                    .font(.system(size: 13))
+                                                Spacer()
+                                                if filterType == type {
+                                                    Image(systemName: "checkmark")
+                                                        .font(.system(size: 10, weight: .bold))
+                                                }
+                                            }
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 10)
+                                            .contentShape(Rectangle())
+                                        }
+                                        .buttonStyle(.plain)
+                                        .foregroundStyle(filterType == type ? Color.wikiAccent : .wikiText)
+                                    }
                                 }
+                                .fixedSize(horizontal: false, vertical: true)
                             }
+                            .frame(maxHeight: 220) 
                         }
-                        .frame(maxHeight: 300)
+                        .frame(width: 140)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14)
+                                .fill(.regularMaterial)
+                                .shadow(color: .black.opacity(0.15), radius: 8, x: -4, y: 4)
+                        )
+                        .offset(x: -50, y: -20)
+                        .transition(.asymmetric(
+                            insertion: .scale(scale: 0.8).combined(with: .opacity),
+                            removal: .opacity
+                        ))
                     }
-                    .frame(width: 180)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16)
-                            .fill(Color(white: 0.12)) // 非常深的灰色，接近背景但可区分
-                            .shadow(color: .black.opacity(0.4), radius: 10, x: -5, y: 5)
-                    )
-                    .offset(x: -50, y: -20)
-                    .transition(.asymmetric(
-                        insertion: .scale(scale: 0.8).combined(with: .opacity),
-                        removal: .opacity
-                    ))
                 }
+                .accessibilityIdentifier("graph3d-filter")
             }
-            .accessibilityIdentifier("graph3d-filter")
+        }
+        .onChange(of: isFullScreen) { _, _ in
+            showFilterPopup = false
         }
     }
     

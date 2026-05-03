@@ -19,59 +19,73 @@ final class KnowledgeInsightService: @unchecked Sendable {
     }
     
     /// 生成每日主动召回见解 (Smart Recall)
-    /// 逻辑：根据用户最近 3 天关注的内容，寻找 30-90 天前编辑过且语义相关的“尘封内容”，触发知识复利。
-    func generateDailyRecap(pages: [WikiPage], llmService: any LLMServiceProtocol) async throws -> DailyRecap {
+    /// 每天仅生成一次，结果缓存至 UserDefaults。用户手动刷新时跳过缓存。
+    func generateDailyRecap(pages: [WikiPage], llmService: any LLMServiceProtocol, forceRefresh: Bool = false) async throws -> DailyRecap {
         guard pages.count > 1 else { throw NSError(domain: "Insight", code: -1) }
-        
+
+        if !forceRefresh, let cached = loadCachedDailyRecap() {
+            return cached
+        }
+
         let now = Date()
         let calendar = Calendar.current
-        
-        // 1. 定义“最近”和“长程”时间范围
         let recentThreshold = calendar.date(byAdding: .day, value: -3, to: now)!
         let longTermMin = calendar.date(byAdding: .day, value: -90, to: now)!
         let longTermMax = calendar.date(byAdding: .day, value: -30, to: now)!
-        
-        // 2. 获取最近感兴趣的主题（模拟，实际可从 NavigationHistory 获取）
+
         let recentPages = pages.filter { $0.updated >= recentThreshold }
         let recentFocus = recentPages.map { $0.title }.joined(separator: " ")
-        
-        // 3. 寻找长程页面
+
         let candidates = pages.filter { $0.updated >= longTermMin && $0.updated <= longTermMax }
-        guard !candidates.isEmpty else {
-            // 如果没有合适范围的，回退到普通召回
-            return try await generateSimpleRecap(pages: pages, llmService: llmService)
+        let recap: DailyRecap
+        if !candidates.isEmpty {
+            let target = candidates.randomElement()!
+            let prompt = """
+            你是一个贴心的知识复习伙伴。用户最近在关注：\(recentFocus)。
+            推荐复习旧笔记《\(target.title)》，内容摘要：\(target.content.prefix(500))。
+            请用自然亲切的口吻写一句推荐语，点明重读这篇笔记对当前学习的价值。不超过50字。
+            返回JSON: {"insight": "...", "suggestedConnection": "..."}
+            """
+            let response = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个贴心的知识复习伙伴，用温暖自然的口吻帮助用户发现知识间的联系。")
+            let data = response.data(using: .utf8)!
+            let json = try JSONDecoder().decode([String: String].self, from: data)
+            recap = DailyRecap(
+                targetPageTitle: target.title,
+                insight: json["insight"] ?? "",
+                suggestedConnection: json["suggestedConnection"] ?? ""
+            )
+        } else {
+            let sorted = pages.sorted { $0.updated < $1.updated }
+            let target = sorted.first!
+            let prompt = "用自然的口吻写一句推荐语，建议复习《\(target.title)》这篇笔记，说明复习价值。不超过50字。内容：\(target.content.prefix(300))"
+            let response = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个贴心的知识复习伙伴，用温暖自然的口吻帮助用户。")
+            recap = DailyRecap(targetPageTitle: target.title, insight: response, suggestedConnection: Localized.tr("insight.recap.tip"))
         }
-        
-        // 4. 这里的简化逻辑：随机选一个（理想应使用 Embedding 语义匹配）
-        let target = candidates.randomElement()!
-        
-        let prompt = """
-        # Role: 深度学习导师
-        # Task: 帮助用户建立新旧知识之间的“长程连接”。
-        # Current Focus: \(recentFocus)
-        # Recall Page Title: \(target.title)
-        # Recall Content: \(target.content.prefix(500))
-        # Requirements: 分析为什么现在复习这个页面对当前的研究有帮助。文字精简，总字数不超过 30 字。
-        返回 JSON 格式: {"insight": "...", "suggestedConnection": "..."}
-        """
-        
-        let response = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个深度学习导师，擅长帮助用户建立跨时空的知识连接。")
-        let data = response.data(using: .utf8)!
-        let json = try JSONDecoder().decode([String: String].self, from: data)
-        
-        return DailyRecap(
-            targetPageTitle: target.title,
-            insight: json["insight"] ?? "",
-            suggestedConnection: json["suggestedConnection"] ?? ""
-        )
+
+        saveCachedDailyRecap(recap)
+        return recap
     }
-    
-    private func generateSimpleRecap(pages: [WikiPage], llmService: any LLMServiceProtocol) async throws -> DailyRecap {
-        let sorted = pages.sorted { $0.updated < $1.updated }
-        let target = sorted.first!
-        let prompt = "分析页面内容并提供复习见解（字数 30 字以内）: \(target.title)\n\(target.content.prefix(300))"
-        let response = try await llmService.generate(prompt: prompt, systemPrompt: "你是一个知识导师。")
-        return DailyRecap(targetPageTitle: target.title, insight: response, suggestedConnection: Localized.tr("insight.recap.tip"))
+
+    private func cacheKey() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        return "daily_recap_\(formatter.string(from: Date()))"
+    }
+
+    private func loadCachedDailyRecap() -> DailyRecap? {
+        let key = cacheKey()
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let recap = try? JSONDecoder().decode(DailyRecap.self, from: data) else {
+            return nil
+        }
+        return recap
+    }
+
+    private func saveCachedDailyRecap(_ recap: DailyRecap) {
+        let key = cacheKey()
+        if let data = try? JSONEncoder().encode(recap) {
+            UserDefaults.standard.set(data, forKey: key)
+        }
     }
 
     /// 生成最近一周的知识洞察

@@ -24,7 +24,7 @@ struct WeeklyInsightCard: View {
                 if isGenerating {
                     ProgressView().scaleEffect(0.8)
                 } else {
-                    Button(action: generateInsight) {
+                    Button(action: { generateInsight(forceRefresh: true) }) {
                         Image(systemName: "arrow.clockwise")
                             .font(.caption.bold())
                             .foregroundStyle(.wikiSecondary)
@@ -111,7 +111,7 @@ struct WeeklyInsightCard: View {
                 }
                 .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
             } else {
-                Button(action: generateInsight) {
+                Button(action: { generateInsight(forceRefresh: true) }) {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(Localized.tr("insight.generateReport"))
@@ -150,10 +150,10 @@ struct WeeklyInsightCard: View {
         }
     }
     
-    private func generateInsight() {
+    private func generateInsight(forceRefresh: Bool = false) {
         withAnimation { isGenerating = true }
         Task {
-            await store.generateWeeklyInsight()
+            await store.generateWeeklyInsight(forceRefresh: forceRefresh)
             await MainActor.run {
                 withAnimation { isGenerating = false }
             }

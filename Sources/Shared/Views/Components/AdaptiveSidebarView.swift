@@ -69,7 +69,7 @@ struct AdaptiveDetailView: View {
             DetailContentView(selection: $selection, selectedTab: $selectedTab)
         case .graph:
             NavigationStack {
-                GraphContainerView(heroNamespace: heroNamespace)
+                GraphContainerView(heroNamespace: heroNamespace, selectedTab: $selectedTab)
                     .navigationDestination(for: WikiPage.self) { page in
                         PageDetailView(page: page)
                     }
@@ -82,7 +82,7 @@ struct AdaptiveDetailView: View {
                     }
             }
         case .ingest:
-            IngestView()
+            IngestView(selectedTab: $selectedTab)
         case .settings:
             SettingsView(languageForceUpdate: $languageForceUpdate)
         }
