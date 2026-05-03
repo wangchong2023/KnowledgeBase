@@ -4,6 +4,7 @@ import SwiftUI
 struct GraphContainerView: View {
     @Environment(KMStore.self) var store
     var heroNamespace: Namespace.ID
+    @State private var selectedTab: GraphMode = .graph2D
     @State private var selectedNodeID: UUID?
     @State private var nodes: [GraphNode] = []
     @State private var edges: [GraphEdge] = []
@@ -18,6 +19,17 @@ struct GraphContainerView: View {
     @State private var useClustering = false
     @State private var filterType: PageType?
     @StateObject private var tooltipManager = TooltipManager.shared
+    
+    enum GraphMode: String, CaseIterable, Identifiable {
+        case graph2D, graph3D
+        var id: String { rawValue }
+        var title: String {
+            switch self {
+            case .graph2D: return Localized.tr("graph.mode.2d")
+            case .graph3D: return Localized.tr("graph.mode.3d")
+            }
+        }
+    }
     
     @State private var insightSurprising: [UUID] = []
     @State private var insightOrphans: [UUID] = []
@@ -43,66 +55,88 @@ struct GraphContainerView: View {
         let currentFilteredEdges = getFilteredEdges(for: currentFilteredNodes)
         
         ZStack {
-                Color.wikiBackground.ignoresSafeArea()
-                WikiDotPattern(dotColor: .wikiBorder, spacing: 24, dotSize: 2)
-                    .opacity(0.35)
+            if selectedTab == .graph2D {
+                ZStack {
+                    Color.wikiBackground.ignoresSafeArea()
+                    WikiDotPattern(dotColor: .wikiBorder, spacing: 24, dotSize: 2)
+                        .opacity(0.35)
 
-                if nodes.isEmpty {
-                    GraphEmptyStateView()
-                } else {
-                    GraphCanvasView(
-                        filteredNodes: currentFilteredNodes,
-                        filteredEdges: currentFilteredEdges,
-                        provider: store,
-                        useClustering: useClustering,
-                        selectedNodeID: $selectedNodeID,
-                        isAnimating: $isAnimating,
-                        scale: $scale,
-                        lastScale: $lastScale,
-                        offset: $offset,
-                        lastOffset: $lastOffset,
-                        graphSize: $graphSize,
-                        heroNamespace: heroNamespace
-                    ) { node in
-                        withAnimation(.spring(response: 0.5)) {
-                            selectedNodeID = selectedNodeID == node.id ? nil : node.id
-                            isAnimating = selectedNodeID != nil
+                    if nodes.isEmpty {
+                        GraphEmptyStateView()
+                    } else {
+                        GraphCanvasView(
+                            filteredNodes: currentFilteredNodes,
+                            filteredEdges: currentFilteredEdges,
+                            provider: store,
+                            useClustering: useClustering,
+                            selectedNodeID: $selectedNodeID,
+                            isAnimating: $isAnimating,
+                            scale: $scale,
+                            lastScale: $lastScale,
+                            offset: $offset,
+                            lastOffset: $lastOffset,
+                            graphSize: $graphSize,
+                            heroNamespace: heroNamespace
+                        ) { node in
+                            withAnimation(.spring(response: 0.5)) {
+                                selectedNodeID = selectedNodeID == node.id ? nil : node.id
+                                isAnimating = selectedNodeID != nil
+                            }
+                        }
+                    }
+
+                    if !nodes.isEmpty {
+                        // 顶部控件区域：统计栏 + 筛选药丸（Tab 下方，不重叠）
+                        VStack(alignment: .leading, spacing: 8) {
+                            graphStatsBar
+                                .padding(.leading, 16)
+                                .padding(.top, 8)
+
+                            GraphFilterPillsView(
+                                filterType: $filterType,
+                                tooltipManager: tooltipManager
+                            )
+
+                            Spacer()
+                        }
+
+                        GraphZoomControlsView(
+                            scale: $scale,
+                            lastScale: $lastScale,
+                            offset: $offset,
+                            lastOffset: $lastOffset,
+                            onRelayout: layoutGraph
+                        )
+                    }
+
+                    if showLegend && !nodes.isEmpty {
+                        GraphLegendView(useClustering: useClustering, clusters: store.clusters)
+                    }
+                    
+                    if let selectedID = selectedNodeID,
+                       let page = store.pages.first(where: { $0.id == selectedID }) {
+                        VStack {
+                            Spacer()
+                            GraphSelectedNodeCard(page: page)
                         }
                     }
                 }
-
-                if !nodes.isEmpty {
-                    GraphZoomControlsView(
-                        scale: $scale,
-                        lastScale: $lastScale,
-                        offset: $offset,
-                        lastOffset: $lastOffset,
-                        onRelayout: layoutGraph
-                    )
-                    GraphFilterPillsView(
-                        filterType: $filterType,
-                        tooltipManager: tooltipManager
-                    )
-                }
-
-                if showLegend && !nodes.isEmpty {
-                    GraphLegendView(useClustering: useClustering, clusters: store.clusters)
-                }
-                
-                if let selectedID = selectedNodeID,
-                   let page = store.pages.first(where: { $0.id == selectedID }) {
-                    VStack {
-                        Spacer()
-                        GraphSelectedNodeCard(page: page)
-                    }
-                }
+            } else {
+                Graph3DView()
+            }
         }
         .navigationTitle(Localized.tr("graph.title"))
-        .sheet(isPresented: $showInsights) {
-            insightsPanel
-        }
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            graphToolbar
+            ToolbarItem(placement: .principal) {
+                Picker("", selection: $selectedTab) {
+                    ForEach(GraphMode.allCases) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 160)
+            }
         }
         .onAppear { layoutGraph() }
         .onChange(of: store.pages.count) { _, _ in
@@ -142,37 +176,35 @@ struct GraphContainerView: View {
         }
     }
     
-    private var graphToolbar: some ToolbarContent {
-        ToolbarItem(placement: .automatic) {
-            HStack(spacing: 10) {
-                // 左侧统计文字
-                Text(Localized.trf("graph.nodesConnections", getFilteredNodes().count, getFilteredEdges(for: getFilteredNodes()).count))
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.wikiSecondary)
-                    .padding(.leading, 4)
-                
-                Divider()
-                    .frame(height: 12)
-                    .foregroundStyle(.wikiBorder)
+    private var graphStatsBar: some View {
+        HStack(spacing: 10) {
+            // 统计文字
+            Text(Localized.trf("graph.nodesConnections", getFilteredNodes().count, getFilteredEdges(for: getFilteredNodes()).count))
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.wikiSecondary)
+                .padding(.leading, 4)
+            
+            Divider()
+                .frame(height: 12)
+                .foregroundStyle(.wikiBorder)
 
-                // 洞察灯泡
-                Button(action: { 
-                    computeInsights()
-                    showInsights = true 
-                }) {
-                    Image(systemName: "lightbulb.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.wikiAccent)
-                }
-                .help(Localized.tr("graph.insights"))
+            // 洞察灯泡
+            Button(action: { 
+                computeInsights()
+                showInsights = true 
+            }) {
+                Image(systemName: "lightbulb.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.wikiAccent)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background {
-                Capsule()
-                    .fill(Color.wikiCard.opacity(0.85))
-                    .overlay(Capsule().stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1))
-            }
+            .help(Localized.tr("graph.insights"))
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background {
+            Capsule()
+                .fill(Color.wikiCard.opacity(0.85))
+                .overlay(Capsule().stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1))
         }
     }
     
@@ -439,6 +471,7 @@ private struct GraphZoomControlsView: View {
                 .padding(.trailing, 16)
             }
             .padding(.bottom, 80)
+            .padding(.top, 100)
         }
     }
 }
@@ -448,21 +481,18 @@ private struct GraphFilterPillsView: View {
     @ObservedObject var tooltipManager: TooltipManager
 
     var body: some View {
-        VStack {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    FilterPill(title: Localized.tr("search.all"), isSelected: filterType == nil) {
-                        filterType = nil
-                    }
-                    ForEach(PageType.allCases) { type in
-                        FilterPill(title: type.displayName, icon: type.icon, color: type.themedColor, isSelected: filterType == type) {
-                            filterType = type
-                        }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                FilterPill(title: Localized.tr("search.all"), isSelected: filterType == nil) {
+                    filterType = nil
+                }
+                ForEach(PageType.allCases) { type in
+                    FilterPill(title: type.displayName, icon: type.icon, color: type.themedColor, isSelected: filterType == type) {
+                        filterType = type
                     }
                 }
-                .padding(.horizontal, 16)
             }
-            Spacer()
+            .padding(.horizontal, 16)
         }
     }
 }

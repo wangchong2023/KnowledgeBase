@@ -104,15 +104,15 @@ struct IndexStatView: View {
     let color: Color
 
     var body: some View {
-        VStack(spacing: 6) {
-            Text(value)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundStyle(color)
-            
+        VStack(spacing: 4) {
             Text(label)
                 .font(.system(size: 10, weight: .semibold))
                 .foregroundStyle(.wikiSecondary)
                 .textCase(.uppercase)
+            
+            Text(value)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundStyle(color)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

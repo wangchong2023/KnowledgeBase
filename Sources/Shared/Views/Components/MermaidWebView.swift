@@ -14,22 +14,62 @@ struct MermaidWebView: View {
     @State private var identifiablePDFURL: IdentifiableURL?
 
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack(alignment: .bottomTrailing) {
             #if os(macOS)
             MermaidWKWebViewMac(mermaidCode: mermaidCode, webView: $webView)
-                .frame(minHeight: 400)
                 .background(Color.wikiCard)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             #else
             MermaidWKWebView(mermaidCode: mermaidCode, webView: $webView)
-                .frame(minHeight: 400)
                 .background(Color.wikiCard)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             #endif
+            
+            // Zoom Controls
+            HStack(spacing: 12) {
+                zoomButton(icon: "minus.magnifyingglass") { zoom(by: 0.8) }
+                zoomButton(icon: "arrow.counterclockwise") { resetZoom() }
+                zoomButton(icon: "plus.magnifyingglass") { zoom(by: 1.2) }
+            }
+            .padding(8)
+            .background(.ultraThinMaterial)
+            .clipShape(Capsule())
+            .shadow(color: .black.opacity(0.1), radius: 4)
+            .padding(16)
         }
+        .frame(minHeight: 400)
         .sheet(item: $identifiablePDFURL) { identifiable in
             ActivityView(activityItems: [identifiable.url])
         }
+    }
+
+    private func zoomButton(icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: {
+            HapticManager.shared.trigger(.selection)
+            action()
+        }) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.wikiText)
+                .frame(width: 32, height: 32)
+                .background(Color.wikiCard.opacity(0.5))
+                .clipShape(Circle())
+        }
+    }
+
+    private func zoom(by factor: CGFloat) {
+        #if os(iOS)
+        guard let webView = webView else { return }
+        let currentScale = webView.scrollView.zoomScale
+        let newScale = min(max(currentScale * factor, webView.scrollView.minimumZoomScale), webView.scrollView.maximumZoomScale)
+        webView.scrollView.setZoomScale(newScale, animated: true)
+        #endif
+    }
+
+    private func resetZoom() {
+        #if os(iOS)
+        webView?.scrollView.setZoomScale(1.0, animated: true)
+        #endif
     }
 
     private func exportToPDF() {
@@ -79,8 +119,8 @@ struct MermaidWKWebView: UIViewRepresentable {
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
             <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
             <style>
-                body { background-color: transparent; margin: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; font-family: -apple-system; }
-                .mermaid { background-color: transparent; width: 100%; padding: 20px; box-sizing: border-box; }
+                body { background-color: transparent; margin: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; width: 100vw; font-family: -apple-system; }
+                .mermaid { background-color: transparent; width: 100%; height: 100%; padding: 20px; box-sizing: border-box; }
                 svg { max-width: 100% !important; height: auto !important; }
             </style>
         </head>

@@ -10,14 +10,16 @@ struct ContentView: View {
     @State private var showCommandPalette = false
     @State private var languageForceUpdate: Bool = false
     @Namespace private var heroNamespace
+    @StateObject private var medalService = MedalService.shared
     @State private var searchPath = NavigationPath()
     @State private var graphPath = NavigationPath()
+    @State private var sidebarSelection: SidebarSelection? = .tool(.dashboard)
     
     enum AppTab: String, CaseIterable {
         case wiki
-        case graph
-        case search
         case ingest
+        case search
+        case graph
         case settings
         
         var displayTitle: String {
@@ -69,6 +71,17 @@ struct ContentView: View {
             }
             
             OnboardingOverlay(service: onboardingService)
+            
+            // 全局奖章奖励弹窗
+            if let medal = medalService.newlyEarnedMedal {
+                MedalRewardPopup(medal: medal) {
+                    withAnimation(.spring()) {
+                        medalService.newlyEarnedMedal = nil
+                    }
+                }
+                .zIndex(200)
+                .transition(.asymmetric(insertion: .opacity, removal: .scale.combined(with: .opacity)))
+            }
         }
         .onAppear {
             if !onboardingService.hasCompletedOnboarding {
@@ -82,8 +95,17 @@ struct ContentView: View {
     private func adaptiveSplitView(tintColor: Color) -> some View {
         NavigationSplitView {
             AdaptiveSidebarView(selectedTab: $selectedTab)
+        } content: {
+            // 中间列：根据 Tab 显示不同的二级列表
+            switch selectedTab {
+            case .wiki:
+                SidebarView(heroNamespace: heroNamespace, selection: $sidebarSelection)
+            default:
+                Color.wikiBackground // 其他模块暂不显示二级列，或者显示空白
+            }
         } detail: {
-            AdaptiveDetailView(selectedTab: $selectedTab, languageForceUpdate: $languageForceUpdate, heroNamespace: heroNamespace)
+            // 详情列：显示主要内容
+            AdaptiveDetailView(selectedTab: $selectedTab, selection: $sidebarSelection, languageForceUpdate: $languageForceUpdate, heroNamespace: heroNamespace)
         }
         .tint(tintColor)
         .sheet(isPresented: $showCommandPalette) {
@@ -108,16 +130,16 @@ struct ContentView: View {
                 wikiTabContent
             }
 
-            Tab(AppTab.graph.displayTitle, systemImage: AppTab.graph.icon, value: AppTab.graph) {
-                graphTabContent
+            Tab(AppTab.ingest.displayTitle, systemImage: AppTab.ingest.icon, value: AppTab.ingest) {
+                ingestTabContent
             }
 
             Tab(AppTab.search.displayTitle, systemImage: AppTab.search.icon, value: AppTab.search) {
                 searchTabContent
             }
 
-            Tab(AppTab.ingest.displayTitle, systemImage: AppTab.ingest.icon, value: AppTab.ingest) {
-                ingestTabContent
+            Tab(AppTab.graph.displayTitle, systemImage: AppTab.graph.icon, value: AppTab.graph) {
+                graphTabContent
             }
 
             Tab(AppTab.settings.displayTitle, systemImage: AppTab.settings.icon, value: AppTab.settings) {
@@ -159,12 +181,12 @@ struct ContentView: View {
                 }
                 .tag(AppTab.wiki)
 
-            graphTabContent
-                .accessibilityIdentifier("Graph")
+            ingestTabContent
+                .accessibilityIdentifier("Ingest")
                 .tabItem {
-                    Label(AppTab.graph.displayTitle, systemImage: AppTab.graph.icon)
+                    Label(AppTab.ingest.displayTitle, systemImage: AppTab.ingest.icon)
                 }
-                .tag(AppTab.graph)
+                .tag(AppTab.ingest)
 
             searchTabContent
                 .accessibilityIdentifier("Search")
@@ -173,12 +195,12 @@ struct ContentView: View {
                 }
                 .tag(AppTab.search)
 
-            ingestTabContent
-                .accessibilityIdentifier("Ingest")
+            graphTabContent
+                .accessibilityIdentifier("Graph")
                 .tabItem {
-                    Label(AppTab.ingest.displayTitle, systemImage: AppTab.ingest.icon)
+                    Label(AppTab.graph.displayTitle, systemImage: AppTab.graph.icon)
                 }
-                .tag(AppTab.ingest)
+                .tag(AppTab.graph)
 
             SettingsView(languageForceUpdate: $languageForceUpdate)
                 .accessibilityIdentifier("Settings")

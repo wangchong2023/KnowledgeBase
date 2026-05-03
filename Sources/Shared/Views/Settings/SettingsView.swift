@@ -92,7 +92,7 @@ struct SettingsView: View {
                 
                 // ── AI 配置 ──
                 Section {
-                    SettingsNavigationRow(icon: "wrench.and.screwdriver.fill", title: Localized.tr("settings.llmConfig"), identifier: "AI-LLM设置") {
+                    SettingsNavigationRow(icon: "wrench.and.screwdriver.fill", title: Localized.tr("settings.llmConfig"), identifier: "settings.llm") {
                         LLMSettingsView()
                     } trailing: {
                         if llmService.isEnabled {
@@ -106,11 +106,11 @@ struct SettingsView: View {
                         }
                     }
 
-                    SettingsNavigationRow(icon: "cpu.fill", title: Localized.tr("settings.onDeviceLLM"), identifier: "AI-端侧LLM") {
+                    SettingsNavigationRow(icon: "cpu.fill", title: Localized.tr("settings.onDeviceLLM"), identifier: "settings.onDeviceLLM") {
                         OnDeviceLLMSettingsView()
                     }
                     
-                    SettingsNavigationRow(icon: "flask.fill", title: Localized.tr("settings.promptWorkshop"), identifier: "AI-提示词工厂") {
+                    SettingsNavigationRow(icon: "flask.fill", title: Localized.tr("settings.promptWorkshop"), identifier: "settings.promptWorkshop") {
                         PromptWorkshopView()
                     }
                 } header: {
@@ -119,7 +119,7 @@ struct SettingsView: View {
                 
                 // ── 同步与备份 ──
                 Section {
-                    SettingsNavigationRow(icon: "icloud", title: Localized.tr("settings.iCloudSync"), identifier: "数据-iCloud同步") {
+                    SettingsNavigationRow(icon: "icloud", title: Localized.tr("settings.iCloudSync"), identifier: "settings.icloud") {
                         iCloudSyncView(syncService: syncService, store: store)
                     } trailing: {
                         if syncService.iCloudAvailable {
@@ -133,7 +133,7 @@ struct SettingsView: View {
                         }
                     }
 
-                    SettingsNavigationRow(icon: "externaldrive.fill", title: Localized.tr("backup.title"), identifier: "数据-备份") {
+                    SettingsNavigationRow(icon: "externaldrive.fill", title: Localized.tr("backup.title"), identifier: "settings.backup") {
                         BackupView()
                     }
                     
@@ -141,7 +141,7 @@ struct SettingsView: View {
                         Label(Localized.tr("settings.reset"), systemImage: "arrow.counterclockwise")
                             .foregroundStyle(.red)
                     }
-                    .accessibilityIdentifier("数据-重置知识库")
+                    .accessibilityIdentifier("settings.reset")
                 } header: {
                     Text(Localized.tr("settings.section.data"))
                 }
@@ -161,7 +161,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.wikiAccent)
                         }
                     }
-                    .accessibilityIdentifier("安全-隐私模式开关")
+                    .accessibilityIdentifier("settings.privacy")
                     
                     Toggle(isOn: biometricBinding) {
                         Label {
@@ -171,22 +171,14 @@ struct SettingsView: View {
                                 .foregroundStyle(.blue)
                         }
                     }
-                    .accessibilityIdentifier("安全-生物识别开关")
+                    .accessibilityIdentifier("settings.biometric")
                 } header: {
                     Text(Localized.tr("settings.section.security"))
                 }
                 
                 // ── 更多功能 ──
                 Section {
-                    SettingsNavigationRow(icon: "cube.transparent.fill", title: Localized.tr("settings.graph3D"), identifier: "功能-3D图谱") {
-                        Graph3DView()
-                    }
-
-                    SettingsNavigationRow(icon: "visionpro", title: Localized.tr("settings.spatialComputing"), identifier: "功能-空间计算") {
-                        VisionProSpatialView()
-                    }
-                    
-                    SettingsNavigationRow(icon: "puzzlepiece.extension.fill", title: Localized.tr("sidebar.pluginMarket"), identifier: "功能-插件中心") {
+                    SettingsNavigationRow(icon: "puzzlepiece.extension.fill", title: Localized.tr("sidebar.pluginMarket"), identifier: "settings.plugins") {
                         PluginCenterView()
                     }
                 } header: {
@@ -196,7 +188,7 @@ struct SettingsView: View {
 
 
                 Section {
-                    SettingsNavigationRow(icon: "books.vertical.circle.fill", title: Localized.tr("settings.aboutApp"), identifier: "关于-应用") {
+                    SettingsNavigationRow(icon: "books.vertical.circle.fill", title: Localized.tr("settings.aboutApp"), identifier: "settings.about") {
                         SettingsAboutView()
                     }
                 }
@@ -225,7 +217,7 @@ struct SettingsView: View {
                 switch result {
                 case .success(let urls):
                     if let url = urls.first {
-                        let taskID = TaskCenter.shared.addTask(type: .ingest, name: "载入外部库", target: url.lastPathComponent)
+                        let taskID = TaskCenter.shared.addTask(type: .ingest, name: Localized.tr("import.externalVault"), target: url.lastPathComponent)
                         Task {
                             let _ = url.startAccessingSecurityScopedResource()
                             defer { url.stopAccessingSecurityScopedResource() }

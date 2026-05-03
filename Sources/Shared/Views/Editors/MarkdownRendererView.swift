@@ -90,7 +90,25 @@ struct MarkdownRendererView: View {
             renderHorizontalRule()
         case .taskList(let items):
             renderTaskList(items: items)
+        case .details(let summary, let content):
+            renderDetailsBlock(summary: summary, content: content)
         }
+    }
+
+    @ViewBuilder
+    private func renderDetailsBlock(summary: String, content: String) -> some View {
+        DisclosureGroup {
+            MarkdownRendererView(content: content, isPrivate: isPrivate, onLinkTap: onLinkTap, isCompact: true)
+                .padding(.top, 4)
+        } label: {
+            Text(summary)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.wikiAccent)
+        }
+        .padding(12)
+        .background(Color.wikiAccent.opacity(0.05))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(.vertical, 4)
     }
 
     // MARK: - Render Heading

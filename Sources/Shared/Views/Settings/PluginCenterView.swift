@@ -8,6 +8,7 @@ struct PluginCenterView: View {
     @State private var selectedTab = 0
     @State private var searchText = ""
     @State private var isSafeModeOn = true
+    @State private var showFileImporter = false
     
     var body: some View {
         ZStack {
@@ -19,8 +20,8 @@ struct PluginCenterView: View {
                 
                 // 2. 分段切换 (带动效)
                 Picker("", selection: $selectedTab) {
-                    Text(Localized.tr("plugin.myPlugins")).tag(0)
-                    Text(Localized.tr("plugin.market")).tag(1)
+                    Text(Localized.tr("plugin.market")).tag(0)
+                    Text(Localized.tr("plugin.myPlugins")).tag(1)
                 }
                 .pickerStyle(.segmented)
                 .padding()
@@ -28,9 +29,9 @@ struct PluginCenterView: View {
                 // 3. 内容主体
                 ScrollView {
                     if selectedTab == 0 {
-                        myPluginsSection
-                    } else {
                         marketSection
+                    } else {
+                        myPluginsSection
                     }
                 }
             }
@@ -39,6 +40,10 @@ struct PluginCenterView: View {
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #endif
+        .fileImporter(isPresented: $showFileImporter, allowedContentTypes: [.item]) { result in
+            // 处理文件选择结果
+            print("Selected: \(result)")
+        }
     }
     
     private var headerSection: some View {
@@ -51,66 +56,68 @@ struct PluginCenterView: View {
                     .textFieldStyle(.plain)
             }
             .padding(12)
-            .background(.ultraThinMaterial)
-            .clipShape(RoundedRectangle(cornerRadius: 15))
-            .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.wikiAccent.opacity(0.2), lineWidth: 1))
+            .background(Color.wikiCard)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.wikiBorder.opacity(0.5), lineWidth: 0.5))
             
-            // 安全模式：呼吸感提醒
-            HStack {
+            // 安全模式与加载按钮：左对齐，去冗余
+            HStack(spacing: 16) {
                 HStack(spacing: 6) {
-                    Circle()
-                        .fill(isSafeModeOn ? Color.green : Color.orange)
-                        .frame(width: 8, height: 8)
-                        .shadow(color: (isSafeModeOn ? Color.green : Color.orange).opacity(0.5), radius: 3)
-                    Text(isSafeModeOn ? Localized.tr("plugin.safeModeOn") : Localized.tr("plugin.communityMode"))
-                        .font(.caption2.bold())
-                        .foregroundStyle(isSafeModeOn ? .green : .orange)
+                    Text(Localized.tr("plugin.safeMode"))
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.wikiSecondary)
+                    Toggle("", isOn: $isSafeModeOn)
+                        .labelsHidden()
+                        .controlSize(.mini)
+                        .scaleEffect(0.85) // 缩小开关尺寸
+                        .tint(.wikiAccent)
                 }
+                
+                Button(action: { 
+                    HapticManager.shared.trigger(.selection)
+                    showFileImporter = true 
+                }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 12))
+                        Text(Localized.tr("plugin.local.mount"))
+                            .font(.system(size: 10, weight: .bold))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.wikiAccent.opacity(0.1))
+                    .foregroundStyle(Color.wikiAccent)
+                    .clipShape(Capsule())
+                }
+                
                 Spacer()
-                Toggle("", isOn: $isSafeModeOn)
-                    .labelsHidden()
-                    .controlSize(.mini)
-                    .tint(.wikiAccent)
             }
             .padding(.horizontal, 4)
         }
         .padding()
-        .background(Color.wikiCard.opacity(0.4))
+        .background(Color.wikiBackground)
     }
     
     private var myPluginsSection: some View {
         VStack(alignment: .leading, spacing: 20) {
-            // 本地加载卡片
-            Button(action: { HapticManager.shared.trigger(.selection) }) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(Localized.tr("plugin.local.mount")).font(.headline)
-                        Text(Localized.tr("plugin.local.desc")).font(.caption2).foregroundStyle(.wikiSecondary)
-                    }
-                    Spacer()
-                    Image(systemName: "plus.viewfinder").font(.title2)
-                }
-                .padding()
-                .background(Color.wikiAccent.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.wikiAccent.opacity(0.3), lineWidth: 1))
-            }
-            .padding(.horizontal)
-            
-            Text(Localized.tr("plugin.status.enabled"))
-                .font(.caption.bold())
-                .foregroundStyle(.wikiSecondary)
-                .padding(.horizontal)
-            
             let filtered = registry.plugins.filter { searchText.isEmpty || $0.manifest.name.localizedCaseInsensitiveContains(searchText) }
             
-            if filtered.isEmpty {
-                emptyStateView(icon: "puzzlepiece", title: Localized.tr("plugin.noPlugins"), sub: Localized.tr("plugin.noPluginsHint"))
-            } else {
+            if !filtered.isEmpty {
+                Text(Localized.tr("plugin.status.enabled"))
+                    .font(.caption.bold())
+                    .foregroundStyle(.wikiSecondary)
+                    .padding(.horizontal)
+                
                 ForEach(filtered, id: \.manifest.id) { plugin in
                     PluginCard(name: plugin.manifest.name, version: plugin.manifest.version, isLocal: true)
                 }
                 .padding(.horizontal)
+            } else if searchText.isEmpty {
+                // 如果没有插件且不在搜索状态，显示空状态
+                emptyStateView(icon: "puzzlepiece", title: Localized.tr("plugin.noPlugins"), sub: Localized.tr("plugin.noPluginsHint"))
+            } else {
+                // 搜索结果为空
+                emptyStateView(icon: "magnifyingglass", title: Localized.tr("plugin.noResults"), sub: Localized.tr("plugin.noResultsHint"))
             }
         }
     }
@@ -122,12 +129,16 @@ struct PluginCenterView: View {
             } else {
                 let filtered = marketService.availablePlugins.filter { searchText.isEmpty || $0.name.localizedCaseInsensitiveContains(searchText) }
                 
-                ForEach(filtered) { p in
-                    NavigationLink(destination: PluginDetailView(name: p.name, author: p.author, version: p.version, description: p.description, icon: p.icon)) {
-                        PluginCard(name: p.name, version: p.version, author: p.author, downloads: p.downloads, rating: p.rating, icon: p.icon)
+                if filtered.isEmpty {
+                    emptyStateView(icon: "storefront", title: Localized.tr("plugin.market.empty"), sub: Localized.tr("plugin.market.emptyHint"))
+                } else {
+                    ForEach(filtered) { p in
+                        NavigationLink(destination: PluginDetailView(name: p.name, author: p.author, version: p.version, description: p.description, icon: p.icon)) {
+                            PluginCard(name: p.name, version: p.version, author: p.author, downloads: p.downloads, rating: p.rating, icon: p.icon)
+                        }
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
         }
     }

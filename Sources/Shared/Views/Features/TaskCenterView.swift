@@ -12,60 +12,185 @@ struct TaskCenterView: View {
             
             if taskCenter.tasks.isEmpty {
                 ScrollView {
-                    emptyState
-                        .padding(.top, 20)
+                    VStack(spacing: 20) {
+                        statusDashboard
+                        emptyState
+                            .padding(.top, 20)
+                    }
                 }
             } else {
-                List {
-                    ForEach(taskCenter.tasks) { task in
-                        TaskRow(task: task)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                taskCenter.markAsRead(task.id)
-                                if let pageID = task.associatedPageID {
-                                    store.selectedPageID = pageID
-                                    store.selectedTool = nil
+                    List {
+                        Section {
+                            statusDashboard
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                                .padding(.vertical, 8)
+                        } header: {
+                            Text(Localized.tr("aitask.categories"))
+                                .font(.subheadline.bold())
+                                .foregroundStyle(.wikiText)
+                                .textCase(nil)
+                        }
+                        
+                        Section {
+                            ForEach(TaskType.allCases, id: \.self) { type in
+                                let tasks = taskCenter.tasks.filter { $0.type == type }
+                                let runningCount = tasks.filter { if case .running = $0.status { return true }; return false }.count
+                                
+                                DisclosureGroup {
+                                    if tasks.isEmpty {
+                                        Text(Localized.tr("aitask.noHistory"))
+                                            .font(.caption)
+                                            .foregroundStyle(.wikiSecondary)
+                                            .padding(.vertical, 8)
+                                    } else {
+                                        ForEach(tasks.sorted(by: { $0.startTime > $1.startTime })) { task in
+                                            TaskRow(task: task)
+                                                .contentShape(Rectangle())
+                                                .onTapGesture {
+                                                    taskCenter.markAsRead(task.id)
+                                                    if let pageID = task.associatedPageID {
+                                                        store.selectedPageID = pageID
+                                                        store.selectedTool = nil
+                                                    }
+                                                }
+                                        }
+                                        .onDelete { indices in
+                                            let sortedTasks = tasks.sorted(by: { $0.startTime > $1.startTime })
+                                            indices.forEach { index in
+                                                taskCenter.removeTask(sortedTasks[index].id)
+                                            }
+                                        }
+                                    }
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        ZStack {
+                                            Circle()
+                                                .fill(taskColor(for: type).opacity(0.1))
+                                                .frame(width: 32, height: 32)
+                                            Image(systemName: type.icon)
+                                                .font(.system(size: 14, weight: .bold))
+                                                .foregroundStyle(taskColor(for: type))
+                                        }
+                                        
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(Localized.tr("aitask.type.\(type.rawValue)"))
+                                                .font(.subheadline.bold())
+                                            Text(Localized.trf("aitask.history.count", tasks.count))
+                                                .font(.caption2)
+                                                .foregroundStyle(.wikiSecondary)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        if runningCount > 0 {
+                                            HStack(spacing: 4) {
+                                                ProgressView()
+                                                    .controlSize(.small)
+                                                Text("\(runningCount)")
+                                                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                                                    .foregroundStyle(taskColor(for: type))
+                                            }
+                                            .padding(.horizontal, 8)
+                                            .padding(.vertical, 4)
+                                            .background(taskColor(for: type).opacity(0.1))
+                                            .clipShape(Capsule())
+                                        }
+                                    }
+                                    .padding(.vertical, 4)
                                 }
                             }
-                    }
-                    .onDelete { indices in
-                        indices.forEach { index in
-                            taskCenter.removeTask(taskCenter.tasks[index].id)
+                        } header: {
+                            Text(Localized.tr("aitask.list.title"))
+                                .font(.subheadline.bold())
+                                .foregroundStyle(.wikiText)
+                                .textCase(nil)
                         }
                     }
+                    .listStyle(.insetGrouped)
                 }
-                .listStyle(.insetGrouped)
             }
-        }
         .navigationTitle(Localized.tr("aitask.center.title"))
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
-#endif
-#if os(iOS)
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                if !taskCenter.tasks.isEmpty {
-                    Button(Localized.tr("aitask.clearAll")) {
-                        taskCenter.tasks.removeAll()
-                    }
-                }
-            }
-        }
-#else
-        .toolbar {
-            ToolbarItem {
-                if !taskCenter.tasks.isEmpty {
-                    Button(Localized.tr("aitask.clearAll")) {
-                        taskCenter.tasks.removeAll()
-                    }
-                }
-            }
-        }
 #endif
         .background(Color.wikiBackground)
         .onAppear {
             taskCenter.markAllAsRead()
         }
+    }
+    
+    // MARK: - Status Dashboard
+    private var statusDashboard: some View {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+            summaryCard(type: .ingest, color: .blue)
+            summaryCard(type: .healthCheck, color: .red)
+            summaryCard(type: .aiScan, color: .orange)
+            summaryCard(type: .synthesis, color: .purple)
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private func taskColor(for type: TaskType) -> Color {
+        switch type {
+        case .ingest: return .blue
+        case .healthCheck: return .red
+        case .aiScan, .ai: return .orange
+        case .synthesis: return .purple
+        }
+    }
+    
+    private func summaryCard(type: TaskType, color: Color) -> some View {
+        let relevantTasks = taskCenter.tasks.filter { $0.type == type }
+        let runningCount = relevantTasks.filter {
+            if case .running = $0.status { return true }
+            return false
+        }.count
+        let totalCount = relevantTasks.count
+        let completedCount = relevantTasks.filter { $0.status == .completed }.count
+        
+        return VStack(alignment: .center, spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.08))
+                    .frame(width: 36, height: 36)
+                Image(systemName: type.icon)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(color)
+                
+                if runningCount > 0 {
+                    Circle()
+                        .trim(from: 0, to: 0.8)
+                        .stroke(color, lineWidth: 2)
+                        .frame(width: 42, height: 42)
+                        .rotationEffect(.degrees(-90))
+                }
+            }
+            
+            VStack(spacing: 4) {
+                Text(Localized.tr("aitask.type.\(type.rawValue)"))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(.wikiSecondary)
+                
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text("\(completedCount)")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundStyle(.wikiText)
+                    Text("/ \(totalCount)")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(.wikiSecondary.opacity(0.6))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 14)
+        .background(Color.wikiCard)
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20)
+                .stroke(runningCount > 0 ? color.opacity(0.3) : Color.wikiBorder.opacity(0.2), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.02), radius: 8, x: 0, y: 4)
     }
     
     private var emptyState: some View {
@@ -111,8 +236,9 @@ struct TaskCenterView: View {
                     .padding(.bottom, 4)
                 
                 guideRow(icon: "stethoscope", color: .red, title: Localized.tr("aitask.guide.health"), desc: Localized.tr("aitask.guide.health.desc"))
-                guideRow(icon: "arrow.down.doc.fill", color: .blue, title: Localized.tr("aitask.guide.ingest"), desc: Localized.tr("aitask.guide.ingest.desc"))
-                guideRow(icon: "wand.and.stars", color: .purple, title: Localized.tr("aitask.guide.archive"), desc: Localized.tr("aitask.guide.archive.desc"))
+                guideRow(icon: "bolt.shield.fill", color: .orange, title: Localized.tr("aitask.guide.aiscan"), desc: Localized.tr("aitask.guide.aiscan.desc"))
+                guideRow(icon: "tray.and.arrow.down.fill", color: .blue, title: Localized.tr("aitask.guide.ingest"), desc: Localized.tr("aitask.guide.ingest.desc"))
+                guideRow(icon: "wand.and.stars", color: .purple, title: Localized.tr("aitask.guide.synthesis"), desc: Localized.tr("aitask.guide.synthesis.desc"))
             }
             .padding()
             .background(Color.wikiCard)
@@ -190,7 +316,7 @@ private struct TaskRow: View {
             
             VStack(alignment: .trailing, spacing: 4) {
                 statusText
-                Text(task.startTime.formatted(.dateTime.hour().minute().second()))
+                Text(task.startTime.formatted(.dateTime.year().month().day().hour().minute().second()))
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.wikiSecondary.opacity(0.6))
             }

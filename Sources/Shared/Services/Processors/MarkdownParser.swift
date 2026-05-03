@@ -15,6 +15,7 @@ final class MarkdownParser {
         case table(headers: [String], rows: [[String]])
         case horizontalRule
         case taskList(items: [(text: String, checked: Bool)])
+        case details(summary: String, content: String)
     }
 
     // MARK: - Inline Types
@@ -42,6 +43,12 @@ final class MarkdownParser {
             }
 
             // Try each block type parser
+            if let result = parseDetailsBlock(lines: lines, startIndex: i) {
+                blocks.append(result.block)
+                i = result.nextIndex
+                continue
+            }
+
             if let result = parseCodeBlock(lines: lines, startIndex: i) {
                 blocks.append(result.block)
                 i = result.nextIndex
@@ -90,6 +97,40 @@ final class MarkdownParser {
         }
 
         return blocks
+    }
+
+    // MARK: - Parse Details Block
+    private func parseDetailsBlock(lines: [String], startIndex: Int) -> (block: BlockType, nextIndex: Int)? {
+        let trimmed = lines[startIndex].trimmingCharacters(in: .whitespaces)
+        guard trimmed.hasPrefix("<details>") else { return nil }
+
+        var summary = ""
+        var contentLines: [String] = []
+        var i = startIndex + 1
+
+        while i < lines.count {
+            let line = lines[i].trimmingCharacters(in: .whitespaces)
+            if line.hasPrefix("</details>") {
+                i += 1
+                break
+            }
+
+            if line.hasPrefix("<summary>") && line.contains("</summary>") {
+                summary = line.replacingOccurrences(of: "<summary>", with: "")
+                              .replacingOccurrences(of: "</summary>", with: "")
+            } else if line.hasPrefix("<summary>") {
+                // Handle multi-line summary if needed (rare but possible)
+                summary = line.replacingOccurrences(of: "<summary>", with: "")
+            } else if line.contains("</summary>") {
+                summary += line.replacingOccurrences(of: "</summary>", with: "")
+            } else {
+                contentLines.append(lines[i])
+            }
+            i += 1
+        }
+
+        if summary.isEmpty { summary = "Details" }
+        return (.details(summary: summary, content: contentLines.joined(separator: "\n")), i)
     }
 
     // MARK: - Parse Code Block

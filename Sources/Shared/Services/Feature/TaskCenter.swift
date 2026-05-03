@@ -3,13 +3,19 @@ import Combine
 
 /// 任务类型
 enum TaskType: String, CaseIterable {
-    case ai         // AI 任务
-    case ingest     // 导入任务
+    case ai             // 通用 AI 任务
+    case ingest         // 导入任务
+    case aiScan         // AI 扫描
+    case healthCheck    // 健康检查
+    case synthesis      // 知识合成
     
     var icon: String {
         switch self {
         case .ai: return "sparkles"
         case .ingest: return "tray.and.arrow.down"
+        case .aiScan: return "bolt.shield.fill"
+        case .healthCheck: return "stethoscope"
+        case .synthesis: return "wand.and.stars"
         }
     }
 }

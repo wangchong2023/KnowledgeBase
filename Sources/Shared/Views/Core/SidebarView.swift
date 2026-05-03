@@ -11,6 +11,7 @@ enum SidebarSelection: Hashable {
 struct SidebarView: View {
     @Environment(KMStore.self) var store
     var heroNamespace: Namespace.ID
+    var selection: Binding<SidebarSelection?>? = nil
 
     /// 状态恢复 (Platinum Experience Item #3)
     @SceneStorage("sidebar.selectedPageID") private var restoredPageID: String?
@@ -47,7 +48,7 @@ struct SidebarView: View {
     }
 
     var body: some View {
-        List(selection: selectionBinding) {
+        List(selection: selection ?? selectionBinding) {
             // ══ 1. 仪表盘与核心能力 ══
             Section {
                 NavigationLink(value: SidebarSelection.tool(.dashboard)) {
@@ -144,7 +145,7 @@ struct SidebarView: View {
 
                 NavigationLink(value: SidebarSelection.tool(.taskCenter)) {
                     HStack {
-                        Label(Localized.tr("aitask.center.title"), systemImage: "cpu.fill")
+                        Label(Localized.tr("aitask.center.title"), systemImage: "arrow.triangle.2.circlepath")
                         Spacer()
                         if TaskCenter.shared.unreadCount > 0 {
                             Text("\(TaskCenter.shared.unreadCount)")

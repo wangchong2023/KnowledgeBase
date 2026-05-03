@@ -6,8 +6,9 @@ import AppKit
 
 // MARK: - 标签云视图 (导航容器)
 struct TagCloudView: View {
+    var initialTag: String? = nil
     var body: some View {
-        TagCloudViewContent()
+        TagCloudViewContent(initialTag: initialTag)
     }
 }
 
@@ -21,6 +22,10 @@ struct TagCloudViewContent: View {
     @State private var tagToDelete: String?
     @State private var showAddTagDialog = false
     @State private var addTagName = ""
+    
+    init(initialTag: String? = nil) {
+        _selectedTag = State(initialValue: initialTag)
+    }
     
     // 批量管理状态
     @State private var isEditMode = false
@@ -49,21 +54,40 @@ struct TagCloudViewContent: View {
             .navigationTitle(isEditMode ? Localized.tr("tags.manageTitle") : Localized.tr("tag.title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    HStack {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 10) {
                         // 编辑模式开关
-                        Button(isEditMode ? Localized.tr("misc.done") : Localized.tr("tags.bulkManage")) {
+                        Button(action: {
                             withAnimation {
                                 isEditMode.toggle()
                                 if !isEditMode { selectedTagsForBulk.removeAll() }
                             }
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: isEditMode ? "checkmark.circle.fill" : "checklist")
+                                Text(isEditMode ? Localized.tr("misc.done") : Localized.tr("tags.bulkManage"))
+                            }
                         }
-                        .font(.subheadline)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.wikiAccent)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.wikiAccent.opacity(0.1))
+                        .clipShape(Capsule())
                         
                         if !isEditMode {
                             Button(action: { showAddTagDialog = true }) {
-                                Image(systemName: "plus")
+                                HStack(spacing: 6) {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text(Localized.tr("misc.add"))
+                                }
                             }
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.wikiAccent)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.wikiAccent.opacity(0.1))
+                            .clipShape(Capsule())
                         }
                     }
                 }
@@ -216,11 +240,6 @@ struct TagCloudViewContent: View {
             }
         }) {
             HStack(spacing: 4) {
-                if isEditMode {
-                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                        .font(.caption)
-                        .foregroundStyle(isSelected ? .wikiAccent : .wikiSecondary)
-                }
                 Text("#\(item.tag)")
                     .font(.subheadline.weight(isSelected ? .bold : .regular))
                 Text("\(item.count)")
@@ -230,14 +249,29 @@ struct TagCloudViewContent: View {
                     .background(Color.wikiAccent.opacity(0.2))
                     .clipShape(Capsule())
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16) // 始终保持一致的间距
             .padding(.vertical, 8)
             .background(isSelected ? Color.wikiAccent.opacity(0.15) : Color.wikiCard)
             .overlay(
-                RoundedRectangle(cornerRadius: Capsule().path(in: .zero).boundingRect.height) // This is just for demonstration, Capsule has no easy border
+                RoundedRectangle(cornerRadius: 100) // 使用大圆角
                     .stroke(isSelected ? Color.wikiAccent.opacity(0.5) : Color.clear, lineWidth: 1)
             )
             .clipShape(Capsule())
+            .overlay(alignment: .topTrailing) {
+                if isEditMode && isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.wikiAccent)
+                        .background(Circle().fill(Color.wikiCard))
+                        .offset(x: 6, y: -6)
+                } else if isEditMode {
+                    Circle()
+                        .stroke(Color.wikiSecondary.opacity(0.5), lineWidth: 1)
+                        .frame(width: 14, height: 14)
+                        .background(Circle().fill(Color.wikiCard.opacity(0.5)))
+                        .offset(x: 6, y: -6)
+                }
+            }
             .foregroundStyle(isSelected ? .wikiAccent : .wikiText)
         }
         .buttonStyle(.plain)

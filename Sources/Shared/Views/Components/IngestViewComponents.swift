@@ -149,7 +149,8 @@ struct IngestEntryCardsSection: View {
         WikiBorderedCard(borderColor: color.opacity(0.3)) {
             VStack(spacing: 10) {
                 Image(systemName: icon)
-                    .font(.title)
+                    .font(.system(size: 24))
+                    .frame(width: 32, height: 32)
                     .foregroundStyle(color)
                 Text(title)
                     .font(.subheadline.weight(.semibold))

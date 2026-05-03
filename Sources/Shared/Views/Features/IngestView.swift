@@ -113,6 +113,9 @@ struct IngestView: View {
                     if !TaskCenter.shared.tasks.filter({ $0.type == .ingest }).isEmpty {
                         taskCenterLinkSection
                     }
+                    
+                    // 最近处理的文档列表
+                    recentActivitiesSection
 
 
                 }
@@ -405,6 +408,45 @@ struct IngestView: View {
         newTags = []
         newCustomIcon = nil
         ingestSuccess = false
+    }
+
+    // MARK: - Recent Activities Section
+    private var recentActivitiesSection: some View {
+        let recentTasks = TaskCenter.shared.tasks
+            .filter { $0.type == .ingest }
+            .prefix(5)
+        
+        return Group {
+            if !recentTasks.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(Localized.tr("ingest.recentActivities"))
+                        .font(.headline)
+                        .foregroundStyle(.wikiText)
+                        .padding(.horizontal)
+                    
+                    VStack(spacing: 8) {
+                        ForEach(recentTasks) { task in
+                            ActivityRow(item: ActivityItem(
+                                title: task.target.isEmpty ? task.name : task.target,
+                                status: mapTaskStatus(task.status),
+                                timestamp: task.startTime,
+                                associatedPageID: task.associatedPageID
+                            ), isCurrent: false)
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+            }
+        }
+    }
+    
+    private func mapTaskStatus(_ status: TaskStatus) -> ActivityItem.ActivityStatus {
+        switch status {
+        case .pending: return .pending
+        case .running: return .processing
+        case .completed: return .completed
+        case .failed: return .failed
+        }
     }
 
 

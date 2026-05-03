@@ -10,19 +10,19 @@ struct AdaptiveSidebarView: View {
         List {
             Section(Localized.tr("sidebar.knowledge")) {
                 sidebarRow(for: .wiki)
-                sidebarRow(for: .graph)
-                sidebarRow(for: .search)
             }
             
             Section(Localized.tr("sidebar.tools")) {
                 sidebarRow(for: .ingest)
+                sidebarRow(for: .search)
+                sidebarRow(for: .graph)
                 
                 // 快捷跳转到任务中心 (作为 Wiki 模块的子操作)
                 Button(action: {
                     selectedTab = .wiki
                     store.selectedTool = .taskCenter
                 }) {
-                    Label(Localized.tr("aitask.center.title"), systemImage: "bolt.horizontal.circle")
+                    Label(Localized.tr("aitask.center.title"), systemImage: "arrow.triangle.2.circlepath")
                 }
             }
             
@@ -59,13 +59,14 @@ struct AdaptiveSidebarView: View {
 struct AdaptiveDetailView: View {
     @Environment(KMStore.self) var store
     @Binding var selectedTab: ContentView.AppTab
+    @Binding var selection: SidebarSelection?
     @Binding var languageForceUpdate: Bool
     var heroNamespace: Namespace.ID
     
     var body: some View {
         switch selectedTab {
         case .wiki:
-            NavigationView(selectedTab: $selectedTab, heroNamespace: heroNamespace)
+            DetailContentView(selection: $selection, selectedTab: $selectedTab)
         case .graph:
             NavigationStack {
                 GraphContainerView(heroNamespace: heroNamespace)

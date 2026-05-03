@@ -10,6 +10,7 @@ struct LintView: View {
 // MARK: - 健康检查核心内容 ( Dashboard 模式)
 struct LintViewContent: View {
     @Environment(KMStore.self) var store
+    @Environment(\.dismiss) var dismiss // 新增：用于强制退出层级
     @State private var isRunning = false
     @State private var selectedTab = 0 // 0: 健康检查, 1: AI 建议
 
@@ -36,6 +37,10 @@ struct LintViewContent: View {
         if score >= 50 { return .orange }
         return .red
     }
+    
+    private var buttonGradient: Color {
+        selectedTab == 0 ? .blue : .purple
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -45,7 +50,8 @@ struct LintViewContent: View {
                 Text(Localized.tr("lint.aiSuggestions")).tag(1)
             }
             .pickerStyle(.segmented)
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, 10)
             .background(Color.wikiCard)
 
             // 内容区
@@ -57,14 +63,65 @@ struct LintViewContent: View {
                 }
             }
             .frame(maxHeight: .infinity)
-
-            Divider()
-
-            // 操作栏
-            bottomActionBar
         }
         .background(Color.wikiBackground)
         .navigationTitle(selectedTab == 0 ? Localized.tr("lint.title") : Localized.tr("lint.aiSuggestions"))
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: {
+                    HapticManager.shared.trigger(.selection)
+                    // 1. 重置选择，回到主侧边栏或主页
+                    store.selectedTool = nil
+                    // 2. 同时清除所有层级路径，确保彻底返回
+                    if !store.navigationPath.isEmpty {
+                        store.navigationPath.removeLast(store.navigationPath.count)
+                    }
+                    // 3. 调用系统 dismiss 确保退出
+                    dismiss()
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(.wikiText)
+                        .frame(width: 32, height: 32)
+                        .background(Color.wikiCard)
+                        .clipShape(Circle())
+                        .shadow(color: .black.opacity(0.1), radius: 2)
+                }
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    if selectedTab == 0 { runLint() } else { runAIScan() }
+                }) {
+                    HStack(spacing: 8) {
+                        // 使用固定身份的 ZStack 和透明度切换，彻底杜绝重影
+                        ZStack {
+                            ProgressView()
+                                .controlSize(.small)
+                                .opacity(isRunning || store.isScanningAI ? 1 : 0)
+                            
+                            Image(systemName: selectedTab == 0 ? "stethoscope" : "sparkles")
+                                .opacity(isRunning || store.isScanningAI ? 0 : 1)
+                        }
+                        .frame(width: 20)
+                        
+                        Text(isRunning || store.isScanningAI ? Localized.tr("lint.scanning") : (selectedTab == 0 ? Localized.tr("lint.runCheck") : Localized.tr("lint.runAIScan")))
+                    }
+                    .font(.subheadline.bold())
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(buttonGradient.opacity(0.15))
+                    .foregroundStyle(buttonGradient)
+                    .clipShape(Capsule())
+                    .animation(nil, value: isRunning || store.isScanningAI) // 禁止内容内部动画，彻底杜绝重影
+                }
+                .disabled(isRunning || store.isScanningAI)
+                .transaction { transaction in
+                    transaction.animation = nil // 强制禁用过渡动画，从事务层面防止重影
+                }
+            }
+        }
     }
 
     // MARK: - 健康检查板块 (重构为 Dashboard 模式)
@@ -109,54 +166,59 @@ struct LintViewContent: View {
     }
     
     private var healthDashboardHeader: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             ZStack {
                 // 上次检查时间展示在左上角
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(Localized.tr("lint.lastCheck.title"))
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.wikiSecondary)
-                    
-                    if let date = store.lastLintDate {
-                        Text(formatDate(date))
-                            .font(.system(size: 10, design: .monospaced))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    } else {
-                        Text(Localized.tr("lint.lastCheck.never"))
-                            .font(.system(size: 10))
-                            .lineLimit(1)
+                VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(Localized.tr("lint.lastCheck.title"))
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(.wikiSecondary)
+                        
+                        if let date = store.lastLintDate {
+                            Text(formatDate(date))
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundStyle(.wikiText)
+                        } else {
+                            Text(Localized.tr("lint.lastCheck.never"))
+                                .font(.system(size: 10))
+                                .foregroundStyle(.wikiSecondary)
+                        }
                     }
+                    .padding(8)
+                    .background(Color.wikiCard)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
+                    )
                 }
-                .padding(8)
-                .background(Color.wikiCard.opacity(0.4))
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .padding(.leading, 10)
+                .padding(.leading, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 
                 HStack {
                     Spacer()
                     ZStack {
-                        // 背景环
                         Circle()
-                            .stroke(healthColor.opacity(0.1), lineWidth: 15)
-                            .frame(width: 160, height: 160)
+                            .stroke(healthColor.opacity(0.08), lineWidth: 14)
+                            .frame(width: 135, height: 135) // 进一步缩小圆圈，彻底解决与左侧信息的重叠
                         
                         // 进度环
                         Circle()
                             .trim(from: 0, to: CGFloat(score) / 100.0)
                             .stroke(
-                                AngularGradient(colors: [healthColor.opacity(0.6), healthColor], center: .center),
-                                style: StrokeStyle(lineWidth: 15, lineCap: .round)
+                                LinearGradient(colors: [healthColor.opacity(0.6), healthColor], startPoint: .top, endPoint: .bottom),
+                                style: StrokeStyle(lineWidth: 14, lineCap: .round)
                             )
-                            .frame(width: 160, height: 160)
+                            .frame(width: 135, height: 135)
                             .rotationEffect(.degrees(-90))
                         
-                        VStack(spacing: 4) {
+                        VStack(spacing: 2) {
                             Text("\(score)")
-                                .font(.system(size: 48, weight: .bold, design: .rounded))
+                                .font(.system(size: 50, weight: .bold, design: .rounded))
+                                .foregroundStyle(.wikiText)
                             Text(Localized.tr("lint.health.score"))
-                                .font(.caption2)
+                                .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
@@ -164,54 +226,56 @@ struct LintViewContent: View {
                 }
                 
                 // 评分标准展示在右下角
-                VStack(alignment: .trailing, spacing: 4) {
-                    HStack(spacing: 6) {
-                        Text(Localized.tr("lint.health.excellent"))
-                        Text("90-100")
-                            .foregroundStyle(.wikiSecondary.opacity(0.8))
-                    }
-                    HStack(spacing: 6) {
-                        Text(Localized.tr("lint.health.good"))
-                        Text("70-89")
-                            .foregroundStyle(.wikiSecondary.opacity(0.8))
-                    }
-                    HStack(spacing: 6) {
-                        Text(Localized.tr("lint.health.fair"))
-                        Text("50-69")
-                            .foregroundStyle(.wikiSecondary.opacity(0.8))
-                    }
-                    HStack(spacing: 6) {
-                        Text(Localized.tr("lint.health.poor"))
-                        Text("< 50")
-                            .foregroundStyle(.wikiSecondary.opacity(0.8))
+                VStack(alignment: .trailing, spacing: 6) {
+                    let ranges = [
+                        (Localized.tr("lint.health.excellent"), "90-100"),
+                        (Localized.tr("lint.health.good"), "70-89"),
+                        (Localized.tr("lint.health.fair"), "50-69"),
+                        (Localized.tr("lint.health.poor"), "< 50")
+                    ]
+                    
+                    ForEach(ranges, id: \.1) { label, range in
+                        HStack(spacing: 4) {
+                            Text(label)
+                                .font(.system(size: 9))
+                                .frame(width: 30, alignment: .trailing)
+                            Text(range)
+                                .font(.system(size: 9, design: .monospaced))
+                                .foregroundStyle(.wikiSecondary.opacity(0.8))
+                                .frame(width: 45, alignment: .leading)
+                        }
                     }
                 }
-                .font(.system(size: 10, weight: .medium, design: .rounded))
+                .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundStyle(.wikiSecondary)
-                .padding(10)
-                .background(Color.wikiCard.opacity(0.7))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .padding(12)
+                .background(Color.wikiCard)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.wikiBorder.opacity(0.4), lineWidth: 1)
                 )
-                .padding(.trailing, 10)
+                .padding(.trailing, 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
             }
             .frame(height: 180)
             
             Text(healthLabel)
-                .font(.title3.bold())
+                .font(.headline.bold())
                 .foregroundStyle(healthColor)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 6)
-                .background(healthColor.opacity(0.1))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(healthColor.opacity(0.12))
                 .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(healthColor.opacity(0.2), lineWidth: 1)
+                )
         }
     }
     
     private var metricsGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 16) {
             metricCard(title: Localized.tr("lint.metric.pages"), 
                        value: "\(store.pages.count)", 
                        icon: "doc.text.fill", 
@@ -226,42 +290,50 @@ struct LintViewContent: View {
             let islandCount = store.lintIssues.filter { $0.type == .island || $0.type == .orphan }.count
             metricCard(title: Localized.tr("lint.metric.orphans"), 
                        value: "\(islandCount)", 
-                       icon: " person.fill.questionmark", 
+                       icon: "person.fill.questionmark", 
                        color: .orange)
             
-            // 这里可以接入图谱洞察，目前先用活跃连接数
             let connectionCount = store.pages.reduce(0) { $0 + $1.outgoingLinks.count }
             metricCard(title: Localized.tr("lint.metric.links"), 
                        value: "\(connectionCount)", 
                        icon: "point.3.connected.trianglepath.dotted", 
                        color: .wikiAccent)
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 16)
     }
     
     private func metricCard(title: String, value: String, icon: String, color: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: icon)
-                    .font(.caption)
-                    .foregroundStyle(color)
+        VStack(alignment: .center, spacing: 12) {
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(color.opacity(0.1))
+                        .frame(width: 28, height: 28)
+                    Image(systemName: icon)
+                        .font(.system(size: 14))
+                        .foregroundStyle(color)
+                }
+                
                 Text(title)
-                    .font(.caption2)
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.wikiSecondary)
             }
+            .frame(maxWidth: .infinity, alignment: .center)
             
             Text(value)
-                .font(.title3.bold())
+                .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(.wikiText)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
+        .frame(maxWidth: .infinity)
+        .padding(16)
         .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 16)
                 .stroke(Color.wikiBorder.opacity(0.5), lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 4)
     }
 
     // MARK: - AI 建议板块
@@ -371,49 +443,6 @@ struct LintViewContent: View {
                     }
                 }
             }
-        }
-    }
-
-    private var bottomActionBar: some View {
-        VStack(spacing: 16) {
-            Button(action: {
-                if selectedTab == 0 { runLint() } else { runAIScan() }
-            }) {
-                HStack(spacing: 8) {
-                    if isRunning || store.isScanningAI {
-                        ProgressView().tint(.white)
-                    } else {
-                        Image(systemName: selectedTab == 0 ? "stethoscope" : "sparkles")
-                    }
-                    Text(buttonTitle)
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(buttonGradient)
-                .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
-                .foregroundStyle(.white)
-            }
-            .disabled(isRunning || store.isScanningAI)
-            .padding(.horizontal)
-            .padding(.bottom, 24)
-        }
-        .background(Color.wikiCard)
-    }
-
-    private var buttonTitle: String {
-        if selectedTab == 0 {
-            return isRunning ? Localized.tr("lint.checking") : Localized.tr("lint.runCheck")
-        } else {
-            return store.isScanningAI ? Localized.tr("lint.aiScanning") : Localized.tr("lint.runAIScan")
-        }
-    }
-
-    private var buttonGradient: LinearGradient {
-        if selectedTab == 0 {
-            return LinearGradient(colors: [.wikiComparison, .red.opacity(0.8)], startPoint: .leading, endPoint: .trailing)
-        } else {
-            return LinearGradient(colors: [.wikiAccent, .purple], startPoint: .leading, endPoint: .trailing)
         }
     }
 

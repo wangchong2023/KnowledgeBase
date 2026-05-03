@@ -197,14 +197,18 @@ struct ChatViewContent: View {
             isSelected: selectedMessageIDs.contains(message.id)
         )
         .id(message.id)
-        .onTapGesture {
+        .overlay {
             if isSelectionMode {
-                if selectedMessageIDs.contains(message.id) {
-                    selectedMessageIDs.remove(message.id)
-                } else {
-                    selectedMessageIDs.insert(message.id)
-                }
-                HapticManager.shared.trigger(.selection)
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        if selectedMessageIDs.contains(message.id) {
+                            selectedMessageIDs.remove(message.id)
+                        } else {
+                            selectedMessageIDs.insert(message.id)
+                        }
+                        HapticManager.shared.trigger(.selection)
+                    }
             }
         }
     }

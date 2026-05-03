@@ -8,127 +8,180 @@ struct Graph3DView: View {
     @Environment(KMStore.self) var store
     @State private var scene: SCNScene?
     @State private var selectedNodeID: UUID?
-    @State private var cameraDistance: Float = 30
-    @State private var autoRotate = true
+    @State private var cameraDistance: Float = 140 // 增加默认距离，确保边缘节点也能展示出来
+    @State private var autoRotate = false // 默认关闭，由用户按需开启
     @State private var filterType: PageType? = nil
     @State private var showNodeInfo = false
     @State private var infoPage: WikiPage?
-    /// 用于 resetCamera 的初始相机节点
+    @State private var showPageDetail = false
     @State private var cameraNode: SCNNode?
+    @State private var isFullScreen = false
     
     var body: some View {
-        VStack(spacing: 0) {
-            // 3D Scene
-            TappableSceneView(scene: scene) { uuid in
-                handleNodeTap(uuid)
-            }
-            .edgesIgnoringSafeArea(.all)
-            .overlay(alignment: .topTrailing) {
-                controlsOverlay
-            }
-            .overlay(alignment: .bottom) {
-                if let page = infoPage {
-                    nodeInfoBar(page: page)
-                        .transition(.move(edge: .bottom))
-                }
+        TappableSceneView(scene: scene) { uuid in
+            handleNodeTap(uuid)
+        }
+        .ignoresSafeArea(edges: isFullScreen ? .all : [])
+        .overlay(alignment: .top) {
+            if isFullScreen {
+                headerOverlay
+                    .padding(.top, 40)
             }
         }
-        .background(Color.wikiBackground)
-        .navigationTitle(Localized.tr("graph3d.title"))
+        .overlay(alignment: .topTrailing) {
+            controlsOverlay
+                .padding(.top, isFullScreen ? 40 : 8)
+                .padding(.trailing, 16)
+        }
+        .overlay(alignment: .bottom) {
+            if let page = infoPage {
+                nodeInfoBar(page: page)
+                    .padding(.bottom, isFullScreen ? 20 : 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .background(Color.black)
+        .preferredColorScheme(.dark)
+        .toolbar(isFullScreen ? .hidden : .visible, for: .tabBar)
 #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(isFullScreen)
+        .toolbar(isFullScreen ? .hidden : .visible, for: .navigationBar)
 #endif
+        .navigationDestination(isPresented: $showPageDetail) {
+            if let page = infoPage {
+                PageDetailView(page: page)
+            }
+        }
         .onAppear { buildScene() }
+        .onDisappear {
+            store.selectedTool = nil
+        }
         .onChange(of: store.pages.count) { _, _ in buildScene() }
         .onChange(of: filterType) { _, _ in buildScene() }
     }
     
-    // MARK: - Controls Overlay
+    private var headerOverlay: some View {
+        VStack(alignment: .center, spacing: 4) {
+            Text(Localized.tr("graph3d.title"))
+                .font(.subheadline.bold())
+                .foregroundStyle(.white)
+            
+            Text(Localized.tr("graph3d.desc"))
+                .font(.system(size: 10))
+                .foregroundStyle(.white.opacity(0.6))
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 200)
+        }
+        .allowsHitTesting(false)
+    }
+
     private var controlsOverlay: some View {
         Graph3DControlsOverlay(
             autoRotate: $autoRotate,
             filterType: $filterType,
+            isFullScreen: $isFullScreen,
             onAutoRotateToggle: { autoRotate.toggle(); updateAutoRotation() },
-            onResetCamera: { resetCamera() }
+            onResetCamera: { resetCamera() },
+            onZoomIn: { zoom(in: true) },
+            onZoomOut: { zoom(in: false) }
         )
     }
 
-    // MARK: - Node Info Bar
     private func nodeInfoBar(page: WikiPage) -> some View {
         Graph3DNodeInfoBar(page: page) {
-            store.selectedPageID = page.id
+            showPageDetail = true
         }
     }
     
-    // MARK: - Build Scene
     private func buildScene() {
         let newScene = SCNScene()
-        newScene.background.contents = UIColor(Color.wikiBackground)
+        // Deep space background
+        newScene.background.contents = UIColor.black
+        
+        // Add stars
+        addStarfield(to: newScene)
 
         setupLighting(scene: newScene)
         setupCamera(scene: newScene)
 
-        // Filter pages
         let pages = filterType == nil ? store.pages : store.pages.filter { $0.type == filterType }
         guard !pages.isEmpty else {
             scene = newScene
             return
         }
 
-        // Generate 3D positions (sphere distribution)
-        let positions = generateSpherePositions(count: pages.count, radius: CGFloat(cameraDistance) * 0.6)
+        // 使用更动态的半径，确保节点不会过于拥挤
+        let radius: CGFloat = CGFloat(max(30, min(100, pages.count * 10)))
+        let positions = generateSpherePositions(count: pages.count, radius: radius)
 
-        // Create nodes
         let nodeMap = createPageNodes(pages: pages, positions: positions, scene: newScene)
-
-        // Create edges
         createEdgeNodes(pages: pages, nodeMap: nodeMap, scene: newScene)
-
-        // Add grid floor
         addGridFloor(scene: newScene)
 
         scene = newScene
+        updateAutoRotation()
     }
 
-    // MARK: - Setup Lighting
+    private func addStarfield(to scene: SCNScene) {
+        let starCount = 500
+        let starGeometry = SCNSphere(radius: 0.1)
+        starGeometry.firstMaterial?.emission.contents = UIColor.white
+        
+        for _ in 0..<starCount {
+            let node = SCNNode(geometry: starGeometry)
+            let r: Float = 150
+            let theta = Float.random(in: 0...(2 * .pi))
+            let phi = Float.random(in: 0...(.pi))
+            
+            node.position = SCNVector3(
+                r * sin(phi) * cos(theta),
+                r * sin(phi) * sin(theta),
+                r * cos(phi)
+            )
+            scene.rootNode.addChildNode(node)
+        }
+    }
+
     private func setupLighting(scene: SCNScene) {
-        // Ambient light
         let ambientLight = SCNNode()
         ambientLight.light = SCNLight()
         ambientLight.light?.type = .ambient
-        ambientLight.light?.color = UIColor(white: 0.3, alpha: 1)
+        ambientLight.light?.color = UIColor(white: 0.2, alpha: 1)
         scene.rootNode.addChildNode(ambientLight)
 
-        // Omni light
         let omniLight = SCNNode()
         omniLight.light = SCNLight()
         omniLight.light?.type = .omni
-        omniLight.light?.color = UIColor(white: 0.8, alpha: 1)
-        omniLight.position = SCNVector3(0, 20, 20)
+        omniLight.light?.color = UIColor(white: 1.0, alpha: 1)
+        omniLight.position = SCNVector3(20, 30, 20)
         scene.rootNode.addChildNode(omniLight)
     }
 
-    // MARK: - Setup Camera
     private func setupCamera(scene: SCNScene) {
         let camera = SCNNode()
         camera.camera = SCNCamera()
         camera.camera?.zNear = 0.1
-        camera.camera?.zFar = 200
-        camera.position = SCNVector3(0, 10, Float(cameraDistance))
+        camera.camera?.zFar = 1000 // Increased range to prevent cutting off distant nodes
+        camera.position = SCNVector3(0, 15, Float(cameraDistance))
         camera.look(at: SCNVector3(0, 0, 0))
+        camera.name = "mainCamera"
         scene.rootNode.addChildNode(camera)
         cameraNode = camera
     }
 
-    // MARK: - Create Page Nodes
     private func createPageNodes(pages: [WikiPage], positions: [CGPoint3D], scene: SCNScene) -> [UUID: SCNNode] {
         var nodeMap: [UUID: SCNNode] = [:]
 
         for (index, page) in pages.enumerated() {
             let nodeSize = calculateNodeSize(for: page)
-            let sphere = createSphereGeometry(size: nodeSize, color: page.type.themedColor)
+            let geometry = createNodeGeometry(for: page.type, size: nodeSize)
+            
+            let uiColor = UIColor(page.type.themedColor)
+            geometry.firstMaterial?.diffuse.contents = uiColor
+            geometry.firstMaterial?.specular.contents = UIColor.white
+            geometry.firstMaterial?.emission.contents = uiColor.withAlphaComponent(0.4)
 
-            let node = SCNNode(geometry: sphere)
+            let node = SCNNode(geometry: geometry)
             node.position = SCNVector3(
                 Float(positions[index].x),
                 Float(positions[index].y),
@@ -136,11 +189,9 @@ struct Graph3DView: View {
             )
             node.name = page.id.uuidString
 
-            // Add label
             let textNode = createLabelNode(title: page.title, nodeSize: nodeSize)
             node.addChildNode(textNode)
 
-            // Pulse animation for pinned pages
             if page.isPinned {
                 addPulseAnimation(to: node)
             }
@@ -151,41 +202,42 @@ struct Graph3DView: View {
 
         return nodeMap
     }
+    
+    private func createNodeGeometry(for type: PageType, size: CGFloat) -> SCNGeometry {
+        switch type {
+        case .concept:
+            return SCNSphere(radius: size)
+        case .entity:
+            return SCNBox(width: size * 1.6, height: size * 1.6, length: size * 1.6, chamferRadius: size * 0.2)
+        case .source:
+            return SCNCylinder(radius: size, height: size * 2.5)
+        case .comparison:
+            return SCNPyramid(width: size * 2, height: size * 2, length: size * 2)
+        case .map:
+            return SCNTorus(ringRadius: size, pipeRadius: size * 0.3)
+        case .raw:
+            return SCNBox(width: size * 2, height: size * 0.2, length: size * 1.5, chamferRadius: 0.05)
+        }
+    }
 
-    // MARK: - Calculate Node Size
     private func calculateNodeSize(for page: WikiPage) -> CGFloat {
         let backlinkCount = store.pages.filter { $0.outgoingLinks.contains(page.title) }.count
         let linkCount = page.outgoingLinks.count + backlinkCount
-        return CGFloat(max(0.4, min(1.5, 0.5 + Double(linkCount) * 0.15)))
+        return CGFloat(max(0.6, min(2.0, 0.8 + Double(linkCount) * 0.2)))
     }
 
-    // MARK: - Create Sphere Geometry
-    private func createSphereGeometry(size: CGFloat, color: Color) -> SCNSphere {
-        let sphere = SCNSphere(radius: size)
-        sphere.segmentCount = 24
-
-        let uiColor = UIColor(color)
-        sphere.firstMaterial?.diffuse.contents = uiColor
-        sphere.firstMaterial?.specular.contents = UIColor(white: 0.5, alpha: 1)
-        sphere.firstMaterial?.emission.contents = uiColor.withAlphaComponent(0.3)
-
-        return sphere
-    }
-
-    // MARK: - Create Label Node
     private func createLabelNode(title: String, nodeSize: CGFloat) -> SCNNode {
         let text = SCNText(string: title, extrusionDepth: 0.1)
-        text.font = UIFont.systemFont(ofSize: 1.0)
-        text.flatness = 0.3
+        text.font = UIFont.boldSystemFont(ofSize: 1.2)
+        text.flatness = 0.2
         text.isWrapped = false
 
         let textNode = SCNNode(geometry: text)
-        textNode.position = SCNVector3(Float(nodeSize + 0.3), 0, 0)
-        textNode.scale = SCNVector3(0.3, 0.3, 0.3)
-        textNode.geometry?.firstMaterial?.diffuse.contents = UIColor(Color.wikiText).withAlphaComponent(0.8)
-        textNode.geometry?.firstMaterial?.emission.contents = UIColor(Color.wikiText).withAlphaComponent(0.2)
+        textNode.position = SCNVector3(Float(nodeSize + 0.5), 0, 0)
+        textNode.scale = SCNVector3(0.4, 0.4, 0.4)
+        textNode.geometry?.firstMaterial?.diffuse.contents = UIColor.white
+        textNode.geometry?.firstMaterial?.emission.contents = UIColor.white.withAlphaComponent(0.3)
 
-        // Billboard constraint: always face camera
         let billboard = SCNBillboardConstraint()
         billboard.freeAxes = .all
         textNode.constraints = [billboard]
@@ -193,16 +245,14 @@ struct Graph3DView: View {
         return textNode
     }
 
-    // MARK: - Add Pulse Animation
     private func addPulseAnimation(to node: SCNNode) {
         let pulseAction = SCNAction.customAction(duration: 2.0) { node, elapsedTime in
-            let scale = 1.0 + 0.15 * sin(elapsedTime * .pi)
+            let scale = 1.0 + 0.2 * sin(elapsedTime * .pi)
             node.scale = SCNVector3(scale, scale, scale)
         }
         node.runAction(SCNAction.repeatForever(pulseAction))
     }
 
-    // MARK: - Create Edge Nodes
     private func createEdgeNodes(pages: [WikiPage], nodeMap: [UUID: SCNNode], scene: SCNScene) {
         for page in pages {
             for linkTitle in page.outgoingLinks {
@@ -216,14 +266,12 @@ struct Graph3DView: View {
         }
     }
 
-    // MARK: - Add Grid Floor
     private func addGridFloor(scene: SCNScene) {
-        let gridNode = createGridNode(size: 40, divisions: 20)
-        gridNode.position = SCNVector3(0, -Float(cameraDistance) * 0.5, 0)
+        let gridNode = createGridNode(size: 100, divisions: 50)
+        gridNode.position = SCNVector3(0, -30, 0)
         scene.rootNode.addChildNode(gridNode)
     }
     
-    // MARK: - Sphere Position Distribution (Fibonacci)
     private func generateSpherePositions(count: Int, radius: CGFloat) -> [CGPoint3D] {
         var positions: [CGPoint3D] = []
         let goldenRatio = (1 + sqrt(5)) / 2
@@ -242,7 +290,6 @@ struct Graph3DView: View {
         return positions
     }
     
-    // MARK: - Edge Node
     private func createEdgeNode(from: SCNVector3, to: SCNVector3) -> SCNNode {
         let source = SCNVector3(from.x, from.y, from.z)
         let target = SCNVector3(to.x, to.y, to.z)
@@ -250,9 +297,9 @@ struct Graph3DView: View {
         let vector = SCNVector3(target.x - source.x, target.y - source.y, target.z - source.z)
         let length = sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
         
-        let cylinder = SCNCylinder(radius: 0.03, height: CGFloat(length))
-        cylinder.firstMaterial?.diffuse.contents = UIColor(Color.wikiSecondary).withAlphaComponent(0.2)
-        cylinder.firstMaterial?.emission.contents = UIColor(Color.wikiAccent).withAlphaComponent(0.1)
+        let cylinder = SCNCylinder(radius: 0.05, height: CGFloat(length))
+        cylinder.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.1)
+        cylinder.firstMaterial?.emission.contents = UIColor.white.withAlphaComponent(0.05)
         
         let node = SCNNode(geometry: cylinder)
         node.position = SCNVector3(
@@ -261,7 +308,6 @@ struct Graph3DView: View {
             (source.z + target.z) / 2
         )
         
-        // Orient cylinder
         let direction = SCNVector3(vector.x / length, vector.y / length, vector.z / length)
         let up = SCNVector3(0, 1, 0)
         let cross = SCNVector3(
@@ -279,19 +325,15 @@ struct Graph3DView: View {
         return node
     }
     
-    // MARK: - Grid Floor
     private func createGridNode(size: Float, divisions: Int) -> SCNNode {
         let gridSize = CGFloat(size)
         let step = gridSize / CGFloat(divisions)
-        
         var vertices: [SCNVector3] = []
         
         for i in 0...divisions {
             let offset = -gridSize / 2 + step * CGFloat(i)
-            // X lines
             vertices.append(SCNVector3(Float(offset), 0, -size / 2))
             vertices.append(SCNVector3(Float(offset), 0, size / 2))
-            // Z lines
             vertices.append(SCNVector3(-size / 2, 0, Float(offset)))
             vertices.append(SCNVector3(size / 2, 0, Float(offset)))
         }
@@ -305,30 +347,37 @@ struct Graph3DView: View {
         let element = SCNGeometryElement(indices: indices, primitiveType: .line)
         
         let geometry = SCNGeometry(sources: [source], elements: [element])
-        geometry.firstMaterial?.diffuse.contents = UIColor(Color.wikiSecondary).withAlphaComponent(0.05)
-        geometry.firstMaterial?.emission.contents = UIColor(Color.wikiSecondary).withAlphaComponent(0.02)
+        geometry.firstMaterial?.diffuse.contents = UIColor.white.withAlphaComponent(0.1)
         
         return SCNNode(geometry: geometry)
     }
     
-    // MARK: - Camera Control
     private func resetCamera() {
         guard let camera = cameraNode else { return }
-        // Animate camera back to initial position
+        cameraDistance = 100
         SCNTransaction.begin()
-        SCNTransaction.animationDuration = 0.5
-        camera.position = SCNVector3(0, 10, Float(cameraDistance))
-        camera.eulerAngles = SCNVector3(0, 0, 0)
+        SCNTransaction.animationDuration = 0.8
+        camera.position = SCNVector3(0, 15, Float(cameraDistance))
         camera.look(at: SCNVector3(0, 0, 0))
         SCNTransaction.commit()
     }
     
-    // MARK: - Node Tap Handler
+    private func zoom(in zoomingIn: Bool) {
+        guard let camera = cameraNode else { return }
+        let factor: Float = zoomingIn ? 0.8 : 1.25
+        cameraDistance = max(20, min(300, cameraDistance * factor))
+        
+        SCNTransaction.begin()
+        SCNTransaction.animationDuration = 0.5
+        camera.position = SCNVector3(0, 15, Float(cameraDistance))
+        SCNTransaction.commit()
+    }
+    
     private func handleNodeTap(_ uuid: UUID) {
-        selectedNodeID = uuid
         if let page = store.pages.first(where: { $0.id == uuid }) {
+            selectedNodeID = uuid
             infoPage = page
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(.spring()) {
                 showNodeInfo = true
             }
         }
@@ -336,11 +385,11 @@ struct Graph3DView: View {
 
     private func updateAutoRotation() {
         guard let scene = scene else { return }
+        scene.rootNode.removeAction(forKey: "autoRotate")
         if autoRotate {
-            let rotate = SCNAction.rotateBy(x: 0, y: 0.3, z: 0, duration: 10)
-            scene.rootNode.runAction(SCNAction.repeatForever(rotate))
-        } else {
-            scene.rootNode.removeAllActions()
+            // 加快旋转速度 (从 0.5 增加到 2.0)，增加视觉动感
+            let rotate = SCNAction.rotateBy(x: 0, y: 2.0, z: 0, duration: 10)
+            scene.rootNode.runAction(SCNAction.repeatForever(rotate), forKey: "autoRotate")
         }
     }
 }
