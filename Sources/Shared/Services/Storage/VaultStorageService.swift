@@ -1,3 +1,13 @@
+// VaultStorageService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 扫描指定文件夹下的所有 Markdown 文件
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 @MainActor
@@ -8,8 +18,8 @@ struct ExternalPage {
     let lastModified: Date
 }
 
-class VaultService {
-    nonisolated(unsafe) static let shared = VaultService()
+final class VaultStorageService {
+    nonisolated(unsafe) static let shared = VaultStorageService()
     
     /// 扫描指定文件夹下的所有 Markdown 文件
     func scan(directory: URL) -> [ExternalPage] {
@@ -47,11 +57,11 @@ class VaultService {
                 lastModified: modificationDate
             )
         } catch {
-            print("Failed to process external file \(url): \(error)")
+            LogService.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to process external file \(url): \(error.localizedDescription)")
             return nil
         }
     }
-    
+
     private func extractTitle(from content: String) -> String? {
         let lines = content.components(separatedBy: .newlines)
         for line in lines {
@@ -62,7 +72,7 @@ class VaultService {
         }
         return nil
     }
-    
+
     /// 存储书签以备持久化访问 (macOS)
     #if os(macOS)
     func storeBookmark(for url: URL) {
@@ -70,7 +80,7 @@ class VaultService {
             let data = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
             UserDefaults.standard.set(data, forKey: "vault_bookmark_\(url.lastPathComponent)")
         } catch {
-            print("Failed to create bookmark: \(error)")
+            LogService.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to create bookmark: \(error.localizedDescription)")
         }
     }
 
@@ -84,7 +94,7 @@ class VaultService {
             }
             return url
         } catch {
-            print("Failed to resolve bookmark: \(error)")
+            LogService.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to resolve bookmark: \(error.localizedDescription)")
             return nil
         }
     }

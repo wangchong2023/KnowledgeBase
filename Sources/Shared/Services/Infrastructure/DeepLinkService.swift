@@ -1,3 +1,13 @@
+// DeepLinkService.swift
+//
+// 作者: Wang Chong
+// 功能说明: Handles deep links, universal links, and Spotlight indexing for Knowledge Base pages.
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import CoreSpotlight
 
@@ -82,7 +92,7 @@ final class DeepLinkService: ObservableObject {
         
         CSSearchableIndex.default().indexSearchableItems(searchableItems) { error in
             if let error = error {
-                print(String(format: Localized.tr("deepLink.log.indexingFailed"), error.localizedDescription))
+                print(String(format: L10n.Common.tr("deepLink.log.indexingFailed"), error.localizedDescription))
             }
         }
     }

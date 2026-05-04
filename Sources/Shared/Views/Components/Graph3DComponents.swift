@@ -1,3 +1,14 @@
+// Graph3DComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: SceneKit 视图的可点击封装，支持节点点击检测
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import SceneKit
 #if canImport(UIKit)
@@ -12,7 +23,7 @@ import AppKit
 @MainActor
 struct TappableSceneView: UIViewRepresentable {
     let scene: SCNScene?
-    let onNodeTap: (UUID) -> Void
+    let onNodeTap: (UUID?) -> Void
 
     func makeUIView(context: Context) -> SCNView {
         let scnView = SCNView()
@@ -44,8 +55,8 @@ struct TappableSceneView: UIViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(onNodeTap: onNodeTap) }
 
     @MainActor class Coordinator: NSObject {
-        let onNodeTap: (UUID) -> Void
-        init(onNodeTap: @escaping (UUID) -> Void) { self.onNodeTap = onNodeTap }
+        let onNodeTap: (UUID?) -> Void
+        init(onNodeTap: @escaping (UUID?) -> Void) { self.onNodeTap = onNodeTap }
 
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             guard let scnView = gesture.view as? SCNView,
@@ -60,13 +71,14 @@ struct TappableSceneView: UIViewRepresentable {
                     onNodeTap(uuid); return
                 }
             }
+            onNodeTap(nil)
         }
     }
 }
 #elseif canImport(AppKit)
 struct TappableSceneView: NSViewRepresentable {
     let scene: SCNScene?
-    let onNodeTap: (UUID) -> Void
+    let onNodeTap: (UUID?) -> Void
 
     func makeNSView(context: Context) -> SCNView {
         let scnView = SCNView()
@@ -92,8 +104,8 @@ struct TappableSceneView: NSViewRepresentable {
     func makeCoordinator() -> Coordinator { Coordinator(onNodeTap: onNodeTap) }
 
     class Coordinator: NSObject {
-        let onNodeTap: (UUID) -> Void
-        init(onNodeTap: @escaping (UUID) -> Void) { self.onNodeTap = onNodeTap }
+        let onNodeTap: (UUID?) -> Void
+        init(onNodeTap: @escaping (UUID?) -> Void) { self.onNodeTap = onNodeTap }
 
         @objc func handleTap(_ gesture: NSClickGestureRecognizer) {
             guard let scnView = gesture.view as? SCNView,
@@ -108,6 +120,7 @@ struct TappableSceneView: NSViewRepresentable {
                     onNodeTap(uuid); return
                 }
             }
+            onNodeTap(nil)
         }
     }
 }
@@ -213,7 +226,7 @@ struct Graph3DControlsOverlay: View {
                 .overlay(alignment: .bottomTrailing) {
                     if showFilterPopup {
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(Localized.tr("graph.filter"))
+                            Text(L10n.Graph.tr("filter"))
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundStyle(.wikiSecondary)
                                 .padding(.horizontal, 12)
@@ -228,7 +241,7 @@ struct Graph3DControlsOverlay: View {
                                         HStack {
                                             Image(systemName: "square.grid.2x2")
                                                 .font(.system(size: 12))
-                                            Text(Localized.tr("graph.all"))
+                                            Text(L10n.Graph.tr("all"))
                                                 .font(.system(size: 13))
                                             Spacer()
                                             if filterType == nil {
@@ -321,7 +334,7 @@ struct Graph3DNodeInfoBar: View {
             Spacer()
 
             Button(action: onViewPage) {
-                Text(Localized.tr("graph3d.viewPage"))
+                Text(L10n.Graph.ThreeD.tr("viewPage"))
                     .font(.caption.weight(.medium))
                     .foregroundStyle(.wikiAccent)
                     .padding(.horizontal, 12)

@@ -1,3 +1,13 @@
+// PluginRegistry.swift
+//
+// 作者: Wang Chong
+// 功能说明: 插件注册中心 (L2 层：中枢管理)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 
@@ -10,9 +20,8 @@ final class PluginRegistry: ObservableObject {
     private var intercepters: [InterceptionPlugin] = []
     
     // 注入分析服务
-    var analytics: AnalyticsServiceProtocol?
+    var analytics: (any AnalyticsServiceProtocol)?
     
-    // 数据提供者：用于将核心数据（如页面列表）安全传递给沙盒
     // 数据提供者：用于将核心数据（如页面列表）安全传递给沙盒
     var pagesProvider: (@Sendable () -> [WikiPage])?
     
@@ -28,6 +37,16 @@ final class PluginRegistry: ObservableObject {
     private let throttlingWindow: TimeInterval = 60.0 // 1分钟
     
     private init() {}
+    
+    /// 重置注册中心状态（仅用于测试）
+    func reset() {
+        for plugin in plugins {
+            plugin.onUnload()
+        }
+        plugins.removeAll()
+        intercepters.removeAll()
+        pluginCallCounts.removeAll()
+    }
     
     func loadPlugin(_ plugin: KnowledgePlugin) {
         // 版本兼容性检查
@@ -61,7 +80,7 @@ final class PluginRegistry: ObservableObject {
                 LogService.shared.error("🛡️ [安全拦截] 插件 \(manifest.id) 尝试调用 LLM，但未在 manifest 中声明 'llm' 权限。", error: nil)
                 return nil
             }
-            return try? await ServiceContainer.shared.resolve(LLMServiceProtocol.self).generate(prompt: prompt, systemPrompt: "你是一个智能插件辅助助手")
+            return try? await ServiceContainer.shared.resolve((any LLMServiceProtocol).self).generate(prompt: prompt, systemPrompt: "你是一个智能插件辅助助手")
         }
         
         func queryPages(matching query: String) async -> [WikiPage] {
@@ -114,23 +133,28 @@ final class PluginRegistry: ObservableObject {
                 continue
             }
 
-            let processed = intercepter.preProcess(content: result)
-            
-            let duration = CFAbsoluteTimeGetCurrent() - start
-            
-            if duration > pluginTimeout {
-                LogService.shared.error("⚠️ [熔断警告] 插件 \(intercepter.manifest.name) 执行超时 (\(String(format: "%.2f", duration))s)，将被限制。")
-                analytics?.trackEvent("plugin_circuit_break", properties: ["id": intercepter.manifest.id, "duration": duration])
+            do {
+                let processed = try intercepter.preProcess(content: result)
+                let duration = CFAbsoluteTimeGetCurrent() - start
+                
+                if duration > pluginTimeout {
+                    LogService.shared.error("⚠️ [熔断警告] 插件 \(intercepter.manifest.name) 执行超时 (\(String(format: "%.2f", duration))s)，将被限制。")
+                    analytics?.trackEvent("plugin_circuit_break", properties: ["id": intercepter.manifest.id, "duration": duration])
+                }
+                
+                result = processed
+                
+                // 埋点：插件执行成功，记录时长
+                analytics?.trackEvent("plugin_intercepted", properties: [
+                    "id": intercepter.manifest.id,
+                    "duration": duration,
+                    "type": "preProcess"
+                ])
+            } catch {
+                LogService.shared.error("🛡️ [崩溃隔离] 插件 \(intercepter.manifest.name) 执行异常，已自动跳过。", error: error)
+                analytics?.trackEvent("plugin_crash", properties: ["id": intercepter.manifest.id, "error": error.localizedDescription])
+                // 继续下一个插件，不中断主流程
             }
-            
-            result = processed
-            
-            // 埋点：插件执行成功，记录时长
-            analytics?.trackEvent("plugin_intercepted", properties: [
-                "id": intercepter.manifest.id,
-                "duration": duration,
-                "type": "preProcess"
-            ])
         }
         
         return result

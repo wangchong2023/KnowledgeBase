@@ -1,3 +1,14 @@
+// PageDetailView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 页面详情视图
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 页面详情视图
@@ -20,23 +31,16 @@ import SwiftUI
 /// - 支持通过 NavigationLink 跳转到其他页面
 /// - 点击页面内容中的链接会导航到对应页面
 struct PageDetailView: View {
-    @State var page: WikiPage
+    @State private var viewModel: PageDetailViewModel
     var heroNamespace: Namespace.ID? = nil
     @Environment(KMStore.self) var store  ///< 全局知识库存储
-    @State private var isEditing = false  ///< 是否处于编辑模式
-    @State private var showBacklinks = false  ///< 是否显示反向链接面板
-    @State private var showDeleteConfirmation = false  ///< 是否显示删除确认对话框
-    @State private var showAliasEditor = false  ///< 是否显示别名编辑输入框
-    @State private var newAlias = ""  ///< 新增别名输入框的内容
-    @State private var showIconPicker = false  ///< 是否显示图标选择器
-    @State private var showSnapshotHistory = false ///< 是否显示快照历史
-    @State private var isLoadingAI = false ///< AI 加载状态
-    @State private var aiResult: String? ///< AI 结果展示
-    @State private var activeQuiz: QuizModel? = nil ///< 当前活跃的测验模型
-    
-    var backlinks: [WikiPage] {
-        store.pages.filter { $0.outgoingLinks.contains(page.title) }
-    }  ///< 计算属性：获取所有引用当前页面的反向链接页面
+    @Environment(AIWorkflowStore.self) var aiStore ///< AI 工作流存储
+    @Environment(AppRouter.self) var router     ///< 路由管理器
+
+    init(page: WikiPage, heroNamespace: Namespace.ID? = nil) {
+        self.heroNamespace = heroNamespace
+        self._viewModel = State(initialValue: PageDetailViewModel(page: page))
+    }
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
@@ -56,66 +60,62 @@ struct PageDetailView: View {
     }
     
     private var pinButton: some View {
-        Button(action: {
-            HapticManager.shared.trigger(.selection)
-            page.isPinned.toggle()
-            store.updatePage(page, forceDeepScan: false)
-        }) {
-            Image(systemName: page.isPinned ? "pin.fill" : "pin")
-                .foregroundStyle(page.isPinned ? .wikiComparison : .wikiSecondary)
+        Button(action: { viewModel.togglePin() }) {
+            Image(systemName: viewModel.page.isPinned ? "pin.fill" : "pin")
+                .foregroundStyle(viewModel.page.isPinned ? .wikiComparison : .wikiSecondary)
         }
-        .accessibilityLabel(page.isPinned ? Localized.tr("page.unpin") : Localized.tr("page.pin"))
+        .accessibilityLabel(viewModel.page.isPinned ? Localized.tr("page.unpin") : Localized.tr("page.pin"))
     }
     
     private var backlinksButton: some View {
-        Button(action: { showBacklinks.toggle() }) {
+        Button(action: { viewModel.showBacklinks.toggle() }) {
             HStack(spacing: 4) {
                 Image(systemName: "link")
-                Text("\(backlinks.count)")
+                Text("\(viewModel.backlinks.count)")
             }
             .foregroundStyle(.wikiText)
         }
         .accessibilityLabel(Localized.tr("page.backlinks"))
-        .accessibilityValue(Localized.trf("page.backlinksCount", backlinks.count))
+        .accessibilityValue(Localized.trf("page.backlinksCount", viewModel.backlinks.count))
     }
     
     private var editButton: some View {
         Button(action: {
             HapticManager.shared.trigger(.selection)
-            if isEditing {
-                store.updatePage(page, forceDeepScan: false)
+            if viewModel.isEditing {
+                store.updatePage(viewModel.page, forceDeepScan: false)
             }
-            isEditing.toggle()
+            viewModel.isEditing.toggle()
         }) {
-            Image(systemName: isEditing ? "checkmark.circle.fill" : "pencil.circle.fill")
-                .foregroundStyle(isEditing ? .green : .wikiText)
+            Image(systemName: viewModel.isEditing ? "checkmark.circle.fill" : "pencil.circle.fill")
+                .foregroundStyle(viewModel.isEditing ? .green : .wikiText)
         }
-        .accessibilityLabel(isEditing ? Localized.tr("page.doneEditing") : Localized.tr("page.edit"))
+        .accessibilityLabel(viewModel.isEditing ? Localized.tr("page.doneEditing") : Localized.tr("page.edit"))
     }
     
     private var aiMenuButton: some View {
         Menu {
-            Button(action: { runAISummary() }) {
+            Button(action: { aiStore.runPageAISummary(content: viewModel.page.content) }) {
                 Label(Localized.tr("page.ai.summary"), systemImage: "wand.and.stars")
             }
-            Button(action: { extractActions() }) {
+            Button(action: { aiStore.extractPageActions(content: viewModel.page.content) }) {
                 Label(Localized.tr("page.ai.extractActions"), systemImage: "checkmark.seal")
             }
-            
+
             Menu {
-                Button(action: { synthesize(.mindmap) }) {
+                Button(action: { aiStore.performPageSynthesis(type: .mindmap, title: viewModel.page.title, content: viewModel.page.content) }) {
                     Label(Localized.tr("page.ai.mindmap"), systemImage: "rectangle.stack.badge.person.crop")
                 }
-                Button(action: { synthesize(.quiz) }) {
+                Button(action: { aiStore.performPageSynthesis(type: .quiz, title: viewModel.page.title, content: viewModel.page.content) }) {
                     Label(Localized.tr("page.ai.quiz"), systemImage: "questionmark.circle")
                 }
-                Button(action: { synthesize(.slides) }) {
+                Button(action: { aiStore.performPageSynthesis(type: .slides, title: viewModel.page.title, content: viewModel.page.content) }) {
                     Label(Localized.tr("page.ai.slides"), systemImage: "play.rectangle")
                 }
-                Button(action: { synthesize(.report) }) {
+                Button(action: { aiStore.performPageSynthesis(type: .report, title: viewModel.page.title, content: viewModel.page.content) }) {
                     Label(Localized.tr("page.ai.report"), systemImage: "doc.text.magnifyingglass")
                 }
-                Button(action: { synthesize(.infographic) }) {
+                Button(action: { aiStore.performPageSynthesis(type: .infographic, title: viewModel.page.title, content: viewModel.page.content) }) {
                     Label(Localized.tr("page.ai.infographic"), systemImage: "chart.bar.doc.horizontal")
                 }
             } label: {
@@ -123,7 +123,7 @@ struct PageDetailView: View {
             }
             
             Divider()
-            Button(action: { showSnapshotHistory = true }) {
+            Button(action: { viewModel.showSnapshotHistory = true }) {
                 Label(Localized.tr("page.history"), systemImage: "clock.arrow.circlepath")
             }
             Button(action: { expandStub() }) {
@@ -136,7 +136,7 @@ struct PageDetailView: View {
             Image(systemName: "sparkles.circle.fill")
                 .foregroundStyle(.wikiAccent)
         }
-        .disabled(isEditing)
+        .disabled(viewModel.isEditing)
     }
     
     private var moreMenu: some View {
@@ -148,13 +148,13 @@ struct PageDetailView: View {
             Divider()
             
             // 导出当前页面为 Markdown 文件 (支持 AirDrop, 微信, 邮件等)
-            if let fileURL = exportMarkdownFile() {
-                ShareLink(item: fileURL, preview: SharePreview(page.title, image: Image(systemName: "doc.text"))) {
-                    Label(Localized.tr("export.header"), systemImage: "square.and.arrow.up")
+            if let fileURL = store.exportPageAsMarkdown(viewModel.page) {
+                ShareLink(item: fileURL, preview: SharePreview(viewModel.page.title, image: Image(systemName: "doc.text"))) {
+                    Label(L10n.Transfer.tr("export.header"), systemImage: "square.and.arrow.up")
                 }
             }
-            Button(action: { copyToClipboard() }) {
-                Label(Localized.tr("misc.copy"), systemImage: "doc.on.doc")
+            Button(action: { store.copyPageToClipboard(viewModel.page); HapticManager.shared.trigger(.success) }) {
+                Label(L10n.Common.tr("copy"), systemImage: "doc.on.doc")
             }
             
             Divider()
@@ -168,26 +168,23 @@ struct PageDetailView: View {
     private var typeSubmenu: some View {
         Menu {
             ForEach(PageType.allCases) { type in
-                Button(action: {
-                    page.type = type
-                    store.updatePage(page, forceDeepScan: false)
-                }) {
+                Button(action: { viewModel.updateType(type) }) {
                     Label(type.displayName, systemImage: type.icon)
                 }
             }
         } label: {
-            Label(Localized.tr("page.type"), systemImage: page.displayIcon)
+            Label(Localized.tr("page.type"), systemImage: viewModel.page.displayIcon)
         }
     }
     
     private var iconMenuItem: some View {
-        Button(action: { showIconPicker = true }) {
+        Button(action: { viewModel.showIconPicker = true }) {
             HStack {
-                Image(systemName: page.displayIcon)
+                Image(systemName: viewModel.page.displayIcon)
                 Text(Localized.tr("page.icon"))
-                if page.customIcon != nil {
+                if viewModel.page.customIcon != nil {
                     Spacer()
-                    Text(Localized.tr("editor.iconCustomized"))
+                    Text(L10n.Editor.tr("iconCustomized"))
                         .foregroundStyle(.secondary)
                 }
             }
@@ -197,36 +194,30 @@ struct PageDetailView: View {
     private var statusSubmenu: some View {
         Menu {
             ForEach(PageStatus.allCases, id: \.self) { status in
-                Button(action: {
-                    page.status = status
-                    store.updatePage(page, forceDeepScan: false)
-                }) {
+                Button(action: { viewModel.updateStatus(status) }) {
                     Label(status.displayName, systemImage: "circle.fill")
                         .foregroundStyle(status.color)
                 }
             }
         } label: {
-            Label(Localized.trf("page.statusFormat", page.status.displayName), systemImage: "flag.fill")
+            Label(Localized.trf("page.statusFormat", viewModel.page.status.displayName), systemImage: "flag.fill")
         }
     }
     
     private var confidenceSubmenu: some View {
         Menu {
             ForEach(Confidence.allCases, id: \.self) { conf in
-                Button(action: {
-                    page.confidence = conf
-                    store.updatePage(page, forceDeepScan: false)
-                }) {
+                Button(action: { viewModel.updateConfidence(conf) }) {
                     Label(conf.displayName, systemImage: "signal")
                 }
             }
         } label: {
-            Label(Localized.trf("page.confidenceFormat", page.confidence.displayName), systemImage: "signal")
+            Label(Localized.trf("page.confidenceFormat", viewModel.page.confidence.displayName), systemImage: "signal")
         }
     }
     
     private var deleteButton: some View {
-        Button(role: .destructive, action: { showDeleteConfirmation = true }) {
+        Button(role: .destructive, action: { viewModel.showDeleteConfirmation = true }) {
             Label(Localized.tr("page.deletePage"), systemImage: "trash")
         }
     }
@@ -235,7 +226,7 @@ struct PageDetailView: View {
         ZStack(alignment: .top) {
             // Immersive Background
             LinearGradient(
-                colors: [page.type.themedColor.opacity(0.08), Color.wikiBackground],
+                colors: [viewModel.page.type.themedColor.opacity(0.08), Color.wikiBackground],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -245,14 +236,14 @@ struct PageDetailView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // Content
                     Group {
-                        if isEditing {
-                            MarkdownEditorView(page: $page, isEditing: $isEditing)
+                        if viewModel.isEditing {
+                            MarkdownEditorView(page: $viewModel.page, isEditing: $viewModel.isEditing)
                                 .padding(.top, 20)
-                        } else if page.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        } else if viewModel.page.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             // 空内容占位提示
                             emptyStateView
                         } else {
-                            MarkdownRendererView(content: page.content, isPrivate: page.isPrivate, onLinkTap: { title in
+                            MarkdownRendererView(content: viewModel.page.content, isPrivate: viewModel.page.isPrivate, onLinkTap: { title in
                                 navigateToPage(title)
                             })
                             .padding(.vertical)
@@ -287,52 +278,53 @@ struct PageDetailView: View {
 #endif
         // Register navigationDestination so NavigationLink(value: WikiPage) works
         // both in the Graph tab's NavigationStack and elsewhere.
-        .navigationDestination(for: WikiPage.self) { destination in
-            PageDetailView(page: destination, heroNamespace: heroNamespace)
-                .environment(\.navigate, navigate)
+        .navigationDestination(for: AppRoute.self) { route in
+            ViewFactory.makeView(for: route)
         }
         .toolbar { toolbarContent }
-        .confirmationDialog(Localized.tr("page.confirmDelete"), isPresented: $showDeleteConfirmation) {
-            Button(Localized.trf("page.deletePageTitle", page.title), role: .destructive) {
-                store.deletePage(page)
+        .confirmationDialog(Localized.tr("page.confirmDelete"), isPresented: $viewModel.showDeleteConfirmation) {
+            Button(Localized.trf("page.deletePageTitle", viewModel.page.title), role: .destructive) {
+                viewModel.deletePage()
             }
-            Button(Localized.tr("misc.cancel"), role: .cancel) {}
+            Button(L10n.Common.tr("cancel"), role: .cancel) {}
         } message: {
             Text(Localized.tr("page.deleteMessage"))
         }
-        .sheet(isPresented: $showBacklinks) {
-            BacklinksView(page: page)
+        .sheet(isPresented: $viewModel.showBacklinks) {
+            BacklinksView(page: viewModel.page)
         }
-        .sheet(isPresented: $showIconPicker) {
+        .sheet(isPresented: $viewModel.showIconPicker) {
             NavigationStack {
                 IconPickerView(selectedIcon: Binding(
-                    get: { page.customIcon },
+                    get: { viewModel.page.customIcon },
                     set: { newIcon in
-                        page.customIcon = newIcon
-                        store.updatePage(page, forceDeepScan: false)
+                        var updated = viewModel.page
+                        updated.customIcon = newIcon
+                        store.updatePage(updated, forceDeepScan: false)
+                        viewModel.page = updated
                     }
                 ))
             }
         }
-        .onChange(of: page) { _, newValue in
-            if !isEditing {
+        .onChange(of: viewModel.page) { _, newValue in
+            if !viewModel.isEditing {
                 store.updatePage(newValue, forceDeepScan: false)
             }
         }
         .safeAreaInset(edge: .top) {
             VStack(spacing: 0) {
                 // 空间导航面包屑
-                if !store.navigationHistory.isEmpty {
-                    BreadcrumbView(history: store.navigationHistory) { id in
+                if !router.navigationHistory.isEmpty {
+                    BreadcrumbView(history: router.navigationHistory) { id in
                         if let target = store.pages.first(where: { $0.id == id }) {
                             navigateToPage(target.title)
                         }
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                 }
-                
-                PageDetailHeader(page: page, heroNamespace: heroNamespace)
-                    .padding(.top, store.navigationHistory.isEmpty ? 10 : 0)
+
+                PageDetailHeader(page: viewModel.page, heroNamespace: heroNamespace)
+                    .padding(.top, router.navigationHistory.isEmpty ? 10 : 0)
                     .background(.ultraThinMaterial)
             }
             .frame(maxWidth: 800)
@@ -341,16 +333,22 @@ struct PageDetailView: View {
                 alignment: .bottom
             )
         }
-        .sheet(isPresented: $showSnapshotHistory) {
-            PageHistoryView(page: page)
+        .sheet(isPresented: $viewModel.showSnapshotHistory) {
+            PageHistoryView(page: viewModel.page)
         }
-        .quizPresentation(activeQuiz: $activeQuiz)
+        .onAppear {
+            router.addToHistory(viewModel.page)
+        }
+        .onChange(of: viewModel.page) { _, newValue in
+            router.addToHistory(newValue)
+        }
+        .quizPresentation(activeQuiz: Binding(get: { aiStore.activeQuiz }, set: { aiStore.activeQuiz = $0 }))
     }
     
     // MARK: - AI Result Display Section
     @ViewBuilder
     private var aiResultDisplaySection: some View {
-        if isLoadingAI || aiResult != nil {
+        if aiStore.isProcessingPageAI || aiStore.activePageAIResult != nil {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Image(systemName: "sparkles")
@@ -359,15 +357,15 @@ struct PageDetailView: View {
                         .font(.headline)
                         .foregroundStyle(.wikiText)
                     Spacer()
-                    if !isLoadingAI {
-                        if let result = aiResult, result.contains("- ") {
+                    if !aiStore.isProcessingPageAI {
+                        if let result = aiStore.activePageAIResult, result.contains("- ") {
                             Button(action: {
                                 Task {
                                     @Inject var workflowService: WorkflowService
-                                    try? await workflowService.syncToReminders(text: result, title: page.title)
+                                    try? await workflowService.syncToReminders(text: result, title: viewModel.page.title)
                                 }
                             }) {
-                                Label(Localized.tr("misc.syncToReminders"), systemImage: "checklist")
+                                Label(L10n.Common.tr("syncToReminders"), systemImage: "checklist")
                                     .font(.caption)
                                     .foregroundStyle(.wikiAccent)
                             }
@@ -375,7 +373,7 @@ struct PageDetailView: View {
                         }
                         
                         Button(action: { 
-                            WikiPasteboard.string = aiResult
+                            WikiPasteboard.string = aiStore.activePageAIResult
                             HapticManager.shared.trigger(.success)
                         }) {
                             Image(systemName: "doc.on.doc")
@@ -383,7 +381,7 @@ struct PageDetailView: View {
                                 .foregroundStyle(.wikiSecondary)
                         }
                         
-                        Button(action: { aiResult = nil }) {
+                        Button(action: { aiStore.activePageAIResult = nil }) {
                             Image(systemName: "xmark.circle")
                                 .font(.caption)
                                 .foregroundStyle(.wikiSecondary)
@@ -391,13 +389,13 @@ struct PageDetailView: View {
                     }
                 }
                 
-                if isLoadingAI {
+                if aiStore.isProcessingPageAI {
                     VStack(alignment: .leading, spacing: 12) {
                         SkeletonBox(width: 200, height: 20)
                         SkeletonBox(height: 120)
                         SkeletonBox(height: 60)
                     }
-                } else if let result = aiResult {
+                } else if let result = aiStore.activePageAIResult {
                     MarkdownRendererView(content: result, isPrivate: false, onLinkTap: { text in
                         navigateToPage(text)
                     })
@@ -439,7 +437,7 @@ struct PageDetailView: View {
     // MARK: - Provenance Section
     private var provenanceSection: some View {
         Group {
-            if let sourceURL = page.sourceURL, let url = URL(string: sourceURL) {
+            if let sourceURL = viewModel.page.sourceURL, let url = URL(string: sourceURL) {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Image(systemName: "safari")
@@ -465,7 +463,7 @@ struct PageDetailView: View {
                             .lineLimit(1)
                             .truncationMode(.middle)
                         
-                        if let snippet = page.rawTextSnippet, !snippet.isEmpty {
+                        if let snippet = viewModel.page.rawTextSnippet, !snippet.isEmpty {
                             Text(snippet)
                                 .font(.system(size: 11, design: .monospaced))
                                 .foregroundStyle(.wikiSecondary)
@@ -499,14 +497,14 @@ struct PageDetailView: View {
                 
                 Spacer()
                 
-                if isEditing {
-                    Text(Localized.tr("misc.dragToSort"))
+                if viewModel.isEditing {
+                    Text(L10n.Common.tr("dragToSort"))
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
                 }
             }
             
-            let relatedPages = page.relatedPageIDs.compactMap { id in
+            let relatedPages = viewModel.page.relatedPageIDs.compactMap { id in
                 store.pages.first(where: { $0.id == id })
             }
             
@@ -524,7 +522,7 @@ struct PageDetailView: View {
                             Text(related.title)
                                 .font(.subheadline)
                             Spacer()
-                            if isEditing {
+                            if viewModel.isEditing {
                                 Image(systemName: "line.3.horizontal")
                                     .foregroundStyle(.wikiBorder)
                             }
@@ -535,7 +533,7 @@ struct PageDetailView: View {
                         .onDrag {
                             return NSItemProvider(object: related.id.uuidString as NSString)
                         }
-                        .onDrop(of: [.text], delegate: RelatedPageDropDelegate(item: related, page: $page))
+                        .onDrop(of: [.text], delegate: RelatedPageDropDelegate(item: related, page: $viewModel.page))
                     }
                 }
             }
@@ -545,7 +543,7 @@ struct PageDetailView: View {
 
     // MARK: - AI Contextual Sparks (Predictive Context)
     private var semanticRecommendationsSection: some View {
-        let recommendations = store.findSimilarPages(for: page)
+        let recommendations = aiStore.findSimilarPages(for: viewModel.page)
         
         return Group {
             if !recommendations.isEmpty {
@@ -596,7 +594,7 @@ struct PageDetailView: View {
     
     // MARK: - Recommendation Row
     private func recommendationRow(for recPage: WikiPage) -> some View {
-        NavigationLink(value: recPage) {
+        NavigationLink(value: AppRoute.pageDetail(id: recPage.id)) {
             HStack {
                 Image(systemName: recPage.displayIcon)
                     .foregroundStyle(recPage.type.themedColor)
@@ -633,19 +631,19 @@ struct PageDetailView: View {
                 Text(Localized.tr("page.backlinks"))
                     .font(.headline)
                     .foregroundStyle(.wikiText)
-                Text("(\(backlinks.count))")
+                Text("(\(viewModel.backlinks.count)")
                     .font(.subheadline)
                     .foregroundStyle(.wikiSecondary)
             }
             
-            if backlinks.isEmpty {
+            if viewModel.backlinks.isEmpty {
                 Text(Localized.tr("page.noBackLinks"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                     .padding(.vertical, 8)
             } else {
-                ForEach(backlinks) { linkedPage in
-                    NavigationLink(value: linkedPage) {
+                ForEach(viewModel.backlinks) { linkedPage in
+                    NavigationLink(value: AppRoute.pageDetail(id: linkedPage.id)) {
                         HStack(spacing: 10) {
                             Image(systemName: linkedPage.displayIcon)
                                 .foregroundStyle(linkedPage.type.themedColor)
@@ -677,119 +675,19 @@ struct PageDetailView: View {
         .padding()
     }
     
-    // MARK: - AI Actions Implementation
-    
-    private func runAISummary() {
-        ToastManager.shared.show(type: .processing, message: Localized.tr("misc.aiThinking"), duration: 0)
-        Task {
-            isLoadingAI = true
-            defer { 
-                isLoadingAI = false
-                ToastManager.shared.dismiss()
-            }
-            do {
-                let summary = try await AISynthesisService.shared.summarize(content: page.content)
-                aiResult = summary
-                HapticManager.shared.trigger(.success)
-            } catch {
-                ToastManager.shared.show(type: .error, message: error.localizedDescription)
-            }
-        }
-    }
-    
-    private func extractActions() {
-        ToastManager.shared.show(type: .processing, message: Localized.tr("misc.aiThinking"), duration: 0)
-        Task {
-            isLoadingAI = true
-            defer { 
-                isLoadingAI = false
-                ToastManager.shared.dismiss()
-            }
-            do {
-                let actions = try await AISynthesisService.shared.extractActions(content: page.content)
-                aiResult = actions
-                HapticManager.shared.trigger(.success)
-            } catch {
-                ToastManager.shared.show(type: .error, message: error.localizedDescription)
-            }
-        }
-    }
-    
-    enum SynthesisType {
-        case mindmap, quiz, slides, report, infographic
-    }
-    
-    private func synthesize(_ type: SynthesisType) {
-        let title: String
-        switch type {
-        case .mindmap: title = Localized.tr("action.generateMindmap")
-        case .quiz: title = Localized.tr("action.generateQuiz")
-        case .slides: title = Localized.tr("action.generateSlides")
-        case .report: title = Localized.tr("action.generateReport")
-        case .infographic: title = Localized.tr("action.generateInfographic")
-        }
-        
-        let taskID = TaskCenter.shared.addTask(type: .ai, name: title, target: page.title)
-        
-        ToastManager.shared.show(type: .processing, message: Localized.tr("misc.aiThinking"), duration: 0)
-        Task {
-            isLoadingAI = true
-            defer { 
-                isLoadingAI = false
-                ToastManager.shared.dismiss()
-            }
-            do {
-                let result: String
-                switch type {
-                case .mindmap: result = try await AISynthesisService.shared.generateMindMap(content: page.content)
-                case .quiz: result = try await AISynthesisService.shared.generateQuiz(content: page.content)
-                case .slides: result = try await AISynthesisService.shared.generatePresentation(content: page.content)
-                case .report: result = try await AISynthesisService.shared.generateReport(content: page.content)
-                case .infographic: result = try await AISynthesisService.shared.generateInfographic(content: page.content)
-                }
-                
-                TaskCenter.shared.updateTask(taskID, status: .completed)
-                
-                if type == .quiz {
-                    // 尝试解析 JSON
-                    if let data = result.data(using: .utf8),
-                       let quiz = try? JSONDecoder().decode(QuizModel.self, from: data) {
-                        activeQuiz = quiz
-                    } else {
-                        aiResult = result // 解析失败则降级显示文本
-                    }
-                } else {
-                    aiResult = result
-                }
-            } catch {
-                TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
-                print("Synthesis failed: \(error)")
-            }
-        }
-    }
-    
     private func expandStub() {
         // Implementation logic: Ask LLM to fill missing details based on context
-        print("Expanding stub for \(page.title)")
     }
-    
+
     private func findRelatedLinks() {
         // Implementation logic: Trigger a partial AI Link Scan for this page
-        print("Finding related links for \(page.title)")
-        store.runPartialAIScan(for: page)
+        Task { await aiStore.runAIScan() }
     }
 
-    // MARK: - Navigation
-
     /// 根据页面标题导航到对应页面
-    /// 导航到指定页面
-    /// - Parameter title: 目标页面的标题
-    /// - Note: 如果找不到对应页面，则不进行导航。属于“智元”核心导航逻辑。
-    @Environment(\.navigate) private var navigate
-    
     private func navigateToPage(_ title: String) {
         if let target = store.pages.first(where: { $0.title == title }) {
-            navigate(target)
+            router.navigate(to: .pageDetail(id: target.id))
         }
     }
 }
@@ -869,7 +767,7 @@ struct SnapshotHistoryView: View {
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.close")) { dismiss() }
+                    Button(L10n.Common.tr("close")) { dismiss() }
                 }
             }
             .sheet(item: $selectedSnapshot) { snapshot in
@@ -919,7 +817,7 @@ private struct SnapshotDetailView: View {
                 
                 HStack(spacing: 16) {
                     Button(action: { dismiss() }) {
-                        Text(Localized.tr("misc.cancel"))
+                        Text(L10n.Common.tr("cancel"))
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.wikiCard)
@@ -949,43 +847,4 @@ private struct SnapshotDetailView: View {
     }
 }
 
-// MARK: - Export Helpers
-extension PageDetailView {
-    /// 将页面内容导出为临时 Markdown 文件 URL，以便支持系统级分享（AirDrop, 微信等）
-    private func exportMarkdownFile() -> URL? {
-        let content = """
-        ---
-        title: \(page.title)
-        type: \(page.type.rawValue)
-        tags: \(page.tags.joined(separator: ", "))
-        ---
-        
-        # \(page.title)
-        
-        \(page.content)
-        """
-        
-        // 清理文件名中的非法字符
-        let safeTitle = page.title.components(separatedBy: CharacterSet.alphanumerics.inverted).joined(separator: "_")
-        let fileName = "\(safeTitle).md"
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
-        
-        do {
-            try content.write(to: tempURL, atomically: true, encoding: .utf8)
-            return tempURL
-        } catch {
-            return nil
-        }
-    }
-    
-    private func copyToClipboard() {
-        let content = """
-        # \(page.title)
-        
-        \(page.content)
-        """
-        WikiPasteboard.string = content
-        HapticManager.shared.trigger(.success)
-    }
-}
 

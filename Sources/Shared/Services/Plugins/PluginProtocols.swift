@@ -1,3 +1,13 @@
+// PluginProtocols.swift
+//
+// 作者: Wang Chong
+// 功能说明: 插件元数据定义
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 /// 插件元数据定义
@@ -10,18 +20,18 @@ struct PluginManifest: Codable {
 
 /// 插件权限定义
 enum PluginPermission: String, Codable {
-    case readContent   // 读取内容
-    case writeContent  // 修改内容
-    case network       // 网络访问
-    case aiAccess      // 调用 LLM 服务
+    case readContent = "readContent"    // 读取内容
+    case writeContent = "writeContent"  // 修改内容
+    case network = "network"            // 网络访问
+    case aiAccess = "aiAccess"          // 调用 LLM 服务
 }
 
 /// 插件商业化信息
 struct MonetizationInfo: Codable {
     enum Model: String, Codable {
-        case free       // 免费
-        case donation   // 赞助/打赏
-        case subscription // 订阅
+        case free = "free"               // 免费
+        case donation = "donation"       // 赞助/打赏
+        case subscription = "subscription" // 订阅
     }
     var model: Model
     var supportURL: String? // 打赏链接或订阅主页
@@ -52,10 +62,10 @@ protocol KnowledgePlugin: AnyObject {
 /// 拦截钩子插件：允许插件干扰核心业务逻辑
 protocol InterceptionPlugin: KnowledgePlugin {
     /// 在内容入库前执行（例如：执行正则清洗、敏感词过滤）
-    func preProcess(content: String) -> String
+    func preProcess(content: String) throws -> String
     
     /// 在内容渲染前执行（例如：将特定语法转化为自定义视图）
-    func postProcess(content: String) -> String
+    func postProcess(content: String) throws -> String
 }
 
 /// 分析服务协议：用于系统埋点与行为观测

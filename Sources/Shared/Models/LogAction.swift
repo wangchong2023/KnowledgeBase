@@ -1,3 +1,13 @@
+// LogAction.swift
+//
+// 作者: Wang Chong
+// 功能说明: 操作日志动作类型 (Product Manager 视角：标准化的动作分类，驱动 UI 表现)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 操作日志动作类型 (Product Manager 视角：标准化的动作分类，驱动 UI 表现)
@@ -34,22 +44,23 @@ enum LogAction: String, Codable, CaseIterable {
         Localized.tr(self.rawValue)
     }
     
-    /// 动作对应的品牌色
+    /// 动作对应的颜色
     var color: Color {
         switch self {
         case .create: return .green
         case .update: return .blue
-        case .delete, .deletePDF, .importPDFFailed, .aiscanFailed: return .red
+        case .delete, .deletePDF: return .red
         case .lint, .healthCheck: return .orange
-        case .ingest, .importPDF, .export: return .wikiSource
-        case .smartIngest: return .wikiAccent
-        case .systemInit: return .purple
-        case .aiscanSkipped: return .wikiSecondary
-        case .highlight: return .wikiAccent
-        default: return .wikiSecondary
+        case .ingest, .importPDF, .export: return .teal
+        case .smartIngest: return .purple
+        case .highlight: return .yellow
+        case .systemInit: return .indigo
+        case .aiscanFailed, .importPDFFailed: return .red
+        case .aiscanSkipped: return .gray
+        default: return .gray
         }
     }
-    
+
     /// 动作对应的 SF Symbol 图标
     var icon: String {
         switch self {

@@ -1,8 +1,21 @@
+// WeeklyInsightCard.swift
+//
+// 作者: Wang Chong
+// 功能说明: 知识周报卡片 (PM 视角：价值闭环)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 知识周报卡片 (PM 视角：价值闭环)
 struct WeeklyInsightCard: View {
     @Environment(KMStore.self) var store
+    @Environment(AIWorkflowStore.self) var aiStore
+    @Environment(AppRouter.self) var router
     @State private var isGenerating = false
     
     var body: some View {
@@ -10,10 +23,10 @@ struct WeeklyInsightCard: View {
             HStack {
                 WikiGlow(icon: "sparkles", color: .purple, size: 28)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(Localized.tr("insight.weeklyTitle"))
+                    Text(L10n.Dashboard.tr("insight.weeklyTitle"))
                         .font(.title3.bold())
                         .foregroundStyle(.wikiText)
-                    if let insight = store.weeklyInsight {
+                    if let insight = aiStore.weeklyInsight {
                         Text(insight.dateRange)
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
@@ -42,7 +55,7 @@ struct WeeklyInsightCard: View {
                     SkeletonBox(width: 260, height: 16)
                     SkeletonBox(width: 280, height: 16)
                 }
-            } else if let insight = store.weeklyInsight {
+            } else if let insight = aiStore.weeklyInsight {
                 VStack(alignment: .leading, spacing: 24) {
                     // 核心指标 (奖牌化设计)
                     VStack(alignment: .leading, spacing: 16) {
@@ -85,7 +98,7 @@ struct WeeklyInsightCard: View {
                         
                         MarkdownRendererView(content: insight.aiSummary, isPrivate: false, onLinkTap: { title in
                             if let page = store.pages.first(where: { $0.title == title }) {
-                                store.selectedPageID = page.id
+                                router.navigateToPage(id: page.id)
                             }
                         })
                         .padding(.horizontal, 4)
@@ -114,7 +127,7 @@ struct WeeklyInsightCard: View {
                 Button(action: { generateInsight(forceRefresh: true) }) {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(Localized.tr("insight.generateReport"))
+                            Text(L10n.Dashboard.tr("insight.generateReport"))
                                 .font(.headline)
                             Text(Localized.tr("weekly.aiAnalysis"))
                                 .font(.caption)
@@ -144,7 +157,7 @@ struct WeeklyInsightCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 20))
         .shadow(color: .black.opacity(0.05), radius: 15, x: 0, y: 8)
         .onAppear {
-            if store.weeklyInsight == nil && !store.pages.isEmpty {
+            if aiStore.weeklyInsight == nil && !store.pages.isEmpty {
                 generateInsight()
             }
         }
@@ -153,7 +166,7 @@ struct WeeklyInsightCard: View {
     private func generateInsight(forceRefresh: Bool = false) {
         withAnimation { isGenerating = true }
         Task {
-            await store.generateWeeklyInsight(forceRefresh: forceRefresh)
+            await aiStore.generateWeeklyInsight(forceRefresh: forceRefresh)
             await MainActor.run {
                 withAnimation { isGenerating = false }
             }
@@ -204,11 +217,11 @@ struct WeeklyReportView: View {
                     HStack {
                         Image(systemName: "lightbulb.fill")
                             .foregroundStyle(.orange)
-                        Text(Localized.tr("insight.tips.title"))
+                        Text(L10n.Dashboard.tr("insight.tips.title"))
                             .font(.headline)
                     }
                     
-                    Text(Localized.tr("insight.tips.content"))
+                    Text(L10n.Dashboard.tr("insight.tips.content"))
                         .font(.subheadline)
                         .lineSpacing(5)
                         .foregroundStyle(.wikiSecondary)

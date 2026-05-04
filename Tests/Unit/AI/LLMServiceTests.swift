@@ -1,7 +1,18 @@
+// LLMServiceTests.swift
+//
+// 作者: Wang Chong
+// 功能说明: LLMService 单元测试 (软件工程视角：确保 AI 逻辑鲁棒性)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 @testable import KM
 
 /// LLMService 单元测试 (软件工程视角：确保 AI 逻辑鲁棒性)
+@MainActor
 final class LLMServiceTests: XCTestCase {
     var service: LLMService!
     

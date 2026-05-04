@@ -1,3 +1,13 @@
+// WebViewExportService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 网页导出服务 (L0 基础架构层)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import WebKit
 
@@ -170,7 +180,7 @@ final class WebViewExportService: NSObject {
                 }
                 
                 // 页码
-                slide.addText('\(Localized.trf("export.generatedBy", Localized.tr("app.name")))', { x: 0.5, y: 5.0, fontSize: 10, color: 'B2BEC3' });
+                slide.addText('\(L10n.Transfer.Export.trf("generatedBy", Localized.tr("app.name")))', { x: 0.5, y: 5.0, fontSize: 10, color: 'B2BEC3' });
             });
             
             const base64 = await pptx.write('base64');
@@ -200,7 +210,7 @@ final class WebViewExportService: NSObject {
         let parts = markdown.components(separatedBy: "\n## ")
         for (index, part) in parts.enumerated() {
             let lines = part.components(separatedBy: .newlines)
-            let title = lines.first?.replacingOccurrences(of: "# ", with: "").trimmingCharacters(in: .whitespaces) ?? Localized.trf("export.defaultSlideTitle", index + 1)
+            let title = lines.first?.replacingOccurrences(of: "# ", with: "").trimmingCharacters(in: .whitespaces) ?? L10n.Transfer.Export.trf("defaultSlideTitle", index + 1)
             let bullets = lines.dropFirst().filter { 
                 let trimmed = $0.trimmingCharacters(in: .whitespaces)
                 return trimmed.hasPrefix("- ") || trimmed.hasPrefix("* ") 

@@ -1,0 +1,158 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "schema.concept.field.applications": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applications"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用场景"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.concept.field.theory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Principles"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原理"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.concept.prompt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For concept types, focus on explaining underlying principles and practical application scenarios. Content should be concise and professional."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对于概念类型，重点解释其底层原理和实际应用场景。内容要求高度概括且专业。"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.concept.template": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "# {title}\n\n## Principles\n{theory}\n\n## Application Scenarios\n- Scenario 1\n- Scenario 2"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "# {title}\n\n## 原理\n{theory}\n\n## 应用场景\n- 场景1\n- 场景2"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.entity.field.attributes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Core Attributes"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "核心属性"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.entity.field.definition": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Definition"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定义"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.entity.field.relations": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Related Entities"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关联实体"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.entity.prompt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For entity types, extract a clear definition and at least 3 core attributes. Establish bidirectional links with other entities."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对于实体类型，必须提取其明确的定义，并列出至少3个核心属性。必须发现并建立与其他实体的双向链接。"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "schema.entity.template": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "# {title}\n\n## Definition\n{definition}\n\n## Core Attributes\n- Attr 1: \n- Attr 2: \n\n## Related Entities\n- [[Related Entity]]"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "# {title}\n\n## 定义\n{definition}\n\n## 核心属性\n- 属性1: \n- 属性2: \n\n## 关联实体\n- [[相关实体]]"
+          }
+        }
+      },
+      "extractionState": "manual"
+    }
+  }
+}

@@ -1,3 +1,14 @@
+// GraphModels.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct LogEntry
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 // MARK: - Log Entry
@@ -32,6 +43,7 @@ struct GraphNode: Identifiable {
     var isHighlighted: Bool = false
     var communityID: Int? = nil
     var communityCohesion: Double? = nil
+    var linkCount: Int = 0
 }
 
 // MARK: - Graph Edge

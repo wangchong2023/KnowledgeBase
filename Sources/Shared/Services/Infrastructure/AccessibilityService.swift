@@ -1,3 +1,13 @@
+// AccessibilityService.swift
+//
+// 作者: Wang Chong
+// 功能说明: Provides accessibility enhancements, VoiceOver support, and dynamic type scaling.
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import Foundation
 
@@ -43,15 +53,15 @@ final class AccessibilityService: ObservableObject {
         parts.append(page.type.displayName)
         parts.append(page.status.displayName)
         if !page.tags.isEmpty {
-            parts.append(Localized.tr("a11y.tags") + ": " + page.tags.joined(separator: ", "))
+            parts.append(L10n.Accessibility.tr("tags") + ": " + page.tags.joined(separator: ", "))
         }
-        let wordStr = "\(page.wordCount) " + Localized.tr("a11y.words")
+        let wordStr = "\(page.wordCount) " + L10n.Accessibility.tr("words")
         parts.append(wordStr)
         return parts.joined(separator: ", ")
     }
     
     static func graphNodeAnnouncement(_ node: GraphNode, linkCount: Int) -> String {
-        "\(node.title), \(node.type.displayName), \(linkCount) " + Localized.tr("a11y.links")
+        "\(node.title), \(node.type.displayName), \(linkCount) " + L10n.Accessibility.tr("links")
     }
     
     // MARK: - Haptic Feedback
@@ -79,15 +89,15 @@ extension View {
         self
             .accessibilityElement(children: .combine)
             .accessibilityLabel(AccessibilityService.pageAnnouncement(page))
-            .accessibilityHint(Localized.tr("a11y.tapToOpen"))
+            .accessibilityHint(L10n.Accessibility.tr("tapToOpen"))
             .accessibilityAddTraits(.isButton)
     }
     
     func wikiGraphNode(title: String, type: PageType, linkCount: Int) -> some View {
         self
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("\(title), \(type.displayName), \(linkCount) " + Localized.tr("a11y.links"))
-            .accessibilityHint(Localized.tr("a11y.tapToOpen"))
+            .accessibilityLabel("\(title), \(type.displayName), \(linkCount) " + L10n.Accessibility.tr("links"))
+            .accessibilityHint(L10n.Accessibility.tr("tapToOpen"))
             .accessibilityAddTraits(.isButton)
     }
     

@@ -1,53 +1,37 @@
+// ContentView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct ContentView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 @MainActor
 struct ContentView: View {
     @Environment(KMStore.self) var store
     @EnvironmentObject var themeManager: ThemeManager
+    @Environment(AppRouter.self) var router
+    
     @StateObject private var tooltipManager = TooltipManager.shared
-    @State private var selectedTab: AppTab = .wiki
     @State private var showCommandPalette = false
     @State private var languageForceUpdate: Bool = false
     @Namespace private var heroNamespace
     @StateObject private var medalService = MedalService.shared
-    @State private var searchPath = NavigationPath()
-    @State private var graphPath = NavigationPath()
-    @State private var sidebarSelection: SidebarSelection? = nil
     
-    enum AppTab: String, CaseIterable {
-        case wiki
-        case ingest
-        case search
-        case graph
-        case settings
-        
-        var displayTitle: String {
-            switch self {
-            case .wiki: return Localized.tr("tab.wiki")
-            case .graph: return Localized.tr("tab.graph")
-            case .search: return Localized.tr("tab.search")
-            case .ingest: return Localized.tr("tab.ingest")
-            case .settings: return Localized.tr("tab.settings")
-            }
-        }
-        
-        var icon: String {
-            switch self {
-            case .wiki: return "books.vertical.fill"
-            case .graph: return "circle.hexagongrid.fill"
-            case .search: return "magnifyingglass"
-            case .ingest: return "tray.and.arrow.down.fill"
-            case .settings: return "gearshape.fill"
-            }
-        }
-    }
     
     @StateObject private var onboardingService = OnboardingService()
-    
+    @Inject var deepLinkService: DeepLinkService
+
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         @Bindable var store = store
+        @Bindable var router = router
         let tintColor = ThemeManager.colorForName(themeManager.accentColorRaw)
         
         ZStack {
@@ -87,7 +71,7 @@ struct ContentView: View {
             
             // 功能引导弹窗 (Coach Marks)
             if let coachMark = store.pendingCoachMark {
-                CoachMarkOverlay(type: coachMark, selectedTab: $selectedTab) {
+                CoachMarkOverlay(type: coachMark, selectedTab: $router.selectedTab) {
                     store.pendingCoachMark = nil
                 }
                 .zIndex(300)
@@ -109,19 +93,20 @@ struct ContentView: View {
     // MARK: - iPad/Mac Adaptive SplitView
     @ViewBuilder
     private func adaptiveSplitView(tintColor: Color) -> some View {
+        @Bindable var router = router
         NavigationSplitView {
-            AdaptiveSidebarView(selectedTab: $selectedTab)
+            AdaptiveSidebarView(selectedTab: $router.selectedTab)
         } content: {
             // 中间列：根据 Tab 显示不同的二级列表
-            switch selectedTab {
+            switch router.selectedTab {
             case .wiki:
-                SidebarView(heroNamespace: heroNamespace, selection: $sidebarSelection)
+                SidebarView(heroNamespace: heroNamespace, selection: $router.sidebarSelection)
             default:
                 Color.wikiBackground // 其他模块暂不显示二级列，或者显示空白
             }
         } detail: {
             // 详情列：显示主要内容
-            AdaptiveDetailView(selectedTab: $selectedTab, selection: $sidebarSelection, languageForceUpdate: $languageForceUpdate, onboardingService: onboardingService, heroNamespace: heroNamespace)
+            AdaptiveDetailView(selectedTab: $router.selectedTab, selection: $router.sidebarSelection, languageForceUpdate: $languageForceUpdate, onboardingService: onboardingService, heroNamespace: heroNamespace)
         }
         .tint(tintColor)
         .sheet(isPresented: $showCommandPalette) {
@@ -141,7 +126,8 @@ struct ContentView: View {
     @ViewBuilder
     private func modernTabView(tintColor: Color) -> some View {
         @Bindable var store = store
-        TabView(selection: $selectedTab) {
+        @Bindable var router = router
+        TabView(selection: $router.selectedTab) {
             Tab(AppTab.wiki.displayTitle, systemImage: AppTab.wiki.icon, value: AppTab.wiki) {
                 wikiTabContent
             }
@@ -164,8 +150,8 @@ struct ContentView: View {
         }
         .tint(tintColor)
         .onOpenURL { url in
-            if store.handleDeepLink(url) {
-                store.consumeDeepLink()
+            if deepLinkService.handleURL(url) {
+                consumeDeepLink()
             }
         }
         .sheet(isPresented: $store.showPerfDashboard) {
@@ -177,7 +163,7 @@ struct ContentView: View {
                 .presentationBackground(.clear)
         }
         .background {
-            Button(Localized.tr("misc.action")) {
+            Button(L10n.Common.tr("action")) {
                 showCommandPalette.toggle()
             }
             .keyboardShortcut("k", modifiers: .command)
@@ -189,7 +175,8 @@ struct ContentView: View {
     @ViewBuilder
     private func legacyTabView(tintColor: Color) -> some View {
         @Bindable var store = store
-        TabView(selection: $selectedTab) {
+        @Bindable var router = router
+        TabView(selection: $router.selectedTab) {
             wikiTabContent
                 .accessibilityIdentifier("Wiki")
                 .tabItem {
@@ -227,8 +214,8 @@ struct ContentView: View {
         }
         .tint(tintColor)
         .onOpenURL { url in
-            if store.handleDeepLink(url) {
-                store.consumeDeepLink()
+            if deepLinkService.handleURL(url) {
+                consumeDeepLink()
             }
         }
         .sheet(isPresented: $store.showPerfDashboard) {
@@ -240,7 +227,7 @@ struct ContentView: View {
                 .presentationBackground(.clear)
         }
         .background {
-            Button(Localized.tr("misc.action")) {
+            Button(L10n.Common.tr("action")) {
                 showCommandPalette.toggle()
             }
             .keyboardShortcut("k", modifiers: .command)
@@ -252,72 +239,72 @@ struct ContentView: View {
     /// 这样可以避免在 TabView 层级使用 .id() 导致 Menu 崩溃
     @ViewBuilder
     private var wikiTabContent: some View {
+        @Bindable var router = router
         if languageForceUpdate {
-            NavigationView(selectedTab: $selectedTab, heroNamespace: heroNamespace)
+            NavigationView(selectedTab: $router.selectedTab, heroNamespace: heroNamespace)
                 .id(languageForceUpdate)
         } else {
-            NavigationView(selectedTab: $selectedTab, heroNamespace: heroNamespace)
+            NavigationView(selectedTab: $router.selectedTab, heroNamespace: heroNamespace)
         }
     }
     
     /// Graph tab 内容，languageForceUpdate 时强制刷新
     @ViewBuilder
     private var graphTabContent: some View {
-        NavigationStack(path: $graphPath) {
+        @Bindable var router = router
+        NavigationStack(path: $router.path) {
             Group {
                 if languageForceUpdate {
-                    GraphContainerView(heroNamespace: heroNamespace, selectedTab: $selectedTab)
+                    GraphContainerView(heroNamespace: heroNamespace, selectedTab: $router.selectedTab)
                         .id(languageForceUpdate)
                 } else {
-                    GraphContainerView(heroNamespace: heroNamespace, selectedTab: $selectedTab)
+                    GraphContainerView(heroNamespace: heroNamespace, selectedTab: $router.selectedTab)
                 }
             }
-            .navigationDestination(for: WikiPage.self) { page in
-                PageDetailView(page: page)
-                    .environment(\.navigate, NavigateAction { target in
-                        Task { @MainActor in
-                            graphPath.append(target)
-                        }
-                    })
+            .navigationDestination(for: AppRoute.self) { route in
+                ViewFactory.makeView(for: route)
             }
-            .environment(\.navigate, NavigateAction { target in
-                Task { @MainActor in
-                    graphPath.append(target)
-                }
-            })
         }
     }
     
     /// Search tab 内容，languageForceUpdate 时强制刷新
     @ViewBuilder
     private var searchTabContent: some View {
-        NavigationStack(path: $searchPath) {
+        @Bindable var router = router
+        NavigationStack(path: $router.path) {
             SearchView()
                 .id(languageForceUpdate)
-                .navigationDestination(for: WikiPage.self) { page in
-                    PageDetailView(page: page)
-                        .environment(\.navigate, NavigateAction { target in
-                            Task { @MainActor in
-                                searchPath.append(target)
-                            }
-                        })
+                .navigationDestination(for: AppRoute.self) { route in
+                    ViewFactory.makeView(for: route)
                 }
-                .environment(\.navigate, NavigateAction { target in
-                    Task { @MainActor in
-                        searchPath.append(target)
-                    }
-                })
         }
     }
 
     /// Ingest tab 内容，languageForceUpdate 时强制刷新
     @ViewBuilder
     private var ingestTabContent: some View {
+        @Bindable var router = router
         if languageForceUpdate {
-            IngestView(selectedTab: $selectedTab)
+            IngestView(selectedTab: $router.selectedTab)
                 .id(languageForceUpdate)
         } else {
-            IngestView(selectedTab: $selectedTab)
+            IngestView(selectedTab: $router.selectedTab)
+        }
+    }
+
+    /// 处理 Deep Link 路由导航
+    private func consumeDeepLink() {
+        guard let link = deepLinkService.consumeDeepLink() else { return }
+        switch link {
+        case .openPage(let id): router.navigateToPage(id: id)
+        case .openPageByTitle(let t):
+            Task {
+                if let p = await store.pageByTitle(t) {
+                    await MainActor.run { router.navigateToPage(id: p.id) }
+                }
+            }
+        case .search(let q): store.searchStore.searchText = q
+        default: break
         }
     }
 }
@@ -332,7 +319,7 @@ struct ContentView: View {
 // MARK: - Coach Mark Overlay
 struct CoachMarkOverlay: View {
     let type: KMStore.CoachMarkType
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     let onDismiss: () -> Void
     
     @State private var isAnimating = false
@@ -388,7 +375,7 @@ struct CoachMarkOverlay: View {
                 .opacity(isAnimating ? 1 : 0)
                 
                 Button(action: dismissWithAnimation) {
-                    Text(Localized.tr("misc.skip"))
+                    Text(L10n.Common.tr("skip"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -437,7 +424,6 @@ struct CoachMarkOverlay: View {
         HapticManager.shared.trigger(.success)
         switch type {
         case .graphDiscovery:
-            UserDefaults.standard.set(true, forKey: "hasShownGraphCoachMark")
             withAnimation {
                 selectedTab = .graph
             }
@@ -453,4 +439,5 @@ struct CoachMarkOverlay: View {
             onDismiss()
         }
     }
+
 }

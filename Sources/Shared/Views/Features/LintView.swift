@@ -1,3 +1,14 @@
+// LintView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct LintView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - 健康检查视图 (导航入口)
@@ -12,32 +23,20 @@ struct LintView: View {
 struct LintViewContent: View {
     @Binding var selection: SidebarSelection?
     @Environment(KMStore.self) var store
+    @Environment(AIWorkflowStore.self) var aiStore
+    @Environment(AppRouter.self) var router
     @Environment(\.dismiss) var dismiss // 新增：用于强制退出层级
     @State private var isRunning = false
     @State private var selectedTab = 0 // 0: 健康检查, 1: AI 建议
 
-    // MARK: - 核心计算指标
-    private var score: Int {
-        let errorCount = store.lintIssues.filter { $0.severity == .error }.count
-        let warningCount = store.lintIssues.filter { $0.severity == .warning }.count
-        let infoCount = store.lintIssues.filter { $0.severity == .info }.count
-        
-        let deduction = (errorCount * 10) + (warningCount * 5) + (infoCount * 2)
-        return max(0, 100 - deduction)
-    }
-    
-    private var healthLabel: String {
-        if score >= 90 { return Localized.tr("lint.health.excellent") }
-        if score >= 70 { return Localized.tr("lint.health.good") }
-        if score >= 50 { return Localized.tr("lint.health.fair") }
-        return Localized.tr("lint.health.poor")
-    }
-    
+    // MARK: - UI Helpers
     private var healthColor: Color {
-        if score >= 90 { return .green }
-        if score >= 70 { return .wikiAccent }
-        if score >= 50 { return .orange }
-        return .red
+        switch aiStore.healthLevel {
+        case .excellent: return .green
+        case .good: return .wikiAccent
+        case .fair: return .orange
+        case .poor: return .red
+        }
     }
     
     private var buttonGradient: Color {
@@ -45,12 +44,11 @@ struct LintViewContent: View {
     }
 
     var body: some View {
-        let _ = print("🔍 [NAV-DIAG] LintViewContent rendering.")
         VStack(spacing: 0) {
             // 选项卡切换
             Picker("", selection: $selectedTab) {
-                Text(Localized.tr("lint.title")).tag(0)
-                Text(Localized.tr("lint.aiSuggestions")).tag(1)
+                Text(L10n.Lint.tr("title")).tag(0)
+                Text(L10n.Lint.tr("aiSuggestions")).tag(1)
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -68,22 +66,14 @@ struct LintViewContent: View {
             .frame(maxHeight: .infinity)
         }
         .background(Color.wikiBackground)
-        .navigationTitle(selectedTab == 0 ? Localized.tr("lint.title") : Localized.tr("lint.aiSuggestions"))
+        .navigationTitle(selectedTab == 0 ? L10n.Lint.tr("title") : L10n.Lint.tr("aiSuggestions"))
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
                     HapticManager.shared.trigger(.selection)
-                    // 1. 重置选择，回到主侧边栏或主页
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        selection = nil
-                    }
-                    store.selectedTool = nil
-                    // 2. 同时清除所有层级路径，确保彻底返回
-                    if !store.navigationPath.isEmpty {
-                        store.navigationPath.removeLast(store.navigationPath.count)
-                    }
-                    // 3. 调用系统 dismiss 确保退出
+                    // 使用统一路由返回根视图并清理状态
+                    router.popToRoot()
                     dismiss()
                 }) {
                     Image(systemName: "chevron.left")
@@ -105,14 +95,14 @@ struct LintViewContent: View {
                         ZStack {
                             ProgressView()
                                 .controlSize(.small)
-                                .opacity(isRunning || store.isScanningAI ? 1 : 0)
+                                .opacity(isRunning || aiStore.isScanningAI ? 1 : 0)
                             
                             Image(systemName: selectedTab == 0 ? "stethoscope" : "sparkles")
-                                .opacity(isRunning || store.isScanningAI ? 0 : 1)
+                                .opacity(isRunning || aiStore.isScanningAI ? 0 : 1)
                         }
                         .frame(width: 20)
                         
-                        Text(isRunning || store.isScanningAI ? Localized.tr("lint.scanning") : (selectedTab == 0 ? Localized.tr("lint.runCheck") : Localized.tr("lint.runAIScan")))
+                        Text(isRunning || aiStore.isScanningAI ? L10n.Lint.tr("scanning") : (selectedTab == 0 ? L10n.Lint.tr("runCheck") : L10n.Lint.tr("runAIScan")))
                     }
                     .font(.subheadline.bold())
                     .padding(.horizontal, 14)
@@ -120,10 +110,10 @@ struct LintViewContent: View {
                     .background(buttonGradient.opacity(0.15))
                     .foregroundStyle(buttonGradient)
                     .clipShape(Capsule())
-                    .animation(nil, value: isRunning || store.isScanningAI) // 禁止内容内部动画，彻底杜绝重影
+                    .animation(nil, value: isRunning || aiStore.isScanningAI) // 禁止内容内部动画，彻底杜绝重影
                 }
                 .buttonStyle(.plain)
-                .disabled(isRunning || store.isScanningAI)
+                .disabled(isRunning || aiStore.isScanningAI)
                 .transaction { transaction in
                     transaction.animation = nil // 强制禁用过渡动画，从事务层面防止重影
                 }
@@ -143,23 +133,23 @@ struct LintViewContent: View {
                 metricsGrid
                 
                 // 3. Issue List (如果存在问题)
-                if !store.lintIssues.isEmpty {
+                if !aiStore.lintIssues.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(Localized.tr("lint.detailIssues"))
+                        Text(L10n.Lint.tr("detailIssues"))
                             .font(.headline)
                             .padding(.horizontal)
                         
                         VStack(alignment: .leading, spacing: 0) {
-                            issueSection(title: Localized.trf("lint.errors", store.lintIssues.filter { $0.severity == .error }.count), 
-                                         issues: store.lintIssues.filter { $0.severity == .error }, 
+                            issueSection(title: Localized.trf("lint.errors", aiStore.lintIssues.filter { $0.severity == .error }.count), 
+                                         issues: aiStore.lintIssues.filter { $0.severity == .error }, 
                                          icon: "xmark.circle.fill", color: .red)
                             
-                            issueSection(title: Localized.trf("lint.warnings", store.lintIssues.filter { $0.severity == .warning }.count), 
-                                         issues: store.lintIssues.filter { $0.severity == .warning }, 
+                            issueSection(title: Localized.trf("lint.warnings", aiStore.lintIssues.filter { $0.severity == .warning }.count), 
+                                         issues: aiStore.lintIssues.filter { $0.severity == .warning }, 
                                          icon: "exclamationmark.triangle.fill", color: .orange)
                             
-                            issueSection(title: Localized.trf("lint.tips", store.lintIssues.filter { $0.severity == .info }.count), 
-                                         issues: store.lintIssues.filter { $0.severity == .info }, 
+                            issueSection(title: Localized.trf("lint.tips", aiStore.lintIssues.filter { $0.severity == .info }.count), 
+                                         issues: aiStore.lintIssues.filter { $0.severity == .info }, 
                                          icon: "info.circle.fill", color: .blue)
                         }
                         .background(Color.wikiCard)
@@ -182,16 +172,16 @@ struct LintViewContent: View {
                 // 上次检查时间展示在左上角
                 VStack(alignment: .leading, spacing: 6) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(Localized.tr("lint.lastCheck.title"))
+                        Text(L10n.Lint.tr("lastCheck.title"))
                             .font(.system(size: 10, weight: .bold))
                             .foregroundStyle(.wikiSecondary)
                         
-                        if let date = store.lastLintDate {
+                        if let date = aiStore.lastLintDate {
                             Text(formatDate(date))
                                 .font(.system(size: 10, design: .monospaced))
                                 .foregroundStyle(.wikiText)
                         } else {
-                            Text(Localized.tr("lint.lastCheck.never"))
+                            Text(L10n.Lint.tr("lastCheck.never"))
                                 .font(.system(size: 10))
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -216,7 +206,7 @@ struct LintViewContent: View {
                         
                         // 进度环
                         Circle()
-                            .trim(from: 0, to: CGFloat(score) / 100.0)
+                            .trim(from: 0, to: CGFloat(aiStore.lintScore) / 100.0)
                             .stroke(
                                 LinearGradient(colors: [healthColor.opacity(0.6), healthColor], startPoint: .top, endPoint: .bottom),
                                 style: StrokeStyle(lineWidth: 14, lineCap: .round)
@@ -225,10 +215,10 @@ struct LintViewContent: View {
                             .rotationEffect(.degrees(-90))
                         
                         VStack(spacing: 2) {
-                            Text("\(score)")
+                            Text("\(aiStore.lintScore)")
                                 .font(.system(size: 50, weight: .bold, design: .rounded))
                                 .foregroundStyle(.wikiText)
-                            Text(Localized.tr("lint.health.score"))
+                            Text(L10n.Lint.tr("health.score"))
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(.wikiSecondary)
                         }
@@ -239,10 +229,10 @@ struct LintViewContent: View {
                 // 评分标准展示在右下角
                 VStack(alignment: .trailing, spacing: 6) {
                     let ranges = [
-                        (Localized.tr("lint.health.excellent"), "90-100"),
-                        (Localized.tr("lint.health.good"), "70-89"),
-                        (Localized.tr("lint.health.fair"), "50-69"),
-                        (Localized.tr("lint.health.poor"), "< 50")
+                        (L10n.Lint.tr("health.excellent"), "90-100"),
+                        (L10n.Lint.tr("health.good"), "70-89"),
+                        (L10n.Lint.tr("health.fair"), "50-69"),
+                        (L10n.Lint.tr("health.poor"), "< 50")
                     ]
                     
                     ForEach(ranges, id: \.1) { label, range in
@@ -271,7 +261,7 @@ struct LintViewContent: View {
             }
             .frame(height: 180)
             
-            Text(healthLabel)
+            Text(aiStore.healthLevel.title)
                 .font(.headline.bold())
                 .foregroundStyle(healthColor)
                 .padding(.horizontal, 20)
@@ -287,26 +277,23 @@ struct LintViewContent: View {
     
     private var metricsGrid: some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)], spacing: 16) {
-            metricCard(title: Localized.tr("lint.metric.pages"), 
+            metricCard(title: L10n.Lint.tr("metric.pages"), 
                        value: "\(store.pages.count)", 
                        icon: "doc.text.fill", 
                        color: .blue)
             
-            let brokenCount = store.lintIssues.filter { $0.type == .brokenLink }.count
-            metricCard(title: Localized.tr("lint.metric.broken"), 
-                       value: "\(brokenCount)", 
+            metricCard(title: L10n.Lint.tr("metric.broken"), 
+                       value: "\(store.brokenLinkCount)", 
                        icon: "link.badge.plus", 
                        color: .red)
             
-            let islandCount = store.lintIssues.filter { $0.type == .island || $0.type == .orphan }.count
-            metricCard(title: Localized.tr("lint.metric.orphans"), 
-                       value: "\(islandCount)", 
+            metricCard(title: L10n.Lint.tr("metric.orphans"), 
+                       value: "\(store.orphanPageCount)", 
                        icon: "person.fill.questionmark", 
                        color: .orange)
             
-            let connectionCount = store.pages.reduce(0) { $0 + $1.outgoingLinks.count }
-            metricCard(title: Localized.tr("lint.metric.links"), 
-                       value: "\(connectionCount)", 
+            metricCard(title: L10n.Lint.tr("metric.links"), 
+                       value: "\(store.totalConnectionCount)", 
                        icon: "point.3.connected.trianglepath.dotted", 
                        color: .wikiAccent)
         }
@@ -350,38 +337,38 @@ struct LintViewContent: View {
     // MARK: - AI 建议板块
     private var aiSuggestionsSection: some View {
         Group {
-            if store.refactorSuggestions.isEmpty && store.potentialLinks.isEmpty {
+            if aiStore.refactorSuggestions.isEmpty && aiStore.potentialLinks.isEmpty {
                 emptyAIView
             } else {
                 List {
-                    if !store.refactorSuggestions.isEmpty {
-                        Section(Localized.tr("lint.refactorSection")) {
-                            ForEach(store.refactorSuggestions) { suggestion in
+                    if !aiStore.refactorSuggestions.isEmpty {
+                        Section(L10n.Lint.tr("refactorSection")) {
+                            ForEach(aiStore.refactorSuggestions) { suggestion in
                                 RefactorSuggestionRow(suggestion: suggestion)
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
                                             withAnimation {
-                                                store.refactorSuggestions.removeAll { $0.id == suggestion.id }
+                                                aiStore.removeRefactorSuggestion(id: suggestion.id)
                                             }
                                         } label: {
-                                            Label(Localized.tr("misc.ignore"), systemImage: "eye.slash")
+                                            Label(L10n.Common.tr("ignore"), systemImage: "eye.slash")
                                         }
                                     }
                             }
                         }
                     }
                     
-                    if !store.potentialLinks.isEmpty {
-                        Section(Localized.tr("lint.linkDiscoverySection")) {
-                            ForEach(store.potentialLinks) { link in
+                    if !aiStore.potentialLinks.isEmpty {
+                        Section(L10n.Lint.tr("linkDiscoverySection")) {
+                            ForEach(aiStore.potentialLinks) { link in
                                 PotentialLinkRow(link: link)
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
                                             withAnimation {
-                                                store.potentialLinks.removeAll { $0.id == link.id }
+                                                aiStore.removePotentialLink(id: link.id)
                                             }
                                         } label: {
-                                            Label(Localized.tr("misc.ignore"), systemImage: "eye.slash")
+                                            Label(L10n.Common.tr("ignore"), systemImage: "eye.slash")
                                         }
                                     }
                             }
@@ -402,9 +389,9 @@ struct LintViewContent: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 56))
                 .foregroundStyle(.green)
-            Text(Localized.tr("lint.noIssues"))
+            Text(L10n.Lint.tr("noIssues"))
                 .font(.title3.weight(.semibold))
-            Text(Localized.tr("lint.noIssuesHint"))
+            Text(L10n.Lint.tr("noIssuesHint"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
             Spacer()
@@ -417,9 +404,9 @@ struct LintViewContent: View {
             Image(systemName: "sparkles")
                 .font(.system(size: 56))
                 .foregroundStyle(.wikiAccent)
-            Text(Localized.tr("lint.noAISuggestions"))
+            Text(L10n.Lint.tr("noAISuggestions"))
                 .font(.title3.weight(.semibold))
-            Text(Localized.tr("lint.noAISuggestionsHint"))
+            Text(L10n.Lint.tr("noAISuggestionsHint"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -462,7 +449,7 @@ struct LintViewContent: View {
         Task {
             // 模拟扫描耗时，增加视觉反馈
             try? await Task.sleep(nanoseconds: 1_000_000_000)
-            store.runLint()
+            await aiStore.runLint()
             await MainActor.run {
                 isRunning = false
             }
@@ -471,7 +458,7 @@ struct LintViewContent: View {
 
     private func runAIScan() {
         Task {
-            await store.runAIScan()
+            await aiStore.runAIScan()
         }
     }
 
@@ -504,7 +491,7 @@ struct RefactorSuggestionRow: View {
                 
                 Spacer()
                 
-                Button(Localized.tr("lint.apply")) {
+                Button(L10n.Lint.tr("apply")) {
                     withAnimation {
                         store.applyRefactorSuggestion(suggestion)
                     }
@@ -566,7 +553,7 @@ struct PotentialLinkRow: View {
             
             Spacer()
             
-            Button(Localized.tr("lint.apply")) {
+            Button(L10n.Lint.tr("apply")) {
                 withAnimation {
                     store.applyPotentialLink(link)
                 }
@@ -583,6 +570,7 @@ struct PotentialLinkRow: View {
 struct LintIssueRow: View {
     let issue: LintIssue
     @Environment(KMStore.self) var store
+    @Environment(AppRouter.self) var router
     @State private var aiSuggestion: String?
     @State private var isAnalyzing = false
 
@@ -614,8 +602,8 @@ struct LintIssueRow: View {
             if let pageID = issue.pageID,
                store.pages.contains(where: { $0.id == pageID }) {
                 HStack(spacing: 12) {
-                    Button(action: { store.selectedPageID = pageID }) {
-                        Text(Localized.tr("lint.goToPage"))
+                    Button(action: { router.navigateToPage(id: pageID) }) {
+                        Text(L10n.Lint.tr("goToPage"))
                             .font(.caption2)
                             .foregroundStyle(.wikiAccent)
                     }
@@ -629,7 +617,7 @@ struct LintIssueRow: View {
                                     Image(systemName: "sparkles")
                                         .font(.caption2)
                                 }
-                                Text(Localized.tr("lint.aiFixSuggestion"))
+                                Text(L10n.Lint.tr("aiFixSuggestion"))
                                     .font(.caption2)
                             }
                             .foregroundStyle(.purple)
@@ -660,11 +648,10 @@ struct LintIssueRow: View {
     private func fetchAISuggestion() {
         guard !isAnalyzing else { return }
         isAnalyzing = true
-        HapticManager.shared.trigger(.selection)
         
         Task {
             do {
-                let suggestion = try await AISynthesisService.shared.suggestFix(issue: issue, pages: store.pages)
+                let suggestion = try await store.aiWorkflowStore.fetchFixSuggestion(for: issue)
                 await MainActor.run {
                     withAnimation {
                         self.aiSuggestion = suggestion

@@ -1,123 +1,76 @@
+// KMStore.swift
+//
+// 作者: Wang Chong
+// 功能说明: KM存储.swift
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 @preconcurrency import Combine
+@preconcurrency import PDFKit
 import Observation
 
 @MainActor
 @Observable
 final class KMStore: @preconcurrency GraphDataProvider {
-    var isAIProcessing: Bool { llmService.isProcessing }
-    func requestRelayout() {}
     
     @ObservationIgnored @Inject var sqliteStore: SQLiteStore
     @ObservationIgnored @Inject var linkService: LinkService
     @ObservationIgnored @Inject var lintService: LintService
-    @ObservationIgnored @Inject var ingestService: IngestService
-    @ObservationIgnored @Inject var logService: LogServiceProtocol
+    @ObservationIgnored @Inject var logService: any LogServiceProtocol
     @ObservationIgnored @Inject var undoService: UndoService
     @ObservationIgnored @Inject var backupService: BackupService
-    @ObservationIgnored @Inject var deepLinkService: DeepLinkService
+    @ObservationIgnored @Inject var ingestService: IngestService
     @ObservationIgnored @Inject var accessibilityService: AccessibilityService
     @ObservationIgnored @Inject var performanceService: PerformanceService
-    @ObservationIgnored @Inject var llmService: LLMServiceProtocol
+    @ObservationIgnored @Inject var llmService: any LLMServiceProtocol
     @ObservationIgnored @Inject var snapshotService: SnapshotService
     @ObservationIgnored @Inject var insightService: KnowledgeInsightService
-    @ObservationIgnored @Inject var securityService: VaultSecurityService
+    @ObservationIgnored @Inject var securityService: VaultStorageSecurityService
     
-    @ObservationIgnored private var searchTask: Task<Void, Never>? 
-    
-    var clusters: [GraphClusteringService.Cluster] = []
-    var searchText: String = "" {
-        didSet { performDebouncedSearch(query: searchText) }
-    }
-    var searchResults: [WikiPage] = []
-    var selectedPageID: UUID?
-    var showCreateSheet = false
-    var navigationHistory: [WikiPage] = []
-    
-    @ObservationIgnored private var _lintIssues: [LintIssue] = {
-        if let data = UserDefaults.standard.data(forKey: "lastLintIssues"),
-           let decoded = try? JSONDecoder().decode([LintIssue].self, from: data) {
-            return decoded
-        }
-        return []
-    }()
-    var lintIssues: [LintIssue] {
-        get { access(keyPath: \.lintIssues); return _lintIssues }
-        set {
-            withMutation(keyPath: \.lintIssues) {
-                _lintIssues = newValue
-                if let data = try? JSONEncoder().encode(newValue) {
-                    UserDefaults.standard.set(data, forKey: "lastLintIssues")
-                }
-            }
-        }
-    }
+    // ── 职责解耦：子 Store 聚合 ──
+    var searchStore: SearchStore!
+    var settingsStore = SettingsStore()
+    var aiWorkflowStore: AIWorkflowStore!
 
-    var navigationPath = NavigationPath() {
-        didSet {
-            print("🔍 [NAV-DIAG] KMStore navigationPath changed. Count: \(navigationPath.count)")
-        }
-    }
+    var clusters: [GraphClusteringService.Cluster] = []
+    var refreshTrigger = UUID()
+    
+    var showCreateSheet = false
     var showPerfDashboard = false
-    @ObservationIgnored private var _isPrivacyModeEnabled: Bool = UserDefaults.standard.object(forKey: "isPrivacyModeEnabled") as? Bool ?? true
-    var isPrivacyModeEnabled: Bool {
-        get {
-            access(keyPath: \.isPrivacyModeEnabled)
-            return _isPrivacyModeEnabled
-        }
-        set {
-            withMutation(keyPath: \.isPrivacyModeEnabled) {
-                _isPrivacyModeEnabled = newValue
-                UserDefaults.standard.set(newValue, forKey: "isPrivacyModeEnabled")
-            }
-        }
-    }
     
-    @ObservationIgnored private var _isBiometricEnabled: Bool = UserDefaults.standard.object(forKey: "isBiometricEnabled") as? Bool ?? false
-    var isBiometricEnabled: Bool {
-        get {
-            access(keyPath: \.isBiometricEnabled)
-            return _isBiometricEnabled
-        }
-        set {
-            withMutation(keyPath: \.isBiometricEnabled) {
-                _isBiometricEnabled = newValue
-                UserDefaults.standard.set(newValue, forKey: "isBiometricEnabled")
-            }
-        }
-    }
+    // ── 协议适配：GraphDataProvider ──
+    var isScanningAI: Bool { aiWorkflowStore.isScanningAI }
+    var isAIProcessing: Bool { aiWorkflowStore.isProcessingPageAI }
+    var isPrivacyModeEnabled: Bool { settingsStore.isPrivacyModeEnabled }
     
-    var refactorSuggestions: [RefactorSuggestion] = []
-    var potentialLinks: [PotentialLinkSuggestion] = []
-    var isScanningAI = false
-    var isAdvancedSearching = false
-    var lastSearchDiagnostic: SearchDiagnosticInfo?
-    var weeklyInsight: KnowledgeInsightService.WeeklyInsight?
-    var selectedTool: ToolItem?
+    func requestRelayout() {
+        // 图谱布局由 GraphLayoutEngine 处理，此处作为协议占位
+        refreshTrigger = UUID()
+    }
     
     func refresh() {
-        print("🔄 [KMStore] Refreshing store... Current pages: \(sqliteStore.pages.count)")
+        logService.addLog(action: .systemInit, target: "KMStore", details: "Refreshing store. Current pages: \(sqliteStore.pages.count)")
         sqliteStore.reloadFromDisk()
         refreshTrigger = UUID()
-        
-        // 同步检查成就 (Platinum Experience Item #6)
-        let totalLinks = sqliteStore.pages.reduce(0) { $0 + $1.outgoingLinks.count }
-        MedalService.shared.checkAchievements(nodeCount: sqliteStore.pages.count, linkCount: totalLinks)
-        
-        print("🔄 [KMStore] Refreshed. New pages count: \(sqliteStore.pages.count)")
+        logService.addLog(action: .systemInit, target: "KMStore", details: "Refreshed. New pages count: \(sqliteStore.pages.count)")
     }
 
-    @ObservationIgnored private var _lastLintScore: Int = UserDefaults.standard.integer(forKey: "lastLintScore")
-    var lastLintScore: Int {
-        get { access(keyPath: \.lastLintScore); return _lastLintScore }
-        set { withMutation(keyPath: \.lastLintScore) { _lastLintScore = newValue; UserDefaults.standard.set(newValue, forKey: "lastLintScore") } }
+    // ── 健康度（由子 Store/Service 驱动） ──
+    var healthMetrics: (score: Int, level: LintService.HealthLevel) {
+        lintService.calculateHealthMetrics(issues: aiWorkflowStore.lintIssues)
     }
+    var lintScore: Int { healthMetrics.score }
+    var healthLevel: LintService.HealthLevel { healthMetrics.level }
     
-    @ObservationIgnored private var _lastLintDate: Date? = UserDefaults.standard.object(forKey: "lastLintDate") as? Date
-    var lastLintDate: Date? {
-        get { access(keyPath: \.lastLintDate); return _lastLintDate }
-        set { withMutation(keyPath: \.lastLintDate) { _lastLintDate = newValue; UserDefaults.standard.set(newValue, forKey: "lastLintDate") } }
-    }
+    var lintIssues: [LintIssue] { aiWorkflowStore.lintIssues }
+    var brokenLinkCount: Int { lintIssues.filter { $0.type == .brokenLink }.count }
+    var orphanPageCount: Int { lintIssues.filter { $0.type == .island || $0.type == .orphan }.count }
+    var totalConnectionCount: Int { pages.reduce(0) { $0 + $1.outgoingLinks.count } }
     
     enum ToolItem: String, CaseIterable, Hashable {
         case index, chat, log, lint, tagCloud, collab, taskCenter, weeklyReport, dashboard, pluginMarket, synthesis
@@ -125,183 +78,9 @@ final class KMStore: @preconcurrency GraphDataProvider {
 
     // MARK: - Coach Marks
     enum CoachMarkType: String {
-        case graphDiscovery // 发现图谱关联
+        case graphDiscovery
     }
     var pendingCoachMark: CoachMarkType?
-    var refreshTrigger = UUID()
-
-    // MARK: - Synthesis Management
-    struct SynthesisDocument: Codable, Identifiable {
-        let id: UUID
-        let type: SynthesisType
-        let name: String
-        let content: String
-        let createdAt: Date
-    }
-
-    enum SynthesisType: String, CaseIterable, Codable, Identifiable {
-        case mindmap, slides, quiz, report
-        var id: String { rawValue }
-        
-        var title: String {
-            switch self {
-            case .mindmap: return Localized.tr("prompt.expert.mindmap.title")
-            case .slides: return Localized.tr("prompt.expert.slides.title")
-            case .quiz: return Localized.tr("prompt.expert.quiz.title")
-            case .report: return Localized.tr("prompt.expert.report.title")
-            }
-        }
-        
-        var icon: String {
-            switch self {
-            case .mindmap: return "circle.hexagongrid.fill"
-            case .slides: return "play.rectangle"
-            case .quiz: return "checklist.checked"
-            case .report: return "doc.text.magnifyingglass"
-            }
-        }
-
-        /// 获取对应的文件格式图标
-        var formatIcon: String {
-            switch self {
-            case .mindmap: return "doc.plaintext"      // Markdown
-            case .slides: return "play.rectangle.fill" // PPT/Slides
-            case .quiz: return "checklist.checked"    // Quiz
-            case .report: return "doc.richtext.fill"   // PDF/Report
-            }
-        }
-        
-        /// 获取对应的格式颜色
-        var formatColor: Color {
-            switch self {
-            case .mindmap: return .blue
-            case .slides: return .orange
-            case .quiz: return .green
-            case .report: return .red
-            }
-        }
-    }
-
-    enum SynthesisStatus: Equatable {
-        case idle
-        case generating
-        case completed
-        case error(String)
-        
-        var isError: Bool {
-            if case .error = self { return true }
-            return false
-        }
-    }
-
-    let maxSynthesisDocsPerType = 5
-
-    @ObservationIgnored private var _synthesisResults: [SynthesisType: [SynthesisDocument]] = [:]
-    var synthesisResults: [SynthesisType: [SynthesisDocument]] {
-        get { access(keyPath: \.synthesisResults); return _synthesisResults }
-        set { withMutation(keyPath: \.synthesisResults) { _synthesisResults = newValue } }
-    }
-
-    var synthesisStates: [SynthesisType: SynthesisStatus] = {
-        var states: [SynthesisType: SynthesisStatus] = [:]
-        for type in SynthesisType.allCases { states[type] = .idle }
-        return states
-    }()
-    
-    func loadSynthesisResults() {
-        for type in SynthesisType.allCases {
-            let key = "synthesis_docs_\(type.rawValue)"
-            if let data = UserDefaults.standard.data(forKey: key),
-               let docs = try? JSONDecoder().decode([SynthesisDocument].self, from: data),
-               !docs.isEmpty {
-                _synthesisResults[type] = Array(docs.prefix(maxSynthesisDocsPerType))
-                synthesisStates[type] = .completed
-            }
-        }
-    }
-
-    func saveSynthesisResult(type: SynthesisType, content: String) {
-        let title = extractTitle(from: content, type: type)
-        let name = "\(title) - \(formatDateFull(Date()))"
-        let doc = SynthesisDocument(id: UUID(), type: type, name: name, content: content, createdAt: Date())
-        var existing = _synthesisResults[type] ?? []
-        existing.insert(doc, at: 0)
-        _synthesisResults[type] = existing
-        synthesisStates[type] = .completed
-
-        if let data = try? JSONEncoder().encode(existing) {
-            UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
-        }
-    }
-
-    func renameSynthesisDoc(type: SynthesisType, docID: UUID, newName: String) {
-        guard var docs = _synthesisResults[type],
-              let idx = docs.firstIndex(where: { $0.id == docID }) else { return }
-        docs[idx] = SynthesisDocument(id: docs[idx].id, type: docs[idx].type, name: newName, content: docs[idx].content, createdAt: docs[idx].createdAt)
-        _synthesisResults[type] = docs
-        if let data = try? JSONEncoder().encode(docs) {
-            UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
-        }
-    }
-
-    func deleteSynthesisDoc(type: SynthesisType, docID: UUID) {
-        guard var docs = _synthesisResults[type] else { return }
-        docs.removeAll { $0.id == docID }
-        _synthesisResults[type] = docs
-        if let data = try? JSONEncoder().encode(docs) {
-            UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
-        }
-    }
-    
-    func batchDeleteSynthesisDocs(ids: Set<UUID>) {
-        for type in SynthesisType.allCases {
-            guard var docs = _synthesisResults[type], !docs.isEmpty else { continue }
-            let originalCount = docs.count
-            docs.removeAll { ids.contains($0.id) }
-            
-            if docs.count != originalCount {
-                _synthesisResults[type] = docs
-                if let data = try? JSONEncoder().encode(docs) {
-                    UserDefaults.standard.set(data, forKey: "synthesis_docs_\(type.rawValue)")
-                }
-            }
-        }
-    }
-
-    private func extractTitle(from content: String, type: SynthesisType) -> String {
-        // 针对 Quiz 类型尝试解析 JSON 标题
-        if type == .quiz {
-            let cleaned = content.trimmingCharacters(in: .whitespacesAndNewlines)
-                .replacingOccurrences(of: "```json", with: "")
-                .replacingOccurrences(of: "```", with: "")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            if let data = cleaned.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let title = json["title"] as? String {
-                return title
-            }
-        }
-        
-        let firstLine = content.components(separatedBy: .newlines).first?.trimmingCharacters(in: .whitespaces) ?? ""
-        let stripped = firstLine
-            .replacingOccurrences(of: #"^#+\s*"#, with: "", options: .regularExpression)
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespaces)
-        return stripped.isEmpty ? type.title : stripped
-    }
-
-    private func formatDateFull(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd-HHmm"
-        return formatter.string(from: date)
-    }
-    
-    private func formatDateShort(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyyMMdd_HHmm"
-        return formatter.string(from: date)
-    }
     
     var pages: [WikiPage] {
         _ = refreshTrigger
@@ -338,23 +117,19 @@ final class KMStore: @preconcurrency GraphDataProvider {
         return series
     }
 
-    init() { 
-        print("🏪 [KMStore] init called. sqliteStore address: \(Unmanaged.passUnretained(sqliteStore).toOpaque())")
+    init() {
+        // 核心修复：在任何子初始化之前完成自我注册，防止构造过程中的循环依赖导致注入失效
+        ServiceContainer.shared.register(self, for: KMStore.self)
+        
+        // 子 Store 初始化（使用 @Inject 自动解析依赖）
+        self.searchStore = SearchStore()
+        self.aiWorkflowStore = AIWorkflowStore()
+        
+        logService.addLog(action: .systemInit, target: "KMStore", details: "init called")
         sqliteStore.onLog = { [weak self] a, t, d in
             self?.addLog(action: a, target: t, details: d)
         }
         seedDefaultContent() 
-        loadSynthesisResults()
-    }
-
-    private func performDebouncedSearch(query: String) {
-        searchTask?.cancel()
-        searchTask = Task {
-            try? await Task.sleep(nanoseconds: 300_000_000)
-            if Task.isCancelled { return }
-            let res = await linkService.hybridSearchWithDiagnostics(query: query, in: pages, embeddingManager: sqliteStore.embeddingManager)
-            if !Task.isCancelled { searchResults = res.results }
-        }
     }
 
     func seedDefaultContent() {
@@ -368,10 +143,9 @@ final class KMStore: @preconcurrency GraphDataProvider {
         undoService.pushSnapshot(pages)
         let page = sqliteStore.createPage(title: title, type: type, customIcon: customIcon, content: content, tags: tags, forceDeepScan: forceDeepScan)
         backupService.markDirty()
-        
-        // 自动引导触发逻辑：当用户拥有 3 个以上的页面且未显示过引导时
-        if totalPages >= 3 && !UserDefaults.standard.bool(forKey: "hasShownGraphCoachMark") {
-            // 延迟一秒弹出，避免与创建成功的视觉反馈冲突
+
+        if totalPages >= 3 && !settingsStore.hasShownGraphCoachMark {
+            settingsStore.hasShownGraphCoachMark = true
             Task {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 await MainActor.run {
@@ -379,7 +153,10 @@ final class KMStore: @preconcurrency GraphDataProvider {
                 }
             }
         }
-        
+
+        let totalLinks = pages.reduce(0) { $0 + $1.outgoingLinks.count }
+        WikiEventBus.shared.publish(.pageCreated(id: page.id, title: page.title, nodeCount: pages.count, linkCount: totalLinks))
+
         return page
     }
 
@@ -390,23 +167,21 @@ final class KMStore: @preconcurrency GraphDataProvider {
         backupService.markDirty()
     }
 
+    func savePage(_ page: WikiPage) {
+        updatePage(page, forceDeepScan: false)
+    }
+
     func deletePage(_ page: WikiPage) {
         undoService.pushSnapshot(pages)
-        sqliteStore.deletePage(page) { [weak self] id in
-            if self?.selectedPageID == id { self?.selectedPageID = nil; return true }
-            return false
-        }
+        sqliteStore.deletePage(page)
     }
 
     func undo() { if let prev = undoService.undo(currentPages: pages) { sqliteStore.replaceAllPages(prev) } }
     func redo() { if let next = undoService.redo(currentPages: pages) { sqliteStore.replaceAllPages(next) } }
 
-    func saveToDisk() { 
-        logService.saveToDisk(); 
-        backupService.createBackup(pages: pages) 
-        // 触发成就检查
-        let totalLinks = pages.reduce(0) { $0 + $1.outgoingLinks.count }
-        MedalService.shared.checkAchievements(nodeCount: pages.count, linkCount: totalLinks)
+    func saveToDisk() {
+        logService.saveToDisk()
+        backupService.createBackup(pages: pages)
     }
     func loadFromDisk() { sqliteStore.reloadFromDisk(); logService.loadFromDisk() }
     
@@ -414,182 +189,82 @@ final class KMStore: @preconcurrency GraphDataProvider {
     func clearLogs() { logService.clearAllLogs() }
 }
 
-// MARK: - KMStore 补充方法（DeepLink、数据操作等）
+// MARK: - KMStore 核心扩展
 extension KMStore {
-    func handleDeepLink(_ url: URL) -> Bool { deepLinkService.handleURL(url) }
-    func consumeDeepLink() {
-        guard let link = deepLinkService.consumeDeepLink() else { return }
-        switch link {
-        case .openPage(let id): selectedPageID = id
-        case .openPageByTitle(let t): Task { if let p = await pageByTitle(t) { await MainActor.run { self.selectedPageID = p.id } } }
-        case .search(let q): searchText = q
-        default: break
-        }
-    }
-
     func addImportedPage(_ page: WikiPage) {
         var p = page; p.id = UUID()
-        sqliteStore.pages.append(p)
+        sqliteStore.syncRemotePage(p)
+    }
+
+    /// 生成 AI 启发式问题（用于 Chat 视图的引导问题）
+    func generateInsightfulQuestions() async throws -> [String] {
+        try await AISynthesisService.shared.generateInsightfulQuestions(pages: pages)
     }
     
-    func insertRemotePage(_ page: WikiPage) { if !pages.contains(where: { $0.id == page.id }) { sqliteStore.pages.append(page) } }
+    func insertRemotePage(_ page: WikiPage) {
+        sqliteStore.syncRemotePage(page)
+    }
+    
     func clearAllData() throws {
         sqliteStore.pages.removeAll()
         undoService.clear()
-        
-        // 1. 关闭数据库连接
         sqliteStore.close()
-        
-        // 2. 删除物理文件
-        let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let dbURL = docs.appendingPathComponent("km.sqlite3")
+        let dbURL = sqliteStore.dbPath
         try? FileManager.default.removeItem(at: dbURL)
-        
-        // 3. 重置成就系统 (MedalService)
-        MedalService.shared.reset()
-        
-        // 4. 清理核心业务相关的 UserDefaults
-        let keysToClear = [
-            "lastLintIssues", "lastLintScore", "lastLintDate",
-            "hasShownGraphCoachMark", "has_seeded_initial_content"
-        ]
-        keysToClear.forEach { UserDefaults.standard.removeObject(forKey: $0) }
-        
-        // 5. 清理合成文档
-        SynthesisType.allCases.forEach { type in
-            UserDefaults.standard.removeObject(forKey: "synthesis_docs_\(type.rawValue)")
-        }
-        
-        // 重新初始化连接和表结构
+
+        aiWorkflowStore.clearAll()
+        searchStore.clearAll()
+        settingsStore.reset()
+
+        UserDefaults.standard.removeObject(forKey: "has_seeded_initial_content")
+
+        WikiEventBus.shared.publish(.pagesCleared)
         refresh()
     }
     
     func pageByTitle(_ title: String) async -> WikiPage? { await linkService.pageByTitle(title, in: pages) }
 
-    func extractText(from url: URL) -> (title: String, content: String)? {
-        guard let page = ingestService.ingestDocument(at: url, pageStore: sqliteStore) else { return nil }
-        return (page.title, page.content)
-    }
+    // MARK: - 导出与剪贴板
     
-    func ingestWithFolding(title: String, content: String, type: PageType, forceDeepScan: Bool) async throws -> WikiPage {
-        return ingestService.ingestRawContent(title: title, content: content, type: type, forceDeepScan: forceDeepScan, llmService: llmService, pageStore: sqliteStore)
-    }
-    
-    struct ExtractedURLContent { let title: String; let content: String }
-    func fetchURLContent(urlString: String) async throws -> ExtractedURLContent {
-        let result = try await ingestService.scraper.fetchMarkdown(from: urlString)
-        return ExtractedURLContent(title: result.title, content: result.markdown)
-    }
-
-    func runLint() {
-        let taskID = TaskCenter.shared.addTask(type: .healthCheck, name: Localized.tr("sidebar.healthCheck"), target: "System")
-        Task {
-            let issues = await lintService.runLint(pages: pages, linkService: linkService)
-            await MainActor.run {
-                self.lintIssues = issues
-                self.lastLintDate = Date()
-                TaskCenter.shared.updateTask(taskID, status: .completed)
-            }
-        }
-    }
-    
-    func runAIScan() async {
-        guard llmService.isEnabled else { 
-            logService.addLog(action: .aiscanSkipped, target: "System", details: "LLM service disabled")
-            return 
-        }
+    func exportPageAsMarkdown(_ page: WikiPage) -> URL? {
+        let content = """
+        ---
+        title: \(page.title)
+        type: \(page.type.rawValue)
+        tags: \(page.tags.joined(separator: ", "))
+        ---
         
-        await MainActor.run { isScanningAI = true }
-        let taskID = TaskCenter.shared.addTask(type: .ai, name: Localized.tr("aitask.scanTaskName"), target: "System")
+        # \(page.title)
+        
+        \(page.content)
+        """
+        
+        let safeTitle = page.title.components(separatedBy: CharacterSet.alphanumerics.inverted).joined(separator: "_")
+        let fileName = "\(safeTitle).md"
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
         
         do {
-            // 1. 获取重构建议（随机抽取一部分页面进行分析，避免 Token 过载）
-            let samplePages = Array(sqliteStore.pages.prefix(10))
-            let suggestions = try await llmService.analyzeForRefactoring(pages: samplePages)
-            
-            // 2. 发现潜在链接（针对最近活跃的页面）
-            let activePages = sqliteStore.pages.sorted(by: { $0.updated > $1.updated }).prefix(5)
-            let existingTitles = sqliteStore.pages.map { $0.title }
-            
-            var tempLinks: [PotentialLinkSuggestion] = []
-            var seenLinks = Set<String>()
-            for page in activePages {
-                let found = try await llmService.discoverPotentialLinks(content: page.content, existingTitles: existingTitles)
-                // 仅添加不存在于当前页面的新链接，并排重
-                for title in Set(found) {
-                    let linkKey = "\(page.id.uuidString)-\(title)"
-                    if !seenLinks.contains(linkKey) && !page.content.contains("[[\(title)]]") {
-                        seenLinks.insert(linkKey)
-                        tempLinks.append(PotentialLinkSuggestion(sourcePageID: page.id, sourceTitle: page.title, targetTitle: title))
-                    }
-                }
-            }
-            let capturedLinks = tempLinks
-            
-            await MainActor.run {
-                self.refactorSuggestions = suggestions
-                self.potentialLinks = capturedLinks
-                self.isScanningAI = false
-                TaskCenter.shared.updateTask(taskID, status: .completed)
-            }
+            try content.write(to: tempURL, atomically: true, encoding: .utf8)
+            return tempURL
         } catch {
-            logService.addLog(action: .aiscanFailed, target: "System", details: error.localizedDescription)
-            await MainActor.run { 
-                isScanningAI = false 
-                TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
-            }
-        }
-    }
-    
-    func generateWeeklyInsight(forceRefresh: Bool = false) async {
-        guard llmService.isEnabled else { return }
-
-        // 周缓存：非强制刷新时返回缓存
-        if !forceRefresh, let cached = loadCachedWeeklyInsight() {
-            await MainActor.run { self.weeklyInsight = cached }
-            return
-        }
-
-        do {
-            let insight = try await insightService.generateWeeklyInsight(pages: sqliteStore.pages, llmService: llmService)
-            await MainActor.run {
-                self.weeklyInsight = insight
-            }
-            saveCachedWeeklyInsight(insight)
-        } catch {
-            print("[Weekly Insight] Error: \(error)")
-        }
-    }
-
-    private func weeklyCacheKey() -> String {
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
-        let lang = Localized.currentLanguage
-        return "weekly_insight_\(components.yearForWeekOfYear ?? 0)_\(components.weekOfYear ?? 0)_\(lang)"
-    }
-
-    private func loadCachedWeeklyInsight() -> KnowledgeInsightService.WeeklyInsight? {
-        let key = weeklyCacheKey()
-        guard let data = UserDefaults.standard.data(forKey: key),
-              let insight = try? JSONDecoder().decode(KnowledgeInsightService.WeeklyInsight.self, from: data) else {
             return nil
         }
-        return insight
+    }
+    
+    func copyPageToClipboard(_ page: WikiPage) {
+        let content = """
+        # \(page.title)
+
+        \(page.content)
+        """
+        WikiPasteboard.string = content
     }
 
-    private func saveCachedWeeklyInsight(_ insight: KnowledgeInsightService.WeeklyInsight) {
-        let key = weeklyCacheKey()
-        if let data = try? JSONEncoder().encode(insight) {
-            UserDefaults.standard.set(data, forKey: key)
-        }
-    }
-    
-    func runPartialAIScan(for page: WikiPage) { Task { await runAIScan() } }
-    
     func applyRefactorSuggestion(_ suggestion: RefactorSuggestion) {
         if suggestion.type == "rename", let page = sqliteStore.pages.first(where: { $0.title == suggestion.target }) {
             renamePage(page, to: suggestion.suggestion)
         }
+        aiWorkflowStore.removeRefactorSuggestion(id: suggestion.id)
     }
     
     func applyPotentialLink(_ suggestion: PotentialLinkSuggestion) {
@@ -598,80 +273,100 @@ extension KMStore {
             page.content += "\n\n相关链接: [[\(suggestion.targetTitle)]]"
             updatePage(page, forceDeepScan: false)
         }
-        potentialLinks.removeAll { $0.id == suggestion.id }
+        aiWorkflowStore.removePotentialLink(id: suggestion.id)
     }
     
     func renamePage(_ page: WikiPage, to newTitle: String) {
         let oldTitle = page.title
-        var updated = page
-        updated.title = newTitle
-        sqliteStore.updatePage(updated, forceDeepScan: false)
-        
-        for i in sqliteStore.pages.indices {
-            let p = sqliteStore.pages[i]
-            if p.content.contains("[[\(oldTitle)]]") {
-                var refPage = p
-                refPage.content = refPage.content.replacingOccurrences(of: "[[\(oldTitle)]]", with: "[[\(newTitle)]]")
-                sqliteStore.updatePage(refPage, forceDeepScan: false)
+        Task {
+            let modifiedPages = await linkService.prepareRename(page: page, to: newTitle, in: pages)
+            self.sqliteStore.performBatchWrite { db in
+                guard let writer = DatabaseManager.shared.dbWriter else { return }
+                let repo = WikiPageStore(dbWriter: writer)
+                for p in modifiedPages { try? repo.save(p, using: db) }
             }
+            sqliteStore.onLog?(.update, newTitle, "Renamed from \(oldTitle)")
+            backupService.markDirty()
         }
-        backupService.markDirty()
     }
-    func findSimilarPages(for page: WikiPage, limit: Int = 3) -> [WikiPage] { [] }
+
     func mountVault(at url: URL) { }
     func resetAllData() { try? clearAllData() }
     func getAllTags() async -> [(tag: String, count: Int)] { await linkService.allTags(in: pages) }
-    func performAdvancedSearch(query: String) async -> [WikiPage] {
-        let res = await linkService.hybridSearchWithDiagnostics(query: query, in: pages, embeddingManager: sqliteStore.embeddingManager)
-        return res.results
-    }
+
     func renameTag(_ oldTag: String, to newTag: String) {
-        for i in pages.indices { if let idx = pages[i].tags.firstIndex(of: oldTag) { var p = pages[i]; p.tags[idx] = newTag; updatePage(p, forceDeepScan: false) } }
+        sqliteStore.renameTag(oldTag, to: newTag)
     }
     func deleteTag(_ tag: String) {
-        for i in pages.indices { if let idx = pages[i].tags.firstIndex(of: tag) { var p = pages[i]; p.tags.remove(at: idx); updatePage(p, forceDeepScan: false) } }
+        sqliteStore.deleteTag(tag)
     }
     
-    func performSynthesis(type: SynthesisType) {
-        guard llmService.isEnabled else { return }
-        guard synthesisStates[type] != .generating else { return }
-        
-        // 数量上限预检
-        let existingCount = _synthesisResults[type]?.count ?? 0
-        if existingCount >= maxSynthesisDocsPerType {
-            synthesisStates[type] = .error(Localized.tr("synthesis.error.limitReached"))
-            return
+    func bulkDeleteTags(_ tags: Set<String>) {
+        sqliteStore.performBatchWrite { [self] _ in
+            for tag in tags { self.sqliteStore.deleteTag(tag) }
         }
-        
-        synthesisStates[type] = .generating
-        let taskID = TaskCenter.shared.addTask(type: .synthesis, name: type.title, target: Localized.tr("sidebar.synthesis"))
-        
-        let combinedContent = pages.map { "# \($0.title)\n\($0.content)" }.joined(separator: "\n\n---\n\n")
-        
-        Task {
-            do {
-                let content: String
-                switch type {
-                case .mindmap:
-                    content = try await AISynthesisService.shared.generateMindMap(content: combinedContent)
-                case .slides:
-                    content = try await AISynthesisService.shared.generatePresentation(content: combinedContent)
-                case .quiz:
-                    content = try await AISynthesisService.shared.generateQuiz(content: combinedContent)
-                case .report:
-                    content = try await AISynthesisService.shared.generateReport(content: combinedContent)
-                }
-                
-                await MainActor.run {
-                    self.saveSynthesisResult(type: type, content: content)
-                    TaskCenter.shared.updateTask(taskID, status: .completed)
-                }
-            } catch {
-                await MainActor.run {
-                    self.synthesisStates[type] = .error(error.localizedDescription)
-                    TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
-                }
-            }
-        }
+    }
+
+    func addNewTag(_ tag: String) {
+        let trimmed = tag.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        _ = createPage(
+            title: Localized.trf("tags.pageTitle", trimmed),
+            type: .concept,
+            content: Localized.trf("tags.pageContent", trimmed),
+            tags: [trimmed]
+        )
+    }
+
+    // MARK: - 演示数据生成 (封装，避免 View 层直接访问 sqliteStore)
+    @discardableResult
+    func generateDemoData() -> Int {
+        let count = DemoDataGenerator.generate(in: sqliteStore)
+        refresh()
+        return count
+    }
+
+    @discardableResult
+    func generateStressTestData() -> Int {
+        let count = DemoDataGenerator.generateStressTest(in: sqliteStore)
+        refresh()
+        return count
+    }
+
+    func replaceAllPages(_ pages: [WikiPage]) {
+        sqliteStore.replaceAllPages(pages)
+        objectWillChange.send()
+        refresh()
+    }
+
+    /// 开发者选项：清空所有数据（比 clearAllData 更轻量，不触发完整重置流程）
+    func clearAllDeveloperData() {
+        sqliteStore.clearAllData()
+        refresh()
+    }
+
+    // MARK: - PDF 操作代理
+
+    func loadPDFDocuments() -> [PDFDocumentInfo] { PDFService.shared.loadDocumentsInfo() }
+    func savePDFDocuments(_ docs: [PDFDocumentInfo]) { PDFService.shared.saveDocumentsInfo(docs) }
+    func loadPDFDocument(fileName: String) -> PDFKit.PDFDocument? { PDFService.shared.loadPDF(fileName: fileName) }
+    func savePDFDocument(data: Data, fileName: String) -> URL? { PDFService.shared.savePDF(data: data, fileName: fileName) }
+    func deletePDFDocument(fileName: String) -> Bool { PDFService.shared.deletePDF(fileName: fileName) }
+    func extractPDFText(from pdfDoc: PDFKit.PDFDocument, pageRange: Range<Int>? = nil) -> String {
+        PDFService.shared.extractText(from: pdfDoc, pageRange: pageRange)
+    }
+
+    // MARK: - OCR 操作代理
+
+    func recognizeText(from image: WikiImage) async throws -> String {
+        try await OCRService.shared.recognizeText(from: image)
+    }
+}
+
+// MARK: - CollaborationDelegate 实现
+@MainActor
+extension KMStore: CollaborationDelegate {
+    func applyRemoteUpdate(_ page: WikiPage) {
+        updatePage(page, forceDeepScan: false)
     }
 }

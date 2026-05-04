@@ -1,0 +1,56 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "coachmark.graphDiscovery.action": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check it Out"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前往查看"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "coachmark.graphDiscovery.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI has identified potential links in your vault. Head to Graph view to confirm and link them with one click."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "您的知识库中存在一些 AI 识别出的潜在关联，前往图谱视图进行确认并一键建立链接。"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "coachmark.graphDiscovery.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discover Hidden Links"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现隐藏的关联"
+          }
+        }
+      },
+      "extractionState": "manual"
+    }
+  }
+}

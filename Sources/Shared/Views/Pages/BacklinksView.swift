@@ -1,3 +1,14 @@
+// BacklinksView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct BacklinksView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 struct BacklinksView: View {
@@ -33,7 +44,7 @@ struct BacklinksView: View {
                 // Outgoing links
                 Section {
                     if outgoingPages.isEmpty {
-                        Text(Localized.tr("backlinks.noOutgoing"))
+                        Text(L10n.Components.tr("noOutgoing"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     } else {
@@ -71,7 +82,7 @@ struct BacklinksView: View {
                 // Backlinks
                 Section {
                     if backlinks.isEmpty {
-                        Text(Localized.tr("backlinks.noBackLinks"))
+                        Text(L10n.Components.tr("noBackLinks"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     } else {

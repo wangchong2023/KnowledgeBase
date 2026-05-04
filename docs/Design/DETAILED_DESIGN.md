@@ -1,6 +1,6 @@
-# Knowledge Management 详细设计文档 (Detailed Design)
+# 智元 (KM) 详细设计文档 (Detailed Design)
 
-本文件深入解析 Knowledge Management 核心引擎的内部实现细节。
+本文件深入解析 智元 (KM) 核心引擎的内部实现细节。
 
 ## 1. 混合检索引擎 (Hybrid Search Engine)
 
@@ -42,7 +42,7 @@ $$Score(d) = \sum_{r \in R} \frac{1}{k + r(d)}$$
 
 ## 4. API 版本化路由 (Version Routing)
 
-为了确保插件生态的长效兼容性，Knowledge Management 实施 **“双重版本控制”**：
+为了确保插件生态的长效兼容性，智元 (KM) 实施 **“双重版本控制”**：
 1. **内核版本 (Host Version)**: 随 App 更新。
 2. **能力版本 (Feature API Version)**: 独立于内核演进。
    * **路由策略**: 当内核升级至 2.0 且重构了拦截接口时，系统会维护一个 `v1_Adapter`。它将 1.0 插件的调用桥接到 2.0 实现上，确保旧插件无需重写即可运行。
@@ -88,4 +88,41 @@ CREATE VIRTUAL TABLE pages_fts USING fts5(content, content='pages', content_rowi
 
 
 # 附录：专题设计补充
+
+## A. iCloud 同步编排 (Sync Coordinator)
+
+为消除 View 层直接编排 iCloud 业务逻辑的问题，引入 `iCloudSyncCoordinator`：
+
+### 设计模式：View → Coordinator → Service
+
+```
+iCloudSyncView (L3, 瘦 View)
+  └─ @Bindable var coordinator: iCloudSyncCoordinator
+       └─ (L3-ViewModel) 管理 UI 状态(10个属性)、Timer、冲突解决
+            └─ iCloudSyncService (L1) 执行实际同步 IO
+```
+
+- `iCloudSyncView` 从 290 行精简到 128 行，仅保留 UI 布局
+- `iCloudSyncCoordinator` 是 `@Observable` class，180 行，在 `@MainActor` 上运行
+- 所有同步编排逻辑（push、pull、bidirectional、autoSync）集中在 Coordinator 中
+- **下一步**：ChatView、IngestView、PDFReaderView 等大型 View 应逐步采用同样模式
+
+## B. 已知架构缺陷与修复路线图 (2026-05)
+
+来自全工程深度审计：
+
+| 优先级 | 问题 | 目标文件 | 方案 |
+|--------|------|---------|------|
+| P0 | PluginRegistry 重复属性声明 | PluginRegistry.swift L15-17 | 删除重复行 |
+| P0 | API Key 明文存储 | LLMModels.swift | 迁移至 Keychain |
+| P0 | LogService 递归崩溃 | LogService.swift | 修复 extension 递归调用 |
+| P0 | DataExportService fatalError | DataExportService.swift | 实现或抛业务错误 |
+| P0 | SecurityManager 硬编码 salt | SecurityManager.swift | 移至配置或 keychain |
+| P1 | LLMService 上帝类 (627行) | LLMService.swift | 拆分为 ChatOrchestrator/IngestService/RefactorService |
+| P1 | AIWorkflowStore (571行) | AIWorkflowStore.swift | 按合成/扫描/洞察/建议拆分为多个 @Observable |
+| P1 | KMStore 瘦身 | KMStore.swift | PDF/OCR 操作已提取代理方法 |
+| P1 | 两套 LLM 协议 | AIProviders.swift, LLMStrategy.swift | 删除死代码体系 |
+| P1 | applyRefactorSuggestion 重复 | KMStore + AIWorkflowStore | 合并到单一 Store |
+| P2 | parseJSONArray 重复 3 次 | 多文件 | 提取 LLMUtils |
+| P2 | cosineSimilarity 重复 2 次 | EmbeddingManager.swift | 提取静态工具
 

@@ -1,3 +1,13 @@
+// PluginSandboxTests.swift
+//
+// 作者: Wang Chong
+// 功能说明: 插件沙箱安全测试
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 @testable import KM
 
@@ -11,10 +21,11 @@ final class PluginSandboxTests: XCTestCase {
     override func setUp() {
         super.setUp()
         registry = PluginRegistry.shared
+        registry.reset()
     }
 
     override func tearDown() {
-        registry.plugins.forEach { registry.unloadPlugin(id: $0.manifest.id) }
+        registry.reset()
         registry = nil
         super.tearDown()
     }
@@ -56,7 +67,7 @@ final class PluginSandboxTests: XCTestCase {
         let plugin = MockInterceptionPlugin(
             id: "test.noperm",
             name: "无权限插件",
-            permissions: ["pages.read"]
+            permissions: ["pages.read"] // 故意不给 writeContent
         )
         registry.loadPlugin(plugin)
 
@@ -91,13 +102,17 @@ final class PluginSandboxTests: XCTestCase {
 
 // MARK: - Mock 插件
 
-private final class MockKnowledgePlugin: KnowledgePlugin {
+private enum MockError: Error {
+    case simulatedCrash
+}
+
+private class MockKnowledgePlugin: KnowledgePlugin {
     let manifest: PluginManifest
     var monetization: MonetizationInfo? { nil }
     private(set) var didLoad = false
     private(set) var didUnload = false
 
-    init(id: String, name: String, permissions: [String] = ["storage.read"]) {
+    init(id: String, name: String, permissions: [String] = ["storage.read", "writeContent"]) {
         manifest = PluginManifest(id: id, name: name, version: "2.0.0", permissions: permissions)
     }
 
@@ -106,13 +121,16 @@ private final class MockKnowledgePlugin: KnowledgePlugin {
 }
 
 private final class MockInterceptionPlugin: MockKnowledgePlugin, InterceptionPlugin {
-    func preProcess(content: String) -> String { "拦截后: \(content)" }
-    func postProcess(content: String) -> String { content }
+    func preProcess(content: String) throws -> String { "拦截后: \(content)" }
+    func postProcess(content: String) throws -> String { content }
 }
 
 private final class MockCrashingPlugin: MockKnowledgePlugin, InterceptionPlugin {
-    func preProcess(content: String) -> String {
-        fatalError("模拟插件崩溃")
+    init() {
+        super.init(id: "test.crash", name: "崩溃测试", permissions: ["writeContent"])
     }
-    func postProcess(content: String) -> String { content }
+    func preProcess(content: String) throws -> String {
+        throw MockError.simulatedCrash
+    }
+    func postProcess(content: String) throws -> String { content }
 }

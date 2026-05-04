@@ -1,3 +1,13 @@
+// CollaborationModels.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct CollabUser
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import MultipeerConnectivity
 
@@ -22,15 +32,15 @@ struct CollabEdit: Identifiable, Codable {
 }
 
 enum CollabRole: String, Codable {
-    case owner
-    case editor
-    case viewer
+    case owner = "owner"
+    case editor = "editor"
+    case viewer = "viewer"
 
     var displayName: String {
         switch self {
-        case .owner: return Localized.tr("collab.role.owner")
-        case .editor: return Localized.tr("collab.role.editor")
-        case .viewer: return Localized.tr("collab.role.viewer")
+        case .owner: return L10n.Collaboration.tr("role.owner")
+        case .editor: return L10n.Collaboration.tr("role.editor")
+        case .viewer: return L10n.Collaboration.tr("role.viewer")
         }
     }
 

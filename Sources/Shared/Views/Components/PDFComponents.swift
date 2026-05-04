@@ -1,3 +1,14 @@
+// PDFComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct PDFIngestSheet
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import PDFKit
 
@@ -119,13 +130,13 @@ struct PDFIngestSheet: View {
         switch ingestMode {
         case "fullText":
             guard let pdfDoc = pdfDocument else { return Localized.tr("pdf.cannotLoadPDF") }
-            let text = PDFService.shared.extractText(from: pdfDoc, pageRange: 0..<min(2, pdfDoc.pageCount))
+            let text = store.extractPDFText(from: pdfDoc, pageRange: 0..<min(2, pdfDoc.pageCount))
             return String(text.prefix(500))
         case "pageRange":
             guard let pdfDoc = pdfDocument else { return "" }
             let start = max(0, pageStart - 1)
             let end = min(pdfDoc.pageCount, pageEnd)
-            let text = PDFService.shared.extractText(from: pdfDoc, pageRange: start..<end)
+            let text = store.extractPDFText(from: pdfDoc, pageRange: start..<end)
             return String(text.prefix(500))
         case "highlights":
             let texts = documentInfo.highlights.map { $0.text }
@@ -142,13 +153,13 @@ struct PDFIngestSheet: View {
         switch ingestMode {
         case "fullText":
             if let pdfDoc = pdfDocument {
-                content = PDFService.shared.extractText(from: pdfDoc)
+                content = store.extractPDFText(from: pdfDoc)
             }
         case "pageRange":
             if let pdfDoc = pdfDocument {
                 let start = max(0, pageStart - 1)
                 let end = min(pdfDoc.pageCount, pageEnd)
-                content = PDFService.shared.extractText(from: pdfDoc, pageRange: start..<end)
+                content = store.extractPDFText(from: pdfDoc, pageRange: start..<end)
             }
         case "highlights":
             content = documentInfo.highlights.map { h in

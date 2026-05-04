@@ -1,3 +1,13 @@
+// LLMClient.swift
+//
+// 作者: Wang Chong
+// 功能说明: Handles all HTTP communication with OpenAI-compatible LLM APIs.
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 // MARK: - LLM HTTP Client

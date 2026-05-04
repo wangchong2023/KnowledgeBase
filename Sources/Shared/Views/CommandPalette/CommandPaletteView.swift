@@ -1,3 +1,14 @@
+// CommandPaletteView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 全局指令中枢 (Command Palette)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 全局指令中枢 (Command Palette)
@@ -30,17 +41,17 @@ struct CommandPaletteView: View {
             
             // 结果列表
             List {
-                Section(Localized.tr("cmd.quickActions")) {
-                    CommandRow(icon: "sparkles", title: Localized.tr("cmd.deepExplore"), shortcut: "↵") {
+                Section(L10n.Action.tr("cmd.quickActions")) {
+                    CommandRow(icon: "sparkles", title: L10n.Action.tr("cmd.deepExplore"), shortcut: "↵") {
                         // 触发逻辑
                         dismiss()
                     }
-                    CommandRow(icon: "doc.badge.plus", title: Localized.tr("cmd.newWikiPage"), shortcut: "N") {
+                    CommandRow(icon: "doc.badge.plus", title: L10n.Action.tr("cmd.newWikiPage"), shortcut: "N") {
                         dismiss()
                     }
                 }
                 
-                Section(Localized.tr("cmd.recentAccess")) {
+                Section(L10n.Action.tr("cmd.recentAccess")) {
                     ForEach(store.pages.prefix(3)) { page in
                         CommandRow(icon: page.type.icon, title: page.title) {
                             dismiss()

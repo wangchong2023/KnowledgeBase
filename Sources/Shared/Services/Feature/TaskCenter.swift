@@ -1,3 +1,14 @@
+// TaskCenter.swift
+//
+// 作者: Wang Chong
+// 功能说明: 任务类型
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 
@@ -16,6 +27,16 @@ enum TaskType: String, CaseIterable {
         case .aiScan: return "bolt.shield.fill"
         case .healthCheck: return "stethoscope"
         case .synthesis: return "wand.and.stars"
+        }
+    }
+    
+    // UI 扩展逻辑映射（后续可由 View 层通过扩展覆盖，目前放在这里作为默认实现）
+    var defaultColor: String {
+        switch self {
+        case .ingest: return "blue"
+        case .healthCheck: return "red"
+        case .aiScan, .ai: return "orange"
+        case .synthesis: return "purple"
         }
     }
 }
@@ -62,6 +83,28 @@ class TaskCenter: ObservableObject {
     /// 更新全局最新状态文案 (用于触发 UI 脉搏动效)
     func updateLatestStatus(_ text: String) {
         self.latestStatus = text
+    }
+    
+    /// 任务指标摘要
+    struct TaskMetrics {
+        let total: Int
+        let completed: Int
+        let running: Int
+        let failed: Int
+    }
+    
+    /// 获取指定类型的任务指标
+    func metrics(for type: TaskType) -> TaskMetrics {
+        let relevant = tasks.filter { $0.type == type }
+        let completed = relevant.filter { $0.status == .completed }.count
+        let running = relevant.filter { 
+            if case .running = $0.status { return true }; return false 
+        }.count
+        let failed = relevant.filter {
+            if case .failed = $0.status { return true }; return false
+        }.count
+        
+        return TaskMetrics(total: relevant.count, completed: completed, running: running, failed: failed)
     }
     
     /// 未读已完成任务数
@@ -140,6 +183,12 @@ class TaskCenter: ObservableObject {
         DispatchQueue.main.async {
             self.tasks.removeAll(where: { $0.id == id })
         }
+    }
+    
+    /// 重置所有任务数据
+    func reset() {
+        self.tasks.removeAll()
+        self.latestStatus = ""
     }
 }
 

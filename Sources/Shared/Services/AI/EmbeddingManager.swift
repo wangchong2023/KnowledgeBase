@@ -1,3 +1,13 @@
+// EmbeddingManager.swift
+//
+// 作者: Wang Chong
+// 功能说明: 商用级向量管理中心
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import NaturalLanguage
 import Accelerate
@@ -5,7 +15,7 @@ import Accelerate
 /// 商用级向量管理中心
 /// 负责向量的异步计算、持久化同步以及基于 Accelerate 框架的高性能检索。
 final class EmbeddingManager {
-    private let core: SQLiteStoreCore
+    private let repository: WikiPageStore
     private let embeddingModel: NLEmbedding?
     private let modelName = "apple_nl_v1"
     
@@ -21,17 +31,18 @@ final class EmbeddingManager {
         return vectorCache
     }
     
-    init(core: SQLiteStoreCore) {
-        self.core = core
+    init(repository: WikiPageStore) {
+        self.repository = repository
         self.embeddingModel = NLEmbedding.sentenceEmbedding(for: .simplifiedChinese) ?? NLEmbedding.sentenceEmbedding(for: .english)
         loadCache()
     }
     
     private func loadCache() {
-        let embeddings = core.selectAllEmbeddings()
-        lock.lock()
-        defer { lock.unlock() }
-        vectorCache = embeddings
+        if let embeddings = try? repository.fetchAllEmbeddings() {
+            lock.lock()
+            defer { lock.unlock() }
+            vectorCache = embeddings
+        }
     }
     
     // MARK: - 异步同步逻辑
@@ -61,7 +72,7 @@ final class EmbeddingManager {
                     
                     if let v = vector {
                         let floatVector = v.map { Float($0) }
-                        self.core.saveEmbedding(id: page.id, embedding: floatVector, model: self.modelName)
+                        try? self.repository.saveEmbedding(id: page.id, vector: floatVector, modelName: self.modelName)
                         
                         self.lock.lock()
                         self.vectorCache[page.id] = floatVector
@@ -87,12 +98,18 @@ final class EmbeddingManager {
             
             if let v = vector {
                 let floatVector = v.map { Float($0) }
-                self.core.saveEmbedding(id: page.id, embedding: floatVector, model: self.modelName)
+                try? self.repository.saveEmbedding(id: page.id, vector: floatVector, modelName: self.modelName)
                 
                 self.lock.lock()
                 self.vectorCache[page.id] = floatVector
                 self.lock.unlock()
             }
+        }
+    }
+    /// 等待所有排队的异步任务完成（仅用于测试或必要同步场景）
+    func waitForCompletion() {
+        syncQueue.sync {
+            // 仅仅是为了排队等待之前的 async 任务执行完毕
         }
     }
     
@@ -144,7 +161,7 @@ final class EmbeddingManager {
         DispatchQueue.concurrentPerform(iterations: keysCount) { index in
             let id = keys[index]
             if let vector = currentCache[id] {
-                let score = cosineSimilarity(vector, qv)
+                let score = Self.cosineSimilarity(vector, qv)
                 wrappedResults.ptr[index] = (id, score)
             } else {
                 wrappedResults.ptr[index] = (id, -1.0)
@@ -163,25 +180,7 @@ final class EmbeddingManager {
         return resultsList.sorted { $0.1 > $1.1 }.prefix(topK).map { $0 }
     }
     
-    /// 利用 Accelerate 的 vDSP_dotpr 计算两个向量的点积（余弦相似度基础）
-    private func cosineSimilarity(_ v1: [Float], _ v2: [Float]) -> Float {
-        guard v1.count == v2.count else { return 0 }
-
-        var dotProduct: Float = 0
-        vDSP_dotpr(v1, 1, v2, 1, &dotProduct, vDSP_Length(v1.count))
-
-        var v1SumSq: Float = 0
-        vDSP_svesq(v1, 1, &v1SumSq, vDSP_Length(v1.count))
-
-        var v2SumSq: Float = 0
-        vDSP_svesq(v2, 1, &v2SumSq, vDSP_Length(v2.count))
-
-        let denominator = sqrt(v1SumSq) * sqrt(v2SumSq)
-        guard denominator > 0 else { return 0 }
-        return dotProduct / denominator
-    }
-
-    /// 计算两个向量的余弦相似度（静态方法，可从外部调用）
+    /// 计算两个向量的余弦相似度
     static func cosineSimilarity(_ v1: [Float], _ v2: [Float]) -> Float {
         guard v1.count == v2.count else { return 0 }
 

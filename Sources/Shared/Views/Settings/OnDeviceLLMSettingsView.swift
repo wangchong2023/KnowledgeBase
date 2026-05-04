@@ -1,3 +1,14 @@
+// OnDeviceLLMSettingsView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct OnDeviceLLMSettingsView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 import UniformTypeIdentifiers
 
@@ -34,7 +45,7 @@ struct OnDeviceLLMSettingsView: View {
             OnDeviceTestView(onDeviceService: onDeviceService)
         }
         .alert(Localized.tr("ondevice.error.inferenceFailed"), isPresented: $showError) {
-            Button(Localized.tr("misc.ok"), role: .cancel) {}
+            Button(L10n.Common.tr("ok"), role: .cancel) {}
         } message: {
             Text(errorMessage)
         }

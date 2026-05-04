@@ -59,7 +59,10 @@
 1. [ ] 100% 的 P0 测试用例通过。
 2. [ ] 单元测试覆盖率 > 60%。
 3. [ ] 内存泄漏 (Instruments) 扫描结果为零。
-# Knowledge Management 测试与质量保证策略 (Test Strategy)
+
+---
+
+# 智元 (KM) 测试与质量保证策略 (Test Strategy)
 
 ## 1. 测试原则 (QA Principles)
 *   **左移测试**: 在开发阶段通过 XCTest 执行单元测试，而非依赖集成后的手动验证。
@@ -99,7 +102,10 @@
 ## 4. 回归策略 (Regression Policy)
 *   任何 `KMStore` 的状态变更逻辑修改，必须同步更新对应的单元测试用例。
 *   主要版本发布前，需执行针对 iPad 分屏模式（Split View）的专项 UI 兼容性测试。
-# Knowledge Management 测试用例库 (Test Case Repository)
+
+---
+
+# 智元 (KM) 测试用例库 (Test Case Repository)
 
 本文件定义了系统的核心验收测试用例，涵盖 UI、业务逻辑及集成稳定性。
 
@@ -125,7 +131,7 @@
 ### TC-201: 跨端自适应布局切换
 *   **测试环境**：iPad Pro (支持分屏)。
 *   **测试步骤**：
-    1. 全屏开启 Knowledge Management（应显示三栏布局）。
+    1. 全屏开启 智元 (KM)（应显示三栏布局）。
     2. 拖动分屏边缘，将应用调整为 1/3 窄屏模式。
 *   **预期结果**：布局自动切换为 TabView 底栏模式，当前选中的页面 ID 保持一致。
 
@@ -152,4 +158,4 @@
 ---
 
 ## 4. 自动化测试脚本
-参考 `KnowledgeBaseTests.swift` 进行 XCTest 编写。
+参考 `Tests/` 目录下的 XCTest 文件进行编写。

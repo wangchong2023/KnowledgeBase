@@ -1,3 +1,14 @@
+// PluginMarketService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 插件市场条目模型
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 
@@ -56,7 +67,7 @@ final class PluginMarketService: ObservableObject {
                 self.isLoading = false
             }
         } catch {
-            print("❌ [Market] 获取插件失败: \(error.localizedDescription)")
+            LogService.shared.addLog(action: .error, target: "PluginMarketService", details: "获取插件失败: \(error.localizedDescription)")
             await MainActor.run {
                 self.errorMessage = Localized.tr("plugin.market.connectionError")
                 self.isLoading = false

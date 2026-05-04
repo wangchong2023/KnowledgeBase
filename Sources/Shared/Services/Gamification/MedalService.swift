@@ -1,11 +1,24 @@
-import SwiftUI
+// MedalService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 奖章系统服务：负责追踪用户成就并触发奖励弹窗
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-03
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
+import Foundation
 import Combine
 
 /// 奖章系统服务：负责追踪用户成就并触发奖励弹窗
 @MainActor
 final class MedalService: ObservableObject {
     static let shared = MedalService()
-    
+
+    private var cancellables: Set<AnyCancellable> = []
+
     struct Medal: Identifiable, Codable, Equatable {
         let id: String
         let titleKey: String
@@ -16,9 +29,9 @@ final class MedalService: ObservableObject {
         let category: Category
         
         enum Category: String, Codable {
-            case accumulation // 知识积累 (节点数)
-            case connection   // 知识链接 (链接数)
-            case explore      // 探索 (首次行为)
+            case accumulation = "accumulation" // 知识积累 (节点数)
+            case connection = "connection"     // 知识链接 (链接数)
+            case explore = "explore"           // 探索 (首次行为)
         }
     }
     
@@ -42,6 +55,25 @@ final class MedalService: ObservableObject {
     
     private init() {
         loadEarnedMedals()
+        observeEvents()
+    }
+
+    /// 通过 WikiEventBus 自动监听页面变更，解耦对 KMStore 的直接依赖
+    private func observeEvents() {
+        WikiEventBus.shared.subscribe()
+            .sink { [weak self] event in
+                guard let self = self else { return }
+                switch event {
+                case .pageCreated(_, _, let nodeCount, let linkCount),
+                     .pageUpdated(_, let nodeCount, let linkCount):
+                    self.checkAchievements(nodeCount: nodeCount, linkCount: linkCount)
+                case .pagesCleared:
+                    self.reset()
+                default:
+                    break
+                }
+            }
+            .store(in: &cancellables)
     }
     
     /// 检查并触发成就

@@ -1,3 +1,14 @@
+// Graph3DView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 3D knowledge graph visualization using SceneKit.
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import SceneKit
 
@@ -86,9 +97,12 @@ struct Graph3DView: View {
                 PageDetailView(page: page)
             }
         }
-        .onAppear { buildScene() }
-        .onDisappear {
-            store.selectedTool = nil
+        .onAppear { 
+            // 切换到 3D 图谱时，默认清空选中状态以隐藏卡片
+            selectedNodeID = nil
+            infoPage = nil
+            showNodeInfo = false
+            buildScene() 
         }
         .onChange(of: store.pages.count) { _, _ in buildScene() }
         .onChange(of: filterType) { _, _ in buildScene() }
@@ -96,12 +110,12 @@ struct Graph3DView: View {
     
     private var headerOverlay: some View {
         VStack(alignment: isFullScreen ? .center : .leading, spacing: 4) {
-            Text(Localized.tr("graph3d.title"))
+            Text(L10n.Graph.ThreeD.tr("title"))
                 .font(.subheadline.bold())
                 .foregroundStyle(isFullScreen ? .white : .wikiText)
             
             if isFullScreen {
-                Text(Localized.tr("graph3d.desc"))
+                Text(L10n.Graph.ThreeD.tr("desc"))
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.7))
                     .multilineTextAlignment(isFullScreen ? .center : .leading)
@@ -160,6 +174,12 @@ struct Graph3DView: View {
         addGridFloor(scene: newScene)
 
         scene = newScene
+        
+        // 动态调整相机距离：确保能看到整个球体
+        let targetDistance = Float(radius) * 2.2
+        cameraDistance = max(60, min(400, targetDistance))
+        resetCamera() // 自动应用新距离并平滑对齐
+        
         updateAutoRotation(isRotating: autoRotate)
     }
 
@@ -213,15 +233,35 @@ struct Graph3DView: View {
 
     private func createPageNodes(pages: [WikiPage], positions: [CGPoint3D], scene: SCNScene) -> [UUID: SCNNode] {
         var nodeMap: [UUID: SCNNode] = [:]
+        
+        // 计算邻居 ID 集合
+        let neighborIDs: Set<UUID> = {
+            guard let selectedID = selectedNodeID else { return [] }
+            let connectedEdges = store.pages.flatMap { page in
+                page.outgoingLinks.compactMap { link -> (UUID, UUID)? in
+                    if let target = store.pages.first(where: { $0.title == link }) {
+                        return (page.id, target.id)
+                    }
+                    return nil
+                }
+            }.filter { $0.0 == selectedID || $0.1 == selectedID }
+            return Set(connectedEdges.flatMap { [$0.0, $0.1] })
+        }()
 
         for (index, page) in pages.enumerated() {
             let nodeSize = calculateNodeSize(for: page)
             let geometry = createNodeGeometry(for: page.type, size: nodeSize)
             
+            let isSelected = selectedNodeID == page.id
+            let isNeighbor = neighborIDs.contains(page.id)
+            let isDimmed = selectedNodeID != nil && !isSelected && !isNeighbor
+            
             let uiColor = UIColor(page.type.themedColor)
-            geometry.firstMaterial?.diffuse.contents = uiColor
-            geometry.firstMaterial?.specular.contents = UIColor.white
-            geometry.firstMaterial?.emission.contents = uiColor.withAlphaComponent(0.4)
+            let opacity: CGFloat = isDimmed ? 0.2 : 1.0
+            
+            geometry.firstMaterial?.diffuse.contents = uiColor.withAlphaComponent(opacity)
+            geometry.firstMaterial?.specular.contents = UIColor.white.withAlphaComponent(opacity)
+            geometry.firstMaterial?.emission.contents = isDimmed ? uiColor.withAlphaComponent(0.1) : uiColor.withAlphaComponent(0.4)
 
             let node = SCNNode(geometry: geometry)
             node.position = SCNVector3(
@@ -231,10 +271,14 @@ struct Graph3DView: View {
             )
             node.name = page.id.uuidString
 
-            let textNode = createLabelNode(title: page.title, nodeSize: nodeSize)
-            node.addChildNode(textNode)
+            // 仅为选中点或邻居显示标签，或者节点总数较少时全部显示
+            if !isDimmed || pages.count < 50 {
+                let textNode = createLabelNode(title: page.title, nodeSize: nodeSize)
+                textNode.opacity = isDimmed ? 0.4 : 1.0
+                node.addChildNode(textNode)
+            }
 
-            if page.isPinned {
+            if page.isPinned || isSelected {
                 addPulseAnimation(to: node)
             }
 
@@ -444,12 +488,36 @@ struct Graph3DView: View {
         SCNTransaction.commit()
     }
     
-    private func handleNodeTap(_ uuid: UUID) {
-        if let page = store.pages.first(where: { $0.id == uuid }) {
+    private func handleNodeTap(_ uuid: UUID?) {
+        if let uuid = uuid, let page = store.pages.first(where: { $0.id == uuid }) {
             selectedNodeID = uuid
             infoPage = page
+            
+            // 3D 空间对焦逻辑
+            if let scene = scene, let targetNode = scene.rootNode.childNode(withName: uuid.uuidString, recursively: true), let camera = cameraNode {
+                SCNTransaction.begin()
+                SCNTransaction.animationDuration = 1.0
+                SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                
+                // 将相机移动到目标节点附近
+                let pos = targetNode.position
+                let direction = SCNVector3(pos.x, pos.y + 5, pos.z + 15) // 稍微偏移以获得良好的透视感
+                camera.position = direction
+                camera.look(at: pos)
+                
+                SCNTransaction.commit()
+            }
+            
             withAnimation(.spring()) {
                 showNodeInfo = true
+            }
+        } else {
+            // 点击空白处，清空选中状态
+            selectedNodeID = nil
+            infoPage = nil
+            resetCamera()
+            withAnimation(.spring()) {
+                showNodeInfo = false
             }
         }
     }

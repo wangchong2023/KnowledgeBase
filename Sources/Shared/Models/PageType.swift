@@ -1,7 +1,18 @@
+// PageType.swift
+//
+// 作者: Wang Chong
+// 功能说明: enum PageType
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
+import GRDB
 
 // MARK: - Page Type
-enum PageType: String, Codable, CaseIterable, Identifiable {
+enum PageType: String, Codable, CaseIterable, Identifiable, DatabaseValueConvertible {
     case entity = "entity"
     case concept = "concept"
     case source = "source"
@@ -13,12 +24,12 @@ enum PageType: String, Codable, CaseIterable, Identifiable {
     
     var displayName: String {
         switch self {
-        case .entity: return Localized.tr("type.entity")
-        case .concept: return Localized.tr("type.concept")
-        case .source: return Localized.tr("type.source")
-        case .comparison: return Localized.tr("type.comparison")
-        case .map: return Localized.tr("type.map")
-        case .raw: return Localized.tr("type.raw")
+        case .entity: return L10n.CoreModels.tr("type.entity")
+        case .concept: return L10n.CoreModels.tr("type.concept")
+        case .source: return L10n.CoreModels.tr("type.source")
+        case .comparison: return L10n.CoreModels.tr("type.comparison")
+        case .map: return L10n.CoreModels.tr("type.map")
+        case .raw: return L10n.CoreModels.tr("type.raw")
         }
     }
     
@@ -46,7 +57,7 @@ enum PageType: String, Codable, CaseIterable, Identifiable {
 }
 
 // MARK: - Page Status
-enum PageStatus: String, Codable, CaseIterable {
+enum PageStatus: String, Codable, CaseIterable, DatabaseValueConvertible {
     case active = "active"
     case stub = "stub"
     case needsUpdate = "needs-update"
@@ -54,13 +65,13 @@ enum PageStatus: String, Codable, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .active: return Localized.tr("status.active")
-        case .stub: return Localized.tr("status.stub")
-        case .needsUpdate: return Localized.tr("status.needsUpdate")
-        case .deprecated: return Localized.tr("status.deprecated")
+        case .active: return L10n.CoreModels.tr("status.active")
+        case .stub: return L10n.CoreModels.tr("status.stub")
+        case .needsUpdate: return L10n.CoreModels.tr("status.needsUpdate")
+        case .deprecated: return L10n.CoreModels.tr("status.deprecated")
         }
     }
-    
+
     var color: Color {
         switch self {
         case .active: return .green
@@ -69,22 +80,23 @@ enum PageStatus: String, Codable, CaseIterable {
         case .deprecated: return .red
         }
     }
+
 }
 
 // MARK: - Confidence Level
-enum Confidence: String, Codable, CaseIterable {
+enum Confidence: String, Codable, CaseIterable, DatabaseValueConvertible {
     case high = "high"
     case medium = "medium"
     case low = "low"
     
     var displayName: String {
         switch self {
-        case .high: return Localized.tr("confidence.high")
-        case .medium: return Localized.tr("confidence.medium")
-        case .low: return Localized.tr("confidence.low")
+        case .high: return L10n.CoreModels.tr("confidence.high")
+        case .medium: return L10n.CoreModels.tr("confidence.medium")
+        case .low: return L10n.CoreModels.tr("confidence.low")
         }
     }
-    
+
     var color: Color {
         switch self {
         case .high: return .green
@@ -92,4 +104,5 @@ enum Confidence: String, Codable, CaseIterable {
         case .low: return .red
         }
     }
+
 }

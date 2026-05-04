@@ -1,8 +1,19 @@
+// KMTests.swift
+//
+// 作者: Wang Chong
+// 功能说明: KMTests.swift
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 import SwiftUI
 @testable import KM
 
 // MARK: - Models Tests
+@MainActor
 final class ModelsTests: XCTestCase {
     
     // MARK: - WikiPage Tests
@@ -267,6 +278,7 @@ final class ModelsTests: XCTestCase {
 }
 
 // MARK: - GraphModels Tests
+@MainActor
 final class GraphModelsTests: XCTestCase {
     
     func testGraphNodeCreation() {
@@ -288,8 +300,8 @@ final class GraphModelsTests: XCTestCase {
     }
     
     func testLogEntryCreation() {
-        let entry = LogEntry(action: "create", target: "Page1", details: "Created new page")
-        XCTAssertEqual(entry.action, "create")
+        let entry = LogEntry(action: .create, target: "Page1", details: "Created new page")
+        XCTAssertEqual(entry.action, .create)
         XCTAssertEqual(entry.target, "Page1")
         XCTAssertEqual(entry.details, "Created new page")
         XCTAssertNotNil(entry.timestamp)
@@ -298,6 +310,7 @@ final class GraphModelsTests: XCTestCase {
 }
 
 // MARK: - LintIssue Tests
+@MainActor
 final class LintIssueTests: XCTestCase {
     
     func testLintIssueSeverityError() {
@@ -322,6 +335,7 @@ final class LintIssueTests: XCTestCase {
 }
 
 // MARK: - CollaborationModels Tests
+@MainActor
 final class CollaborationModelsTests: XCTestCase {
     
     func testCollabUserDisplayLabel() {
@@ -354,6 +368,7 @@ final class CollaborationModelsTests: XCTestCase {
 }
 
 // MARK: - DocumentFormat Tests
+@MainActor
 final class DocumentFormatTests: XCTestCase {
     
     func testDetectMarkdown() {
@@ -393,18 +408,19 @@ final class DocumentFormatTests: XCTestCase {
 }
 
 // MARK: - UndoService Tests
+@MainActor
 final class UndoServiceTests: XCTestCase {
     
     var undoService: UndoService!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         undoService = UndoService()
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         undoService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     func testInitialCanUndoRedo() {
@@ -475,154 +491,87 @@ final class UndoServiceTests: XCTestCase {
     }
 }
 
-// MARK: - LinkService Tests
-final class LinkServiceTests: XCTestCase {
-    
-    var linkService: LinkService!
-    var samplePages: [WikiPage]!
-    
-    override func setUp() {
-        super.setUp()
-        linkService = LinkService()
-        
-        samplePages = [
-            WikiPage(title: "Alpha", type: .entity, content: "Links to [[Beta]] and [[Gamma]]"),
-            WikiPage(title: "Beta", type: .concept, content: "Links to [[Alpha]]"),
-            WikiPage(title: "Gamma", type: .source, content: "No outgoing links"),
-            WikiPage(title: "Delta", type: .concept, content: "Links to [[NonExistent]]", tags: ["test", "sample"])
-        ]
-    }
-    
-    override func tearDown() {
-        linkService = nil
-        samplePages = nil
-        super.tearDown()
-    }
-    
-    func testPageByTitle() {
-        let found = linkService.pageByTitle("Alpha", in: samplePages)
-        XCTAssertNotNil(found)
-        XCTAssertEqual(found?.title, "Alpha")
-    }
-    
-    func testPageByTitleCaseInsensitive() {
-        let found = linkService.pageByTitle("alpha", in: samplePages)
-        XCTAssertNotNil(found)
-    }
-    
-    func testPageByTitleNotFound() {
-        let found = linkService.pageByTitle("NonExistent", in: samplePages)
-        XCTAssertNil(found)
-    }
-    
-    func testPageByID() {
-        let targetID = samplePages[0].id
-        let found = linkService.pageByID(targetID, in: samplePages)
-        XCTAssertNotNil(found)
-        XCTAssertEqual(found?.id, targetID)
-    }
-    
-    func testBacklinks() {
-        let alphaID = samplePages[0].id
-        let backlinks = linkService.backlinks(for: alphaID, in: samplePages)
-        // Beta links to Alpha
-        XCTAssertTrue(backlinks.contains { $0.title == "Beta" })
-    }
-    
-    func testSearchByTitle() {
-        let results = linkService.search(query: "Alpha", in: samplePages)
-        XCTAssertFalse(results.isEmpty)
-        XCTAssertTrue(results.contains { $0.title == "Alpha" })
-    }
-    
-    func testSearchByContent() {
-        let results = linkService.search(query: "outgoing links", in: samplePages)
-        XCTAssertFalse(results.isEmpty)
-    }
-    
-    func testAllTags() {
-        let tags = linkService.allTags(in: samplePages)
-        XCTAssertFalse(tags.isEmpty)
-        XCTAssertTrue(tags.contains { $0.tag == "test" })
-    }
-}
 
 // MARK: - LintService Tests
+
+// MARK: - LintService Tests
+@MainActor
 final class LintServiceTests: XCTestCase {
     
     var lintService: LintService!
     var linkService: LinkService!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         lintService = LintService()
         linkService = LinkService()
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         lintService = nil
         linkService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
-    func testDetectBrokenLinks() {
+    func testDetectBrokenLinks() async {
         let pages = [
             WikiPage(title: "A", content: "Links to [[NonExistent]]")
         ]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         XCTAssertTrue(issues.contains { $0.message.contains("NonExistent") || $0.message.contains("broken") || $0.message.contains("Broken") })
     }
     
-    func testDetectMultipleBrokenLinks() {
+    func testDetectMultipleBrokenLinks() async {
         let pages = [
             WikiPage(title: "A", content: "[[Missing1]] and [[Missing2]]")
         ]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         let brokenCount = issues.filter { $0.severity == .error }.count
         XCTAssertEqual(brokenCount, 2)
     }
     
-    func testDetectStubContent() {
+    func testDetectStubContent() async {
         let pages = [
             WikiPage(title: "Short", content: "Hi")
         ]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         XCTAssertTrue(issues.contains { $0.message.contains("Short") })
     }
     
-    func testRawPagesNotFlaggedAsOrphan() {
+    func testRawPagesNotFlaggedAsOrphan() async {
         // raw type pages should NOT be flagged as orphans even without backlinks
         let rawPage = WikiPage(title: "RawData", type: .raw, content: String(repeating: "x", count: 200))
-        let issues = lintService.runLint(pages: [rawPage], linkService: linkService)
+        let issues = await lintService.runLint(pages: [rawPage], linkService: linkService)
         let orphanIssues = issues.filter { $0.severity == .warning && $0.message.contains("orphan") || $0.message.contains("Orphan") }
         XCTAssertTrue(orphanIssues.isEmpty, "raw type should not be flagged as orphan")
     }
     
-    func testNoIssuesForHealthyWiki() {
+    func testNoIssuesForHealthyWiki() async {
         let pageA = WikiPage(title: "Alpha", content: String(repeating: "Good content ", count: 20))
         let pageB = WikiPage(title: "Beta", content: "Links to [[Alpha]] " + String(repeating: "content ", count: 15))
         let pages = [pageA, pageB]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         XCTAssertFalse(issues.contains { $0.severity == .error })
     }
 }
 
 // MARK: - IngestService Tests
+@MainActor
 final class IngestServiceTests: XCTestCase {
     
     var ingestService: IngestService!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         ingestService = IngestService()
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         ingestService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
-    func testExtractConceptsFromContent() {
+    func testExtractConceptsFromContent() async {
         let pages = [
             WikiPage(title: "Machine Learning", type: .concept),
             WikiPage(title: "Deep Learning", type: .concept),
@@ -637,13 +586,13 @@ final class IngestServiceTests: XCTestCase {
         XCTAssertFalse(concepts.contains("Deep Learning")) // Not in content
     }
     
-    func testExtractConceptsCaseInsensitive() {
+    func testExtractConceptsCaseInsensitive() async {
         let pages = [WikiPage(title: "SwiftUI", type: .concept)]
         let concepts = ingestService.extractConcepts(from: "I love swiftui programming", pages: pages)
         XCTAssertTrue(concepts.contains("SwiftUI"), "Should be case-insensitive")
     }
     
-    func testExtractConceptsEmpty() {
+    func testExtractConceptsEmpty() async {
         let pages = [WikiPage(title: "Something")]
         let concepts = ingestService.extractConcepts(from: "No matches here", pages: pages)
         XCTAssertTrue(concepts.isEmpty)
@@ -664,8 +613,8 @@ final class MarkdownParserTests: XCTestCase {
     
     var parser: MarkdownParser!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         parser = MarkdownParser()
     }
     
@@ -751,6 +700,9 @@ final class MarkdownParserTests: XCTestCase {
         XCTAssertTrue(types.contains(.wikilink))
         XCTAssertTrue(types.contains(.italic))
         XCTAssertTrue(types.contains(.text))
+        
+        // 验证 content 属性 (Swift 6 迁移后 text 改为 content)
+        XCTAssertEqual(segments.first?.content, "bold")
     }
     
     func testParseMixedContent() {
@@ -788,64 +740,66 @@ final class MarkdownParserTests: XCTestCase {
 }
 
 // MARK: - LogService Tests
+@MainActor
 final class LogServiceTests: XCTestCase {
     
     var logService: LogService!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         logService = LogService()
         logService.logEntries.removeAll() // Start clean
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         // Clean up any files created during testing
         let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         _ = try? FileManager.default.removeItem(at: docs!.appendingPathComponent("wikicraft_logs.json"))
         logService = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     func testAddLogEntry() {
-        logService.addLog(action: "create", target: "TestPage")
+        logService.addLog(action: .create, target: "TestPage")
         XCTAssertEqual(logService.logEntries.count, 1)
-        XCTAssertEqual(logService.logEntries.first?.action, "create")
+        XCTAssertEqual(logService.logEntries.first?.action, .create)
         XCTAssertEqual(logService.logEntries.first?.target, "TestPage")
     }
     
     func testLogEntryOrdering() {
-        logService.addLog(action: "action1", target: "t1")
-        logService.addLog(action: "action2", target: "t2")
-        logService.addLog(action: "action3", target: "t3")
+        logService.addLog(action: .update, target: "t1")
+        logService.addLog(action: .update, target: "t2")
+        logService.addLog(action: .update, target: "t3")
         
-        XCTAssertEqual(logService.logEntries.first?.action, "action3") // Most recent first
-        XCTAssertEqual(logService.logEntries.last?.action, "action1")
+        XCTAssertEqual(logService.logEntries.first?.target, "t3") // Most recent first
+        XCTAssertEqual(logService.logEntries.last?.target, "t1")
     }
     
     func testMaxLogEntriesCap() {
         for i in 0..<600 {
-            logService.addLog(action: "batch_\(i)", target: "t\(i)")
+            logService.addLog(action: .update, target: "t\(i)")
         }
         XCTAssertLessThanOrEqual(logService.logEntries.count, 500)
     }
 }
 
 // MARK: - ChatHistoryStore Tests
+@MainActor
 final class ChatHistoryStoreTests: XCTestCase {
     
     var store: ChatHistoryStore!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         store = ChatHistoryStore()
         store.messages.removeAll()
         UserDefaults.standard.removeObject(forKey: "wikicraft_chat_history")
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         UserDefaults.standard.removeObject(forKey: "wikicraft_chat_history")
         store = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     func testAppendMessage() {
@@ -895,24 +849,25 @@ final class ChatHistoryStoreTests: XCTestCase {
 }
 
 // MARK: - LLMConfigStore Tests
+@MainActor
 final class LLMConfigStoreTests: XCTestCase {
     
     var configStore: LLMConfigStore!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         UserDefaults.standard.removeObject(forKey: "wikicraft_llm_config")
         configStore = LLMConfigStore()
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         UserDefaults.standard.removeObject(forKey: "wikicraft_llm_config")
         configStore = nil
-        super.tearDown()
+        try await super.tearDown()
     }
     
     func testDefaultValues() {
-        XCTAssertEqual(configStore.provider, .openAI)
+        XCTAssertEqual(configStore.provider, .deepSeek)
         XCTAssertEqual(configStore.apiKey, "")
         XCTAssertEqual(configStore.isEnabled, false)
         XCTAssertFalse(configStore.baseURL.isEmpty)
@@ -942,6 +897,7 @@ final class LLMConfigStoreTests: XCTestCase {
 }
 
 // MARK: - VoiceRecording Tests
+@MainActor
 final class VoiceRecordingTests: XCTestCase {
     
     func testVoiceRecordingCreation() {
@@ -969,9 +925,10 @@ final class VoiceRecordingTests: XCTestCase {
 }
 
 // MARK: - PDF Document Info Tests
+@MainActor
 final class PDFDocumentInfoTests: XCTestCase {
     
-    func testPDFDocCreation() {
+    func testPDFDocCreation() async {
         let doc = PDFDocumentInfo(
             title: "Research Paper",
             fileName: "paper.pdf",

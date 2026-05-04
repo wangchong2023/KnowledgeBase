@@ -1,3 +1,13 @@
+// LinkService.swift
+//
+// 作者: Wang Chong
+// 功能说明: [L1] 领域层：处理链接解析、反向链接、搜索与标签聚合
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 /// [L1] 领域层：处理链接解析、反向链接、搜索与标签聚合
@@ -62,7 +72,7 @@ actor LinkService {
     }
     
     /// 混合检索（带诊断信息版）
-    func hybridSearchWithDiagnostics(query: String, in pages: [WikiPage], embeddingManager: EmbeddingManager) -> (results: [WikiPage], diagnostics: [SearchDiagnosticInfo.ResultScore]) {
+    func hybridSearchWithDiagnostics(query: String, in pages: [WikiPage], embeddingManager: EmbeddingManager) -> (results: [WikiPage], diagnostic: SearchDiagnosticInfo) {
         let keywordResults = search(query: query, in: pages)
         let semanticScored = embeddingManager.search(query: query)
         
@@ -92,8 +102,6 @@ actor LinkService {
         var scores: [UUID: Double] = [:]
         var diagMap: [UUID: (fts: Int, vec: Int)] = [:]
         
-        // 只有在关键词命中或者语义得分极高时才认为有效
-        
         // 动态权重：对于短查询（如 "3D"），关键词匹配更可靠
         let keywordWeight = query.count < 4 ? 1.5 : 1.0
         let semanticWeight = 1.0
@@ -112,7 +120,7 @@ actor LinkService {
         let sortedIDs = scores.keys.sorted { scores[$0]! > scores[$1]! }
         let results = sortedIDs.compactMap { id in pages.first { $0.id == id } }
         
-        let diagnostics = results.prefix(10).map { page in
+        let topDiagnostics = results.prefix(10).map { page in
             let ranks = diagMap[page.id]!
             return SearchDiagnosticInfo.ResultScore(
                 id: page.id,
@@ -123,7 +131,15 @@ actor LinkService {
             )
         }
         
-        return (results, diagnostics)
+        let diagnosticInfo = SearchDiagnosticInfo(
+            query: query,
+            rewrittenQuery: query, // 暂无重写逻辑
+            ftsCount: keywordResults.count,
+            vectorCount: semanticResults.count,
+            rrfTopResults: topDiagnostics
+        )
+        
+        return (results, diagnosticInfo)
     }
     
     /// Reciprocal Rank Fusion (RRF) 算法
@@ -161,5 +177,32 @@ actor LinkService {
             if $0.1 != $1.1 { return $0.1 > $1.1 }
             return $0.0 < $1.0
         }
+    }
+    
+    // MARK: - Refactoring Logic
+    
+    /// 准备页面重命名：扫描所有页面并替换内容中的旧链接
+    /// 返回需要更新的页面列表（包括重命名后的主页面）
+    func prepareRename(page: WikiPage, to newTitle: String, in allPages: [WikiPage]) -> [WikiPage] {
+        let oldTitle = page.title
+        var modifiedPages: [WikiPage] = []
+        
+        // 1. 处理主页面
+        var updatedMainPage = page
+        updatedMainPage.title = newTitle
+        updatedMainPage.updated = Date()
+        modifiedPages.append(updatedMainPage)
+        
+        // 2. 扫描并替换其他页面中的反向链接
+        for p in allPages where p.id != page.id {
+            if p.content.contains("[[\(oldTitle)]]") {
+                var refPage = p
+                refPage.content = refPage.content.replacingOccurrences(of: "[[\(oldTitle)]]", with: "[[\(newTitle)]]")
+                refPage.updated = Date()
+                modifiedPages.append(refPage)
+            }
+        }
+        
+        return modifiedPages
     }
 }

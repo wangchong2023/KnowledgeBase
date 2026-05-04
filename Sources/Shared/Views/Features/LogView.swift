@@ -1,3 +1,14 @@
+// LogView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct LogView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Log View (entry point with NavigationStack)
@@ -54,7 +65,7 @@ struct LogViewContent: View {
 #endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle(Localized.tr("settings.operationLog"))
+        .navigationTitle(L10n.Settings.tr("operationLog"))
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #endif
@@ -63,7 +74,7 @@ struct LogViewContent: View {
                 Button(role: .destructive) {
                     showConfirmation = true
                 } label: {
-                    Label(Localized.tr("misc.clear"), systemImage: "trash.slash.fill")
+                    Label(L10n.Common.tr("clear"), systemImage: "trash.slash.fill")
                 }
             }
         }
@@ -72,13 +83,13 @@ struct LogViewContent: View {
             isPresented: $showConfirmation,
             titleVisibility: .visible
         ) {
-            Button(Localized.tr("misc.clearAll"), role: .destructive) {
+            Button(L10n.Common.tr("clearAll"), role: .destructive) {
                 HapticManager.shared.trigger(.warning)
                 store.clearLogs()
             }
-            Button(Localized.tr("misc.cancel"), role: .cancel) {}
+            Button(L10n.Common.tr("cancel"), role: .cancel) {}
         } message: {
-            Text(Localized.tr("log.clearConfirmMessage"))
+            Text(L10n.Settings.tr("clearAll.message"))
         }
 #if os(iOS)
         .toolbarBackground(.visible, for: .navigationBar)

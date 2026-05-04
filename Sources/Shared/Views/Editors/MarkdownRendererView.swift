@@ -1,5 +1,15 @@
+// MarkdownRendererView.swift
+//
+// 作者: Wang Chong
+// 功能说明: Renders structured Markdown blocks using MarkdownParser.
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
-import LocalAuthentication
 
 // MARK: - Markdown Renderer View
 /// Renders structured Markdown blocks using MarkdownParser.
@@ -13,7 +23,6 @@ struct MarkdownRendererView: View {
     var isCompact: Bool = false
 
     @State private var tempUnlocked = false
-    private let laContext = LAContext()
     private let parser = MarkdownParser()
 
     var body: some View {
@@ -54,19 +63,13 @@ struct MarkdownRendererView: View {
     }
 
     private func authenticate() {
-        var error: NSError?
-        if laContext.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
-            laContext.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: Localized.tr("security.unlockReason")) { success, _ in
-                if success {
-                    DispatchQueue.main.async {
-                        withAnimation { tempUnlocked = true }
-                        HapticManager.shared.trigger(.unlock)
-                    }
+        Task {
+            if await store.securityService.authenticateWithBiometrics() {
+                await MainActor.run {
+                    withAnimation { tempUnlocked = true }
+                    HapticManager.shared.trigger(.unlock)
                 }
             }
-        } else {
-            // Fallback to passcode or just show it if biometrics not available
-            withAnimation { tempUnlocked = true }
         }
     }
 

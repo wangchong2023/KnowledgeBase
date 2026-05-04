@@ -1,3 +1,14 @@
+// ChatComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct ChatBubbleView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Chat Bubble View
@@ -5,8 +16,9 @@ struct ChatBubbleView: View {
     let message: ChatMessage
     let pages: [WikiPage]
     @Environment(KMStore.self) var store
+    @Environment(AppRouter.self) var router
     @State private var referencesExpanded = false
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     
     var isSelectionMode: Bool = false
     var isSelected: Bool = false
@@ -115,7 +127,7 @@ struct ChatBubbleView: View {
                     Image(systemName: referencesExpanded ? "chevron.down" : "chevron.right")
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
-                    Text(referencesExpanded ? Localized.tr("chat.referencesExpanded") : Localized.tr("chat.referencesCollapsed"))
+                    Text(referencesExpanded ? L10n.Chat.tr("referencesExpanded") : L10n.Chat.tr("referencesCollapsed"))
                         .font(.caption.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
                     Spacer()
@@ -152,8 +164,8 @@ struct ChatBubbleView: View {
                             FlowLayout(spacing: 6) {
                                 ForEach(pagesOfType, id: \.id) { page in
                                     Button(action: { 
-                                        store.selectedPageID = page.id 
                                         selectedTab = .wiki
+                                        router.navigateToPage(id: page.id)
                                     }) {
                                         HStack(spacing: 3) {
                                             Image(systemName: page.displayIcon)
@@ -204,8 +216,9 @@ struct ChatContentView: View {
     let text: String
     let pages: [WikiPage]
     @Environment(KMStore.self) var store
+    @Environment(AppRouter.self) var router
     @State private var expanded = false
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -215,13 +228,13 @@ struct ChatContentView: View {
                 let targetTitle = title.trimmingCharacters(in: .whitespaces)
                 if let page = pages.first(where: { $0.title.localizedCaseInsensitiveCompare(targetTitle) == .orderedSame }) {
                     HapticManager.shared.trigger(.link)
-                    store.selectedPageID = page.id
                     selectedTab = .wiki
+                    router.navigateToPage(id: page.id)
                 }
             }, isCompact: true)
             
             if text.count > 1500 && !expanded {
-                Button(Localized.tr("chat.expandFull")) {
+                Button(L10n.Chat.tr("expandFull")) {
                     withAnimation { expanded = true }
                 }
                 .font(.caption)

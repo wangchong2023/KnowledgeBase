@@ -1,3 +1,13 @@
+// PageHistoryView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 页面历史快照列表面板 (Refactored from PageDetailView)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 页面历史快照列表面板 (Refactored from PageDetailView)
@@ -37,7 +47,7 @@ struct PageHistoryView: View {
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.close")) { dismiss() }
+                    Button(L10n.Common.tr("close")) { dismiss() }
                 }
             }
             .sheet(item: $selectedSnapshot) { snapshot in

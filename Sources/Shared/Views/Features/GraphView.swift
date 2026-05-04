@@ -1,48 +1,28 @@
+// GraphView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 图形可视化容器视图
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 图形可视化容器视图
 struct GraphContainerView: View {
     @Environment(KMStore.self) var store
+    @Environment(AppRouter.self) var router
     var heroNamespace: Namespace.ID
-    @Binding var selectedTab: ContentView.AppTab
-    @State private var selectedNodeID: UUID?
-    @State private var nodes: [GraphNode] = []
-    @State private var edges: [GraphEdge] = []
-    @State private var graphSize: CGSize = CGSize(width: 400, height: 600)
-    @State private var scale: CGFloat = 1.0
-    @State private var lastScale: CGFloat = 1.0
-    @State private var offset: CGSize = .zero
-    @State private var lastOffset: CGSize = .zero
-    @State private var isAnimating = false
-    @State private var showLegend = false
-    @State private var showInsights = false
-    @State private var useClustering = false
-    @State private var show3D = false
-    @State private var filterType: PageType?
+    @Binding var selectedTab: AppTab
+    @State private var viewModel = GraphViewModel()
     @StateObject private var tooltipManager = TooltipManager.shared
-    
-    @State private var insightSurprising: [UUID] = []
-    @State private var insightOrphans: [UUID] = []
-    @State private var insightSparse: [UUID] = []
-    @State private var insightBridges: [UUID] = []
-
-    // 辅助计算：解耦复杂表达式
-    private func getFilteredNodes() -> [GraphNode] {
-        guard let filter = filterType else { return nodes }
-        return nodes.filter { $0.type == filter }
-    }
-
-    private func getFilteredEdges(for filteredNodes: [GraphNode]) -> [GraphEdge] {
-        guard filterType != nil else { return edges }
-        let filteredIDs = Set(filteredNodes.map { $0.id })
-        return edges.filter { edge in
-            filteredIDs.contains(edge.source) && filteredIDs.contains(edge.target)
-        }
-    }
 
     var body: some View {
-        let currentFilteredNodes = getFilteredNodes()
-        let currentFilteredEdges = getFilteredEdges(for: currentFilteredNodes)
+        let currentFilteredNodes = viewModel.getFilteredNodes()
+        let currentFilteredEdges = viewModel.getFilteredEdges(for: currentFilteredNodes)
 
         ZStack {
             // 3D 图谱同款渐变底色
@@ -69,28 +49,63 @@ struct GraphContainerView: View {
                 )
             }
             .ignoresSafeArea()
+            .contentShape(Rectangle())
+            .onTapGesture {
+                // 点击空白处取消选中，从而隐藏详情卡片
+                withAnimation(.spring(response: 0.4)) {
+                    viewModel.selectedNodeID = nil
+                    viewModel.isAnimating = false
+                }
+            }
 
-            if nodes.isEmpty {
+            if viewModel.nodes.isEmpty {
                 GraphEmptyStateView(selectedTab: $selectedTab)
             } else {
                 GraphCanvasView(
-                    filteredNodes: currentFilteredNodes,
+                    nodes: $viewModel.nodes,
                     filteredEdges: currentFilteredEdges,
                     provider: store,
-                    useClustering: useClustering,
-                    selectedNodeID: $selectedNodeID,
-                    isAnimating: $isAnimating,
-                    scale: $scale,
-                    lastScale: $lastScale,
-                    offset: $offset,
-                    lastOffset: $lastOffset,
-                    graphSize: $graphSize,
+                    filterType: viewModel.filterType,
+                    useClustering: viewModel.useClustering,
+                    selectedNodeID: $viewModel.selectedNodeID,
+                    isAnimating: $viewModel.isAnimating,
+                    scale: $viewModel.scale,
+                    lastScale: $viewModel.lastScale,
+                    offset: $viewModel.offset,
+                    lastOffset: $viewModel.lastOffset,
+                    graphSize: $viewModel.graphSize,
                     heroNamespace: heroNamespace
                 ) { node in
-                    withAnimation(.spring(response: 0.5)) {
-                        selectedNodeID = selectedNodeID == node.id ? nil : node.id
-                        isAnimating = selectedNodeID != nil
+                    withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) {
+                        if viewModel.selectedNodeID == node.id {
+                            viewModel.selectedNodeID = nil
+                            viewModel.isAnimating = false
+                        } else {
+                            viewModel.selectedNodeID = node.id
+                            viewModel.isAnimating = true
+
+                            // 自动聚焦逻辑
+                            // 目标：将节点平移至视口中心
+                            // 注意：由于 Canvas 可能很大且应用了 scale 和 offset，
+                            // 我们需要计算抵消节点当前坐标的位移。
+                            let targetOffsetX = -node.position.x * viewModel.scale
+                            let targetOffsetY = -node.position.y * viewModel.scale
+
+                            // 加上屏幕中心补偿
+                            viewModel.offset = CGSize(
+                                width: targetOffsetX + viewModel.graphSize.width / 2,
+                                height: targetOffsetY + viewModel.graphSize.height / 2
+                            )
+                            viewModel.lastOffset = viewModel.offset
+
+                            // 如果当前缩放太小，自动放大至 1.2 倍以看清细节
+                            if viewModel.scale < 1.0 {
+                                viewModel.scale = 1.2
+                                viewModel.lastScale = 1.2
+                            }
+                        }
                     }
+                    HapticManager.shared.trigger(.selection)
                 }
 
                 // 顶部控件区域
@@ -100,7 +115,7 @@ struct GraphContainerView: View {
                         .padding(.top, 8)
 
                     GraphFilterPillsView(
-                        filterType: $filterType,
+                        filterType: $viewModel.filterType,
                         tooltipManager: tooltipManager
                     )
 
@@ -109,94 +124,97 @@ struct GraphContainerView: View {
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            if !nodes.isEmpty {
-                // 右下角统一控制组
-                HStack(spacing: 0) {
-                    GraphZoomControls(
-                        scale: $scale,
-                        lastScale: $lastScale,
-                        offset: $offset,
-                        lastOffset: $lastOffset,
-                        onRelayout: layoutGraph
-                    )
-
-                    Divider().frame(width: 1, height: 24).background(Color.wikiBorder)
-
-                    Button(action: { show3D = true }) {
-                        Image(systemName: "view.3d")
-                            .font(.body)
-                            .foregroundStyle(.wikiAccent)
-                            .frame(width: 36, height: 36)
-                            .background(Color.wikiCard)
-                    }
-                    .accessibilityIdentifier("graph-3d")
-                }
+            if !viewModel.nodes.isEmpty {
+                GraphZoomControls(
+                    scale: $viewModel.scale,
+                    lastScale: $viewModel.lastScale,
+                    offset: $viewModel.offset,
+                    lastOffset: $viewModel.lastOffset,
+                    show3D: $viewModel.show3D,
+                    onRelayout: layoutGraph,
+                    onFitToScreen: fitToScreen
+                )
                 .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
                 .shadow(color: .black.opacity(0.12), radius: 10, y: 4)
                 .padding(.trailing, 16)
-                .padding(.bottom, selectedNodeID != nil ? 140 : 16)
+                .padding(.bottom, viewModel.selectedNodeID != nil ? 140 : 16)
             }
         }
         .overlay(alignment: .bottom) {
-            if !nodes.isEmpty, let selectedID = selectedNodeID,
+            if !viewModel.nodes.isEmpty, let selectedID = viewModel.selectedNodeID,
                let page = store.pages.first(where: { $0.id == selectedID }) {
                 GraphSelectedNodeCard(page: page)
             }
         }
         .overlay(alignment: .topTrailing) {
-            if !nodes.isEmpty, showLegend {
-                GraphLegendView(useClustering: useClustering, clusters: store.clusters)
+            if !viewModel.nodes.isEmpty, viewModel.showLegend {
+                GraphLegendView(useClustering: viewModel.useClustering, clusters: store.clusters)
                     .padding(.trailing, 16)
                     .padding(.top, 100)
             }
         }
-        .navigationTitle(Localized.tr("graph.title"))
+        .navigationTitle(L10n.Graph.title)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { layoutGraph() }
         .onChange(of: store.pages.count) { _, _ in
             withAnimation(.spring(response: 0.6)) { layoutGraph() }
         }
-        .navigationDestination(for: WikiPage.self) { destination in
-            PageDetailView(page: destination)
+        .navigationDestination(for: AppRoute.self) { route in
+            ViewFactory.makeView(for: route)
         }
-        .sheet(isPresented: $showInsights) {
+        .sheet(isPresented: $viewModel.showInsights) {
             insightsPanel
         }
-        .fullScreenCover(isPresented: $show3D) {
+        .fullScreenCover(isPresented: $viewModel.show3D) {
             Graph3DView(
-                selectedNodeID: $selectedNodeID,
+                selectedNodeID: $viewModel.selectedNodeID,
                 isFullScreen: Binding(
                     get: { true },
-                    set: { if !$0 { show3D = false } }
+                    set: { if !$0 { viewModel.show3D = false } }
                 )
             )
+        }
+        .overlay {
+            if viewModel.isLayouting {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .tint(.wikiAccent)
+                    Text(L10n.Graph.optimizingLayout)
+                        .font(.caption.bold())
+                        .foregroundStyle(.wikiAccent)
+                }
+                .padding(24)
+                .background(.ultraThinMaterial)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .shadow(color: .black.opacity(0.1), radius: 10)
+            }
         }
     }
     
     private var insightsPanel: some View {
         NavigationStack {
             GraphInsightsPanel(
-                surprising: insightSurprising,
-                orphans: insightOrphans,
-                sparse: insightSparse,
-                bridges: insightBridges,
-                nodes: nodes,
+                surprising: viewModel.insightSurprising,
+                orphans: viewModel.insightOrphans,
+                sparse: viewModel.insightSparse,
+                bridges: viewModel.insightBridges,
+                nodes: viewModel.nodes,
                 onSelectNode: { nodeID in
-                    selectedNodeID = nodeID
-                    isAnimating = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { isAnimating = false }
-                    showInsights = false
+                    viewModel.selectedNodeID = nodeID
+                    viewModel.isAnimating = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { viewModel.isAnimating = false }
+                    viewModel.showInsights = false
                 }
             )
-            .navigationTitle(Localized.tr("graph.insights"))
+            .navigationTitle(L10n.Graph.tr("insights"))
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.cancel")) {
-                        showInsights = false
+                    Button(L10n.Common.tr("cancel")) {
+                        viewModel.showInsights = false
                     }
                 }
             }
@@ -206,7 +224,7 @@ struct GraphContainerView: View {
     private var graphStatsBar: some View {
         HStack(spacing: 10) {
             // 统计文字
-            Text(Localized.trf("graph.nodesConnections", getFilteredNodes().count, getFilteredEdges(for: getFilteredNodes()).count))
+            Text(L10n.Graph.trf("nodesConnections", viewModel.getFilteredNodes().count, viewModel.getFilteredEdges(for: viewModel.getFilteredNodes()).count))
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.wikiSecondary)
                 .padding(.leading, 4)
@@ -216,15 +234,15 @@ struct GraphContainerView: View {
                 .foregroundStyle(.wikiBorder)
 
             // 洞察灯泡
-            Button(action: { 
+            Button(action: {
                 computeInsights()
-                showInsights = true 
+                viewModel.showInsights = true
             }) {
                 Image(systemName: "lightbulb.fill")
                     .font(.system(size: 12))
                     .foregroundStyle(.wikiAccent)
             }
-            .help(Localized.tr("graph.insights"))
+            .help(L10n.Graph.tr("insights"))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
@@ -237,32 +255,85 @@ struct GraphContainerView: View {
     
     private func computeInsights() {
         let (surprising, orphans, sparse, bridges) = GraphLayoutEngine.detectInsights(
-            nodes: nodes,
-            edges: edges,
+            nodes: viewModel.nodes,
+            edges: viewModel.edges,
             pages: store.pages
         )
-        insightSurprising = surprising
-        insightOrphans = orphans
-        insightSparse = sparse
-        insightBridges = bridges
+        viewModel.insightSurprising = surprising
+        viewModel.insightOrphans = orphans
+        viewModel.insightSparse = sparse
+        viewModel.insightBridges = bridges
     }
 
     private func layoutGraph() {
-        let result = GraphLayoutEngine.layout(
-            pages: store.pages,
-            linkResolver: { title in store.pages.first(where: { $0.title == title }) },
-            canvasSize: graphSize
-        )
-        nodes = result.nodes
-        edges = result.edges
+        let pages = store.pages
+        let canvasSize = viewModel.graphSize
+        
+        viewModel.isLayouting = true
+        
+        Task {
+            let result = await Task.detached(priority: .userInitiated) {
+                GraphLayoutEngine.layout(
+                    pages: pages,
+                    linkResolver: { title in pages.first(where: { $0.title == title }) },
+                    canvasSize: canvasSize
+                )
+            }.value
+            
+            await MainActor.run {
+                viewModel.isLayouting = false
+                withAnimation(.spring(response: 0.8)) {
+                    viewModel.nodes = result.nodes
+                    viewModel.edges = result.edges
+                }
+                fitToScreen()
+            }
+        }
+    }
+
+    private func fitToScreen() {
+        guard !viewModel.nodes.isEmpty else { return }
+
+        // 计算所有节点的包围盒
+        let minX = viewModel.nodes.map { $0.position.x }.min() ?? 0
+        let maxX = viewModel.nodes.map { $0.position.x }.max() ?? viewModel.graphSize.width
+        let minY = viewModel.nodes.map { $0.position.y }.min() ?? 0
+        let maxY = viewModel.nodes.map { $0.position.y }.max() ?? viewModel.graphSize.height
+
+        let contentWidth = maxX - minX
+        let contentHeight = maxY - minY
+
+        // 留出一定的边距 (padding)
+        let padding: CGFloat = 60
+        let availableWidth = viewModel.graphSize.width - padding * 2
+        let availableHeight = viewModel.graphSize.height - padding * 2
+
+        // 计算缩放比例
+        let scaleX = availableWidth / max(contentWidth, 100)
+        let scaleY = availableHeight / max(contentHeight, 100)
+        let targetScale = min(max(min(scaleX, scaleY), 0.5), 2.0)
+
+        // 计算偏移量，使图谱中心对齐画布中心
+        let contentCenterX = (minX + maxX) / 2
+        let contentCenterY = (minY + maxY) / 2
+        let targetOffsetX = (viewModel.graphSize.width / 2 - contentCenterX) * targetScale
+        let targetOffsetY = (viewModel.graphSize.height / 2 - contentCenterY) * targetScale
+
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+            viewModel.scale = targetScale
+            viewModel.lastScale = targetScale
+            viewModel.offset = CGSize(width: targetOffsetX, height: targetOffsetY)
+            viewModel.lastOffset = viewModel.offset
+        }
     }
 }
 
 // MARK: - Graph Canvas View
 struct GraphCanvasView: View {
-    let filteredNodes: [GraphNode]
+    @Binding var nodes: [GraphNode]
     let filteredEdges: [GraphEdge]
     let provider: any GraphDataProvider
+    let filterType: PageType?
     let useClustering: Bool
     @Binding var selectedNodeID: UUID?
     @Binding var isAnimating: Bool
@@ -279,6 +350,12 @@ struct GraphCanvasView: View {
             TimelineView(.animation) { timeline in
                 let _ = updatePhysics(at: timeline.date)
                 
+                // 渲染节点逻辑
+                let currentFilteredNodes = nodes.filter { node in
+                    guard let filter = filterType else { return true }
+                    return node.type == filter
+                }
+                
                 ZStack {
                     // 渲染边
                     Canvas { context, size in
@@ -287,9 +364,22 @@ struct GraphCanvasView: View {
                     .frame(width: max(geometry.size.width, graphSize.width),
                            height: max(geometry.size.height, graphSize.height))
 
-                    // 渲染节点
-                    ForEach(filteredNodes) { node in
-                        renderNode(node, in: geometry)
+                    // 优化：仅在选中节点时计算邻居 ID
+                    let neighborIDs: Set<UUID> = {
+                        guard let selectedID = selectedNodeID else { return [] }
+                        return Set(filteredEdges.compactMap { edge in
+                            if edge.source == selectedID { return edge.target }
+                            if edge.target == selectedID { return edge.source }
+                            return nil
+                        })
+                    }()
+                    
+                    ForEach(currentFilteredNodes) { node in
+                        let isSelected = selectedNodeID == node.id
+                        let isNeighbor = neighborIDs.contains(node.id)
+                        let isDimmed = selectedNodeID != nil && !isSelected && !isNeighbor
+                        
+                        renderNode(node, isSelected: isSelected, isNeighbor: isNeighbor, isDimmed: isDimmed, in: geometry)
                     }
                 }
                 .scaleEffect(scale)
@@ -300,9 +390,9 @@ struct GraphCanvasView: View {
                     if graphSize.width == 0 { graphSize = geometry.size }
                 }
                 .accessibilityElement(children: .contain)
-                .accessibilityLabel(Localized.tr("graph.accessibility.canvasLabel"))
-                .accessibilityValue(Localized.trf("graph.nodesConnections", filteredNodes.count, filteredEdges.count))
-                .accessibilityHint(Localized.tr("graph.accessibility.canvasHint"))
+                .accessibilityLabel(L10n.Graph.tr("accessibility.canvasLabel"))
+                .accessibilityValue(L10n.Graph.trf("nodesConnections", currentFilteredNodes.count, filteredEdges.count))
+                .accessibilityHint(L10n.Graph.tr("accessibility.canvasHint"))
             }
         }
     }
@@ -318,9 +408,17 @@ struct GraphCanvasView: View {
         // LOD: 远景模式下降低连线亮度
         let baseOpacity: Double = scale < 0.8 ? 0.15 : 0.35
         
+        // 优化：使用字典建立快速查找索引 (O(N))
+        let nodeLookup = Dictionary(uniqueKeysWithValues: nodes.map { ($0.id, $0) })
+        
         for edge in filteredEdges {
-            guard let sourceNode = filteredNodes.first(where: { $0.id == edge.source }),
-                  let targetNode = filteredNodes.first(where: { $0.id == edge.target }) else { continue }
+            guard let sourceNode = nodeLookup[edge.source],
+                  let targetNode = nodeLookup[edge.target] else { continue }
+            
+            // 额外的过滤检查：如果当前设置了类型过滤，确保两端节点都符合条件
+            if let filter = filterType {
+                guard sourceNode.type == filter && targetNode.type == filter else { continue }
+            }
 
             let sPos = sourceNode.position
             let tPos = targetNode.position
@@ -332,7 +430,7 @@ struct GraphCanvasView: View {
             // 计算方向向量和距离
             let dx = tPos.x - sPos.x
             let dy = tPos.y - sPos.y
-            let distance = sqrt(dx * dx + dy * dy)
+            let distance = hypot(dx, dy)
             
             // 如果节点重合，跳过
             if distance < (sRadius + tRadius) { continue }
@@ -350,24 +448,25 @@ struct GraphCanvasView: View {
             let isHighlighted = selectedNodeID == edge.source || selectedNodeID == edge.target
             
             if isHighlighted {
-                // 选中状态：使用高亮渐变色
+                // 选中状态：使用高亮渐变色，并增加线宽
                 let gradient = GraphicsContext.Shading.linearGradient(
                     Gradient(colors: [sourceNode.type.themedColor, targetNode.type.themedColor]),
                     startPoint: CGPoint(x: startX, y: startY),
                     endPoint: CGPoint(x: endX, y: endY)
                 )
-                context.stroke(path, with: gradient, lineWidth: 2.5)
+                context.stroke(path, with: gradient, lineWidth: 3.0)
             } else {
-                // 普通状态：弱化的自适应色
-                let color = Color.wikiBorder.opacity(baseOpacity)
+                // 普通状态：如果有选中点但当前连线不是关联线，则大幅调暗
+                let isAnySelected = selectedNodeID != nil
+                let opacity = isAnySelected ? 0.05 : baseOpacity
+                let color = Color.wikiBorder.opacity(opacity)
                 context.stroke(path, with: .color(color), lineWidth: 1.0)
             }
         }
     }
     
-    private func renderNode(_ node: GraphNode, in geometry: GeometryProxy) -> some View {
-        let isSelected = selectedNodeID == node.id
-        let linkCount = filteredEdges.filter { $0.source == node.id || $0.target == node.id }.count
+    private func renderNode(_ node: GraphNode, isSelected: Bool, isNeighbor: Bool, isDimmed: Bool, in geometry: GeometryProxy) -> some View {
+        let linkCount = node.linkCount
         
         return Group {
             GraphNodeView(
@@ -379,12 +478,18 @@ struct GraphCanvasView: View {
                 useClustering: useClustering,
                 onSelect: { onNodeTap(node) },
                 heroNamespace: heroNamespace,
-                viewportRect: geometry.frame(in: .local),
+                viewportRect: CGRect(origin: CGPoint(x: -offset.width / scale, y: -offset.height / scale), size: CGSize(width: geometry.size.width / scale, height: geometry.size.height / scale)),
                 scale: scale
             )
+            .opacity(isDimmed ? 0.2 : 1.0)
+            .animation(.easeInOut, value: isDimmed)
             
             let nodeSize = getNodeSize(for: node)
-            GraphNodeLabel(node: node, isSelected: isSelected, nodeSize: nodeSize)
+            let isLowDetail = scale < 0.8
+            
+            if isSelected || isNeighbor || !isLowDetail {
+                GraphNodeLabel(node: node, isSelected: isSelected, nodeSize: nodeSize)
+            }
         }
     }
     
@@ -418,14 +523,17 @@ struct GraphCanvasView: View {
     
     private func updatePhysics(at date: Date) -> Bool {
         guard isAnimating else { return false }
-        var currentNodes = filteredNodes
+        
+        // 性能优化：节点过多时，降低物理模拟的复杂度
+        let iterationTemp: CGFloat = nodes.count > 500 ? 0.02 : 0.1
+        
         GraphLayoutEngine.applyForces(
-            nodes: &currentNodes,
+            nodes: &nodes,
             edges: filteredEdges,
             canvasWidth: graphSize.width,
             canvasHeight: graphSize.height,
             config: .default,
-            temperature: 0.1
+            temperature: iterationTemp
         )
         return true
     }
@@ -434,7 +542,7 @@ struct GraphCanvasView: View {
 // MARK: - Subviews
 private struct GraphEmptyStateView: View {
     @Environment(KMStore.self) var store
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     
     var body: some View {
         VStack(spacing: 32) {
@@ -463,11 +571,11 @@ private struct GraphEmptyStateView: View {
             .padding(.top, 40)
 
             VStack(spacing: 12) {
-                Text(Localized.tr("graph.emptyTitle"))
+                Text(L10n.Graph.tr("emptyTitle"))
                     .font(.title2.bold())
                     .foregroundStyle(.wikiText)
                 
-                Text(Localized.tr("graph.emptyDesc"))
+                Text(L10n.Graph.tr("emptyDesc"))
                     .font(.subheadline)
                     .foregroundStyle(.wikiSecondary)
                     .multilineTextAlignment(.center)
@@ -490,7 +598,7 @@ private struct GraphEmptyStateView: View {
             }) {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
-                    Text(Localized.tr("graph.startBuilding"))
+                    Text(L10n.Graph.tr("startBuilding"))
                 }
                 .font(.headline)
                 .foregroundStyle(.white)
@@ -504,7 +612,7 @@ private struct GraphEmptyStateView: View {
             }
             .buttonStyle(PlainButtonStyle()) // 防止全局按钮样式干扰
             
-            Text(Localized.tr("graph.tip.biLink"))
+            Text(L10n.Graph.tr("tip.biLink"))
                 .font(.caption2)
                 .foregroundStyle(.wikiBorder)
                 .padding(.top, 10)
@@ -518,7 +626,9 @@ private struct GraphZoomControlsView: View {
     @Binding var lastScale: CGFloat
     @Binding var offset: CGSize
     @Binding var lastOffset: CGSize
+    @Binding var show3D: Bool
     let onRelayout: () -> Void
+    let onFitToScreen: () -> Void
 
     var body: some View {
         VStack {
@@ -530,7 +640,9 @@ private struct GraphZoomControlsView: View {
                     lastScale: $lastScale,
                     offset: $offset,
                     lastOffset: $lastOffset,
-                    onRelayout: onRelayout
+                    show3D: $show3D,
+                    onRelayout: onRelayout,
+                    onFitToScreen: onFitToScreen
                 )
                 .padding(.trailing, 16)
             }

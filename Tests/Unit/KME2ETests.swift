@@ -1,26 +1,61 @@
+// KME2ETests.swift
+//
+// 作者: Wang Chong
+// 功能说明: 覆盖从创建→编辑→链接→健康检查→删除的完整页面生命周期
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
+import MultipeerConnectivity
 @testable import KM
 
 // MARK: - E2E: Complete Wiki Page Workflow Tests
 /// 覆盖从创建→编辑→链接→健康检查→删除的完整页面生命周期
+@MainActor
 final class WikiPageWorkflowTests: XCTestCase {
 
     var store: KMStore!
     var linkService: LinkService!
     var lintService: LintService!
 
-    override func setUp() {
-        super.setUp()
-        store = KMStore()
-        linkService = LinkService()
-        lintService = LintService()
+    override func setUp() async throws {
+        try await super.setUp()
+        
+        // 1. 重置全局状态 (核心隔离逻辑)
+        ServiceContainer.shared.reset()
+        DatabaseManager.shared.reset()
+        DatabaseManager.shared.isInTesting = true
+        
+        // 2. 初始化测试专用服务 (使用唯一的内存数据库名称，防止并发测试冲突)
+        let uniqueDBName = "km_test_\(UUID().uuidString)"
+        let testDBURL = URL(string: "file:\(uniqueDBName)?mode=memory&cache=shared")!
+        let sqliteStore = SQLiteStore(dbURL: testDBURL)
+        let linkService = LinkService()
+        let lintService = LintService()
+        
+        // 3. 注册到 DI 容器
+        ServiceContainer.shared.register(sqliteStore, for: SQLiteStore.self)
+        ServiceContainer.shared.register(linkService, for: LinkService.self)
+        ServiceContainer.shared.register(lintService, for: LintService.self)
+        ServiceContainer.shared.register(LogService(), for: LogServiceProtocol.self)
+        ServiceContainer.shared.register(UndoService(), for: UndoService.self)
+        ServiceContainer.shared.register(BackupService(), for: BackupService.self)
+        
+        self.store = KMStore()
+        self.linkService = linkService
+        self.lintService = lintService
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         store = nil
         linkService = nil
         lintService = nil
-        super.tearDown()
+        DatabaseManager.shared.reset()
+        ServiceContainer.shared.reset()
+        try await super.tearDown()
     }
 
     // MARK: - Page Creation
@@ -80,7 +115,7 @@ final class WikiPageWorkflowTests: XCTestCase {
 
     // MARK: - WikiLinks
 
-    func testBidirectionalLinkCreation() {
+    func testBidirectionalLinkCreation() async {
         var pageA = WikiPage(title: "Page A", type: .entity, content: "Links to [[Page B]]")
         var pageB = WikiPage(title: "Page B", type: .concept, content: "Links to [[Page A]]")
 
@@ -90,8 +125,8 @@ final class WikiPageWorkflowTests: XCTestCase {
 
         // Backlinks via LinkService
         let pages = [pageA, pageB]
-        let aBacklinks = linkService.backlinks(for: pageA.id, in: pages)
-        let bBacklinks = linkService.backlinks(for: pageB.id, in: pages)
+        let aBacklinks = await linkService.backlinks(for: pageA.id, in: pages)
+        let bBacklinks = await linkService.backlinks(for: pageB.id, in: pages)
 
         XCTAssertEqual(aBacklinks.map(\.title), ["Page B"])
         XCTAssertEqual(bBacklinks.map(\.title), ["Page A"])
@@ -103,14 +138,14 @@ final class WikiPageWorkflowTests: XCTestCase {
         XCTAssertEqual(page.outgoingLinks, ["Self", "self"])
     }
 
-    func testBrokenWikiLinksIdentified() {
+    func testBrokenWikiLinksIdentified() async {
         let pageA = WikiPage(title: "A", type: .entity, content: "Links to [[NonExistent Page]]")
         let pageB = WikiPage(title: "B", type: .concept, content: "Real link to [[C]]")
         var pageC = WikiPage(title: "C", type: .source, content: "Content here")
 
         let pages = [pageA, pageB, pageC]
 
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         let errorIssues = issues.filter { $0.severity == .error }
 
         // A has broken link to NonExistent Page
@@ -163,24 +198,24 @@ final class WikiPageWorkflowTests: XCTestCase {
 
     // MARK: - Health Check Integration
 
-    func testHealthCheckNoIssuesForHealthyWiki() {
+    func testHealthCheckNoIssuesForHealthyWiki() async {
         var page1 = WikiPage(title: "Healthy A", type: .entity, content: String(repeating: "Healthy content here. ", count: 10))
         var page2 = WikiPage(title: "Healthy B", type: .concept, content: "Links to [[Healthy A]]. " + String(repeating: "More healthy content. ", count: 10))
 
         let pages = [page1, page2]
 
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         let errorCount = issues.filter { $0.severity == .error }.count
 
         // No broken links, no orphans (both pages link to each other)
         XCTAssertEqual(errorCount, 0, "Healthy wiki should produce no errors")
     }
 
-    func testStubPagesFlaggedByHealthCheck() {
+    func testStubPagesFlaggedByHealthCheck() async {
         let stubPage = WikiPage(title: "Stubby", type: .entity, content: "Too short")
 
         let pages = [stubPage]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
 
         let stubIssues = issues.filter {
             $0.message.localizedCaseInsensitiveContains("stub") ||
@@ -193,55 +228,74 @@ final class WikiPageWorkflowTests: XCTestCase {
 }
 
 // MARK: - E2E: Search and Filter Workflow
+@MainActor
 final class SearchFilterWorkflowTests: XCTestCase {
 
     var linkService: LinkService!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
+        ServiceContainer.shared.reset()
+        DatabaseManager.shared.reset()
+        DatabaseManager.shared.isInTesting = true
+        
+        let uniqueDBName = "km_test_search_\(UUID().uuidString)"
+        let testDBURL = URL(string: "file:\(uniqueDBName)?mode=memory&cache=shared")!
+        let sqliteStore = SQLiteStore(dbURL: testDBURL)
         linkService = LinkService()
+        
+        ServiceContainer.shared.register(sqliteStore, for: SQLiteStore.self)
+        ServiceContainer.shared.register(linkService, for: LinkService.self)
+        ServiceContainer.shared.register(LogService(), for: LogServiceProtocol.self)
+    }
+    
+    override func tearDown() async throws {
+        linkService = nil
+        DatabaseManager.shared.reset()
+        ServiceContainer.shared.reset()
+        try await super.tearDown()
     }
 
-    func testSearchByTitleExactMatch() {
+    func testSearchByTitleExactMatch() async {
         let pages = [
             WikiPage(title: "Machine Learning", type: .concept, content: "ML content"),
             WikiPage(title: "Deep Learning", type: .concept, content: "DL content"),
             WikiPage(title: "Machine", type: .entity, content: "Just machine")
         ]
 
-        let results = linkService.search(query: "Machine Learning", in: pages)
+        let results = await linkService.search(query: "Machine Learning", in: pages)
         XCTAssertTrue(results.contains { $0.title == "Machine Learning" })
         XCTAssertFalse(results.contains { $0.title == "Machine" })
     }
 
-    func testSearchByPartialTitle() {
+    func testSearchByPartialTitle() async {
         let pages = [
             WikiPage(title: "Neural Network", type: .entity, content: "Content"),
             WikiPage(title: "Network Analysis", type: .concept, content: "Content")
         ]
 
-        let results = linkService.search(query: "Network", in: pages)
+        let results = await linkService.search(query: "Network", in: pages)
         XCTAssertEqual(results.count, 2)
     }
 
-    func testSearchByContent() {
+    func testSearchByContent() async {
         let pages = [
             WikiPage(title: "Doc A", type: .source, content: "Python is a great language for data science"),
             WikiPage(title: "Doc B", type: .source, content: "JavaScript is great for web")
         ]
 
-        let results = linkService.search(query: "data science", in: pages)
+        let results = await linkService.search(query: "data science", in: pages)
         XCTAssertTrue(results.contains { $0.title == "Doc A" })
         XCTAssertFalse(results.contains { $0.title == "Doc B" })
     }
 
-    func testSearchByTag() {
+    func testSearchByTag() async {
         let pages = [
             WikiPage(title: "Tagged", type: .entity, content: "Content", tags: ["important", "priority"]),
             WikiPage(title: "Untagged", type: .concept, content: "Content", tags: [])
         ]
 
-        let results = linkService.search(query: "important", in: pages)
+        let results = await linkService.search(query: "important", in: pages)
         XCTAssertTrue(results.contains { $0.title == "Tagged" })
         XCTAssertFalse(results.contains { $0.title == "Untagged" })
     }
@@ -288,11 +342,12 @@ final class SearchFilterWorkflowTests: XCTestCase {
 }
 
 // MARK: - E2E: Collaboration Workflow
+@MainActor
 final class CollaborationWorkflowTests: XCTestCase {
 
     func testCollabEditStructure() {
         let edit = CollabEdit(
-            id: UUID(),
+            id: UUID().uuidString,
             userID: "user1",
             pageID: UUID(),
             field: "title",
@@ -318,45 +373,50 @@ final class CollaborationWorkflowTests: XCTestCase {
     }
 
     func testDiscoveredRoomStructure() {
+        let peer = MCPeerID(displayName: "peer123")
         let room = DiscoveredRoom(
-            name: "Test Room",
-            hostName: "HostUser",
-            peerID: "peer123",
-            createdAt: Date()
+            id: "room-1",
+            peerID: peer,
+            roomName: "Test Room",
+            owner: "HostUser"
         )
 
-        XCTAssertEqual(room.name, "Test Room")
-        XCTAssertEqual(room.hostName, "HostUser")
+        XCTAssertEqual(room.roomName, "Test Room")
+        XCTAssertEqual(room.owner, "HostUser")
     }
 
     func testRolePermissions() {
-        // Owner can do everything
-        XCTAssertTrue(CollabRole.owner.canEdit)
-        XCTAssertTrue(CollabRole.owner.canDelete)
-
-        // Editor can edit but not delete
-        XCTAssertTrue(CollabRole.editor.canEdit)
-        XCTAssertFalse(CollabRole.editor.canDelete)
-
-        // Viewer cannot edit
-        XCTAssertFalse(CollabRole.viewer.canEdit)
-        XCTAssertFalse(CollabRole.viewer.canDelete)
+        // Only test display metadata since permissions properties were removed
+        XCTAssertFalse(CollabRole.owner.displayName.isEmpty)
+        XCTAssertEqual(CollabRole.owner.icon, "crown.fill")
+        XCTAssertEqual(CollabRole.editor.icon, "pencil.circle.fill")
     }
 }
 
 // MARK: - E2E: Backup and Restore Workflow
+@MainActor
 final class BackupRestoreWorkflowTests: XCTestCase {
 
     var backupService: BackupService!
 
-    override func setUp() {
-        super.setUp()
-        backupService = BackupService()
+    var tempDir: URL!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        ServiceContainer.shared.reset()
+        
+        tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        
+        backupService = BackupService(baseDirectory: tempDir)
+        ServiceContainer.shared.register(backupService, for: BackupService.self)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
+        try? FileManager.default.removeItem(at: tempDir)
         backupService = nil
-        super.tearDown()
+        ServiceContainer.shared.reset()
+        try await super.tearDown()
     }
 
     func testCreateAndRestoreBackup() {
@@ -411,16 +471,25 @@ final class BackupRestoreWorkflowTests: XCTestCase {
 }
 
 // MARK: - E2E: Ingest Pipeline
+@MainActor
 final class IngestPipelineTests: XCTestCase {
 
     var ingestService: IngestService!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
+        ServiceContainer.shared.reset()
         ingestService = IngestService()
+        ServiceContainer.shared.register(ingestService, for: IngestService.self)
+    }
+    
+    override func tearDown() async throws {
+        ingestService = nil
+        ServiceContainer.shared.reset()
+        try await super.tearDown()
     }
 
-    func testExtractConceptsFromMixedContent() {
+    func testExtractConceptsFromMixedContent() async {
         let existingPages = [
             WikiPage(title: "Machine Learning", type: .concept, content: "ML content"),
             WikiPage(title: "Neural Network", type: .entity, content: "NN content"),
@@ -463,6 +532,7 @@ final class IngestPipelineTests: XCTestCase {
 }
 
 // MARK: - E2E: Graph Layout with Realistic Data
+@MainActor
 final class GraphLayoutRealisticTests: XCTestCase {
 
     func testLayoutWith100NodesCompletesInReasonableTime() {
@@ -470,7 +540,7 @@ final class GraphLayoutRealisticTests: XCTestCase {
         for i in 0..<100 {
             var page = WikiPage(
                 title: "Page \(i)",
-                type: PageType.allCases()[i % 6],
+                type: PageType.allCases[i % 6],
                 content: "Content for page \(i). " + String(repeating: "word ", count: 20)
             )
             // Create some links between pages
@@ -588,8 +658,8 @@ final class MarkdownRenderingTests: XCTestCase {
 
     var parser: MarkdownParser!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         parser = MarkdownParser()
     }
 
@@ -639,10 +709,10 @@ final class MarkdownRenderingTests: XCTestCase {
         let codeSegments = segments.filter { $0.type == .code }
         let wikilinkSegments = segments.filter { $0.type == .wikilink }
 
-        XCTAssertEqual(boldSegments.first?.text, "bold")
-        XCTAssertEqual(italicSegments.first?.text, "italic")
-        XCTAssertEqual(codeSegments.first?.text, "code")
-        XCTAssertEqual(wikilinkSegments.first?.text, "WikiLink")
+        XCTAssertEqual(boldSegments.first?.content, "bold")
+        XCTAssertEqual(italicSegments.first?.content, "italic")
+        XCTAssertEqual(codeSegments.first?.content, "code")
+        XCTAssertEqual(wikilinkSegments.first?.content, "WikiLink")
     }
 
     func testComplexNestedFormatting() {
@@ -656,53 +726,57 @@ final class MarkdownRenderingTests: XCTestCase {
 }
 
 // MARK: - E2E: Log and Audit Trail
+@MainActor
 final class LogAuditTrailTests: XCTestCase {
 
+    var logService: LogService!
+    var tempDir: URL!
+
+    override func setUp() async throws {
+        try await super.setUp()
+        ServiceContainer.shared.reset()
+        
+        tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        
+        logService = LogService(customDirectory: tempDir)
+        ServiceContainer.shared.register(logService, for: LogServiceProtocol.self)
+    }
+
+    override func tearDown() async throws {
+        try? FileManager.default.removeItem(at: tempDir)
+        logService = nil
+        ServiceContainer.shared.reset()
+        try await super.tearDown()
+    }
     func testLogEntryCapturesAllActionTypes() {
-        let logService = LogService()
-        logService.logEntries.removeAll()
+        logService.addLog(action: .create, target: "Test Page", details: "Created new page")
+        logService.addLog(action: .update, target: "Test Page", details: "Updated content")
+        logService.addLog(action: .delete, target: "Test Page", details: "Deleted page")
+        logService.addLog(action: .lint, target: "Wiki", details: "Ran full lint: 3 issues found")
 
-        logService.addLog(action: "create", target: "Test Page", details: "Created new page")
-        logService.addLog(action: "update", target: "Test Page", details: "Updated content")
-        logService.addLog(action: "delete", target: "Test Page", details: "Deleted page")
-        logService.addLog(action: "pin", target: "Test Page", details: "Pinned page")
-        logService.addLog(action: "unpin", target: "Test Page", details: "Unpinned page")
-        logService.addLog(action: "tag", target: "Test Page", details: "Added tag: work")
-        logService.addLog(action: "alias", target: "Test Page", details: "Added alias: alias1")
-        logService.addLog(action: "lint", target: "Wiki", details: "Ran full lint: 3 issues found")
-
-        XCTAssertEqual(logService.logEntries.count, 8)
+        XCTAssertEqual(logService.logEntries.count, 4)
 
         // Verify action types
         let actions = logService.logEntries.map(\.action)
-        XCTAssertTrue(actions.contains("create"))
-        XCTAssertTrue(actions.contains("update"))
-        XCTAssertTrue(actions.contains("delete"))
-        XCTAssertTrue(actions.contains("pin"))
-        XCTAssertTrue(actions.contains("unpin"))
-        XCTAssertTrue(actions.contains("tag"))
-        XCTAssertTrue(actions.contains("alias"))
-        XCTAssertTrue(actions.contains("lint"))
+        XCTAssertTrue(actions.contains(.create))
+        XCTAssertTrue(actions.contains(.update))
+        XCTAssertTrue(actions.contains(.delete))
+        XCTAssertTrue(actions.contains(.lint))
     }
 
     func testLogOrderingNewestFirst() {
-        let logService = LogService()
-        logService.logEntries.removeAll()
+        logService.addLog(action: .update, target: "T1", details: "first")
+        logService.addLog(action: .update, target: "T2", details: "second")
+        logService.addLog(action: .update, target: "T3", details: "third")
 
-        logService.addLog(action: "first", target: "T1", details: "")
-        logService.addLog(action: "second", target: "T2", details: "")
-        logService.addLog(action: "third", target: "T3", details: "")
-
-        XCTAssertEqual(logService.logEntries.first?.action, "third")
-        XCTAssertEqual(logService.logEntries.last?.action, "first")
+        XCTAssertEqual(logService.logEntries.first?.target, "T3")
+        XCTAssertEqual(logService.logEntries.last?.target, "T1")
     }
 
     func testLogMaxEntriesCapped() {
-        let logService = LogService()
-        logService.logEntries.removeAll()
-
         for i in 0..<600 {
-            logService.addLog(action: "action_\(i)", target: "page_\(i)", details: "Log entry \(i)")
+            logService.addLog(action: .update, target: "page_\(i)", details: "Log entry \(i)")
         }
 
         XCTAssertLessThanOrEqual(logService.logEntries.count, 500, "Log should cap at 500 entries")

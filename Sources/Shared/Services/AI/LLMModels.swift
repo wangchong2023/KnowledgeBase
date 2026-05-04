@@ -1,3 +1,13 @@
+// LLMModels.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct LLMProviderMetadata
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 // MARK: - LLM Provider Metadata
@@ -100,9 +110,9 @@ struct ChatMessage: Identifiable, Codable {
     var relatedPageIDs: [UUID]
     
     enum MessageRole: String, Codable {
-        case system
-        case user
-        case assistant
+        case system = "system"
+        case user = "user"
+        case assistant = "assistant"
     }
     
     init(
@@ -163,13 +173,13 @@ enum LLMError: LocalizedError {
 }
 
 // MARK: - LLM Config (Persistence)
-/// Manages LLM provider configuration with UserDefaults persistence.
+/// Manages LLM provider configuration with UserDefaults + Keychain persistence.
 final class LLMConfigStore: ObservableObject {
     @Published var provider: LLMProvider {
         didSet { saveConfig() }
     }
     @Published var apiKey: String {
-        didSet { saveConfig() }
+        didSet { saveAPIKey() }
     }
     @Published var baseURL: String {
         didSet { saveConfig() }
@@ -186,24 +196,23 @@ final class LLMConfigStore: ObservableObject {
     @Published var autoRefactor: Bool {
         didSet { saveConfig() }
     }
-    
+
     private let configKey = "wikicraft_llm_config"
-    
+    private let keychainAPIKey = "llm_api_key"
+
     struct Config: Codable {
         let provider: LLMProvider
-        let apiKey: String
         let baseURL: String
         let model: String
         let isEnabled: Bool
         let autoScan: Bool
         let autoRefactor: Bool
     }
-    
+
     init() {
         if let data = UserDefaults.standard.data(forKey: configKey),
            let config = try? JSONDecoder().decode(Config.self, from: data) {
             self.provider = config.provider
-            self.apiKey = config.apiKey
             self.baseURL = config.baseURL
             self.model = config.model
             self.isEnabled = config.isEnabled
@@ -211,19 +220,18 @@ final class LLMConfigStore: ObservableObject {
             self.autoRefactor = config.autoRefactor
         } else {
             self.provider = .deepSeek
-            self.apiKey = ""
             self.baseURL = LLMProvider.deepSeek.defaultBaseURL
             self.model = LLMProvider.deepSeek.defaultModel
             self.isEnabled = false
             self.autoScan = true
             self.autoRefactor = false
         }
+        self.apiKey = (try? KeychainService.shared.retrieve(key: keychainAPIKey)) ?? ""
     }
-    
+
     private func saveConfig() {
         let config = Config(
             provider: provider,
-            apiKey: apiKey,
             baseURL: baseURL,
             model: model,
             isEnabled: isEnabled,
@@ -233,5 +241,13 @@ final class LLMConfigStore: ObservableObject {
         if let data = try? JSONEncoder().encode(config) {
             UserDefaults.standard.set(data, forKey: configKey)
         }
+    }
+
+    private func saveAPIKey() {
+        guard !apiKey.isEmpty else {
+            try? KeychainService.shared.delete(key: keychainAPIKey)
+            return
+        }
+        try? KeychainService.shared.store(key: keychainAPIKey, value: apiKey)
     }
 }

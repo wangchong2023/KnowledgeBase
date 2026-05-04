@@ -1,3 +1,13 @@
+// KMWindowSceneDelegate.swift
+//
+// 作者: Wang Chong
+// 功能说明: class KMWindowSceneDelegate
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Scene Delegate for Multi-Window Support
@@ -9,17 +19,17 @@ class KMWindowSceneDelegate: NSObject, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         let window = UIWindow(windowScene: windowScene)
-        let store = KMStore()
         let themeManager = ThemeManager()
-        let llmService = LLMService()
+        let store: KMStore = ServiceContainer.shared.resolve(KMStore.self)
+        let llmService: LLMService = ServiceContainer.shared.resolve(LLMService.self)
 
         let contentView = ContentView()
-            .environmentObject(store)
+            .environment(store)
             .environmentObject(themeManager)
             .environmentObject(llmService)
             .environment(\.wikiAccentColor, themeManager.accentColor)
 
-        window.rootViewController = UIHostingController(rootView: contentView)
+        window.rootViewController = UIHostingController(rootView: AnyView(contentView))
         self.window = window
         window.makeKeyAndVisible()
     }

@@ -1,3 +1,13 @@
+// WikiEmptyState.swift
+//
+// 作者: Wang Chong
+// 功能说明: 通用空状态组件，统一各页面的空数据展示。
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Wiki Empty State
@@ -142,8 +152,8 @@ struct WikiEmptyState: View {
     private func buildAccessibilityLabel() -> String {
         var label = "\(title)。"
         if let description = description { label += " \(description)。" }
-        if let hint = hint { label += " \(Localized.tr("empty.hint"))：\(hint)" }
-        if action != nil { label += " \(Localized.tr("empty.actionHint"))。" }
+        if let hint = hint { label += " \(L10n.Common.Empty.tr("hint"))：\(hint)" }
+        if action != nil { label += " \(L10n.Common.Empty.tr("actionHint"))。" }
         return label
     }
 }

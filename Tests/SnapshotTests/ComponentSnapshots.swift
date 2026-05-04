@@ -1,3 +1,13 @@
+// ComponentSnapshots.swift
+//
+// 作者: Wang Chong
+// 功能说明: 测试 AI 脉搏指示器的视觉一致性
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 import SwiftUI
 import SnapshotTesting
@@ -20,7 +30,7 @@ final class ComponentSnapshots: XCTestCase {
         let node = GraphNode(
             id: UUID(),
             title: "测试节点",
-            type: .idea,
+            type: .concept,
             position: .zero
         )
         

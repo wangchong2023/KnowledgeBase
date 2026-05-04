@@ -1,3 +1,13 @@
+// BreadcrumbView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 空间导航面包屑 (UX 视角：解决深度跳转后的心理迷失)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 空间导航面包屑 (UX 视角：解决深度跳转后的心理迷失)

@@ -1,3 +1,14 @@
+// AISynthesisService.swift
+//
+// 作者: Wang Chong
+// 功能说明: AI 知识综合服务 (L1 领域层)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 /// AI 知识综合服务 (L1 领域层)
@@ -209,7 +220,7 @@ final class AISynthesisService {
 
     /// 针对具体的 Lint 问题提供 AI 修复建议
     func suggestFix(issue: LintIssue, pages: [WikiPage]) async throws -> String {
-        let pageTitle = pages.first(where: { $0.id == issue.pageID })?.title ?? Localized.tr("misc.unknown")
+        let pageTitle = pages.first(where: { $0.id == issue.pageID })?.title ?? L10n.Common.tr("unknown")
         let pageContent = pages.first(where: { $0.title == pageTitle })?.content ?? ""
         let otherTitles = pages.map { $0.title }.filter { $0 != pageTitle }
         
@@ -254,29 +265,7 @@ final class AISynthesisService {
         """
         
         let result = try await llm.generate(prompt: prompt, systemPrompt: "")
-        return parseJSONArray(result)
-    }
-    
-    private func parseJSONArray(_ text: String) -> [String] {
-        let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // Try direct parse first
-        if let data = cleaned.data(using: .utf8),
-           let array = try? JSONDecoder().decode([String].self, from: data) {
-            return array
-        }
-        
-        // Try to find [ ... ] block using regex if direct parse failed
-        let pattern = "\\[[\\s\\S]*\\]"
-        if let range = cleaned.range(of: pattern, options: .regularExpression) {
-            let jsonPart = String(cleaned[range])
-            if let data = jsonPart.data(using: .utf8),
-               let array = try? JSONDecoder().decode([String].self, from: data) {
-                return array
-            }
-        }
-        
-        return []
+        return LLMUtils.parseJSONArray(result)
     }
 }
 

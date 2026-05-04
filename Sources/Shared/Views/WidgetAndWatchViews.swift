@@ -1,3 +1,13 @@
+// WidgetAndWatchViews.swift
+//
+// 作者: Wang Chong
+// 功能说明: Lightweight view for Apple Watch showing key wiki stats and recent pages
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import WidgetKit
 
@@ -27,7 +37,7 @@ struct WatchWikiStatsView: View {
                         Text("\(totalPages)")
                             .font(.title3.weight(.bold))
                             .foregroundStyle(.wikiText)
-                        Text(Localized.tr("widget.pages"))
+                        Text(L10n.Widget.tr("pages"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -39,7 +49,7 @@ struct WatchWikiStatsView: View {
                         Text(formatNumber(totalWords))
                             .font(.caption.weight(.bold))
                             .foregroundStyle(.wikiText)
-                        Text(Localized.tr("widget.words"))
+                        Text(L10n.Widget.tr("words"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -49,7 +59,7 @@ struct WatchWikiStatsView: View {
                 
                 // Recent pages
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(Localized.tr("widget.recentUpdates"))
+                    Text(L10n.Widget.tr("recentUpdates"))
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.wikiSecondary)
                     
@@ -69,7 +79,7 @@ struct WatchWikiStatsView: View {
             }
             .padding()
         }
-        .navigationTitle(Localized.tr("widget.title"))
+        .navigationTitle(L10n.Widget.tr("title"))
         .onAppear {
             loadData()
         }
@@ -88,7 +98,7 @@ struct WatchWikiStatsView: View {
     
     private func formatNumber(_ n: Int) -> String {
         if n >= 10000 {
-            return String(format: "%.1f%@", Double(n) / 10000.0, Localized.tr("misc.unitTenThousand"))
+            return String(format: "%.1f%@", Double(n) / 10000.0, L10n.Common.tr("unitTenThousand"))
         } else if n >= 1000 {
             return String(format: "%.1fk", Double(n) / 1000.0)
         }
@@ -113,7 +123,7 @@ struct KMWidgetPreview: View {
                 Image(systemName: "books.vertical.circle.fill")
                     .font(.title3)
                     .foregroundStyle(.wikiAccent)
-                Text(Localized.tr("widget.title"))
+                Text(L10n.Widget.tr("title"))
                     .font(.caption.weight(.bold))
                 Spacer()
                 Text(Localized.trf("widget.pages", totalPages))
@@ -126,26 +136,26 @@ struct KMWidgetPreview: View {
             HStack(spacing: 12) {
                 VStack(spacing: 2) {
                     Text("\(totalWords)").font(.caption.weight(.bold))
-                    Text(Localized.tr("widget.characters")).font(.caption2).foregroundStyle(.secondary)
+                    Text(L10n.Widget.tr("characters")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 
                 VStack(spacing: 2) {
                     Text("\(activeCount)").font(.caption.weight(.bold))
-                    Text(Localized.tr("widget.active")).font(.caption2).foregroundStyle(.secondary)
+                    Text(L10n.Widget.tr("active")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
                 
                 VStack(spacing: 2) {
                     Text("\(stubCount)").font(.caption.weight(.bold))
-                    Text(Localized.tr("widget.stub")).font(.caption2).foregroundStyle(.secondary)
+                    Text(L10n.Widget.tr("stub")).font(.caption2).foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity)
             }
             
             if !recentTitles.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(Localized.tr("widget.recentUpdates"))
+                    Text(L10n.Widget.tr("recentUpdates"))
                         .font(.caption2.weight(.medium))
                         .foregroundStyle(.secondary)
                     
@@ -168,6 +178,6 @@ struct KMWidgetPreview: View {
         totalWords: 4500,
         activeCount: 7,
         stubCount: 2,
-        recentTitles: ["LLM Wiki", "nanoGPT", Localized.tr("widget.knowledgeCompile")]
+        recentTitles: ["LLM Wiki", "nanoGPT", L10n.Widget.tr("knowledgeCompile")]
     )
 }

@@ -1,3 +1,14 @@
+// IngestService.swift
+//
+// 作者: Wang Chong
+// 功能说明: enum DocumentFormat
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Compression
 
@@ -134,7 +145,7 @@ final class IngestService {
     
     /// 对 Markdown 中的图表进行语义增强，提升 RAG 召回率
     func enrichRichContent(_ content: String, llm: any LLMServiceProtocol) async -> String {
-        let prompt = String(format: Localized.tr("ingest.enrichRichContentPrompt"), content)
+        let prompt = String(format: L10n.Ingest.tr("enrichRichContentPrompt"), content)
         let systemPrompt = Localized.tr("llm.ingest.enrichSystemPrompt")
         
         do {
@@ -201,7 +212,7 @@ final class IngestService {
         
         let isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
         if isLowPowerMode {
-            print(Localized.tr("ingest.ecoIndexingLowPower"))
+            print(L10n.Ingest.tr("ecoIndexingLowPower"))
         }
 
         for case let fileURL as URL in enumerator {
@@ -382,150 +393,5 @@ final class IngestService {
 
         guard let size = result, size > 0 else { return nil }
         return Data(destinationBuffer.prefix(size))
-    }
-}
-
-// MARK: - DOCX XML Parser
-
-private final class DocxTextParser: NSObject, XMLParserDelegate {
-    private let xmlData: Data
-    private(set) var extractedText: String = ""
-    private var inTextElement = false
-    private var currentText = ""
-    private var lastWasText = false
-
-    init(xmlData: Data) {
-        self.xmlData = xmlData
-    }
-
-    func parse() -> Bool {
-        let parser = XMLParser(data: xmlData)
-        parser.delegate = self
-        return parser.parse()
-    }
-
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
-        if elementName == "w:t" {
-            inTextElement = true
-            currentText = ""
-        }
-    }
-
-    func parser(_ parser: XMLParser, foundCharacters string: String) {
-        if inTextElement {
-            currentText += string
-        }
-    }
-
-    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-        if elementName == "w:t" {
-            if !currentText.isEmpty {
-                if lastWasText {
-                    extractedText += " "
-                }
-                extractedText += currentText
-                lastWasText = true
-            }
-            inTextElement = false
-            currentText = ""
-        } else if elementName == "w:p" {
-            if lastWasText {
-                extractedText += "\n"
-                lastWasText = false
-            }
-        }
-    }
-}
-
-// MARK: - XLSX Shared Strings Parser
-
-private final class XlsxSharedStringsParser: NSObject, XMLParserDelegate {
-    private let xmlData: Data
-    private(set) var strings: [String] = []
-    private var inTextElement = false
-    private var currentText = ""
-
-    init(xmlData: Data) {
-        self.xmlData = xmlData
-    }
-
-    func parse() -> Bool {
-        let parser = XMLParser(data: xmlData)
-        parser.delegate = self
-        return parser.parse()
-    }
-
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
-        if elementName == "t" {
-            inTextElement = true
-            currentText = ""
-        }
-    }
-
-    func parser(_ parser: XMLParser, foundCharacters string: String) {
-        if inTextElement {
-            currentText += string
-        }
-    }
-
-    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-        if elementName == "t" {
-            strings.append(currentText)
-            inTextElement = false
-            currentText = ""
-        }
-    }
-}
-
-// MARK: - XLSX Sheet Parser
-
-private final class XlsxSheetParser: NSObject, XMLParserDelegate {
-    private let xmlData: Data
-    private(set) var values: [String] = []
-    private var inCellElement = false
-    private var inValueElement = false
-    private var currentText = ""
-    private var currentCellType: String?
-
-    init(xmlData: Data) {
-        self.xmlData = xmlData
-    }
-
-    func parse() -> Bool {
-        let parser = XMLParser(data: xmlData)
-        parser.delegate = self
-        return parser.parse()
-    }
-
-    func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String: String] = [:]) {
-        if elementName == "c" {
-            currentCellType = attributeDict["t"]
-            inCellElement = true
-            currentText = ""
-        } else if elementName == "v" {
-            inValueElement = true
-            currentText = ""
-        }
-    }
-
-    func parser(_ parser: XMLParser, foundCharacters string: String) {
-        if inValueElement {
-            currentText += string
-        }
-    }
-
-    func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-        if elementName == "v" {
-            inValueElement = false
-        } else if elementName == "c" {
-            if !currentText.isEmpty && (currentCellType == "s" || currentCellType == "inlineStr") {
-                if let value = Int(currentText), value < 10000 {
-                    values.append("[\(value)]")
-                }
-            }
-            inCellElement = false
-            currentCellType = nil
-            currentText = ""
-        }
     }
 }

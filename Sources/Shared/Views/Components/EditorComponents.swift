@@ -1,3 +1,13 @@
+// EditorComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct WikilinkPickerSheet
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Wikilink Picker Sheet
@@ -21,7 +31,7 @@ struct WikilinkPickerSheet: View {
                 pageList
             }
             .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("editor.insertWikiLink"))
+            .navigationTitle(L10n.Editor.tr("insertWikiLink"))
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
@@ -32,7 +42,7 @@ struct WikilinkPickerSheet: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.wikiSecondary)
-            TextField(Localized.tr("editor.searchPages"), text: $searchText)
+            TextField(L10n.Editor.tr("searchPages"), text: $searchText)
                 .foregroundStyle(.wikiText)
             if !searchText.isEmpty {
                 Button(action: { searchText = "" }) {
@@ -163,7 +173,7 @@ struct InlineTagInput: View {
     
     var body: some View {
         HStack(spacing: 8) {
-            TextField(Localized.tr("editor.enterTag"), text: $text)
+            TextField(L10n.Editor.tr("enterTag"), text: $text)
                 .font(.caption)
                 .textFieldStyle(.plain)
                 .padding(.horizontal, 10)

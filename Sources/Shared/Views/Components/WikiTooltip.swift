@@ -1,3 +1,13 @@
+// WikiTooltip.swift
+//
+// 作者: Wang Chong
+// 功能说明: 引导提示组件，用于首次使用时的操作引导。
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Wiki Tooltip
@@ -107,83 +117,6 @@ struct Triangle: Shape {
         path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
         path.closeSubpath()
         return path
-    }
-}
-
-// MARK: - Tooltip Overlay Manager
-/// 管理引导提示的显示状态，支持首次使用检测。
-class TooltipManager: ObservableObject {
-    nonisolated(unsafe) static let shared = TooltipManager()
-
-    @Published var activeTooltip: TooltipType?
-    @Published var shownTooltips: Set<String> = []
-
-    private let defaults = UserDefaults.standard
-    private let shownKey = "km_shown_tooltips"
-
-    enum TooltipType: String, CaseIterable {
-        case createPage = "create_page"
-        case wikiLink = "wiki_link"
-        case graphFilter = "graph_filter"
-        case ingest = "ingest"
-        case chat = "chat"
-        case tag = "tag"
-
-        var titleKey: String {
-            switch self {
-            case .createPage: return "tooltip.createPage.title"
-            case .wikiLink: return "tooltip.wikiLink.title"
-            case .graphFilter: return "tooltip.graphFilter.title"
-            case .ingest: return "tooltip.ingest.title"
-            case .chat: return "tooltip.chat.title"
-            case .tag: return "tooltip.tag.title"
-            }
-        }
-
-        var descriptionKey: String {
-            switch self {
-            case .createPage: return "tooltip.createPage.desc"
-            case .wikiLink: return "tooltip.wikiLink.desc"
-            case .graphFilter: return "tooltip.graphFilter.desc"
-            case .ingest: return "tooltip.ingest.desc"
-            case .chat: return "tooltip.chat.desc"
-            case .tag: return "tooltip.tag.desc"
-            }
-        }
-
-        var icon: String {
-            switch self {
-            case .createPage: return "plus.circle.fill"
-            case .wikiLink: return "link"
-            case .graphFilter: return "line.3.horizontal.decrease.circle"
-            case .ingest: return "tray.and.arrow.down.fill"
-            case .chat: return "brain.head.profile"
-            case .tag: return "tag.fill"
-            }
-        }
-    }
-
-    private init() {
-        shownTooltips = Set(defaults.stringArray(forKey: shownKey) ?? [])
-    }
-
-    func markShown(_ tooltip: TooltipType) {
-        shownTooltips.insert(tooltip.rawValue)
-        defaults.set(Array(shownTooltips), forKey: shownKey)
-    }
-
-    func isShown(_ tooltip: TooltipType) -> Bool {
-        shownTooltips.contains(tooltip.rawValue)
-    }
-
-    func resetAll() {
-        shownTooltips.removeAll()
-        defaults.removeObject(forKey: shownKey)
-    }
-
-    /// 返回所有未展示过的 tooltip（按顺序）
-    var pendingTooltips: [TooltipType] {
-        TooltipType.allCases.filter { !isShown($0) }
     }
 }
 

@@ -1,3 +1,13 @@
+// WatchContentView.swift
+//
+// 作者: Wang Chong
+// 功能说明: KMWatch 主界面 (Apple Watch)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// KMWatch 主界面 (Apple Watch)
@@ -9,7 +19,7 @@ struct WatchContentView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(header: Text(Localized.tr("watch.recents"))) {
+                Section(header: Text(L10n.Watch.tr("recents"))) {
                     ForEach(store.pages.sorted(by: { $0.updated > $1.updated }).prefix(5)) { page in
                         NavigationLink(value: page) {
                             HStack {
@@ -27,7 +37,7 @@ struct WatchContentView: View {
                 
                 Section {
                     Button(action: { isShowingDictation = true }) {
-                        Label(Localized.tr("watch.capture"), systemImage: "mic.fill")
+                        Label(L10n.Watch.tr("capture"), systemImage: "mic.fill")
                             .foregroundStyle(.wikiAccent)
                     }
                 }

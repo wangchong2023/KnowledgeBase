@@ -1,3 +1,14 @@
+// QuizView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct QuizModel
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 struct QuizModel: Codable, Identifiable {
@@ -76,7 +87,7 @@ struct QuizView: View {
                                     HStack {
                                         Image(systemName: selectedOption == correctIdx ? "checkmark.circle.fill" : "xmark.circle.fill")
                                             .foregroundStyle(selectedOption == correctIdx ? .green : .red)
-                                        Text(selectedOption == correctIdx ? Localized.tr("misc.correct") : Localized.tr("misc.incorrect"))
+                                        Text(selectedOption == correctIdx ? L10n.Common.tr("correct") : L10n.Common.tr("incorrect"))
                                             .font(.subheadline.bold())
                                     }
 
@@ -104,7 +115,7 @@ struct QuizView: View {
                     // Footer Action
                     if showResult {
                         Button(action: nextQuestion) {
-                            Text(currentIndex + 1 < quiz.questions.count ? Localized.tr("misc.nextQuestion") : Localized.tr("misc.viewResults"))
+                            Text(currentIndex + 1 < quiz.questions.count ? L10n.Common.tr("nextQuestion") : L10n.Common.tr("viewResults"))
                                 .font(.headline)
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -152,7 +163,7 @@ struct QuizView: View {
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.cancel")) { dismiss() }
+                    Button(L10n.Common.tr("cancel")) { dismiss() }
                 }
             }
             .background(Color.wikiBackground)

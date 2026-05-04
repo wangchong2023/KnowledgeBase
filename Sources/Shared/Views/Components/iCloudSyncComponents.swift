@@ -1,3 +1,13 @@
+// iCloudSyncComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: iCloud 同步状态行：图标 + 状态文字 + 上次同步时间
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Sync Status Row
@@ -65,7 +75,7 @@ struct SyncActionsSection: View {
         Section {
             // Push to iCloud
             Button(action: onPush) {
-                Label(Localized.tr("icloud.pushToCloud"), systemImage: "icloud.and.arrow.up")
+                Label(L10n.ICloud.tr("pushToCloud"), systemImage: "icloud.and.arrow.up")
                     .foregroundStyle(.wikiText)
             }
             .accessibilityIdentifier("push-to-icloud")
@@ -73,7 +83,7 @@ struct SyncActionsSection: View {
 
             // Pull from iCloud
             Button(action: onPullRequest) {
-                Label(Localized.tr("icloud.pullFromCloud"), systemImage: "icloud.and.arrow.down")
+                Label(L10n.ICloud.tr("pullFromCloud"), systemImage: "icloud.and.arrow.down")
                     .foregroundStyle(.wikiText)
             }
             .accessibilityIdentifier("pull-from-icloud")
@@ -81,12 +91,12 @@ struct SyncActionsSection: View {
 
             // Bidirectional sync
             Button(action: onBidirectional) {
-                Label(Localized.tr("icloud.bidirectionalSync"), systemImage: "arrow.triangle.2.circlepath.icloud")
+                Label(L10n.ICloud.tr("bidirectionalSync"), systemImage: "arrow.triangle.2.circlepath.icloud")
                     .foregroundStyle(.wikiText)
             }
             .disabled(!syncService.iCloudAvailable || isSyncing)
         } header: {
-            Text(Localized.tr("icloud.syncActions"))
+            Text(L10n.ICloud.tr("syncActions"))
         }
     }
 }
@@ -101,16 +111,15 @@ struct SyncSettingsSection: View {
 
     var body: some View {
         Section {
-            Toggle(Localized.tr("icloud.autoSync"), isOn: $autoSync)
+            Toggle(L10n.ICloud.tr("autoSync"), isOn: $autoSync)
                 .foregroundStyle(.wikiText)
                 .accessibilityIdentifier("auto-sync")
                 .onChange(of: autoSync) { _, newValue in
-                    UserDefaults.standard.set(newValue, forKey: "knowledge-management_auto_sync")
                     onAutoSyncChange(newValue)
                 }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text(Localized.tr("icloud.conflictPolicy"))
+                Text(L10n.ICloud.tr("conflictPolicy"))
                     .font(.subheadline)
                     .foregroundStyle(.wikiText)
 
@@ -120,12 +129,9 @@ struct SyncSettingsSection: View {
                     }
                 }
                 .pickerStyle(.segmented)
-                .onChange(of: conflictResolution) { _, newValue in
-                    UserDefaults.standard.set(newValue.rawValue, forKey: "knowledge-management_conflict_resolution")
-                }
             }
         } header: {
-            Text(Localized.tr("icloud.syncSettings"))
+            Text(L10n.ICloud.tr("syncSettings"))
         }
     }
 }

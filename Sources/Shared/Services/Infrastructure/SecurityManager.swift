@@ -1,18 +1,34 @@
+// SecurityManager.swift
+//
+// 作者: Wang Chong
+// 功能说明: 安全管理器：负责数据签名、加密与完整性校验。
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import CryptoKit
 
 /// 安全管理器：负责数据签名、加密与完整性校验。
 final class SecurityManager: Sendable {
     static let shared = SecurityManager()
-    
-    // 在实际生产中，应从 Secure Enclave 获取或派生
-    private let salt = "KM-Integrity-Salt-2026"
+
+    private let salt: String
     private let signatureKeyPrefix = "km.integrity.sig."
-    
+
+    init(salt: String = "KM-Integrity-Salt-2026") {
+        self.salt = salt
+    }
+
     /// 计算文件的 HMAC 签名
     func calculateHMAC(for fileURL: URL) throws -> String {
         let fileData = try Data(contentsOf: fileURL, options: .mappedIfSafe)
-        let key = SymmetricKey(data: salt.data(using: .utf8)!)
+        guard let saltData = salt.data(using: .utf8) else {
+            throw SecurityError.invalidSalt
+        }
+        let key = SymmetricKey(data: saltData)
         let signature = HMAC<SHA256>.authenticationCode(for: fileData, using: key)
         return Data(signature).base64EncodedString()
     }
@@ -44,7 +60,18 @@ final class SecurityManager: Sendable {
             let sig = try calculateHMAC(for: fileURL)
             saveSignature(sig, forFileName: fileURL.lastPathComponent)
         } catch {
-            print("Failed to update signature: \(error)")
+            LogService.shared.addLog(action: .error, target: "SecurityManager", details: "Failed to update signature: \(error.localizedDescription)")
+        }
+    }
+}
+
+enum SecurityError: LocalizedError {
+    case invalidSalt
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidSalt:
+            return "Failed to derive key from salt: invalid encoding"
         }
     }
 }

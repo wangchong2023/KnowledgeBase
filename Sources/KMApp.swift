@@ -1,9 +1,22 @@
+// KMApp.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct KMApp
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 @main
 @MainActor
 struct KMApp: App {
     @State private var store: KMStore
+    @State private var ingestStore = IngestStore()
+    @State private var router = AppRouter.shared
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var llmService = LLMService()
     @State private var hasSeenSplash = false
@@ -14,14 +27,14 @@ struct KMApp: App {
         let sqliteStore = SQLiteStore()
         let backupService = BackupService()
         let snapshotService = SnapshotService()
-        let securityService = VaultSecurityService()
+        let securityService = VaultStorageSecurityService()
         
         // 2. 注册协议与实例 (Service Locator 模式)
-        ServiceContainer.shared.register(logService, for: LogServiceProtocol.self)
+        ServiceContainer.shared.register(logService, for: (any LogServiceProtocol).self)
         ServiceContainer.shared.register(sqliteStore, for: SQLiteStore.self)
         ServiceContainer.shared.register(backupService, for: BackupService.self)
         ServiceContainer.shared.register(snapshotService, for: SnapshotService.self)
-        ServiceContainer.shared.register(securityService, for: VaultSecurityService.self)
+        ServiceContainer.shared.register(securityService, for: VaultStorageSecurityService.self)
         
         // 3. 初始化领域服务 (L1)
         ServiceContainer.shared.register(LinkService(), for: LinkService.self)
@@ -34,9 +47,11 @@ struct KMApp: App {
         
         // 4. 初始化应用能力层 (L2)
         let mainLLM = LLMService()
-        ServiceContainer.shared.register(mainLLM, for: LLMServiceProtocol.self)
+        ServiceContainer.shared.register(mainLLM, for: (any LLMServiceProtocol).self)
+        ServiceContainer.shared.register(mainLLM, for: LLMService.self)
         ServiceContainer.shared.register(KnowledgeInsightService(), for: KnowledgeInsightService.self)
         ServiceContainer.shared.register(PluginRegistry.shared, for: PluginRegistry.self)
+        ServiceContainer.shared.register(WorkflowService.shared, for: WorkflowService.self)
         
         // 5. 在服务注册完成后初始化 Store (确保 @Inject 依赖已就绪)
         _store = State(wrappedValue: KMStore())
@@ -52,6 +67,12 @@ struct KMApp: App {
             ZStack {
                 ContentView()
                     .environment(store)
+                    .environment(store.aiWorkflowStore)
+                    .environment(SynthesisStore())
+                    .environment(store.searchStore)
+                    .environment(store.settingsStore)
+                    .environment(ingestStore)
+                    .environment(router)
                     .environmentObject(themeManager)
                     .environmentObject(llmService)
                     .preferredColorScheme(themeManager.colorSchemeMode.preferredColorScheme)

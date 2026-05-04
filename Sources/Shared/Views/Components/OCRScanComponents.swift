@@ -1,3 +1,14 @@
+// OCRScanComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: OCR 图片选择区域：显示选中图片或占位符 + 相册选择按钮 + 识别按钮
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 import PhotosUI
 

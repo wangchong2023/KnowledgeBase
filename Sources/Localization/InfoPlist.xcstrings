@@ -1,132 +1,137 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "CFBundleDisplayName" : {
-      "comment" : "Bundle display name",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZhiYuan"
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "Bundle display name",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZhiYuan"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "智元"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智元"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "CFBundleName": {
+      "comment": "Bundle name",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "ZhiYuan"
           }
         }
       }
     },
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "ZhiYuan"
-          }
-        }
-      }
-    },
-    "NSCameraUsageDescription" : {
-      "comment" : "Privacy - Camera Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZhiYuan needs camera access to scan document text (OCR)."
+    "NSCameraUsageDescription": {
+      "comment": "Privacy - Camera Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZhiYuan needs camera access to scan document text (OCR)."
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "智元需要相机权限来扫描文档文字（OCR）。"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智元需要相机权限来扫描文档文字（OCR）。"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "NSHumanReadableCopyright": {
+      "comment": "Copyright (human-readable)",
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Copyright © 2026 KM. All rights reserved."
           }
         }
       }
     },
-    "NSHumanReadableCopyright" : {
-      "comment" : "Copyright (human-readable)",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Copyright © 2026 KM. All rights reserved."
-          }
-        }
-      }
-    },
-    "NSMicrophoneUsageDescription" : {
-      "comment" : "Privacy - Microphone Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZhiYuan needs microphone access to record voice notes."
+    "NSMicrophoneUsageDescription": {
+      "comment": "Privacy - Microphone Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZhiYuan needs microphone access to record voice notes."
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "智元需要麦克风权限来录制语音笔记。"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智元需要麦克风权限来录制语音笔记。"
           }
         }
-      }
+      },
+      "extractionState": "manual"
     },
-    "NSPhotoLibraryUsageDescription" : {
-      "comment" : "Privacy - Photo Library Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZhiYuan needs photo library access for OCR text scanning."
+    "NSPhotoLibraryUsageDescription": {
+      "comment": "Privacy - Photo Library Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZhiYuan needs photo library access for OCR text scanning."
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "智元需要相册权限来进行 OCR 文字扫描。"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智元需要相册权限来进行 OCR 文字扫描。"
           }
         }
-      }
+      },
+      "extractionState": "manual"
     },
-    "NSSpeechRecognitionUsageDescription" : {
-      "comment" : "Privacy - Speech Recognition Usage Description",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZhiYuan needs speech recognition to transcribe your voice notes."
+    "NSSpeechRecognitionUsageDescription": {
+      "comment": "Privacy - Speech Recognition Usage Description",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZhiYuan needs speech recognition to transcribe your voice notes."
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "智元需要语音识别来转录你的语音笔记。"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智元需要语音识别来转录你的语音笔记。"
           }
         }
-      }
+      },
+      "extractionState": "manual"
     },
-    "NSSpotlightUsageDescription" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ZhiYuan will index your knowledge vault so you can find pages directly via system search."
+    "NSSpotlightUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZhiYuan will index your knowledge vault so you can find pages directly via system search."
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "智元将索引您的知识库，以便您可以通过系统搜索直接找到页面。"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智元将索引您的知识库，以便您可以通过系统搜索直接找到页面。"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

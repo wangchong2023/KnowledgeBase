@@ -1,3 +1,14 @@
+// KnowledgeInsightService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 知识见解服务 (PM 视角：价值闭环)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 /// 知识见解服务 (PM 视角：价值闭环)
@@ -41,7 +52,7 @@ final class KnowledgeInsightService: @unchecked Sendable {
         if !candidates.isEmpty {
             let target = candidates.randomElement()!
             let prompt = Localized.trf("insight.daily.prompt.recent", recentFocus, target.title, String(target.content.prefix(500)))
-            let response = try await llmService.generate(prompt: prompt, systemPrompt: Localized.tr("insight.daily.systemPrompt"))
+            let response = try await llmService.generate(prompt: prompt, systemPrompt: L10n.Dashboard.tr("insight.daily.systemPrompt"))
             let data = response.data(using: .utf8)!
             let json = try JSONDecoder().decode([String: String].self, from: data)
             recap = DailyRecap(
@@ -53,8 +64,8 @@ final class KnowledgeInsightService: @unchecked Sendable {
             let sorted = pages.sorted { $0.updated < $1.updated }
             let target = sorted.first!
             let prompt = Localized.trf("insight.daily.prompt.oldest", target.title, String(target.content.prefix(300)))
-            let response = try await llmService.generate(prompt: prompt, systemPrompt: Localized.tr("insight.daily.systemPrompt"))
-            recap = DailyRecap(targetPageTitle: target.title, insight: response, suggestedConnection: Localized.tr("insight.recap.tip"))
+            let response = try await llmService.generate(prompt: prompt, systemPrompt: L10n.Dashboard.tr("insight.daily.systemPrompt"))
+            recap = DailyRecap(targetPageTitle: target.title, insight: response, suggestedConnection: L10n.Dashboard.tr("insight.recap.tip"))
         }
 
         saveCachedDailyRecap(recap)
@@ -94,7 +105,7 @@ final class KnowledgeInsightService: @unchecked Sendable {
         
         let prompt = Localized.trf("insight.weekly.prompt", newTitles)
         
-        let summary = try await llmService.generate(prompt: prompt, systemPrompt: Localized.tr("insight.weekly.systemPrompt"))
+        let summary = try await llmService.generate(prompt: prompt, systemPrompt: L10n.Dashboard.tr("insight.weekly.systemPrompt"))
         let keywords = Array(newPages.flatMap { $0.tags }.prefix(5))
         
         let formatter = DateFormatter()
@@ -107,7 +118,7 @@ final class KnowledgeInsightService: @unchecked Sendable {
             totalNewPages: newPages.count,
             topKeywords: keywords,
             aiSummary: summary,
-            growthTraction: newPages.count > 5 ? Localized.tr("insight.growth.explosive") : Localized.tr("insight.growth.steady")
+            growthTraction: newPages.count > 5 ? L10n.Dashboard.tr("insight.growth.explosive") : L10n.Dashboard.tr("insight.growth.steady")
         )
     }
 }

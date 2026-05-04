@@ -1,3 +1,14 @@
+// GraphComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: 图谱中的单个节点渲染。
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Graph Node View
@@ -118,7 +129,7 @@ struct GraphNodeView: View {
                 }
                 .contextMenu {
                     Button(action: { onSelect() }) {
-                        Label(Localized.tr("graph.viewDetail"), systemImage: "doc.text.magnifyingglass")
+                        Label(L10n.Graph.tr("viewDetail"), systemImage: "doc.text.magnifyingglass")
                     }
                     
                     Button(action: {
@@ -130,16 +141,16 @@ struct GraphNodeView: View {
                         NSPasteboard.general.setString(link, forType: .string)
                         #endif
                     }) {
-                        Label(Localized.tr("graph.copyWikiLink"), systemImage: "link")
+                        Label(L10n.Graph.tr("copyWikiLink"), systemImage: "link")
                     }
                     
                     Divider()
                     
                     #if os(macOS)
                     Button(action: {
-                        LogService.shared.debug("🖥️ [macOS] 正在新窗口打开：\(node.title)")
+                        // macOS 新窗口功能预留
                     }) {
-                        Label(Localized.tr("misc.openInNewWindow"), systemImage: "macwindow.badge.plus")
+                        Label(L10n.Common.tr("openInNewWindow"), systemImage: "macwindow.badge.plus")
                     }
                     #endif
                 }
@@ -161,8 +172,8 @@ struct GraphNodeView: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(node.title), \(node.type.displayName)")
-        .accessibilityValue(Localized.trf("graph.linksCountFormat", linkCount))
-        .accessibilityHint(Localized.tr("graph.accessibility.nodeHint"))
+        .accessibilityValue(L10n.Graph.trf("linksCountFormat", linkCount))
+        .accessibilityHint(L10n.Graph.tr("accessibility.nodeHint"))
         .accessibilityAddTraits(isSelected ? [.isSelected, .isButton] : [.isButton])
         .accessibilityAction { onSelect() }
     }
@@ -198,7 +209,9 @@ struct GraphZoomControls: View {
     @Binding var lastScale: CGFloat
     @Binding var offset: CGSize
     @Binding var lastOffset: CGSize
+    @Binding var show3D: Bool
     let onRelayout: () -> Void
+    let onFitToScreen: () -> Void
 
     var body: some View {
         HStack(spacing: 0) {
@@ -249,6 +262,19 @@ struct GraphZoomControls: View {
             Divider().frame(width: 1, height: 24).background(Color.wikiBorder)
 
             Button(action: {
+                withAnimation(.spring(response: 0.5)) { onFitToScreen() }
+            }) {
+                Image(systemName: "viewfinder")
+                    .font(.body)
+                    .foregroundStyle(.wikiSecondary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.wikiCard)
+            }
+            .accessibilityIdentifier("fit-to-screen")
+
+            Divider().frame(width: 1, height: 24).background(Color.wikiBorder)
+
+            Button(action: {
                 withAnimation(.spring(response: 0.6)) { onRelayout() }
             }) {
                 Image(systemName: "arrow.clockwise")
@@ -258,6 +284,17 @@ struct GraphZoomControls: View {
                     .background(Color.wikiCard)
             }
             .accessibilityIdentifier("relayout")
+
+            Divider().frame(width: 1, height: 24).background(Color.wikiBorder)
+
+            Button(action: { show3D = true }) {
+                Image(systemName: "view.3d")
+                    .font(.body)
+                    .foregroundStyle(.wikiSecondary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.wikiCard)
+            }
+            .accessibilityIdentifier("graph-3d")
         }
         .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
         .overlay(
@@ -279,7 +316,7 @@ struct GraphLegend: View {
                 Image(systemName: "list.bullet.rectangle.portrait")
                     .font(.caption)
                     .foregroundStyle(.wikiAccent)
-                Text(Localized.tr("graph.legend"))
+                Text(L10n.Graph.tr("legend"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.wikiText)
             }
@@ -327,7 +364,7 @@ struct GraphSelectedNodeCard: View {
     var heroNamespace: Namespace.ID? = nil
 
     var body: some View {
-        NavigationLink(value: page) {
+        NavigationLink(value: AppRoute.pageDetail(id: page.id)) {
             cardContent
         }
         .buttonStyle(.plain)
@@ -382,36 +419,36 @@ struct GraphInsightsPanel: View {
                     insightSection(
                         id: "surprising",
                         icon: "link Badge",
-                        title: Localized.tr("graph.insightSurprising"),
+                        title: L10n.Graph.tr("insightSurprising"),
                         count: surprising.count,
-                        description: Localized.tr("graph.insightSurprisingDesc"),
+                        description: L10n.Graph.tr("insightSurprisingDesc"),
                         color: .wikiComparison
                     )
                     
                     insightSection(
                         id: "orphans",
                         icon: "questionmark.circle",
-                        title: Localized.tr("graph.insightOrphans"),
+                        title: L10n.Graph.tr("insightOrphans"),
                         count: orphans.count,
-                        description: Localized.tr("graph.insightOrphansDesc"),
+                        description: L10n.Graph.tr("insightOrphansDesc"),
                         color: .wikiSecondary
                     )
                     
                     insightSection(
                         id: "sparse",
                         icon: "chart.bar.xaxis",
-                        title: Localized.tr("graph.insightSparse"),
+                        title: L10n.Graph.tr("insightSparse"),
                         count: sparse.count,
-                        description: Localized.tr("graph.insightSparseDesc"),
+                        description: L10n.Graph.tr("insightSparseDesc"),
                         color: .orange
                     )
                     
                     insightSection(
                         id: "bridges",
                         icon: "arrow.triangle.branch",
-                        title: Localized.tr("graph.insightBridges"),
+                        title: L10n.Graph.tr("insightBridges"),
                         count: bridges.count,
-                        description: Localized.tr("graph.insightBridgesDesc"),
+                        description: L10n.Graph.tr("insightBridgesDesc"),
                         color: .wikiAccent
                     )
                 }

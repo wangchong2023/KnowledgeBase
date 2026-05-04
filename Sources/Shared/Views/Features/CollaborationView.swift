@@ -1,3 +1,13 @@
+// CollaborationView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct CollaborationView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import MultipeerConnectivity
 
@@ -41,21 +51,21 @@ struct CollaborationViewContent: View {
             .padding()
         }
         .background(Color.wikiBackground)
-        .navigationTitle(Localized.tr("collab.title"))
+        .navigationTitle(L10n.Collaboration.tr("title"))
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #endif
         .sheet(isPresented: $showHostingSheet) {
             HostingSetupSheet(collabService: collabService, roomName: $roomName)
         }
-        .alert(Localized.tr("collab.error.connectionTimeout"), isPresented: $showConnectionError) {
+        .alert(L10n.Collaboration.tr("error.connectionTimeout"), isPresented: $showConnectionError) {
             Button("OK", role: .cancel) { }
         } message: {
             Text(collabService.connectionError ?? "")
         }
         .onAppear {
-            userName = UserDefaults.standard.string(forKey: "knowledge-management_username") ?? UIDevice.current.name
-            collabService.setStore(store)
+            userName = UIDevice.current.name
+            collabService.setDelegate(store)
         }
         .onChange(of: collabService.connectionError) { _, newValue in
             showConnectionError = (newValue != nil)
@@ -75,7 +85,7 @@ struct CollaborationViewContent: View {
                     )
                 )
             
-            Text(Localized.tr("collab.subtitle"))
+            Text(L10n.Collaboration.tr("subtitle"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -89,7 +99,7 @@ struct CollaborationViewContent: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
             
-            Text(Localized.tr("collab.simulatorWarning"))
+            Text(L10n.Collaboration.tr("simulatorWarning"))
                 .font(.subheadline)
                 .foregroundStyle(.wikiSecondary)
         }
@@ -138,14 +148,14 @@ struct CollaborationViewContent: View {
     
     private var usernameField: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(Localized.tr("collab.username"))
+            Text(L10n.Collaboration.tr("username"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.wikiSecondary)
 
             HStack {
                 Image(systemName: "person.fill")
                     .foregroundStyle(.wikiAccent)
-                TextField(Localized.tr("collab.usernamePlaceholder"), text: $userName)
+                TextField(L10n.Collaboration.tr("usernamePlaceholder"), text: $userName)
                     .textFieldStyle(.plain)
                     .font(.subheadline)
                     .accessibilityIdentifier("collab-username-field")
@@ -163,7 +173,7 @@ struct CollaborationViewContent: View {
         Button(action: { showHostingSheet = true }) {
             HStack {
                 Image(systemName: "antenna.radiowaves.left.and.right")
-                Text(Localized.tr("collab.hostSession"))
+                Text(L10n.Collaboration.tr("hostSession"))
             }
             .font(.headline)
             .foregroundStyle(.white)
@@ -184,7 +194,7 @@ struct CollaborationViewContent: View {
         }) {
             HStack {
                 Image(systemName: "magnifyingglass")
-                Text(Localized.tr("collab.joinSession"))
+                Text(L10n.Collaboration.tr("joinSession"))
             }
             .font(.headline)
             .foregroundStyle(.wikiAccent)
@@ -203,7 +213,7 @@ struct CollaborationViewContent: View {
             showBrowsing = false
             collabService.stop()
         }) {
-            Text(Localized.tr("collab.stopSearching"))
+            Text(L10n.Collaboration.tr("stopSearching"))
                 .font(.subheadline)
                 .foregroundStyle(.red)
         }
@@ -213,14 +223,14 @@ struct CollaborationViewContent: View {
     // MARK: - Discovered Rooms
     private var discoveredRoomsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Localized.tr("collab.nearbyRooms"))
+            Text(L10n.Collaboration.tr("nearbyRooms"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
             
             if collabService.discoveredRooms.isEmpty {
                 HStack {
                     ProgressView()
-                    Text(Localized.tr("collab.searching"))
+                    Text(L10n.Collaboration.tr("searching"))
                         .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -264,7 +274,7 @@ struct CollaborationViewContent: View {
         Button(action: { collabService.stop() }) {
             HStack {
                 Image(systemName: "xmark.circle.fill")
-                Text(Localized.tr("collab.leaveSession"))
+                Text(L10n.Collaboration.tr("leaveSession"))
             }
             .font(.subheadline.weight(.medium))
             .foregroundStyle(.red)
@@ -279,7 +289,7 @@ struct CollaborationViewContent: View {
     // MARK: - Peers
     private var peersSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Localized.tr("collab.connectedUsers"))
+            Text(L10n.Collaboration.tr("connectedUsers"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
                 .accessibilityIdentifier("collab-peers-header")
@@ -311,13 +321,13 @@ struct CollaborationViewContent: View {
     // MARK: - Recent Edits
     private var editsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Localized.tr("collab.recentEdits"))
+            Text(L10n.Collaboration.tr("recentEdits"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
                 .accessibilityIdentifier("collab-edits-header")
 
             if recentEditsSnapshot.isEmpty {
-                Text(Localized.tr("collab.noEdits"))
+                Text(L10n.Collaboration.tr("noEdits"))
                     .font(.subheadline)
                     .foregroundStyle(.wikiSecondary)
                     .padding()

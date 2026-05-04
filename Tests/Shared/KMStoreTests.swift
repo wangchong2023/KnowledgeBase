@@ -1,3 +1,13 @@
+// KMStoreTests.swift
+//
+// 作者: Wang Chong
+// 功能说明: KM存储Tests.swift
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 @testable import KM
 
@@ -5,14 +15,28 @@ import XCTest
 final class KMStoreTests: XCTestCase {
     var store: KMStore!
     
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
+        ServiceContainer.shared.reset()
+        DatabaseManager.shared.reset()
+        
+        let testDBURL = URL(string: "file::memory:?cache=shared")!
+        let sqliteStore = SQLiteStore(dbURL: testDBURL)
+        ServiceContainer.shared.register(sqliteStore, for: SQLiteStore.self)
+        ServiceContainer.shared.register(LogService(), for: LogServiceProtocol.self)
+        ServiceContainer.shared.register(LinkService(), for: LinkService.self)
+        ServiceContainer.shared.register(LintService(), for: LintService.self)
+        ServiceContainer.shared.register(UndoService(), for: UndoService.self)
+        ServiceContainer.shared.register(BackupService(), for: BackupService.self)
+
         store = KMStore()
     }
     
-    override func tearDown() {
+    override func tearDown() async throws {
         store = nil
-        super.tearDown()
+        DatabaseManager.shared.reset()
+        ServiceContainer.shared.reset()
+        try await super.tearDown()
     }
     
     func testPageCreation() {

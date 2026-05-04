@@ -1,49 +1,14 @@
-import Foundation
-import SQLite3
+// SecurityReinforcement.swift
+//
+// 作者: Wang Chong
+// 功能说明: 日志脱敏层 (Security Item)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
-/// 数据库迁移管理器 (Reliability Item)
-/// 负责处理 SQLite 架构的版本化升级。
-@MainActor
-final class DatabaseMigrationManager {
-    static let shared = DatabaseMigrationManager()
-    private let currentSchemaVersion = 2 // 当前代码预期的架构版本
-    
-    func migrate(db: OpaquePointer?) {
-        let userVersion = getVersion(db: db)
-        LogService.shared.debug("🗄️ [Migration] 当前数据库版本：\(userVersion)，目标版本：\(currentSchemaVersion)")
-        
-        if userVersion < 1 {
-            // 执行初始建表逻辑（省略）
-            setVersion(1, db: db)
-        }
-        
-        if userVersion < 2 {
-            // 版本 2 升级示例：增加页面可信度字段
-            execute(sql: "ALTER TABLE wiki_pages ADD COLUMN confidence FLOAT DEFAULT 1.0;", db: db)
-            setVersion(2, db: db)
-        }
-    }
-    
-    private func getVersion(db: OpaquePointer?) -> Int {
-        var version: Int = 0
-        var stmt: OpaquePointer?
-        if sqlite3_prepare_v2(db, "PRAGMA user_version;", -1, &stmt, nil) == SQLITE_OK {
-            if sqlite3_step(stmt) == SQLITE_ROW {
-                version = Int(sqlite3_column_int(stmt, 0))
-            }
-        }
-        sqlite3_finalize(stmt)
-        return version
-    }
-    
-    private func setVersion(_ version: Int, db: OpaquePointer?) {
-        execute(sql: "PRAGMA user_version = \(version);", db: db)
-    }
-    
-    private func execute(sql: String, db: OpaquePointer?) {
-        sqlite3_exec(db, sql, nil, nil, nil)
-    }
-}
+import Foundation
 
 /// 日志脱敏层 (Security Item)
 struct LogMasker {

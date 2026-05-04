@@ -1,3 +1,14 @@
+// MermaidWebView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct IdentifiableURL
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 import WebKit
 
@@ -83,7 +94,7 @@ struct MermaidWebView: View {
                 try? data.write(to: tempURL)
                 self.identifiablePDFURL = IdentifiableURL(url: tempURL)
             case .failure(let error):
-                print("PDF generation failed: \(error)")
+                ToastManager.shared.show(type: .error, message: error.localizedDescription)
             }
         }
     }

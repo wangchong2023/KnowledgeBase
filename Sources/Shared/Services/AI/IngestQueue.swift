@@ -1,3 +1,13 @@
+// IngestQueue.swift
+//
+// 作者: Wang Chong
+// 功能说明: 离线处理队列 (Architect 视角：高并发与后台解耦)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 #if !os(macOS)
@@ -32,7 +42,7 @@ final class IngestQueue: ObservableObject {
     }
     
     /// 将导入任务加入队列
-    func enqueue(title: String, content: String, store: KMStore) {
+    func enqueue(title: String, content: String, llmService: any LLMServiceProtocol, pages: [WikiPage], onResult: @escaping @Sendable @MainActor (WikiPage) -> Void) {
         let operation = BlockOperation { [weak self] in
             guard let self = self else { return }
             
@@ -42,13 +52,13 @@ final class IngestQueue: ObservableObject {
             Task {
                 do {
                     LogService.shared.debug("📦 [IngestQueue] 正在处理任务：\(title)")
-                    let result = try await store.llmService.smartIngest(title: title, rawContent: content, pages: store.pages)
+                    let result = try await llmService.smartIngest(title: title, rawContent: content, pages: pages)
                     
                     // 更新数据库 (Fixed for Swift 6)
                     let page = WikiPage(title: title, content: result.compiledContent, tags: result.suggestedTags)
                     
                     await MainActor.run {
-                        store.addImportedPage(page)
+                        onResult(page)
                         self.decrementCount()
                     }
                 } catch {

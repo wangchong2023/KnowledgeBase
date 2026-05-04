@@ -1,3 +1,14 @@
+// IngestView.swift
+//
+// 作者: Wang Chong
+// 功能说明: Single activity log entry for the ingest activity panel.
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 import UniformTypeIdentifiers
 
@@ -42,8 +53,10 @@ struct ActivityItem: Identifiable {
 /// IngestHeroSection / IngestEntryCardsSection / IngestManualFormSection / SmartIngestPreview / IngestTipsSection
 struct IngestView: View {
     @Environment(KMStore.self) var store
+    @Environment(IngestStore.self) var ingestStore
+    @Environment(AppRouter.self) var router
     @EnvironmentObject var llmService: LLMService
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
 
     @State private var newTitle = ""
     @State private var newContent = ""
@@ -59,13 +72,12 @@ struct IngestView: View {
     @State private var showError = false
     @State private var showIconPicker = false
     @State private var showManualForm = false
-    @State private var manualFormTitle = Localized.tr("ingest.manualEntry")
+    @State private var manualFormTitle = L10n.Ingest.tr("manualEntry")
     @State private var showOCRScan = false
     @State private var showURLImport = false
     @State private var newURL = ""
     @State private var useDeepScan = false
     @State private var isExtracting = false
-    @State private var ingestPath = NavigationPath()
     
     // File Import State
     @State private var showFileImporter = false
@@ -75,97 +87,91 @@ struct IngestView: View {
 
 
     var body: some View {
-        NavigationStack(path: $ingestPath) {
-            ScrollView {
-                VStack(spacing: 20) {
-                    IngestHeroSection()
+        @Bindable var router = router
+        ScrollView {
+            VStack(spacing: 20) {
+                IngestHeroSection()
 
-
-                    IngestEntryCardsSection(
-                        showManualForm: Binding(
-                            get: { showManualForm },
-                            set: { newValue in
-                                if newValue { manualFormTitle = Localized.tr("ingest.manualEntry") }
-                                showManualForm = newValue
-                            }
-                        ),
-                        showOCRScan: $showOCRScan,
-                        newType: $newType,
-                        showFileImporter: $showFileImporter,
-                        showVoiceNote: $showVoiceNote,
-                        showURLImport: $showURLImport
-                    )
-
-                    // 导入活动状态展示区域（改为跳转到全局任务中心）
-                    if !TaskCenter.shared.tasks.filter({ $0.type == .ingest }).isEmpty {
-                        taskCenterLinkSection
-                    }
-                    
-                    // 最近处理的文档列表
-                    recentActivitiesSection
-
-
-                }
-                .padding(.bottom, 40)
-            }
-            .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("ingest.title"))
-            .alert(Localized.tr("ingest.error"), isPresented: $showError) {
-                Button(Localized.tr("ingest.ok")) { errorMessage = nil }
-            } message: {
-                Text(errorMessage ?? "")
-            }
-            .sheet(isPresented: $showIconPicker) {
-                IconPickerView(selectedIcon: $newCustomIcon)
-            }
-            .fileImporter(
-                isPresented: $showFileImporter,
-                allowedContentTypes: {
-                    var types: [UTType] = [.pdf, .plainText, .text]
-                    if let doc = UTType("com.microsoft.word.doc") { types.append(doc) }
-                    if let docx = UTType("org.openxmlformats.wordprocessingml.document") { types.append(docx) }
-                    if let xls = UTType("com.microsoft.excel.xls") { types.append(xls) }
-                    if let xlsx = UTType("org.openxmlformats.spreadsheetml.sheet") { types.append(xlsx) }
-                    if let md = UTType("net.daringfireball.markdown") { types.append(md) }
-                    return types
-                }(),
-                allowsMultipleSelection: true
-            ) { result in
-                handleFileImport(result)
-            }
-            .sheet(isPresented: $showVoiceNote) {
-                VoiceNoteView(onFinish: { title, content in
-                    self.newTitle = title
-                    self.newContent = content
-                    self.manualFormTitle = Localized.tr("speech.title")
-                    self.showManualForm = true
-                })
-            }
-            .sheet(isPresented: $showOCRScan) {
-                OCRScanView(onFinish: { title, content in
-                    self.newTitle = title
-                    self.newContent = content
-                    self.manualFormTitle = Localized.tr("ocr.title")
-                    self.showManualForm = true
-                })
-            }
-            .sheet(isPresented: $showURLImport) {
-                URLImportSheet(
-                    urlText: $newURL,
-                    onImport: { handleURLImport() }
+                IngestEntryCardsSection(
+                    showManualForm: Binding(
+                        get: { showManualForm },
+                        set: { newValue in
+                            if newValue { manualFormTitle = L10n.Ingest.tr("manualEntry") }
+                            showManualForm = newValue
+                        }
+                    ),
+                    showOCRScan: $showOCRScan,
+                    newType: $newType,
+                    showFileImporter: $showFileImporter,
+                    showVoiceNote: $showVoiceNote,
+                    showURLImport: $showURLImport
                 )
-            }
-            .sheet(isPresented: $showManualForm) {
-                manualFormSheet
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .importFromClipboard)) { _ in
-                performClipboardImport()
-            }
-            .navigationDestination(for: String.self) { value in
-                if value == "taskCenter" {
-                    TaskCenterView()
+
+                // 导入活动状态展示区域（改为跳转到全局任务中心）
+                if !TaskCenter.shared.tasks.filter({ $0.type == .ingest }).isEmpty {
+                    taskCenterLinkSection
                 }
+                
+                // 最近处理的文档列表
+                recentActivitiesSection
             }
+            .padding(.bottom, 40)
+        }
+        .background(Color.wikiBackground)
+        .navigationTitle(L10n.Ingest.title)
+        .alert(L10n.Ingest.tr("error"), isPresented: $showError) {
+            Button(L10n.Ingest.tr("ok")) { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
+        .sheet(isPresented: $showIconPicker) {
+            IconPickerView(selectedIcon: $newCustomIcon)
+        }
+        .fileImporter(
+            isPresented: $showFileImporter,
+            allowedContentTypes: {
+                var types: [UTType] = [.pdf, .plainText, .text]
+                if let doc = UTType("com.microsoft.word.doc") { types.append(doc) }
+                if let docx = UTType("org.openxmlformats.wordprocessingml.document") { types.append(docx) }
+                if let xls = UTType("com.microsoft.excel.xls") { types.append(xls) }
+                if let xlsx = UTType("org.openxmlformats.spreadsheetml.sheet") { types.append(xlsx) }
+                if let md = UTType("net.daringfireball.markdown") { types.append(md) }
+                return types
+            }(),
+            allowsMultipleSelection: true
+        ) { result in
+            handleFileImport(result)
+        }
+        .sheet(isPresented: $showVoiceNote) {
+            VoiceNoteView(onFinish: { title, content in
+                self.newTitle = title
+                self.newContent = content
+                self.manualFormTitle = Localized.tr("speech.title")
+                self.showManualForm = true
+            })
+        }
+        .sheet(isPresented: $showOCRScan) {
+            OCRScanView(onFinish: { title, content in
+                self.newTitle = title
+                self.newContent = content
+                self.manualFormTitle = Localized.tr("ocr.title")
+                self.showManualForm = true
+            })
+        }
+        .sheet(isPresented: $showURLImport) {
+            URLImportSheet(
+                urlText: $newURL,
+                onImport: { handleURLImport() }
+            )
+        }
+        .sheet(isPresented: $showManualForm) {
+            manualFormSheet
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .importFromClipboard)) { _ in
+            performClipboardImport()
+        }
+        .navigationDestination(for: AppRoute.self) { route in
+            ViewFactory.makeView(for: route)
         }
     }
 
@@ -188,6 +194,7 @@ struct IngestView: View {
                     useDeepScan: $useDeepScan,
                     llmService: llmService,
                     store: store,
+                    ingestStore: ingestStore,
                     onPerformIngest: performIngest,
                     onConfirmSmartIngest: confirmSmartIngest
                 )
@@ -201,7 +208,7 @@ struct IngestView: View {
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.cancel")) {
+                    Button(L10n.Common.tr("cancel")) {
                         showManualForm = false
                     }
                 }
@@ -211,15 +218,15 @@ struct IngestView: View {
 
     // MARK: - Task Center Link Section
     private var taskCenterLinkSection: some View {
-        Button(action: { ingestPath.append("taskCenter") }) {
+        Button(action: { router.navigate(to: .taskCenter) }) {
             HStack {
                 Image(systemName: "tray.full.fill")
                     .foregroundStyle(.wikiAccent)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(Localized.tr("ingest.queue.title"))
+                    Text(L10n.Ingest.tr("queue.title"))
                         .font(.headline)
                         .foregroundStyle(.wikiText)
-                    Text(Localized.tr("ingest.queue.desc"))
+                    Text(L10n.Ingest.tr("queue.desc"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }
@@ -249,33 +256,18 @@ struct IngestView: View {
         switch result {
         case .success(let urls):
             for url in urls {
-                guard url.startAccessingSecurityScopedResource() else { continue }
-                defer { url.stopAccessingSecurityScopedResource() }
-
-                // 安全校验：文件大小限制 (50MB)
-                // 目的：防止大文件解析导致内存溢出或响应卡顿
-                if let resources = try? url.resourceValues(forKeys: [.fileSizeKey]),
-                   let fileSize = resources.fileSize {
-                    let limit = 50 * 1024 * 1024 // 50MB 阈值
-                    if fileSize > limit {
-                        errorMessage = Localized.tr("ingest.fileTooLarge")
-                        showError = true
-                        continue
-                    }
-                }
-
-                isExtracting = true
-                // 预入库预览逻辑：仅提取文本，不直接写入 SQLite
-                if let extracted = store.extractText(from: url) {
+                do {
+                    isExtracting = true
+                    let extracted = try ingestStore.handleFileUpload(at: url)
                     newTitle = extracted.title
                     newContent = extracted.content
-                    manualFormTitle = Localized.tr("ingest.fileImport")
+                    manualFormTitle = L10n.Ingest.tr("fileImport")
                     isExtracting = false
                     showManualForm = true
                     HapticManager.shared.trigger(.success)
-                } else {
+                } catch {
                     isExtracting = false
-                    errorMessage = Localized.tr("ingest.error")
+                    errorMessage = error.localizedDescription
                     showError = true
                 }
             }
@@ -287,69 +279,39 @@ struct IngestView: View {
 
     // MARK: - Ingest Logic
     private func performIngest() {
-        let taskID = TaskCenter.shared.addTask(type: .ingest, name: Localized.tr("ingest.manualEntry"), target: newTitle)
         isIngesting = true
         ingestSuccess = false
         smartResult = nil
 
-        if useSmartIngest && llmService.isEnabled {
-            Task {
-                do {
-                    let result = try await llmService.smartIngest(
-                        title: newTitle,
-                        rawContent: newContent,
-                        pages: store.pages
-                    )
-                    await MainActor.run {
-                        smartResult = result
-                        isIngesting = false
-                        showSmartPreview = true
-                        TaskCenter.shared.updateTask(taskID, status: .completed)
-                    }
-                } catch {
-                    await MainActor.run {
-                        isIngesting = false
-                        errorMessage = error.localizedDescription
-                        showError = true
-                        TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
+        Task {
+            do {
+                _ = try await ingestStore.performIngest(
+                    title: newTitle,
+                    content: newContent,
+                    type: newType,
+                    tags: newTags,
+                    customIcon: newCustomIcon,
+                    useSmart: useSmartIngest,
+                    useDeepScan: useDeepScan
+                )
+
+                await MainActor.run {
+                    isIngesting = false
+                    ingestSuccess = true
+                    
+                    // 如果是智能摄入，可能需要预览（如果逻辑上有预览需求，此处可调整）
+                    // 目前 KMStore.performIngest 已经处理了智能摄入的保存
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        resetForm()
+                        showManualForm = false
                     }
                 }
-            }
-        } else {
-            let tags = newTags
-
-            Task {
-                do {
-                    let page = try await store.ingestWithFolding(
-                        title: newTitle,
-                        content: newContent,
-                        type: newType,
-                        forceDeepScan: useDeepScan
-                    )
-
-                    await MainActor.run {
-                        var updatedPage = page
-                        updatedPage.tags = tags
-                        updatedPage.customIcon = newCustomIcon
-                        store.updatePage(updatedPage, forceDeepScan: false)
-
-                        isIngesting = false
-                        ingestSuccess = true
-                        HapticManager.shared.trigger(.success)
-                        
-                        TaskCenter.shared.updateTask(taskID, status: .completed, associatedPageID: page.id)
-
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            resetForm()
-                        }
-                    }
-                } catch {
-                    await MainActor.run {
-                        isIngesting = false
-                        errorMessage = error.localizedDescription
-                        showError = true
-                        TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
-                    }
+            } catch {
+                await MainActor.run {
+                    isIngesting = false
+                    errorMessage = error.localizedDescription
+                    showError = true
                 }
             }
         }
@@ -359,34 +321,16 @@ struct IngestView: View {
         guard let result = smartResult else { return }
         
         Task {
-            let type: PageType = PageType(rawValue: result.suggestedType) ?? newType
-
-            let page = store.createPage(
-                title: newTitle,
-                type: type,
-                customIcon: newCustomIcon,
-                content: result.compiledContent,
-                tags: result.suggestedTags
+            _ = await ingestStore.finalizeSmartIngest(
+                title: newTitle, 
+                result: result, 
+                customIcon: newCustomIcon
             )
-
-            var updatedPage = page
-            var relatedIDs: [UUID] = []
-            for title in result.relatedTitles {
-                if let linked = await store.pageByTitle(title) {
-                    relatedIDs.append(linked.id)
-                }
-            }
-            updatedPage.relatedPageIDs = relatedIDs
             
             await MainActor.run {
-                store.updatePage(updatedPage, forceDeepScan: false)
-
-                store.addLog(action: .smartIngest, target: newTitle, details: Localized.trf("ingest.smartIngestDoneDesc", type.displayName))
-
                 smartResult = nil
                 ingestSuccess = true
                 ToastManager.shared.show(type: .success, message: Localized.tr("ingest.success"))
-                HapticManager.shared.trigger(.success)
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     resetForm()
@@ -412,7 +356,7 @@ struct IngestView: View {
         return Group {
             if !recentTasks.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(Localized.tr("ingest.recentActivities"))
+                    Text(L10n.Ingest.tr("recentActivities"))
                         .font(.headline)
                         .foregroundStyle(.wikiText)
                         .padding(.horizontal)
@@ -456,19 +400,19 @@ struct IngestView: View {
         newURL = ""
         showURLImport = false
         isExtracting = true
-        ToastManager.shared.show(type: .processing, message: Localized.tr("ingest.processing"), duration: 0)
+        ToastManager.shared.show(type: .processing, message: L10n.Ingest.tr("processing"), duration: 0)
         
         Task {
             do {
-                let extracted = try await store.fetchURLContent(urlString: firstURL)
+                let extracted = try await ingestStore.fetchURLContent(urlString: firstURL)
                 await MainActor.run {
                     self.newTitle = extracted.title
                     self.newContent = extracted.content
-                    self.manualFormTitle = Localized.tr("ingest.urlImport")
+                    self.manualFormTitle = L10n.Ingest.tr("urlImport")
                     self.isExtracting = false
                     ToastManager.shared.dismiss()
                     self.showManualForm = true
-                    ToastManager.shared.show(type: .success, message: Localized.tr("ingest.success"))
+                    ToastManager.shared.show(type: .success, message: L10n.Ingest.tr("success"))
                     HapticManager.shared.trigger(.success)
                 }
             } catch {
@@ -485,7 +429,7 @@ struct IngestView: View {
     // MARK: - Clipboard Import
     private func performClipboardImport() {
         guard let clipboardContent = WikiPasteboard.string, !clipboardContent.isEmpty else {
-            errorMessage = Localized.tr("ingest.clipboardEmpty")
+            errorMessage = L10n.Ingest.tr("clipboardEmpty")
             showError = true
             return
         }
@@ -502,15 +446,15 @@ struct IngestView: View {
         }
 
         if title.isEmpty {
-            title = Localized.tr("settings.importedPageTitle")
+            title = L10n.Settings.tr("importedPageTitle")
         }
 
         // 填充到表单并显示
         newTitle = title
         newContent = content
         newType = .concept
-        newTags = [Localized.tr("settings.importTag")]
-        manualFormTitle = Localized.tr("ingest.clipboardImport") // 使用 "剪贴板" 或新增 "从剪贴板导入"
+        newTags = [L10n.Settings.tr("importTag")]
+        manualFormTitle = L10n.Ingest.tr("clipboardImport") // 使用 "剪贴板" 或新增 "从剪贴板导入"
         
         withAnimation {
             showManualForm = true
@@ -521,9 +465,10 @@ struct IngestView: View {
 // MARK: - Activity Row View
 struct ActivityRow: View {
     @Environment(KMStore.self) var store
+    @Environment(AppRouter.self) var router
     let item: ActivityItem
     let isCurrent: Bool
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     
     var body: some View {
         HStack(spacing: 10) {
@@ -563,12 +508,9 @@ struct ActivityRow: View {
             
             if let pageID = item.associatedPageID {
                 Button(action: {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        store.selectedPageID = pageID
-                        selectedTab = .wiki
-                    }
+                    router.navigate(to: .pageDetail(id: pageID))
                 }) {
-                    Text(Localized.tr("misc.view"))
+                    Text(L10n.Common.tr("view"))
                         .font(.caption2.bold())
                         .foregroundStyle(.wikiAccent)
                         .padding(.horizontal, 8)

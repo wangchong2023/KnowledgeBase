@@ -1,3 +1,13 @@
+// KnowledgeBaseUITests.swift
+//
+// 作者: Wang Chong
+// 功能说明: KnowledgeBase 按钮功能 UI 测试套件
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 
 // MARK: - UI Test Base Class
@@ -8,13 +18,21 @@ import XCTest
 ///   3. 选择 iPhone 16 Pro 模拟器
 ///   4. Cmd+U 运行测试
 /// 注意: 首次运行需要授权辅助访问（System Settings > Privacy & Security > Accessibility）
+@MainActor
 class KnowledgeBaseUITests: XCTestCase {
 
     var app: XCUIApplication!
 
     // MARK: - Setup & Teardown
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
+        
+        // 防止在单元测试 Target 中运行 UI 测试导致崩溃
+        // UI 测试必须在独立的 UI Test Runner 中运行，进程名不应为 "KM"
+        if ProcessInfo.processInfo.processName == "KM" {
+            throw XCTSkip("Skipping UI test in Unit Test target to prevent XCUIApplication init crash.")
+        }
+        
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments = ["--uitesting", "--reset-state"]
@@ -22,9 +40,9 @@ class KnowledgeBaseUITests: XCTestCase {
         app.launch()
     }
 
-    override func tearDown() {
-        app.terminate()
-        super.tearDown()
+    override func tearDown() async throws {
+        app?.terminate()
+        try await super.tearDown()
     }
 
     // MARK: - Helper Methods
@@ -75,8 +93,8 @@ final class TabNavigationTests: KnowledgeBaseUITests {
 // MARK: - Wiki Tab Tests
 final class WikiTabTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         navigateToWikiTab()
     }
 
@@ -123,8 +141,8 @@ final class WikiTabTests: KnowledgeBaseUITests {
 // MARK: - Page Detail Tests
 final class PageDetailTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         navigateToWikiTab()
         // 尝试创建一个测试页面并进入
         createTestPage()
@@ -196,8 +214,8 @@ final class PageDetailTests: KnowledgeBaseUITests {
 // MARK: - Search Tests
 final class SearchTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         app.tabBars.buttons["Search"].tap()
         Thread.sleep(forTimeInterval: 1)
     }
@@ -265,8 +283,8 @@ final class SearchTests: KnowledgeBaseUITests {
 // MARK: - Settings Tests
 final class SettingsTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         navigateToSettingsTab()
     }
 
@@ -370,8 +388,8 @@ final class SettingsTests: KnowledgeBaseUITests {
 // MARK: - Ingest Tests
 final class IngestTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         app.tabBars.buttons["Ingest"].tap()
         Thread.sleep(forTimeInterval: 1)
     }
@@ -451,8 +469,8 @@ final class IngestTests: KnowledgeBaseUITests {
 // MARK: - Graph Tests
 final class GraphTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         app.tabBars.buttons["Graph"].tap()
         Thread.sleep(forTimeInterval: 1)
     }
@@ -520,8 +538,8 @@ final class GraphTests: KnowledgeBaseUITests {
 // MARK: - Chat Tests
 final class ChatTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         app.tabBars.buttons["Wiki"].tap()
         Thread.sleep(forTimeInterval: 1)
         // 从 Wiki tab 导航到 Chat
@@ -581,8 +599,8 @@ final class ChatTests: KnowledgeBaseUITests {
 // MARK: - Lint Tests
 final class LintTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         // 健康检查现在在 Wiki Tab 侧边栏
         navigateToWikiTab()
         let healthButton = app.buttons.matching(identifier: "healthCheck").firstMatch
@@ -621,8 +639,8 @@ final class LintTests: KnowledgeBaseUITests {
 // MARK: - iCloud Sync Tests
 final class iCloudSyncTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         navigateToSettingsTab()
         let iCloudNav = app.cells.matching(identifier: "数据-iCloud同步").firstMatch
         if iCloudNav.exists && iCloudNav.isHittable {
@@ -666,8 +684,8 @@ final class iCloudSyncTests: KnowledgeBaseUITests {
 // MARK: - Markdown Editor Tests
 final class MarkdownEditorTests: KnowledgeBaseUITests {
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         navigateToWikiTab()
         // 创建并进入编辑页面
         createAndEditPage()
@@ -869,7 +887,7 @@ final class TagCloudTests: KnowledgeBaseUITests {
             safeTap(tagCloudButton)
             Thread.sleep(forTimeInterval: 1)
             // Verify tag cloud content appears
-            XCTAssertFalse(app.textElements.count == 0, "Tag cloud should have some content or empty state")
+            XCTAssertFalse(app.staticTexts.count == 0, "Tag cloud should have some content or empty state")
         }
     }
 }
@@ -885,7 +903,7 @@ final class IndexViewTests: KnowledgeBaseUITests {
             Thread.sleep(forTimeInterval: 1)
             // Index view should show page list
             let navTitle = app.navigationBars.firstMatch.identifier
-            XCTAssertTrue(navTitle.exists || app.tables.firstMatch.exists, "Index view should be navigated to")
+            XCTAssertTrue(!navTitle.isEmpty || app.tables.firstMatch.exists, "Index view should be navigated to")
         }
     }
 }
@@ -1022,7 +1040,7 @@ final class SettingsE2ETests: KnowledgeBaseUITests {
         let langPicker = app.pickerWheels.firstMatch
         if langPicker.exists && langPicker.isHittable {
             // Just verify we can interact with it
-            langPicker.adjust(toPickerWheelValue: 1)
+            langPicker.adjust(toPickerWheelValue: "English")
             Thread.sleep(forTimeInterval: 0.5)
         }
     }
@@ -1036,8 +1054,8 @@ final class SettingsE2ETests: KnowledgeBaseUITests {
 
         // Find accent color buttons (usually colored circles/squares)
         let colorButtons = app.buttons.matching(NSPredicate(format: "identifier CONTAINS 'accent' OR identifier CONTAINS 'color'")).allElementsBoundByIndex
-        if colorButtons.count > 0 {
-            safeTap(colorButtons.firstMatch)
+        if let firstColor = colorButtons.first {
+            safeTap(firstColor)
             Thread.sleep(forTimeInterval: 0.5)
         }
     }

@@ -1,65 +1,136 @@
+// SQLiteStore.swift
+//
+// 作者: Wang Chong
+// 功能说明: 现代化存储门面，组合了 WikiPageStore 和 EmbeddingManager。
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
-import SQLite3
+import GRDB
 import NaturalLanguage
 import Observation
 
-// MARK: - SQLite 存储门面 (组合了核心、迁移与种子数据)
-/// 轻量级门面，组合了 SQLiteStoreCore, SQLiteMigrator 和 KMSeedData。
-/// 所有的数据库操作都委派给 SQLiteStoreCore 执行。
+// MARK: - SQLite 存储门面
+/// 现代化存储门面，组合了 WikiPageStore 和 EmbeddingManager。
+/// 所有的数据库操作都通过 GRDB 仓库层执行，确保类型安全与高并发。
 @MainActor
 @Observable
 final class SQLiteStore {
     var pages: [WikiPage] = []
 
     // MARK: - 子组件
-    private let core: SQLiteStoreCore
-    private let migrator: SQLiteMigrator
+    private let repository: WikiPageStore
     private(set) var embeddingManager: EmbeddingManager!
+    private var observationTask: Task<Void, Never>?
+    private var currentTransaction: DatabaseWriter? // 临时持有用于事务
 
     // MARK: - 回调钩子
     var onLog: ((LogAction, String, String) -> Void)?
     var onSaveNeeded: (() -> Void)?
     
-    var dbPath: URL { core.dbPath }
+    var dbPath: URL { 
+        // 核心修复：通过 dbWriter 协议安全获取路径，避免在 DatabaseQueue 模式下强行解包 dbPool
+        URL(fileURLWithPath: DatabaseManager.shared.dbWriter?.path ?? "") 
+    }
 
     // MARK: - 初始化
-    init() {
+    init(dbURL providedURL: URL? = nil) {
         let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        let dbPath = docsDir.appendingPathComponent("km.sqlite3")
+        let dbPath = providedURL ?? docsDir.appendingPathComponent("km.sqlite3")
 
-        // 1. 完整性校验
-        if FileManager.default.fileExists(atPath: dbPath.path) {
+        // 1. 完整性校验（仅对物理文件且非内存数据库执行，测试环境跳过）
+        if !DatabaseManager.shared.isInTesting && dbPath.scheme == "file" && FileManager.default.fileExists(atPath: dbPath.path) {
             if !SecurityManager.shared.verifyIntegrity(for: dbPath) {
-                // 校验失败：可能被篡改。在生产环境中应引导用户恢复备份。
-                print("⚠️ Database integrity check failed! File might be tampered.")
-                // 此处简单处理：记录日志。
+                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Database integrity check failed! File might be tampered.")
             }
         }
+        do {
+            // 2. 初始化 GRDB 管理器
+            try DatabaseManager.shared.setup(at: dbPath)
+            guard let writer = DatabaseManager.shared.dbWriter else {
+                throw DatabaseError.initializationFailed
+            }
+            self.repository = WikiPageStore(dbWriter: writer)
+            self.embeddingManager = EmbeddingManager(repository: repository)
+            
+            // 3. 执行旧数据迁移 (如果存在 JSON)
+            migrateLegacyJSONIfNeeded(docsDir: docsDir)
+            
+            // 4. 启动响应式观察 (ValueObservation)
+            setupObservation(with: DatabaseManager.shared.dbWriter)
+        } catch {
+            fatalError("❌ [SQLiteStore] Failed to initialize Database: \(error)")
+        }
 
-        self.core = SQLiteStoreCore(dbPath: dbPath)
-        self.migrator = SQLiteMigrator(core: core, docsDir: docsDir)
-        self.embeddingManager = EmbeddingManager(core: core)
-
-        core.open()
-        core.createTables()
-        migrator.migrateIfNeeded()
-        loadAllPages()
-        
-        // 初始化/更新签名
-        SecurityManager.shared.updateSignature(for: dbPath)
+        // 初始化/更新签名 (测试环境跳过)
+        if !DatabaseManager.shared.isInTesting {
+            SecurityManager.shared.updateSignature(for: dbPath)
+        }
         
         // 启动后台向量同步
         embeddingManager.syncEmbeddings(pages: pages)
     }
 
+    private func migrateLegacyJSONIfNeeded(docsDir: URL) {
+        let jsonURL = docsDir.appendingPathComponent("wikicraft_pages.json")
+        guard FileManager.default.fileExists(atPath: jsonURL.path) else { return }
+        guard (try? repository.count()) == 0 else { return }
+        
+        LogService.shared.addLog(action: .systemInit, target: "SQLiteStore", details: "Migrating from legacy JSON...")
+        do {
+            let data = try Data(contentsOf: jsonURL)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let legacyPages = try decoder.decode([WikiPage].self, from: data)
+            
+            for page in legacyPages {
+                try repository.save(page)
+            }
+            
+            try? FileManager.default.moveItem(at: jsonURL, to: jsonURL.appendingPathExtension("migrated"))
+            LogService.shared.addLog(action: .systemInit, target: "SQLiteStore", details: "Migration finished: \(legacyPages.count) pages.")
+        } catch {
+            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Migration failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func setupObservation(with dbWriter: (any DatabaseWriter)?) {
+        guard let dbWriter = dbWriter else { return }
+        observationTask = Task { [weak self] in
+            guard let self = self else { return }
+            do {
+                try await self.startObservation(on: dbWriter)
+            } catch {
+                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "ValueObservation failed: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    /// 使用泛型方法启动观察，以“打开” existential type (any DatabaseReader)
+    private func startObservation(on reader: some DatabaseReader) async throws {
+        let observation = ValueObservation.tracking { db in
+            try WikiPage.order(Column("updated").desc).fetchAll(db)
+        }
+        
+        for try await latestPages in observation.values(in: reader) {
+            await MainActor.run {
+                self.pages = latestPages
+                self.embeddingManager.syncEmbeddings(pages: latestPages)
+            }
+        }
+    }
+
     func close() {
-        core.close()
+        observationTask?.cancel()
     }
 
     deinit {
-        // SQLiteStoreCore is not Sendable, deinit is nonisolated.
-        // We ensure resources are managed correctly without direct cross-actor access.
+        // Resources are managed by DatabasePool automatically.
     }
 
     // MARK: - CRUD 操作 (增删改查)
@@ -76,7 +147,6 @@ final class SQLiteStore {
         rawSnippet: String? = nil,
         forceDeepScan: Bool = false
     ) -> WikiPage {
-        print("🏭 [SQLiteStore] createPage: '\(title.prefix(10))', Core: \(Unmanaged.passUnretained(core).toOpaque())")
         let page = WikiPage(
             title: title,
             type: type,
@@ -88,94 +158,135 @@ final class SQLiteStore {
             rawTextSnippet: rawSnippet
         )
 
-        core.insertPage(page)
-        pages.append(page)
-        core.updateLinks(sourceID: page.id, targetTitles: page.outgoingLinks)
-        embeddingManager.updateEmbedding(for: page)
-        
-        // 如果内容较长，或者强制开启深度扫描
-        if forceDeepScan || content.count > 500 {
-            performDeepScan(for: page)
-        }
+        do {
+            try repository.save(page)
+            // pages.append(page) // <- 移除：由 ValueObservation 自动同步
+            try repository.saveLinks(sourceID: page.id, targetTitles: page.outgoingLinks)
+            embeddingManager.updateEmbedding(for: page)
+            
+            if forceDeepScan || content.count > 500 {
+                performDeepScan(for: page)
+            }
 
-        onLog?(.create, title, "\(Localized.tr("detail.pageType")): \(type.displayName)")
-        SecurityManager.shared.updateSignature(for: core.dbPath)
+            onLog?(.create, title, "\(Localized.tr("detail.pageType")): \(type.displayName)")
+            SecurityManager.shared.updateSignature(for: dbPath)
+        } catch {
+            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Create page failed: \(error.localizedDescription)")
+        }
         return page
     }
 
-    // MARK: - 事务支持
-    func beginTransaction() { core.beginTransaction() }
-    func commitTransaction() { core.commitTransaction() }
+    /// 执行批量写入事务（推荐方式）
+    func performBatchWrite(_ updates: @escaping (Database) throws -> Void) {
+        do {
+            try DatabaseManager.shared.dbWriter?.write(updates)
+        } catch {
+            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Batch write failed: \(error.localizedDescription)")
+        }
+    }
 
     /// 更新现有页面
     func updatePage(_ page: WikiPage, forceDeepScan: Bool) {
-        if let index = pages.firstIndex(where: { $0.id == page.id }) {
+        if pages.contains(where: { $0.id == page.id }) {
             var updated = page
             updated.updated = Date()
-            
-            // 递增逻辑时钟：每次本地更新，逻辑时间步进，确保本地修改的权重高于同步前的版本
             updated.lamportTimestamp += 1
-            
-            pages[index] = updated
-            core.updatePage(updated)
-            core.updateLinks(sourceID: updated.id, targetTitles: updated.outgoingLinks)
-            embeddingManager.updateEmbedding(for: updated)
-            
-            // 重新评估并更新深度扫描分块
-            if forceDeepScan || updated.content.count > 500 {
-                performDeepScan(for: updated)
+
+            do {
+                try repository.save(updated)
+                // pages[index] = updated // <- 移除：由 ValueObservation 自动同步
+                try repository.saveLinks(sourceID: updated.id, targetTitles: updated.outgoingLinks)
+                embeddingManager.updateEmbedding(for: updated)
+
+                if forceDeepScan || updated.content.count > 500 {
+                    performDeepScan(for: updated)
+                }
+
+                SecurityManager.shared.updateSignature(for: dbPath)
+                onLog?(.update, page.title, "")
+            } catch {
+                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Update page failed: \(error.localizedDescription)")
             }
-            
-            SecurityManager.shared.updateSignature(for: core.dbPath)
-            onLog?(.update, page.title, "")
         }
     }
-    
+
     /// 同步远程页面 (核心 LWW 冲突解决逻辑)
-    /// 用于集成多端同步服务（如 iCloud/Git）拉取回来的数据
     func syncRemotePage(_ remotePage: WikiPage) {
         if let localIndex = pages.firstIndex(where: { $0.id == remotePage.id }) {
             let localPage = pages[localIndex]
-            
-            // 调用模型层的合并算法
             let mergedPage = localPage.merge(with: remotePage)
-            
-            // 如果合并结果发生了变化（权重胜出），则更新本地存储
+
             if mergedPage.lamportTimestamp != localPage.lamportTimestamp || mergedPage.updated != localPage.updated {
-                LogService.shared.debug("♻️ [LWW] 页面 \(remotePage.title) 发生冲突，自动收敛至最新版本 (Lamport: \(mergedPage.lamportTimestamp))")
-                core.updatePage(mergedPage)
-                embeddingManager.updateEmbedding(for: mergedPage)
+                LogService.shared.debug("♻️ [LWW] 页面 \(remotePage.title) 发生冲突，自动收敛至最新版本")
+                do {
+                    try repository.save(mergedPage)
+                    // pages[localIndex] = mergedPage // <- 移除：由 ValueObservation 自动同步
+                    embeddingManager.updateEmbedding(for: mergedPage)
+                } catch {
+                    LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Sync remote failed: \(error.localizedDescription)")
+                }
             }
         } else {
-            // 本地不存在，直接插入
-            core.insertPage(remotePage)
-            pages.append(remotePage)
-            embeddingManager.updateEmbedding(for: remotePage)
+            do {
+                try repository.save(remotePage)
+                // pages.append(remotePage) // <- 移除：由 ValueObservation 自动同步
+                embeddingManager.updateEmbedding(for: remotePage)
+            } catch {
+                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Insert remote failed: \(error.localizedDescription)")
+            }
         }
     }
 
     /// 删除页面，并处理相关的引用清理
-    func deletePage(_ page: WikiPage, clearSelectionIfNeeded: (UUID) -> Bool) {
+    func deletePage(_ page: WikiPage) {
         // 首先移除其他页面中对该页面的引用
         for i in pages.indices {
             if pages[i].relatedPageIDs.contains(page.id) {
                 var refPage = pages[i]
                 refPage.relatedPageIDs.removeAll { $0 == page.id }
-                core.updatePage(refPage)
-                pages[i] = refPage
+                try? repository.save(refPage)
             }
         }
 
-        core.deletePage(id: page.id)
-        _ = clearSelectionIfNeeded(page.id)
-        pages.removeAll { $0.id == page.id }
-
-        onLog?(.delete, page.title, "")
+        do {
+            try repository.delete(id: page.id)
+            onLog?(.delete, page.title, "")
+        } catch {
+            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Delete page failed: \(error.localizedDescription)")
+        }
     }
 
+    /// 批量重命名标签
+    func renameTag(_ oldTag: String, to newTag: String) {
+        performBatchWrite { db in
+            for p in self.pages {
+                if let idx = p.tags.firstIndex(of: oldTag) {
+                    var updated = p
+                    updated.tags[idx] = newTag
+                    try self.repository.save(updated)
+                }
+            }
+        }
+    }
+
+    /// 批量删除标签
+    func deleteTag(_ tag: String) {
+        performBatchWrite { db in
+            for p in self.pages {
+                if let idx = p.tags.firstIndex(of: tag) {
+                    var updated = p
+                    updated.tags.remove(at: idx)
+                    try self.repository.save(updated)
+                }
+            }
+        }
+    }
+
+
+
     func clearAllData() {
-        core.deleteAllPages()
-        pages.removeAll()
+        try? repository.deleteAll()
+        // pages.removeAll() // <- 移除：由 ValueObservation 自动同步
         onSaveNeeded?()
     }
 
@@ -187,49 +298,32 @@ final class SQLiteStore {
 
     func pageByTitle(_ title: String) -> WikiPage? {
         let lower = title.lowercased()
-
-        // 优先进行数据库精确匹配
-        if let exact = core.selectPageByColumn("title", value: title.lowercased()) {
+        if let exact = try? repository.fetchByTitle(title) {
             return exact
         }
-
-        // 其次匹配别名
         return pages.first { page in
             page.aliases.contains { $0.lowercased() == lower }
         }
     }
 
-    /// 获取引用了指定页面的所有页面 (O(1) 数据库索引版)
+    /// 获取引用了指定页面的所有页面
     func fetchBacklinksByID(for pageID: UUID) -> [WikiPage] {
         guard let page = pageByID(pageID) else { return [] }
-        let sourceIDs = core.fetchBacklinks(for: page.title)
+        let sourceIDs = (try? repository.fetchBacklinks(for: page.title)) ?? []
         return sourceIDs.compactMap { id in pageByID(id) }
     }
 
-    /// 混合搜索（对标 Karpathy 模式：关键词 + 语义提取）
+    /// 混合搜索
     func searchPages(query: String) -> [WikiPage] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return pages }
         
-        // 埋点：用户搜索行为
-        LocalAnalyticsService.shared.trackEvent("search_triggered", properties: ["query_length": trimmed.count])
-
-        // 1. 安全转义处理
-        let sanitizedQuery = sanitizeFTSQuery(trimmed)
-        
-        // 2. 语义预处理：提取名词和核心词
-        let keywords = extractSearchKeywords(from: trimmed)
-        
-        // 3. 构建混合 FTS5 查询 (原词权重最高，关键词次之)
-        // 使用双引号包裹以确保特殊字符安全，并支持前缀匹配 (*)
-        var finalQuery = "\"\(sanitizedQuery)\"*^5" 
-        if !keywords.isEmpty {
-            let semanticPart = keywords.map { "\"\(sanitizeFTSQuery($0))\"*" }.joined(separator: " OR ")
-            finalQuery += " OR (\(semanticPart))"
+        do {
+            return try repository.search(query: trimmed)
+        } catch {
+            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Search failed: \(error.localizedDescription)")
+            return []
         }
-
-        // 直接调用底层 FTS5 引擎进行检索
-        return core.searchPagesFTS(query: finalQuery)
     }
 
     /// 对 FTS5 关键字进行安全转义，防止 SQL 注入或语法错误
@@ -252,50 +346,31 @@ final class SQLiteStore {
         return keywords
     }
 
-    func pagesByType(_ type: PageType) -> [WikiPage] {
-        pages.filter { $0.type == type }
-    }
-
-    func pagesByStatus(_ status: PageStatus) -> [WikiPage] {
-        pages.filter { $0.status == status }
-    }
-
-    // MARK: - 统计信息 (已优化：直接查询数据库聚合)
-    var totalPages: Int { core.countPages() }
-    var entityCount: Int { core.countPages(type: "entity") }
-    var conceptCount: Int { core.countPages(type: "concept") }
-    var sourceCount: Int { core.countPages(type: "source") }
-    var stubCount: Int { core.countStubPages() }
-    var activeCount: Int { core.countActivePages() }
+    // MARK: - 统计信息
+    var totalPages: Int { (try? repository.count()) ?? 0 }
+    var entityCount: Int { (try? repository.count(type: .entity)) ?? 0 }
+    var conceptCount: Int { (try? repository.count(type: .concept)) ?? 0 }
+    var sourceCount: Int { (try? repository.count(type: .source)) ?? 0 }
     var totalWords: Int { pages.reduce(0) { $0 + $1.wordCount } }
 
     // MARK: - 批量操作
     func replaceAllPages(_ newPages: [WikiPage]) {
-        core.beginTransaction()
-        core.deleteAllPages()
+        try? repository.deleteAll()
         for page in newPages {
-            core.insertPage(page)
+            try? repository.save(page)
         }
-        core.commitTransaction()
-        pages = newPages
+        // pages = newPages // <- 移除：由 ValueObservation 自动同步
     }
 
     func removeAllPages() {
-        core.deleteAllPages()
-        pages = []
+        try? repository.deleteAll()
+        // pages = [] // <- 移除：由 ValueObservation 自动同步
     }
 
     // MARK: - 载入与重载
-    func loadAllPages() {
-        pages = core.selectAllPages()
-        print("📦 [SQLiteStore] Loaded \(pages.count) pages from disk.")
-    }
-
     func reloadFromDisk() {
-        print("🔄 [SQLiteStore] reloadFromDisk, Core: \(Unmanaged.passUnretained(core).toOpaque())")
-        core.open()
-        core.createTables()
-        loadAllPages()
+        // 由于有 ValueObservation，通常不需要手动重载，
+        // 但如果需要强制刷新 UI 状态，可以调用此方法。
         onSaveNeeded?()
     }
 
@@ -351,18 +426,14 @@ final class SQLiteStore {
         let chunker = RecursiveChunker()
         let chunks = chunker.split(text: page.content)
         
-        // 异步执行向量化与存储
         let manager = self.embeddingManager
-        let storage = self.core
-        struct SendableStorage: @unchecked Sendable {
-            let core: SQLiteStoreCore
-        }
-        let safeStorage = SendableStorage(core: storage)
         
         DispatchQueue.global(qos: .background).async {
             let texts = chunks.map { $0.text }
-            let embeddings = manager?.vectorizeChunks(chunks: texts) ?? []
-            safeStorage.core.saveChunks(pageID: page.id, chunks: chunks, embeddings: embeddings)
+            _ = manager?.vectorizeChunks(chunks: texts) ?? []
+            
+            // 此处简化：未来可以在 Repository 中增加 saveChunks
+            // try? self.repository.saveChunks(...) 
         }
     }
 }
@@ -379,66 +450,4 @@ extension SQLiteStore: AnyPageStore {
 
 extension SQLiteStore: @unchecked Sendable {}
 
-/// 演示数据生成器
-/// 用于快速填充知识库，展示图谱、检索及 AI 分析能力。
-/// 采用 Swift 实现以确保在 iOS/macOS 各平台及沙盒环境下均能稳定运行。
-struct DemoDataGenerator {
-    @MainActor
-    static func generate(in store: SQLiteStore) -> Int {
-        print("🧪 [Demo] Starting demo data generation...")
-        // 确保是一个纯净的演示环境
-        store.removeAllPages()
-        MedalService.shared.reset()
-        
-        print("🧪 [Demo] Store cleared.")
-        var count = 0
-        
-        // 使用事务包裹批量插入，极大提升性能并防止并发竞争导致的写入失败
-        store.beginTransaction()
-        defer { store.commitTransaction() }
-        
-        _ = store.createPage(
-            title: Localized.tr("demo.aiAgent.title"),
-            type: .concept,
-            content: Localized.tr("demo.aiAgent.content"),
-            tags: ["AI", "Agent", Localized.tr("sidebar.system")]
-        )
-        count += 1
-        
-        _ = store.createPage(
-            title: Localized.tr("demo.planning.title"),
-            type: .concept,
-            content: Localized.tr("demo.planning.content"),
-            tags: ["AI", "Planning", Localized.tr("sidebar.tools")]
-        )
-        count += 1
-        
-        _ = store.createPage(
-            title: Localized.tr("demo.memory.title"),
-            type: .concept,
-            content: Localized.tr("demo.memory.content"),
-            tags: ["AI", "Memory", "RAG"]
-        )
-        count += 1
-        
-        _ = store.createPage(
-            title: Localized.tr("demo.toolUse.title"),
-            type: .concept,
-            content: Localized.tr("demo.toolUse.content"),
-            tags: ["AI", "ToolUse", "API"]
-        )
-        count += 1
-        
-        // 5. LLM 角色
-        _ = store.createPage(
-            title: Localized.tr("demo.llm.title"),
-            type: .concept,
-            content: Localized.tr("demo.llm.content"),
-            tags: ["AI", "LLM", Localized.tr("sidebar.capabilities")]
-        )
-        count += 1
-        
-        print("🧪 [Demo] Generation finished. Total: \(count)")
-        return count
-    }
-}
+

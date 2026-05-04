@@ -1,6 +1,24 @@
+// CollaborationService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 协作服务代理协议
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 import MultipeerConnectivity
+
+/// 协作服务代理协议
+@MainActor
+protocol CollaborationDelegate: AnyObject {
+    var pages: [WikiPage] { get }
+    func applyRemoteUpdate(_ page: WikiPage)
+    func insertRemotePage(_ page: WikiPage)
+}
 
 // MARK: - Collaboration Service
 /// Real-time multi-user collaboration via MultipeerConnectivity (local Wi-Fi/Bluetooth).
@@ -21,8 +39,8 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
     @Published var connectionError: String? = nil
     @Published var isConnecting: Bool = false
 
-    /// KMStore reference for applying remote page changes
-    weak var store: KMStore?
+    /// Delegate for applying remote page changes
+    weak var delegate: CollaborationDelegate?
 
     private let maxRecentEdits = 100
     private let serviceType = "km-collab"
@@ -70,20 +88,20 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         // 对于清理操作，应通过非隔离的方法进行核心资源释放。
     }
 
-    /// Inject KMStore for applying remote page changes
-    func setStore(_ store: KMStore) {
-        self.store = store
+    /// Set delegate for applying remote page changes
+    func setDelegate(_ delegate: CollaborationDelegate) {
+        self.delegate = delegate
     }
 
     // MARK: - Availability
     private func checkAvailability() {
-        #if targetEnvironment(simulator)
-        isAvailable = false
-        statusMessage = Localized.tr("collab.status.simulatorNotSupported")
-        #else
-        isAvailable = true
-        statusMessage = Localized.tr("collab.status.ready")
-        #endif
+        if isSimulator {
+            isAvailable = false
+            statusMessage = L10n.Collaboration.tr("status.simulatorNotSupported")
+        } else {
+            isAvailable = true
+            statusMessage = L10n.Collaboration.tr("status.ready")
+        }
     }
 
     // MARK: - Host Session
@@ -105,7 +123,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         isHosting = true
         isJoined = true
         startConnectionTimer()
-        statusMessage = Localized.tr("collab.status.hosting")
+        statusMessage = L10n.Collaboration.tr("status.hosting")
     }
 
     // MARK: - Join Session
@@ -122,7 +140,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         setupSession(peerID: peerID)
         setupBrowser(peerID: peerID)
 
-        statusMessage = Localized.tr("collab.status.searching")
+        statusMessage = L10n.Collaboration.tr("status.searching")
     }
 
     func joinRoom(_ room: DiscoveredRoom) {
@@ -132,7 +150,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         self.role = .editor
         isConnecting = true
         startConnectionTimer()
-        statusMessage = Localized.tr("collab.status.joining")
+        statusMessage = L10n.Collaboration.tr("status.joining")
     }
 
     // MARK: - Stop
@@ -154,11 +172,9 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         pendingInvitations.removeAll()
         connectionError = nil
 
-        #if !targetEnvironment(simulator)
-        statusMessage = Localized.tr("collab.status.disconnected")
-        #else
-        statusMessage = Localized.tr("collab.status.simulatorNotSupported")
-        #endif
+        statusMessage = isSimulator
+            ? L10n.Collaboration.tr("status.simulatorNotSupported")
+            : L10n.Collaboration.tr("status.disconnected")
     }
 
     // MARK: - Connection Timer
@@ -181,8 +197,8 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
     private func handleConnectionTimeout() {
         isConnecting = false
         if connectedPeers.isEmpty {
-            connectionError = Localized.tr("collab.error.connectionTimeout")
-            statusMessage = Localized.tr("collab.status.disconnected")
+            connectionError = L10n.Collaboration.tr("error.connectionTimeout")
+            statusMessage = L10n.Collaboration.tr("status.disconnected")
         }
     }
 
@@ -196,7 +212,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
     func broadcastEdit(pageID: UUID, field: String, oldValue: String, newValue: String) {
         guard !isSimulator else { return }
         guard canEdit else {
-            statusMessage = Localized.tr("collab.error.noPermission")
+            statusMessage = L10n.Collaboration.tr("error.noPermission")
             return
         }
 
@@ -219,7 +235,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
     func broadcastPage(_ page: WikiPage) {
         guard !isSimulator, let session = session, !session.connectedPeers.isEmpty else { return }
         guard canEdit else {
-            statusMessage = Localized.tr("collab.error.noPermission")
+            statusMessage = L10n.Collaboration.tr("error.noPermission")
             return
         }
 
@@ -281,7 +297,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
                 handler(true, self?.session)
             },
             onError: { [weak self] error in
-                self?.statusMessage = "\(Localized.tr("collab.status.advertiseError")): \(error.localizedDescription)"
+                self?.statusMessage = "\(L10n.Collaboration.tr("status.advertiseError")): \(error.localizedDescription)"
             }
         )
         advertiser = MCNearbyServiceAdvertiser(peer: peerID, discoveryInfo: [
@@ -296,7 +312,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         browserDelegate = MCBrowserDelegateImpl(
             onRoomFound: { [weak self] peerID, info in
                 guard let self = self else { return }
-                let roomName = info?["room"] ?? Localized.tr("collab.defaultRoom")
+                let roomName = info?["room"] ?? L10n.Collaboration.tr("defaultRoom")
                 let owner = info?["owner"] ?? peerID.displayName
                 let id = peerID.displayName
                 if !self.discoveredRooms.contains(where: { $0.id == id }) {
@@ -307,7 +323,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
                 self?.discoveredRooms.removeAll { $0.id == peerID.displayName }
             },
             onError: { [weak self] error in
-                self?.statusMessage = "\(Localized.tr("collab.status.browseError")): \(error.localizedDescription)"
+                self?.statusMessage = "\(L10n.Collaboration.tr("status.browseError")): \(error.localizedDescription)"
             }
         )
         browser = MCNearbyServiceBrowser(peer: peerID, serviceType: serviceType)
@@ -332,7 +348,7 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         }
         pendingInvitations.removeAll { $0 == peerID }
         isJoined = true
-        statusMessage = Localized.tr("collab.status.connected")
+        statusMessage = L10n.Collaboration.tr("status.connected")
     }
 
     private func handlePeerDisconnected(_ peerID: MCPeerID) {
@@ -340,13 +356,13 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
         pendingInvitations.removeAll { $0 == peerID }
         if connectedPeers.isEmpty && !isHosting {
             isJoined = false
-            statusMessage = Localized.tr("collab.status.disconnected")
+            statusMessage = L10n.Collaboration.tr("status.disconnected")
         }
     }
 
     private func handleSessionStatusChange(_ state: MCSessionState, peerID: MCPeerID) {
         if state == .connecting {
-            statusMessage = Localized.tr("collab.status.connecting")
+            statusMessage = L10n.Collaboration.tr("status.connecting")
         }
     }
 
@@ -383,10 +399,10 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
             else { return }
 
             let remoteUpdated = Date(timeIntervalSince1970: updatedTs)
-            guard let store = self.store else { return }
+            guard let delegate = self.delegate else { return }
 
             // Last-write-wins conflict resolution
-            if let existingPage = store.pages.first(where: { $0.id == pageID }) {
+            if let existingPage = delegate.pages.first(where: { $0.id == pageID }) {
                 if remoteUpdated > existingPage.updated {
                     var updated = existingPage
                     updated.title = title
@@ -395,8 +411,8 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
                     updated.tags = tags
                     updated.status = status
                     updated.updated = remoteUpdated
-                    store.updatePage(updated, forceDeepScan: false)
-                    self.statusMessage = Localized.tr("collab.status.pageReceived")
+                    delegate.applyRemoteUpdate(updated)
+                    self.statusMessage = L10n.Collaboration.tr("status.pageReceived")
                 }
             } else {
                 // New page from remote — create it
@@ -416,8 +432,8 @@ final class CollaborationService: NSObject, ObservableObject, @unchecked Sendabl
                     created: remoteUpdated,
                     updated: remoteUpdated
                 )
-                store.insertRemotePage(newPage)
-                self.statusMessage = Localized.tr("collab.status.pageReceived")
+                delegate.insertRemotePage(newPage)
+                self.statusMessage = L10n.Collaboration.tr("status.pageReceived")
             }
         }
     }

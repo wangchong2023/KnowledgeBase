@@ -1,3 +1,14 @@
+// IndexView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct IndexView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Index View (entry point with NavigationStack)
@@ -17,22 +28,21 @@ struct IndexViewContent: View {
     @State private var pageToDelete: WikiPage?
 
     var body: some View {
-        let _ = print("🔍 [NAV-DIAG] IndexViewContent rendering.")
         List {
             if filterType == nil {
                 // Summary
                 Section {
                     HStack(spacing: 10) {
-                        IndexStatView(label: Localized.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
-                        IndexStatView(label: Localized.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
-                        IndexStatView(label: Localized.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
-                        IndexStatView(label: Localized.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
+                        IndexStatView(label: L10n.Dashboard.tr("index.pages"), value: "\(store.totalPages)", color: .wikiAccent)
+                        IndexStatView(label: L10n.Dashboard.tr("index.entities"), value: "\(store.entityCount)", color: .wikiEntity)
+                        IndexStatView(label: L10n.Dashboard.tr("index.concepts"), value: "\(store.conceptCount)", color: .wikiConcept)
+                        IndexStatView(label: L10n.Dashboard.tr("index.sources"), value: "\(store.sourceCount)", color: .wikiSource)
                     }
                     .padding(.vertical, 4)
                     .listRowInsets(EdgeInsets(top: 8, leading: 10, bottom: 8, trailing: 10))
                     .listRowBackground(Color.clear)
                 } header: {
-                    Text(Localized.tr("index.overview"))
+                    Text(L10n.Dashboard.tr("index.overview"))
                 }
             }
 
@@ -42,7 +52,7 @@ struct IndexViewContent: View {
                 if !entities.isEmpty {
                     Section {
                         ForEach(entities) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
+                            NavigationLink(value: AppRoute.pageDetail(id: page.id)) {
                                 IndexRowView(page: page)
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -67,7 +77,7 @@ struct IndexViewContent: View {
                 if !concepts.isEmpty {
                     Section {
                         ForEach(concepts) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
+                            NavigationLink(value: AppRoute.pageDetail(id: page.id)) {
                                 IndexRowView(page: page)
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -92,7 +102,7 @@ struct IndexViewContent: View {
                 if !sources.isEmpty {
                     Section {
                         ForEach(sources) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
+                            NavigationLink(value: AppRoute.pageDetail(id: page.id)) {
                                 IndexRowView(page: page)
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -117,7 +127,7 @@ struct IndexViewContent: View {
                 if !comparisons.isEmpty {
                     Section {
                         ForEach(comparisons) { page in
-                            NavigationLink(destination: PageDetailView(page: page)) {
+                            NavigationLink(value: AppRoute.pageDetail(id: page.id)) {
                                 IndexRowView(page: page)
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -147,7 +157,7 @@ struct IndexViewContent: View {
                     HapticManager.shared.trigger(.success)
                 }
             }
-            Button(Localized.tr("misc.cancel"), role: .cancel) {
+            Button(L10n.Common.tr("cancel"), role: .cancel) {
                 pageToDelete = nil
             }
         } message: {
@@ -166,7 +176,7 @@ struct IndexViewContent: View {
                     HapticManager.shared.trigger(.selection)
                     store.refresh()
                 } label: {
-                    Label(Localized.tr("misc.refresh"), systemImage: "arrow.clockwise")
+                    Label(L10n.Common.tr("refresh"), systemImage: "arrow.clockwise")
                 }
             }
         }

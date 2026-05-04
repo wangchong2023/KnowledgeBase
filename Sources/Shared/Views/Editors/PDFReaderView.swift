@@ -1,3 +1,14 @@
+// PDFReaderView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct PDFLibraryView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import PDFKit
 import UniformTypeIdentifiers
@@ -43,7 +54,7 @@ struct PDFLibraryView: View {
                 PDFReaderView(documentInfo: doc)
             }
             .onAppear {
-                documents = PDFService.shared.loadDocumentsInfo()
+                documents = store.loadPDFDocuments()
             }
         }
     }
@@ -61,7 +72,7 @@ struct PDFLibraryView: View {
             guard let data = try? Data(contentsOf: url) else { return }
             let fileName = "\(UUID().uuidString).pdf"
 
-            if PDFService.shared.savePDF(data: data, fileName: fileName) != nil {
+            if store.savePDFDocument(data: data, fileName: fileName) != nil {
                 let pdfDoc = PDFKit.PDFDocument(data: data)
                 let docInfo = PDFDocumentInfo(
                     title: url.deletingPathExtension().lastPathComponent,
@@ -69,7 +80,7 @@ struct PDFLibraryView: View {
                     pageCount: pdfDoc?.pageCount ?? 0
                 )
                 documents.append(docInfo)
-                PDFService.shared.saveDocumentsInfo(documents)
+                store.savePDFDocuments(documents)
                 store.addLog(action: .importPDF, target: docInfo.title, details: Localized.trf("pdf.pageCountFormat", docInfo.pageCount))
             }
 
@@ -79,15 +90,15 @@ struct PDFLibraryView: View {
     }
 
     private func deleteDocument(_ doc: PDFDocumentInfo) {
-        _ = PDFService.shared.deletePDF(fileName: doc.fileName)
+        _ = store.deletePDFDocument(fileName: doc.fileName)
         documents.removeAll { $0.id == doc.id }
-        PDFService.shared.saveDocumentsInfo(documents)
+        store.savePDFDocuments(documents)
         store.addLog(action: .deletePDF, target: doc.title, details: "")
     }
 
     private func ingestPDF(_ doc: PDFDocumentInfo) {
-        guard let pdfDoc = PDFService.shared.loadPDF(fileName: doc.fileName) else { return }
-        let text = PDFService.shared.extractText(from: pdfDoc)
+        guard let pdfDoc = store.loadPDFDocument(fileName: doc.fileName) else { return }
+        let text = store.extractPDFText(from: pdfDoc)
 
         if !text.isEmpty {
             let page = store.createPage(
@@ -200,7 +211,7 @@ struct PDFReaderView: View {
             }
         }
         .onAppear {
-            pdfDocument = PDFService.shared.loadPDF(fileName: documentInfo.fileName)
+            pdfDocument = store.loadPDFDocument(fileName: documentInfo.fileName)
             highlights = documentInfo.highlights
             currentPage = documentInfo.lastReadPage
         }
@@ -303,10 +314,10 @@ struct PDFReaderView: View {
         )
         highlights.append(highlight)
 
-        var docs = PDFService.shared.loadDocumentsInfo()
+        var docs = store.loadPDFDocuments()
         if let index = docs.firstIndex(where: { $0.id == documentInfo.id }) {
             docs[index].highlights = highlights
-            PDFService.shared.saveDocumentsInfo(docs)
+            store.savePDFDocuments(docs)
         }
 
         selectedText = ""

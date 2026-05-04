@@ -1,4 +1,4 @@
-# Knowledge Management 开发者贡献指南 (Contributing Guidelines)
+# 智元 (KM) 开发者贡献指南 (Contributing Guidelines)
 
 ## 1. 环境搭建 (Setup)
 

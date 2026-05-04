@@ -1,3 +1,13 @@
+// WatchDictationView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 手表端语音采集视图
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 手表端语音采集视图
@@ -8,23 +18,23 @@ struct WatchDictationView: View {
     
     var body: some View {
         VStack {
-            TextField(Localized.tr("watch.dictate.hint"), text: $text)
+            TextField(L10n.Watch.tr("dictate.hint"), text: $text)
                 .padding()
             
             Spacer()
             
             HStack {
-                Button(Localized.tr("misc.cancel")) { dismiss() }
+                Button(L10n.Common.tr("cancel")) { dismiss() }
                     .tint(.red)
                 
-                Button(Localized.tr("misc.save")) {
+                Button(L10n.Common.tr("save")) {
                     saveAndSync()
                 }
                 .tint(.green)
                 .disabled(text.isEmpty)
             }
         }
-        .navigationTitle(Localized.tr("watch.capture"))
+        .navigationTitle(L10n.Watch.tr("capture"))
     }
     
     private func saveAndSync() {

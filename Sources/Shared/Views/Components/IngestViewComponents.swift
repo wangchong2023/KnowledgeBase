@@ -1,3 +1,14 @@
+// IngestViewComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct IngestHeroSection
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Notification Names
@@ -19,7 +30,7 @@ struct IngestHeroSection: View {
                     )
                 )
             // 移除重复的标题，因为导航栏已经有了
-            Text(Localized.tr("ingest.hero.subtitle"))
+            Text(L10n.Ingest.tr("hero.subtitle"))
                 .font(.caption)
                 .foregroundStyle(.wikiSecondary)
                 .multilineTextAlignment(.center)
@@ -60,8 +71,8 @@ struct IngestEntryCardsSection: View {
                 showFileImporter = true
             }) {
                 entryCardContent(
-                    title: Localized.tr("ingest.fileImport"),
-                    subtitle: Localized.tr("ingest.fileImportHint"),
+                    title: L10n.Ingest.tr("fileImport"),
+                    subtitle: L10n.Ingest.tr("fileImportHint"),
                     icon: "doc.badge.plus",
                     color: .wikiText
                 )
@@ -74,8 +85,8 @@ struct IngestEntryCardsSection: View {
                 showManualForm = true
             }) {
                 entryCardContent(
-                    title: Localized.tr("ingest.manualEntry"),
-                    subtitle: Localized.tr("ingest.manualEntryHint"),
+                    title: L10n.Ingest.tr("manualEntry"),
+                    subtitle: L10n.Ingest.tr("manualEntryHint"),
                     icon: "pencil.and.list.clipboard",
                     color: .wikiText
                 )
@@ -88,8 +99,8 @@ struct IngestEntryCardsSection: View {
                 showURLImport = true
             }) {
                 entryCardContent(
-                    title: Localized.tr("ingest.urlImport"),
-                    subtitle: Localized.tr("ingest.urlImportHint"),
+                    title: L10n.Ingest.tr("urlImport"),
+                    subtitle: L10n.Ingest.tr("urlImportHint"),
                     icon: "link.badge.plus",
                     color: .wikiText
                 )
@@ -102,8 +113,8 @@ struct IngestEntryCardsSection: View {
                 showOCRScan = true
             }) {
                 entryCardContent(
-                    title: Localized.tr("ingest.ocrScan"),
-                    subtitle: Localized.tr("ingest.ocrScanHint"),
+                    title: L10n.Ingest.tr("ocrScan"),
+                    subtitle: L10n.Ingest.tr("ocrScanHint"),
                     icon: "text.viewfinder",
                     color: .wikiText
                 )
@@ -117,8 +128,8 @@ struct IngestEntryCardsSection: View {
                 NotificationCenter.default.post(name: .importFromClipboard, object: nil)
             }) {
                 entryCardContent(
-                    title: Localized.tr("ingest.clipboardImport"),
-                    subtitle: Localized.tr("ingest.clipboardImportHint"),
+                    title: L10n.Ingest.tr("clipboardImport"),
+                    subtitle: L10n.Ingest.tr("clipboardImportHint"),
                     icon: "doc.on.clipboard",
                     color: .wikiText
                 )
@@ -131,8 +142,8 @@ struct IngestEntryCardsSection: View {
                 showVoiceNote = true
             }) {
                 entryCardContent(
-                    title: Localized.tr("ingest.voiceNote"),
-                    subtitle: Localized.tr("ingest.voiceNoteHint"),
+                    title: L10n.Ingest.tr("voiceNote"),
+                    subtitle: L10n.Ingest.tr("voiceNoteHint"),
                     icon: "waveform",
                     color: .wikiText
                 )
@@ -179,6 +190,7 @@ struct IngestManualFormSection: View {
 
     let llmService: LLMService
     let store: KMStore
+    let ingestStore: IngestStore
     let onPerformIngest: () -> Void
     let onConfirmSmartIngest: () -> Void
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -191,14 +203,14 @@ struct IngestManualFormSection: View {
     var body: some View {
         VStack(spacing: 16) {
             // Section header
-            WikiSectionHeader(title: Localized.tr("ingest.manualTitle"), icon: "pencil.and.list.clipboard")
+            WikiSectionHeader(title: L10n.Ingest.tr("manualTitle"), icon: "pencil.and.list.clipboard")
 
             // Title field
             VStack(alignment: .leading, spacing: 6) {
-                Text(Localized.tr("ingest.field.title"))
+                Text(L10n.Ingest.tr("field.title"))
                     .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
-                WikiTextField(placeholder: Localized.tr("ingest.field.titlePlaceholder"), text: $newTitle)
+                WikiTextField(placeholder: L10n.Ingest.tr("field.titlePlaceholder"), text: $newTitle)
                     .accessibilityIdentifier("ingest.titleInput")
             }
 
@@ -210,15 +222,15 @@ struct IngestManualFormSection: View {
 
             // Tags field
             VStack(alignment: .leading, spacing: 6) {
-                Text(Localized.tr("ingest.field.tags"))
+                Text(L10n.Ingest.tr("field.tags"))
                     .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
-                WikiTagField(placeholder: Localized.tr("ingest.field.tagsPlaceholder"), tags: $newTags)
+                WikiTagField(placeholder: L10n.Ingest.tr("field.tagsPlaceholder"), tags: $newTags)
             }
 
             // Content editor
             VStack(alignment: .leading, spacing: 6) {
-                Text(Localized.tr("ingest.field.content"))
+                Text(L10n.Ingest.tr("field.content"))
                     .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
                 WikiMonospacedEditor(text: $newContent, minHeight: 200)
@@ -234,7 +246,7 @@ struct IngestManualFormSection: View {
                         Image(systemName: "sparkles")
                             .foregroundStyle(.wikiAccent)
                             .frame(width: 20)
-                        Text(Localized.tr("ingest.smartToggle"))
+                        Text(L10n.Ingest.tr("smartToggle"))
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(.wikiText)
                     }
@@ -252,7 +264,7 @@ struct IngestManualFormSection: View {
                     Image(systemName: "cpu")
                         .foregroundStyle(.wikiSource)
                         .frame(width: 20)
-                    Text(Localized.tr("ingest.deepScan"))
+                    Text(L10n.Ingest.tr("deepScan"))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.wikiText)
                 }
@@ -264,12 +276,12 @@ struct IngestManualFormSection: View {
             if useSmartIngest || useDeepScan {
                 VStack(alignment: .leading, spacing: 4) {
                     if useSmartIngest {
-                        Text(Localized.tr("ingest.smartToggleHint"))
+                        Text(L10n.Ingest.tr("smartToggleHint"))
                             .font(.caption)
                             .foregroundStyle(.wikiSecondary)
                     }
                     if useDeepScan {
-                        Text(Localized.tr("ingest.deepScanDesc"))
+                        Text(L10n.Ingest.tr("deepScanDesc"))
                             .font(.caption)
                             .foregroundStyle(.wikiSource)
                     }
@@ -296,7 +308,7 @@ struct IngestManualFormSection: View {
 
         // Submit button
         WikiPrimaryButton(
-            title: isIngesting ? Localized.tr("ingest.submitting") : Localized.tr("ingest.submit"),
+            title: isIngesting ? L10n.Ingest.tr("submitting") : L10n.Ingest.tr("submit"),
             icon: "tray.and.arrow.down.fill",
             isLoading: isIngesting
         ) {
@@ -314,7 +326,7 @@ struct IngestManualFormSection: View {
                 HStack(spacing: 6) {
                     Image(systemName: "sparkles")
                         .foregroundStyle(.wikiAccent)
-                    Text(Localized.tr("ingest.smartToggle"))
+                    Text(L10n.Ingest.tr("smartToggle"))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.wikiText)
                 }
@@ -323,7 +335,7 @@ struct IngestManualFormSection: View {
             .accessibilityIdentifier("ingest.smartToggleAction")
 
             if useSmartIngest {
-                Text(Localized.tr("ingest.smartToggleHint"))
+                Text(L10n.Ingest.tr("smartToggleHint"))
                     .font(horizontalSizeClass == .regular ? .subheadline : .caption)
                     .foregroundStyle(.wikiSecondary)
             }
@@ -337,7 +349,7 @@ struct IngestManualFormSection: View {
                 HStack(spacing: 6) {
                     Image(systemName: "cpu")
                         .foregroundStyle(.wikiSource)
-                    Text(Localized.tr("ingest.deepScan"))
+                    Text(L10n.Ingest.tr("deepScan"))
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.wikiText)
                 }
@@ -345,7 +357,7 @@ struct IngestManualFormSection: View {
             .tint(.wikiSource)
             
             if useDeepScan {
-                Text(Localized.tr("ingest.deepScanDesc"))
+                Text(L10n.Ingest.tr("deepScanDesc"))
                     .font(horizontalSizeClass == .regular ? .subheadline : .caption)
                     .foregroundStyle(.wikiSource)
                     .padding(.leading, 30)
@@ -359,7 +371,7 @@ struct IngestManualFormSection: View {
 
     private var pageTypeSelector: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(Localized.tr("ingest.field.type"))
+            Text(L10n.Ingest.tr("field.type"))
                 .font(fieldLabelFont)
                 .foregroundStyle(.wikiSecondary)
 
@@ -383,7 +395,7 @@ struct IngestManualFormSection: View {
 
     private var iconPickerSection: some View {
         HStack(spacing: 10) {
-            Text(Localized.tr("ingest.field.icon"))
+            Text(L10n.Ingest.tr("field.icon"))
                 .font(fieldLabelFont)
                 .foregroundStyle(.wikiSecondary)
 
@@ -395,7 +407,7 @@ struct IngestManualFormSection: View {
                         .frame(width: 20, height: 20)
                         .background((newCustomIcon != nil ? Color.wikiAccent : newType.themedColor).opacity(0.15))
                         .clipShape(RoundedRectangle(cornerRadius: WikiUI.tinyRadius))
-                    Text(newCustomIcon != nil ? Localized.tr("ingest.iconCustom") : Localized.tr("ingest.iconDefault"))
+                    Text(newCustomIcon != nil ? L10n.Ingest.tr("iconCustom") : L10n.Ingest.tr("iconDefault"))
                         .font(horizontalSizeClass == .regular ? .subheadline : .caption)
                         .foregroundStyle(newCustomIcon != nil ? .wikiAccent : .wikiSecondary)
                     Image(systemName: "chevron.up.chevron.down")
@@ -416,7 +428,7 @@ struct IngestManualFormSection: View {
 
             if newCustomIcon != nil {
                 Button(action: { newCustomIcon = nil }) {
-                    Text(Localized.tr("ingest.iconReset"))
+                    Text(L10n.Ingest.tr("iconReset"))
                         .font(horizontalSizeClass == .regular ? .caption : .caption2)
                         .foregroundStyle(.wikiSecondary)
                         .padding(.horizontal, 8)
@@ -449,16 +461,16 @@ struct SmartIngestPreview: View {
             HStack {
                 Image(systemName: "sparkles")
                     .foregroundStyle(.wikiAccent)
-                Text(Localized.tr("ingest.preview"))
+                Text(L10n.Ingest.tr("preview"))
                     .font(.headline)
                     .foregroundStyle(.wikiText)
                 Spacer()
                 Button(action: onConfirm) {
-                    WikiCapsuleButton(title: Localized.tr("ingest.previewConfirm"), icon: "checkmark", isPrimary: true, color: .wikiAccent)
+                    WikiCapsuleButton(title: L10n.Ingest.tr("previewConfirm"), icon: "checkmark", isPrimary: true, color: .wikiAccent)
                 }
                 .buttonStyle(.plain)
                 Button(action: onDiscard) {
-                    WikiCapsuleButton(title: Localized.tr("ingest.previewDiscard"), icon: nil, isPrimary: false)
+                    WikiCapsuleButton(title: L10n.Ingest.tr("previewDiscard"), icon: nil, isPrimary: false)
                 }
                 .buttonStyle(.plain)
             }
@@ -495,7 +507,7 @@ struct SmartIngestPreview: View {
             // Related titles
             if !result.relatedTitles.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(Localized.tr("ingest.suggestLinks"))
+                    Text(L10n.Ingest.tr("suggestLinks"))
                         .font(previewFont.weight(.medium))
                         .foregroundStyle(.wikiSecondary)
 
@@ -521,7 +533,7 @@ struct SmartIngestPreview: View {
 struct IngestTipsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Localized.tr("ingest.tips"))
+            Text(L10n.Ingest.tr("tips"))
                 .font(.headline)
                 .foregroundStyle(.wikiText)
 
@@ -529,18 +541,18 @@ struct IngestTipsSection: View {
             HStack(spacing: 10) {
                 importMethodCard(
                     icon: "doc.badge.plus",
-                    title: Localized.tr("ingest.method.file"),
-                    desc: Localized.tr("ingest.method.fileDesc")
+                    title: L10n.Ingest.tr("method.file"),
+                    desc: L10n.Ingest.tr("method.fileDesc")
                 )
                 importMethodCard(
                     icon: "text.viewfinder",
-                    title: Localized.tr("ingest.method.ocr"),
-                    desc: Localized.tr("ingest.method.ocrDesc")
+                    title: L10n.Ingest.tr("method.ocr"),
+                    desc: L10n.Ingest.tr("method.ocrDesc")
                 )
                 importMethodCard(
                     icon: "pencil.and.list.clipboard",
-                    title: Localized.tr("ingest.method.manual"),
-                    desc: Localized.tr("ingest.method.manualDesc")
+                    title: L10n.Ingest.tr("method.manual"),
+                    desc: L10n.Ingest.tr("method.manualDesc")
                 )
             }
         }
@@ -578,7 +590,7 @@ struct URLImportSheet: View {
         NavigationStack {
             VStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(Localized.tr("ingest.urlImportPlaceholder"))
+                    Text(L10n.Ingest.tr("urlImportPlaceholder"))
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                     
@@ -596,12 +608,12 @@ struct URLImportSheet: View {
                 .padding()
                 
                 VStack(alignment: .leading, spacing: 12) {
-                    Label(Localized.tr("ingest.webDesc"), systemImage: "info.circle")
+                    Label(L10n.Ingest.tr("webDesc"), systemImage: "info.circle")
                         .font(.caption2)
                         .foregroundStyle(.wikiSecondary)
                     
                     WikiPrimaryButton(
-                        title: Localized.tr("misc.import"),
+                        title: L10n.Common.tr("import"),
                         icon: "arrow.down.doc.fill",
                         isLoading: false
                     ) {
@@ -612,13 +624,13 @@ struct URLImportSheet: View {
                 .padding()
                 .background(Color.wikiCard)
             }
-            .navigationTitle(Localized.tr("ingest.urlImport"))
+            .navigationTitle(L10n.Ingest.tr("urlImport"))
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.cancel")) {
+                    Button(L10n.Common.tr("cancel")) {
                         dismiss()
                     }
                 }

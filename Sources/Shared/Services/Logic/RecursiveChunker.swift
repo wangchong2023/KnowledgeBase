@@ -1,3 +1,13 @@
+// RecursiveChunker.swift
+//
+// 作者: Wang Chong
+// 功能说明: 递归分块器 (RAG 核心：语义保真)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 /// 递归分块器 (RAG 核心：语义保真)

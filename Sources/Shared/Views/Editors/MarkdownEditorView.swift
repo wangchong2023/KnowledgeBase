@@ -1,3 +1,14 @@
+// MarkdownEditorView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 待执行的编辑器操作
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 #if canImport(UIKit)
 import UIKit
@@ -104,7 +115,7 @@ struct MarkdownEditorView: View {
     // MARK: - Title Editor
     private var titleEditor: some View {
         HStack {
-            TextField(Localized.tr("editor.pageTitlePlaceholder"), text: $page.title)
+            TextField(L10n.Editor.tr("pageTitlePlaceholder"), text: $page.title)
                 .font(.system(size: 24, weight: .bold, design: .rounded))
                 .foregroundStyle(.wikiText)
                 .padding()
@@ -125,7 +136,7 @@ struct MarkdownEditorView: View {
                 Button(action: { withAnimation { showTagInput.toggle() } }) {
                     HStack(spacing: 2) {
                         Image(systemName: "plus.circle.fill").font(.caption)
-                        Text(Localized.tr("editor.addTag")).font(.caption)
+                        Text(L10n.Editor.tr("addTag")).font(.caption)
                     }
                     .foregroundStyle(.wikiSecondary)
                     .padding(.horizontal, 8)
@@ -152,7 +163,7 @@ struct MarkdownEditorView: View {
                 Button(action: { withAnimation { showAliasInput.toggle() } }) {
                     HStack(spacing: 2) {
                         Image(systemName: "plus.circle.fill").font(.caption)
-                        Text(Localized.tr("editor.addAlias")).font(.caption)
+                        Text(L10n.Editor.tr("addAlias")).font(.caption)
                     }
                     .foregroundStyle(.wikiSecondary)
                     .padding(.horizontal, 8)
@@ -283,7 +294,7 @@ struct OCRPickerModifier: ViewModifier {
                             let text = try await ocrService.recognizeText(from: image)
                             await MainActor.run { onResult(text) }
                         } catch {
-                            print("OCR Failed: \(error)")
+                            ToastManager.shared.show(type: .error, message: error.localizedDescription)
                         }
                     }
                     selectedItem = nil

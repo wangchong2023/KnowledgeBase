@@ -1,3 +1,13 @@
+// OCRScanView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct OCRScanView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 import PhotosUI
 
@@ -73,7 +83,7 @@ struct OCRScanView: View {
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.cancel")) {
+                    Button(L10n.Common.tr("cancel")) {
                         dismiss()
                     }
                 }
@@ -85,21 +95,21 @@ struct OCRScanView: View {
                 IconPickerView(selectedIcon: $targetCustomIcon)
             }
             .alert(Localized.tr("ocr.scanFailed"), isPresented: $showOCRError) {
-                Button(Localized.tr("misc.ok"), role: .cancel) {}
+                Button(L10n.Common.tr("ok"), role: .cancel) {}
             } message: {
                 Text(ocrErrorMessage)
             }
-            .alert(Localized.tr("editor.addTag"), isPresented: $showAddTagInput) {
-                TextField(Localized.tr("editor.enterTag"), text: $newTagText)
+            .alert(L10n.Editor.tr("addTag"), isPresented: $showAddTagInput) {
+                TextField(L10n.Editor.tr("enterTag"), text: $newTagText)
                     .accessibilityIdentifier("enterTagName")
                 Button(Localized.tr("ocr.addTag")) {
                     commitNewTag()
                 }
-                Button(Localized.tr("misc.cancel"), role: .cancel) {
+                Button(L10n.Common.tr("cancel"), role: .cancel) {
                     newTagText = ""
                 }
             } message: {
-                Text(Localized.tr("editor.enterTag"))
+                Text(L10n.Editor.tr("enterTag"))
             }
         }
     }
@@ -122,7 +132,7 @@ struct OCRScanView: View {
         
         Task {
             do {
-                let text = try await OCRService.shared.recognizeText(from: image)
+                let text = try await store.recognizeText(from: image)
                 await MainActor.run {
                     recognizedText = text
                     isProcessing = false

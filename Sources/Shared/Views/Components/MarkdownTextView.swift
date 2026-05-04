@@ -1,3 +1,14 @@
+// MarkdownTextView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 用 class 封装光标状态，避免 struct @Binding 在闭包中的捕获问题。
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 #if canImport(UIKit)
 import UIKit
@@ -131,7 +142,7 @@ final class EditorActionExecutor {
         } else {
             let pos = min(coordinator.cursorState.cursorPosition, (tv.text as NSString).length)
             tv.selectedRange = NSRange(location: pos, length: 0)
-            tv.insertText(wrapper + Localized.tr("editor.selectedText") + wrapper)
+            tv.insertText(wrapper + L10n.Editor.tr("selectedText") + wrapper)
         }
     }
 
@@ -169,43 +180,43 @@ struct MarkdownEditorToolbar: View {
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: Localized.tr("editor.bold"), icon: "bold") {
+                EditorToolbarButton(title: L10n.Editor.tr("bold"), icon: "bold") {
                     onWrap("**")
                 }
-                EditorToolbarButton(title: Localized.tr("editor.italic"), icon: "italic") {
+                EditorToolbarButton(title: L10n.Editor.tr("italic"), icon: "italic") {
                     onWrap("*")
                 }
-                EditorToolbarButton(title: Localized.tr("editor.code"), icon: "chevron.left.forwardslash.chevron.right") {
+                EditorToolbarButton(title: L10n.Editor.tr("code"), icon: "chevron.left.forwardslash.chevron.right") {
                     onWrap("`")
                 }
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: Localized.tr("editor.link"), icon: "link") {
+                EditorToolbarButton(title: L10n.Editor.tr("link"), icon: "link") {
                     onInsert("[[", "]]")
                 }
-                EditorToolbarButton(title: Localized.tr("editor.list"), icon: "list.bullet") {
+                EditorToolbarButton(title: L10n.Editor.tr("list"), icon: "list.bullet") {
                     onInsert("- ", nil)
                 }
-                EditorToolbarButton(title: Localized.tr("editor.quote"), icon: "text.quote") {
+                EditorToolbarButton(title: L10n.Editor.tr("quote"), icon: "text.quote") {
                     onInsert("> ", nil)
                 }
-                EditorToolbarButton(title: Localized.tr("editor.table"), icon: "tablecells") {
-                    onInsertMultiline("\n| \(Localized.tr("editor.tableColumn1")) | \(Localized.tr("editor.tableColumn2")) | \(Localized.tr("editor.tableColumn3")) |\n|------|------|------|\n| \(Localized.tr("editor.tableContent")) | \(Localized.tr("editor.tableContent")) | \(Localized.tr("editor.tableContent")) |\n")
+                EditorToolbarButton(title: L10n.Editor.tr("table"), icon: "tablecells") {
+                    onInsertMultiline("\n| \(L10n.Editor.tr("tableColumn1")) | \(L10n.Editor.tr("tableColumn2")) | \(L10n.Editor.tr("tableColumn3")) |\n|------|------|------|\n| \(L10n.Editor.tr("tableContent")) | \(L10n.Editor.tr("tableContent")) | \(L10n.Editor.tr("tableContent")) |\n")
                 }
-                EditorToolbarButton(title: Localized.tr("editor.divider"), icon: "minus") {
+                EditorToolbarButton(title: L10n.Editor.tr("divider"), icon: "minus") {
                     onInsertMultiline("\n---\n")
                 }
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: Localized.tr("editor.wikiLink"), icon: "link.circle.fill") {
+                EditorToolbarButton(title: L10n.Editor.tr("wikiLink"), icon: "link.circle.fill") {
                     onShowLinkPicker()
                 }
 
                 Divider().frame(height: 24).background(Color.wikiBorder)
 
-                EditorToolbarButton(title: Localized.tr("editor.ocrScan"), icon: "text.viewfinder") {
+                EditorToolbarButton(title: L10n.Editor.tr("ocrScan"), icon: "text.viewfinder") {
                     onOCR()
                 }
             }

@@ -1,0 +1,56 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "watch.capture": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick Capture"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快速记录"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "watch.dictate.hint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap mic to record"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击麦克风开始录音"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "watch.recents": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recents"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近记录"
+          }
+        }
+      },
+      "extractionState": "manual"
+    }
+  }
+}

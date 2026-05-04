@@ -1,3 +1,13 @@
+// iCloudSyncManager.swift
+//
+// 作者: Wang Chong
+// 功能说明: iCloud 配置同步管理器 (PM 视角：跨设备连续性)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 

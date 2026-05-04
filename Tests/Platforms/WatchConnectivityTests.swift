@@ -1,8 +1,19 @@
+// WatchConnectivityTests.swift
+//
+// 作者: Wang Chong
+// 功能说明: 验证 WatchConnectivity 同步可靠性
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 import WatchConnectivity
 @testable import KM
 
 /// 验证 WatchConnectivity 同步可靠性
+@MainActor
 final class WatchConnectivityTests: XCTestCase {
     
     var service: WatchConnectivityService!
@@ -13,16 +24,14 @@ final class WatchConnectivityTests: XCTestCase {
     }
     
     /// 测试数据打包逻辑
-    func testContentPackaging() {
+    func testContentPackaging() async {
         let testText = "手表端采集的测试内容"
-        // 模拟发送动作（由于 WCSession 在测试环境无法真实激活，我们验证其调用链路或状态）
-        // 这里的测试重点在于确保发送逻辑不会崩溃，且符合协议规范
         service.sendContent(testText)
         XCTAssertNotNil(service)
     }
     
     /// 测试接收逻辑
-    func testReceiveUserInfo() {
+    func testReceiveUserInfo() async {
         let expectation = XCTestExpectation(description: "接收来自手表的通知")
         
         let userInfo: [String: Any] = [
@@ -40,7 +49,7 @@ final class WatchConnectivityTests: XCTestCase {
         // 模拟收到 WCSession 回调
         service.session(WCSession.default, didReceiveUserInfo: userInfo)
         
-        wait(for: [expectation], timeout: 2.0)
+        await fulfillment(of: [expectation], timeout: 2.0)
         NotificationCenter.default.removeObserver(observer)
     }
 }

@@ -1,3 +1,14 @@
+// LogService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 日志服务协议，定义审计日志的核心行为
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 
@@ -51,9 +62,12 @@ final class LogService: ObservableObject, LogServiceProtocol, @unchecked Sendabl
     }
 
     private let logKey = "knowledge-management_logs"
+    private let customDirectory: URL?
+    
     private var documentsDirectory: URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        customDirectory ?? FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
+    
     private var logsFileURL: URL {
         documentsDirectory.appendingPathComponent(AppConfig.logsFileName)
     }
@@ -63,7 +77,8 @@ final class LogService: ObservableObject, LogServiceProtocol, @unchecked Sendabl
     private static let maxLogEntries = 500
     
     // MARK: - Init
-    init() {
+    init(customDirectory: URL? = nil) {
+        self.customDirectory = customDirectory
         loadFromDisk()
     }
 

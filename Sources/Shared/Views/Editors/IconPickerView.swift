@@ -1,3 +1,13 @@
+// IconPickerView.swift
+//
+// 作者: Wang Chong
+// 功能说明: A reusable icon picker that presents categorized SF Symbols in a grid.
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Icon Picker View
@@ -58,13 +68,13 @@ struct IconPickerView: View {
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("iconPicker.selectIcon"))
+            .navigationTitle(L10n.Editor.tr("iconPicker.selectIcon"))
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.ok")) { dismiss() }
+                    Button(L10n.Common.tr("ok")) { dismiss() }
                         .fontWeight(.medium)
                 }
             }
@@ -82,7 +92,7 @@ struct IconPickerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(selectedIcon != nil ? Localized.tr("iconPicker.customSelected") : Localized.tr("iconPicker.useDefault"))
+                Text(selectedIcon != nil ? L10n.Editor.tr("iconPicker.customSelected") : L10n.Editor.tr("iconPicker.useDefault"))
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.wikiText)
                 if selectedIcon != nil {
@@ -99,7 +109,7 @@ struct IconPickerView: View {
                     selectedIcon = nil
                     dismiss()
                 }) {
-                    Text(Localized.tr("iconPicker.reset"))
+                    Text(L10n.Editor.tr("iconPicker.reset"))
                         .font(.caption.weight(.medium))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)

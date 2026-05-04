@@ -1,0 +1,638 @@
+{
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "ai.status.analyzing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing content..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在分析内容..."
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "ai.status.preprocessing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preprocessing chunks..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在预处理分块..."
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "ai.status.scanning": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全库智能扫描中..."
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "ai.status.thinking": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 正在思考..."
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.active": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "进行中"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.categories": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Categories"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务分类"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.center.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task Center"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务中心"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.clearAll": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear All"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部清除"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.empty.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Progress of all AI scans, synthesis, and health check tasks will be shown here."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有 AI 扫描、导出合成和健康检查任务的进度都将在这里显示。"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.empty.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Active Tasks"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前无活跃任务"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.emptyHint": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This shows long-running background tasks like synthesis, full-vault scanning, etc. You can start tasks from the Labs in page details."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此处展示长耗时的异步后台任务，如知识合成、全库扫描等。您可以在页面详情的实验室栏中启动任务。"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.aiscan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scan"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智能扫描"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.aiscan.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click 'Deep Scan' in sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在侧边栏点击“深度扫描”"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.health": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health Check"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康检查"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.health.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click 'Health Check' in sidebar"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在侧边栏点击“健康检查”"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.ingest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Knowledge Ingest"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知识导入"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.ingest.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add content from 'Ingest' page"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从“导入”页面添加新内容"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.synthesis": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Knowledge Synthesis"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知识合成"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.guide.synthesis.desc": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start export tasks in Synthesis Center"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在合成中心发起导出任务"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.history.count": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld executions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "累计执行 %lld 次"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.howToTrigger": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How to trigger tasks?"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如何触发任务？"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.list.title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Task Flow Details"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务流详情"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.noHistory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No task history"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无此类任务历史"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.noRunning": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无任务"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.processing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Processing..."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "处理中..."
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.scanTaskName": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全库智能扫描"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.completed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.completedFormat": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成: %@"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已失败"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.failedFormat": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "任务失败: %@"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.pending": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待中"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.running": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "执行中"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.runningFormat": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在执行: %1$@ - %2$@"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.status.startingFormat": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在启动: %1$@ (%2$@)"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.tools": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synthesis Tools"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "合成工具"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.type.ai": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Task"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI 任务"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.type.aiScan": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Scan"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "智能扫描"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.type.healthCheck": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Health Check"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "健康检查"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.type.ingest": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingest"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知识导入"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "aitask.type.synthesis": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synthesis"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知识合成"
+          }
+        }
+      },
+      "extractionState": "manual"
+    }
+  },
+  "version": "1.0"
+}

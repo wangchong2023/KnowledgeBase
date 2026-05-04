@@ -1,10 +1,22 @@
+// AdaptiveSidebarView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 响应式侧边栏 (iPad/Mac 专属)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 /// 响应式侧边栏 (iPad/Mac 专属)
 /// 将传统的底部 Tab 转换为更符合大屏习惯的垂直侧边栏。
 struct AdaptiveSidebarView: View {
     @Environment(KMStore.self) var store
-    @Binding var selectedTab: ContentView.AppTab
+    @Environment(AppRouter.self) var router
+    @Binding var selectedTab: AppTab
     
     var body: some View {
         List {
@@ -20,9 +32,9 @@ struct AdaptiveSidebarView: View {
                 // 快捷跳转到任务中心 (作为 Wiki 模块的子操作)
                 Button(action: {
                     selectedTab = .wiki
-                    store.selectedTool = .taskCenter
+                    router.navigateToTool(.taskCenter)
                 }) {
-                    Label(Localized.tr("aitask.center.title"), systemImage: "arrow.triangle.2.circlepath")
+                    Label(L10n.AI.Task.centerTitle, systemImage: "arrow.triangle.2.circlepath")
                 }
             }
             
@@ -46,7 +58,7 @@ struct AdaptiveSidebarView: View {
         }
     }
     
-    private func sidebarRow(for tab: ContentView.AppTab) -> some View {
+    private func sidebarRow(for tab: AppTab) -> some View {
         Button(action: { selectedTab = tab }) {
             Label(tab.displayTitle, systemImage: tab.icon)
                 .foregroundStyle(selectedTab == tab ? Color.wikiAccent : .primary)
@@ -58,7 +70,7 @@ struct AdaptiveSidebarView: View {
 /// 响应式主内容区域
 struct AdaptiveDetailView: View {
     @Environment(KMStore.self) var store
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     @Binding var selection: SidebarSelection?
     @Binding var languageForceUpdate: Bool
     @ObservedObject var onboardingService: OnboardingService

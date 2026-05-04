@@ -1,3 +1,14 @@
+// KnowledgeDashboardView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 知识资产仪表盘 (Designer & PM 视角：可视化知识价值)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 
 /// 知识资产仪表盘 (Designer & PM 视角：可视化知识价值)
@@ -16,15 +27,15 @@ struct KnowledgeDashboardView: View {
             VStack(spacing: 24) {
                 // 1. 核心资产统计
                 HStack(spacing: 16) {
-                    MetricBox(title: Localized.tr("dashboard.totalPages"), value: "\(store.pages.count)", icon: "doc.on.doc", color: .blue)
-                    MetricBox(title: Localized.tr("dashboard.totalLinks"), value: "\(totalLinks)", icon: "link", color: .wikiAccent)
+                    MetricBox(title: L10n.Dashboard.tr("totalPages"), value: "\(store.pages.count)", icon: "doc.on.doc", color: .blue)
+                    MetricBox(title: L10n.Dashboard.tr("totalLinks"), value: "\(totalLinks)", icon: "link", color: .wikiAccent)
                 }
                 .padding(.horizontal)
                 
                 // 2. 连接密度图 (模拟可视化)
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(spacing: 6) {
-                        Text(Localized.tr("dashboard.density"))
+                        Text(L10n.Dashboard.tr("density"))
                             .font(.headline)
                         
                         Button {
@@ -35,7 +46,7 @@ struct KnowledgeDashboardView: View {
                                 .foregroundStyle(.wikiSecondary)
                         }
                         .popover(isPresented: $showDensityInfo) {
-                            Text(Localized.tr("dashboard.density.desc"))
+                            Text(L10n.Dashboard.tr("density.desc"))
                                 .font(.caption)
                                 .padding()
                                 .presentationCompactAdaptation(.popover)
@@ -66,7 +77,7 @@ struct KnowledgeDashboardView: View {
                 
                 // 4. 热门领域
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(Localized.tr("dashboard.hotTopics"))
+                    Text(L10n.Dashboard.tr("hotTopics"))
                         .font(.headline)
                         .padding(.horizontal)
                     
@@ -160,7 +171,7 @@ private struct HotTopicCard: View {
                 Text(tag)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.wikiText)
-                Text("\(count) \(Localized.tr("dashboard.pages"))")
+                Text("\(count) \(L10n.Dashboard.tr("pages"))")
                     .font(.system(size: 10))
                     .foregroundStyle(.wikiSecondary)
             }
@@ -228,32 +239,36 @@ private struct MetricBox: View {
     }
 }
 
+
+
 struct DailyRecapSection: View {
     @Environment(KMStore.self) var store
-    @State private var recap: KnowledgeInsightService.DailyRecap?
-    @State private var isLoading = false
+    @Environment(AIWorkflowStore.self) var aiStore
+    @Environment(AppRouter.self) var router
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text(Localized.tr("dashboard.dailyInsights"))
+                Text(L10n.Dashboard.tr("dailyInsights"))
                     .font(.headline)
                 Spacer()
-                Button(action: loadRecap) {
+                Button(action: {
+                    Task { await aiStore.generateDailyRecap(forceRefresh: true) }
+                }) {
                     Image(systemName: "arrow.clockwise")
                         .font(.caption)
                 }
                 .buttonStyle(.plain)
             }
             
-            if isLoading {
+            if aiStore.isGeneratingDailyRecap {
                 ProgressView()
                     .frame(maxWidth: .infinity)
                     .padding()
-            } else if let recap = recap {
+            } else if let recap = aiStore.dailyRecap {
                 Button {
                     if let target = store.pages.first(where: { $0.title == recap.targetPageTitle }) {
-                        store.navigationPath.append(target)
+                        router.navigateToPage(id: target.id)
                     }
                 } label: {
                     VStack(alignment: .leading, spacing: 12) {
@@ -285,7 +300,7 @@ struct DailyRecapSection: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                Text(Localized.tr("dashboard.dailyInsights.refresh"))
+                Text(L10n.Dashboard.tr("dailyInsights.refresh"))
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
                     .frame(maxWidth: .infinity)
@@ -293,29 +308,8 @@ struct DailyRecapSection: View {
             }
         }
         .onAppear {
-            if recap == nil { loadRecap() }
-        }
-    }
-    
-    private func loadRecap() {
-        guard !isLoading else { return }
-        isLoading = true
-        Task {
-            do {
-                let pages = store.pages
-                if pages.count < 3 {
-                    await MainActor.run { isLoading = false }
-                    return
-                }
-                let result = try await store.insightService.generateDailyRecap(pages: pages, llmService: store.llmService, forceRefresh: true)
-                await MainActor.run {
-                    self.recap = result
-                    self.isLoading = false
-                }
-            } catch {
-                await MainActor.run {
-                    self.isLoading = false
-                }
+            if aiStore.dailyRecap == nil {
+                Task { await aiStore.generateDailyRecap() }
             }
         }
     }

@@ -1,8 +1,20 @@
+// SearchView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct SearchView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 struct SearchView: View {
     @Environment(KMStore.self) var store
-    @Environment(\.navigate) var navigate
+    @Environment(SearchStore.self) var searchStore
+    @Environment(AppRouter.self) var router
     @State private var searchText = ""
     @State private var filterType: PageType?
     @State private var filterStatus: PageStatus?
@@ -131,7 +143,7 @@ struct SearchView: View {
 
                         // Status Filters
                         Menu {
-                            Button(Localized.tr("misc.all")) { filterStatus = nil }
+                            Button(L10n.Common.tr("all")) { filterStatus = nil }
                             ForEach(PageStatus.allCases, id: \.self) { status in
                                 Button(status.displayName) { filterStatus = status }
                             }
@@ -181,7 +193,7 @@ struct SearchView: View {
             
             // Main Results Content
             ZStack {
-                if store.isAdvancedSearching {
+                if searchStore.isSearching {
                     VStack(spacing: 16) {
                         ForEach(0..<6) { _ in
                             HStack(spacing: 12) {
@@ -222,7 +234,7 @@ struct SearchView: View {
                         ForEach(filteredPages) { page in
                             Button(action: {
                                 HapticManager.shared.trigger(.selection)
-                                navigate(page)
+                                router.navigate(to: .pageDetail(id: page.id))
                             }) {
                                 PageRowView(page: page)
                             }
@@ -234,13 +246,13 @@ struct SearchView: View {
                                     HapticManager.shared.trigger(.selection)
                                     previewPage = page
                                 } label: {
-                                    Label(Localized.tr("misc.quickPreview"), systemImage: "eye")
+                                    Label(L10n.Common.tr("quickPreview"), systemImage: "eye")
                                 }
                                 
                                 Button {
                                     WikiPasteboard.string = "[[\(page.title)]]"
                                 } label: {
-                                    Label(Localized.tr("misc.copyWikiLink"), systemImage: "link")
+                                    Label(L10n.Common.tr("copyWikiLink"), systemImage: "link")
                                 }
                             }
                         }
@@ -249,7 +261,7 @@ struct SearchView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .animation(.default, value: store.isAdvancedSearching)
+            .animation(.default, value: searchStore.isSearching)
             .animation(.default, value: filteredPages.isEmpty)
             
             // Footer
@@ -285,7 +297,7 @@ struct SearchView: View {
             PagePreviewSheet(page: page)
         }
         .sheet(isPresented: $showDiagnostics) {
-            if let diag = store.lastSearchDiagnostic {
+            if let diag = searchStore.lastSearchDiagnostic {
                 SearchDiagnosticSheet(info: diag)
             }
         }
@@ -296,13 +308,15 @@ struct SearchView: View {
             withAnimation {
                 useAdvancedSearch = false
                 advancedResults = []
+                searchStore.clearAll()
             }
             return
         }
         
         HapticManager.shared.trigger(.selection)
         Task {
-            let results = await store.performAdvancedSearch(query: searchText)
+            // 注意：SearchStore 内部已经处理了 isSearching 状态
+            let results = await searchStore.performAdvancedSearch(query: searchText)
             await MainActor.run {
                 withAnimation {
                     self.advancedResults = results
@@ -346,13 +360,13 @@ struct PagePreviewSheet: View {
                 .padding()
             }
             .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("misc.preview"))
+            .navigationTitle(L10n.Common.tr("preview"))
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.close")) { dismiss() }
+                    Button(L10n.Common.tr("close")) { dismiss() }
                 }
             }
         }
@@ -442,7 +456,7 @@ struct SearchDiagnosticSheet: View {
 #endif
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    Button(Localized.tr("misc.close")) { dismiss() }
+                    Button(L10n.Common.tr("close")) { dismiss() }
                 }
             }
         }

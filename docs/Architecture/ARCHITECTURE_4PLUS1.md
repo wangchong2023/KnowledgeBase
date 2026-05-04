@@ -1,119 +1,4 @@
-# 智元 (ZhiYuan) 架构 4+1 视图
-
-本文件采用 Kruchten 的 4+1 视图模型，从多个维度深入解析智元系统的技术架构。
-
----
-
-## 1. 逻辑视图 (Logical View) - 功能拆解
-专注于系统的功能需求，即系统提供给最终用户的服务。
-
-```mermaid
-graph TD
-    User((用户))
-    UI[SwiftUI 视图层]
-    Store[KMStore 门面]
-    
-    subgraph CoreServices [核心服务层]
-        DB[SQLiteStore]
-        Embed[EmbeddingManager]
-        Link[LinkService]
-        Security[VaultSecurityService]
-    end
-    
-    subgraph AIServices [AI 智能层]
-        LLM[LLMService - L0]
-        Synthesis[AISynthesisService - L1]
-        Insight[KnowledgeInsightService - L2]
-    end
-    
-    User --> UI
-    UI --> Store
-    Store --> DB
-    Store --> Embed
-    Store --> Link
-    Store --> Security
-    Store --> Synthesis
-    Synthesis --> LLM
-    Insight --> Synthesis
-```
-
----
-
-## 2. 开发视图 (Development View) - 层级管理
-关注软件在开发环境中的模块组织和分层依赖（L0-L3）。
-
-```mermaid
-graph BT
-    L3[L3: 插件与扩展层 - PluginRegistry]
-    L2[L2: 业务中枢层 - KMStore/TaskCenter]
-    L1[L1: 领域服务层 - LinkService/EmbeddingManager]
-    L0[L0: 基础设施层 - SQLite/Vault/Log]
-    
-    L3 --> L2
-    L2 --> L1
-    L1 --> L0
-```
-
----
-
-## 3. 过程视图 (Process View) - RAG 完整链路
-处理系统的动态方面，重点是进程通信与并发。
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Ingest as IngestService
-    participant DB as SQLiteStore
-    participant Vector as EmbeddingManager
-    participant LLM as LLMService
-    
-    User->>Ingest: 导入外部文档 (PDF/Markdown)
-    Ingest->>DB: 写入结构化数据 (UUID)
-    DB-->>Vector: 触发同步监听
-    Vector->>Vector: 异步向量化 (Apple NL)
-    Vector->>DB: 持久化 Embedding
-    
-    Note over User, LLM: 检索与生成过程
-    
-    User->>LLM: 提出问题
-    LLM->>Vector: 语义相似度查询
-    Vector-->>LLM: 返回 Top-K 文档片段
-    LLM->>LLM: 构造 RAG Prompt (含上下文)
-    LLM-->>User: 展示 AI 总结与来源
-```
-
----
-
-## 4. 物理视图 (Physical View) - 拓扑布局
-描述软件到硬件的映射，反映分布式与部署特性。
-
-```mermaid
-graph LR
-    subgraph Device [Apple 设备端]
-        App[智元 Client App]
-        Storage[(Local SQLite + Vector DB)]
-        NPU[Neural Engine - 向量计算]
-    end
-    
-    subgraph Cloud [云端/外部]
-        API[OpenAI/Claude API]
-    end
-    
-    App <--> Storage
-    App --> NPU
-    App -- HTTPS/TLS --> API
-```
-
----
-
-## 5. 场景 (+1) - 核心用例验证
-通过核心用例串联上述视图，确保架构闭环。
-
-*   **用例：双向链接自动发现**
-    *   用户编辑文本 -> L2 捕获输入 -> L1 (LinkService) 执行反向索引查询 -> 发现潜在关联 -> UI 反馈。
 # 智元 (ZhiYuan) 架构设计文档 (4+1 View Model)
-
-本文件采用 Philippe Kruchten 提出的 **4+1 视图模型**，旨在从多个维度解析 智元 (ZhiYuan) 的 AI 原生架构设计。
 
 ---
 
@@ -133,30 +18,43 @@ graph LR
 
 ```mermaid
 classDiagram
+    class iCloudSyncCoordinator {
+        <<ViewModel>>
+        +syncService
+        +syncStatus
+        +pushToCloud()
+        +pullFromCloud()
+        +startAutoSyncIfNeeded()
+    }
     class KMStore {
         <<Facade>>
         +pages: [WikiPage]
         +createPage()
         +searchPages()
-        +mountVault()
+        +generateWeeklyInsight()
+        +loadPDFDocuments()
+        +recognizeText()
     }
     class SQLiteStore {
-        +core: SQLiteStoreCore
-        +embeddingManager: EmbeddingManager
+        +repository: WikiPageStore
     }
     class LLMService {
+        <<GodClass (正在拆解)>>
+        +chat()
         +generate()
-        +vectorize()
+        +smartIngest()
+        +discoverLinks()
     }
     class VaultService {
         +scan()
         +storeBookmark()
     }
     
+    iCloudSyncCoordinator --> iCloudSyncService : 编排同步
     KMStore --> SQLiteStore : 持久化委派
-    KMStore --> LLMService : 智能计算
+    KMStore --> LLMService : AI 能力
     KMStore --> VaultService : 外部库同步
-    SQLiteStore --> EmbeddingManager : 向量化
+    SQLiteStore --> WikiPageStore : GRDB 封装
 ```
 
 ---
@@ -164,10 +62,20 @@ classDiagram
 ## 3. 架构 4+1 视图 (4+1 Architectural View Model)
 
 ### 3.1 逻辑视图 (Logical View) - 功能分层
-- **L3 (展现层)**: `SwiftUI` 驱动的响应式视图（如 `GraphView`, `ChatView`）。
-- **L2 (能力层)**: 核心业务引擎（`LLMService`, `LinkService`）。
-- **L1 (领域层)**: 领域模型与协议（`WikiPage`, `PluginProtocols`）。
-- **L0 (基础层)**: 持久化与驱动（`SQLiteStore`, `SnapshotService`）。
+- **L3 (展现层)**: `SwiftUI` 驱动的响应式视图 + `@Observable` Coordinator/ViewModel
+  - Views: `GraphView`, `ChatView`, `PageDetailView` 等
+  - ViewModel: `iCloudSyncCoordinator`（业务编排剥离自 iCloudSyncView）
+- **L2 (领域/功能层)**: 核心业务引擎与高级功能编排
+  - AI: `LLMService`, `AISynthesisService`, `EmbeddingManager`
+  - Feature: `IngestService`, `CollaborationService`, `TaskCenter`
+  - Gamification: `MedalService`
+- **L1 (服务层)**: 数据访问与 AI 适配器
+  - Storage: `KMStore`, `SQLiteStore`, `WikiPageStore`, `SynthesisStore`
+  - Logic: `LinkService`, `KnowledgeInsightService`, `RecursiveChunker`
+  - Sync: `iCloudSyncService`, `FileSystemSyncService`
+- **L0 (基础设施层)**: 存储引擎、网络、Keychain、Logger、OS 工具
+  - Infrastructure: `LogService`, `SecurityManager`, `HapticManager`, `WebViewExportService`
+  - Processors: `PDFService`, `OCRService`, `MarkdownParser`
 
 ### 3.2 过程视图 (Process View) - 数据流与并发
 描述系统在执行关键任务时的动态协作关系。
@@ -280,21 +188,21 @@ graph LR
 
 为了确保系统的可维护性与测试性，我们对功能进行了逻辑解耦，形成了四层垂直模型：
 
-### 🟢 L0: 基础设施层 (Sources/Shared/Services/Infrastructure & Storage)
+### 🟢 L0: 基础设施层 (Sources/Shared/Services/Infrastructure & Processors & Core/Protocols)
 *   **定位**: 底层能力的封装与数据持久化。
-*   **组件**: `SQLiteStore`, `LogService`, `VaultService`, `FileSystemSyncService`。
+*   **组件**: `SQLiteStore`, `LogService`, `SecurityManager`, `HapticManager`, `WebViewExportService`, `PDFService`, `OCRService`, `MarkdownParser`, `WikiPageRepository`, `ServiceContainer`。
 
-### 🔵 L1: 核心领域层 (Sources/Shared/Models & Services/Logic)
-*   **定位**: 纯粹的业务逻辑与原子操作。
-*   **组件**: `KMStore (Facade)`, `LinkService`, `IngestService`, `RecursiveChunker`。
+### 🔵 L1: 服务层 (Sources/Shared/Services/Storage & Logic & Sync)
+*   **定位**: 数据访问、原子操作、外部系统适配。
+*   **组件**: `KMStore (Facade)`, `VaultService`, `BackupService`, `LinkService`, `KnowledgeInsightService`, `RecursiveChunker`, `iCloudSyncService`, `FileSystemSyncService`, `PluginRegistry`。
 
-### 🟣 L2: 应用能力层 (Sources/Shared/Services/AI & System)
+### 🟣 L2: 应用能力层 (Sources/Shared/Services/AI & Feature & System & Gamification)
 *   **定位**: 高级功能与智能调度。
-*   **组件**: `LLMService` (模型调度), `AISynthesisService` (业务合成), `AITaskCenter` (异步任务)。
+*   **组件**: `LLMService`, `LLMClient`, `AISynthesisService`, `EmbeddingManager`, `IngestService`, `CollaborationService`, `TaskCenter`, `MedalService`, `ActivityService`, `WikiEventBus`。
 
 ### 🟡 L3: 交互展现层 (Sources/Shared/Views)
-*   **定位**: 跨平台响应式视图。
-*   **组件**: `GraphView`, `PageDetailView`, `ChatView`。
+*   **定位**: 跨平台响应式视图 + ViewModel 编排。
+*   **组件**: `GraphView`, `PageDetailView`, `ChatView`, `iCloudSyncCoordinator`（ViewModel），`IngestView` 等。
 
 ---
 

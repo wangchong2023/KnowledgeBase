@@ -1,7 +1,18 @@
+// CreatePageView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct CreatePageView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 struct CreatePageView: View {
     @Environment(KMStore.self) var store
+    @Environment(AppRouter.self) var router
     @Environment(\.dismiss) private var dismiss
     @State private var title = ""
     @State private var type: PageType = .concept
@@ -12,7 +23,7 @@ struct CreatePageView: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField(Localized.tr("create.pageTitle"), text: $title)
+                    TextField(L10n.Creation.tr("pageTitle"), text: $title)
                         .font(.body)
                         .accessibilityIdentifier("pageTitle")
                     
@@ -42,9 +53,9 @@ struct CreatePageView: View {
                         }
                     }
                     
-                    TextField(Localized.tr("create.tagsPlaceholder"), text: $tags)
+                    TextField(L10n.Creation.tr("tagsPlaceholder"), text: $tags)
                 } header: {
-                    Text(Localized.tr("create.basicInfo"))
+                    Text(L10n.Creation.tr("basicInfo"))
                 }
                 
                 Section {
@@ -53,9 +64,9 @@ struct CreatePageView: View {
                         .frame(minHeight: 150)
                 } header: {
                     HStack {
-                        Text(Localized.tr("create.content"))
+                        Text(L10n.Creation.tr("content"))
                         Spacer()
-                        Text(Localized.tr("editor.bidirectionalLinks"))
+                        Text(L10n.Editor.tr("bidirectionalLinks"))
                             .font(.caption2)
                             .foregroundStyle(.wikiSecondary)
                     }
@@ -64,27 +75,27 @@ struct CreatePageView: View {
                 // Quick templates
                 Section {
                     Button(action: applyEntityTemplate) {
-                        Label(Localized.tr("create.entityTemplate"), systemImage: "person.text.rectangle.fill")
+                        Label(L10n.Creation.tr("entityTemplate"), systemImage: "person.text.rectangle.fill")
                     }
                     Button(action: applyConceptTemplate) {
-                        Label(Localized.tr("create.conceptTemplate"), systemImage: "lightbulb.fill")
+                        Label(L10n.Creation.tr("conceptTemplate"), systemImage: "lightbulb.fill")
                     }
                     Button(action: applyComparisonTemplate) {
-                        Label(Localized.tr("create.comparisonTemplate"), systemImage: "arrow.left.arrow.right.circle.fill")
+                        Label(L10n.Creation.tr("comparisonTemplate"), systemImage: "arrow.left.arrow.right.circle.fill")
                     }
                 } header: {
-                    Text(Localized.tr("create.quickTemplates"))
+                    Text(L10n.Creation.tr("quickTemplates"))
                 }
             }
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("create.title"))
+            .navigationTitle(L10n.Creation.tr("title"))
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(Localized.tr("create.create")) {
+                    Button(L10n.Creation.tr("create")) {
                         createPage()
                     }
                     .disabled(title.isEmpty)
@@ -106,7 +117,7 @@ struct CreatePageView: View {
             tags: tagList
         )
         
-        store.selectedPageID = page.id
+        router.navigateToPage(id: page.id)
         dismiss()
     }
     
@@ -114,13 +125,13 @@ struct CreatePageView: View {
         content = """
         # \(title)
         
-        ## \(Localized.tr("create.overview"))
+        ## \(L10n.Creation.tr("overview"))
         
-        ## \(Localized.tr("create.coreContributions"))
+        ## \(L10n.Creation.tr("coreContributions"))
         
-        ## \(Localized.tr("create.keyIdeas"))
+        ## \(L10n.Creation.tr("keyIdeas"))
         
-        ## \(Localized.tr("create.relatedLinks"))
+        ## \(L10n.Creation.tr("relatedLinks"))
         
         """
     }
@@ -129,15 +140,15 @@ struct CreatePageView: View {
         content = """
         # \(title)
 
-        ## \(Localized.tr("create.definition"))
+        ## \(L10n.Creation.tr("definition"))
 
-        ## \(Localized.tr("create.corePoints"))
+        ## \(L10n.Creation.tr("corePoints"))
 
-        | \(Localized.tr("create.dimension")) | \(Localized.tr("create.description")) |
+        | \(L10n.Creation.tr("dimension")) | \(L10n.Creation.tr("description")) |
         |------|------|
         |  |  |
 
-        ## \(Localized.tr("create.relatedLinks"))
+        ## \(L10n.Creation.tr("relatedLinks"))
 
         """
     }
@@ -146,15 +157,15 @@ struct CreatePageView: View {
         content = """
         # \(title)
 
-        ## \(Localized.tr("create.comparisonDimensions"))
+        ## \(L10n.Creation.tr("comparisonDimensions"))
 
-        | \(Localized.tr("create.dimension")) | A | B |
+        | \(L10n.Creation.tr("dimension")) | A | B |
         |------|---|---|
         |  |  |  |
 
-        ## \(Localized.tr("create.conclusion"))
+        ## \(L10n.Creation.tr("conclusion"))
 
-        ## \(Localized.tr("create.relatedLinks"))
+        ## \(L10n.Creation.tr("relatedLinks"))
 
         """
     }

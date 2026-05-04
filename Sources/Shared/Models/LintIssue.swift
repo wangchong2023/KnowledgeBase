@@ -1,3 +1,15 @@
+// LintIssue.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct PotentialLinkSuggestion
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
+import Foundation
 import SwiftUI
 
 // MARK: - Potential Link Suggestion
@@ -18,13 +30,13 @@ struct LintIssue: Identifiable, Codable, Sendable {
     var suggestion: String
     
     enum IssueType: String, Codable, Sendable {
-        case generic
-        case brokenLink
-        case orphan
-        case island
-        case cycle
-        case stub
-        case stale
+        case generic = "generic"
+        case brokenLink = "brokenLink"
+        case orphan = "orphan"
+        case island = "island"
+        case cycle = "cycle"
+        case stub = "stub"
+        case stale = "stale"
         
         var icon: String {
             switch self {
@@ -40,8 +52,10 @@ struct LintIssue: Identifiable, Codable, Sendable {
     }
 
     enum LintSeverity: String, Codable, Sendable {
-        case error, warning, info
-        
+        case error = "error"
+        case warning = "warning"
+        case info = "info"
+
         var icon: String {
             switch self {
             case .error: return "xmark.circle.fill"
@@ -49,7 +63,7 @@ struct LintIssue: Identifiable, Codable, Sendable {
             case .info: return "info.circle.fill"
             }
         }
-        
+
         var color: Color {
             switch self {
             case .error: return .red
@@ -57,5 +71,6 @@ struct LintIssue: Identifiable, Codable, Sendable {
             case .info: return .blue
             }
         }
+
     }
 }

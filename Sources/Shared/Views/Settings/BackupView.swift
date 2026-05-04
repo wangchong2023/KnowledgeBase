@@ -1,3 +1,14 @@
+// BackupView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct BackupView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - Backup & Recovery View
@@ -15,12 +26,12 @@ struct BackupView: View {
                 // Auto Backup Toggle
                 Section {
                     Toggle(isOn: $backupService.isAutoBackupEnabled) {
-                        Label(Localized.tr("backup.autoBackup"), systemImage: "clock.arrow.circlepath")
+                        Label(L10n.Backup.tr("autoBackup"), systemImage: "clock.arrow.circlepath")
                     }
                     
                     if let lastDate = backupService.lastBackupDate {
                         HStack {
-                            Text(Localized.tr("backup.lastBackup"))
+                            Text(L10n.Backup.tr("lastBackup"))
                                 .foregroundStyle(.wikiSecondary)
                             Spacer()
                             Text(lastDate.formatted(date: .numeric, time: .standard))
@@ -28,8 +39,7 @@ struct BackupView: View {
                         }
                     }
                 } header: {
-                    Text(Localized.tr("backup.settings")
-                    )
+                    Text(L10n.Backup.tr("settings"))
                 }
                 
                 // Manual Actions
@@ -38,32 +48,30 @@ struct BackupView: View {
                         backupService.createBackup(pages: store.pages)
                         AccessibilityService.playHaptic(.medium)
                     } label: {
-                        Label(Localized.tr("backup.createNow"), systemImage: "plus.circle.fill")
+                        Label(L10n.Backup.tr("createNow"), systemImage: "plus.circle.fill")
                     }
                     
                     Button {
                         store.saveToDisk()
                         backupService.markClean()
                     } label: {
-                        Label(Localized.tr("backup.exportCurrent"), systemImage: "square.and.arrow.up")
+                        Label(L10n.Backup.tr("exportCurrent"), systemImage: "square.and.arrow.up")
                     }
                 } header: {
-                    Text(Localized.tr("backup.actions")
-                    )
+                    Text(L10n.Backup.tr("actions"))
                 }
                 
                 // Backup History
                 Section {
                     if backupService.backupEntries.isEmpty {
                         ContentUnavailableView(
-                            Localized.tr("backup.noBackups"),
+                            L10n.Backup.tr("noBackups"),
                             systemImage: "archivebox",
-                            description: Text(Localized.tr("backup.noBackupsDesc")
-                            )
+                            description: Text(L10n.Backup.tr("noBackupsDesc"))
                         )
                     } else {
                         ForEach(backupService.backupEntries) { entry in
-                            BackupEntryRow(entry: entry) {
+                            BackupEntryRow(entry: entry, backupDirectory: backupService.backupDirectory) {
                                 selectedEntry = entry
                                 showRestoreConfirmation = true
                             } onDelete: {
@@ -72,28 +80,27 @@ struct BackupView: View {
                         }
                     }
                 } header: {
-                    Text(Localized.tr("backup.history")
-                    )
+                    Text(L10n.Backup.tr("history"))
                 }
             }
             .listStyle(.inset)
             .scrollContentBackground(.hidden)
             .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("backup.title"))
+            .navigationTitle(L10n.Backup.title)
 #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
 #endif
             .confirmationDialog(
-                Localized.tr("backup.restoreTitle"),
+                L10n.Backup.tr("restoreTitle"),
                 isPresented: $showRestoreConfirmation,
                 titleVisibility: .visible
             ) {
-                Button(Localized.tr("backup.restore"), role: .destructive) {
+                Button(L10n.Backup.tr("restore"), role: .destructive) {
                     restoreFromBackup()
                 }
-                Button(Localized.tr("misc.cancel"), role: .cancel) { selectedEntry = nil }
+                Button(L10n.Common.tr("cancel"), role: .cancel) { selectedEntry = nil }
             } message: {
-                Text(Localized.tr("backup.restoreMessage"))
+                Text(L10n.Backup.tr("restoreMessage"))
             }
         }
     }
@@ -106,8 +113,7 @@ struct BackupView: View {
         backupService.createBackup(pages: store.pages)
         
         // Replace with backup data
-        store.sqliteStore.replaceAllPages(pages)
-        store.objectWillChange.send()
+        store.replaceAllPages(pages)
         store.saveToDisk()
         
         AccessibilityService.playNotificationHaptic(.success)
@@ -117,6 +123,7 @@ struct BackupView: View {
 // MARK: - Backup Entry Row
 struct BackupEntryRow: View {
     let entry: BackupService.BackupEntry
+    let backupDirectory: URL
     let onRestore: () -> Void
     let onDelete: () -> Void
     
@@ -132,9 +139,9 @@ struct BackupEntryRow: View {
                     .foregroundStyle(.wikiText)
                 
                 HStack(spacing: 12) {
-                    Label("\(entry.pageCount) " + Localized.tr("backup.pages"), systemImage: "doc.richtext.fill")
-                    Label("\(entry.totalWords) " + Localized.tr("backup.words"), systemImage: "textformat")
-                    Label(entry.fileSize, systemImage: "externaldrive")
+                    Label("\(entry.pageCount) " + L10n.Backup.tr("pages"), systemImage: "doc.richtext.fill")
+                    Label("\(entry.totalWords) " + L10n.Backup.tr("words"), systemImage: "textformat")
+                    Label(entry.fileSize(in: backupDirectory), systemImage: "externaldrive")
                 }
                 .font(.caption)
                 .foregroundStyle(.wikiSecondary)
@@ -155,7 +162,7 @@ struct BackupEntryRow: View {
             Button(role: .destructive) {
                 onDelete()
             } label: {
-                Label(Localized.tr("misc.delete"), systemImage: "trash")
+                Label(L10n.Common.tr("delete"), systemImage: "trash")
             }
         }
     }

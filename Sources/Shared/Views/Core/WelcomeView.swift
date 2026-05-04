@@ -1,9 +1,20 @@
+// WelcomeView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct WelcomeView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 import Charts
 
 struct WelcomeView: View {
     @Environment(KMStore.self) var store
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     @State private var showInjectSuccess = false
     @State private var injectedCount = 0
     
@@ -24,8 +35,8 @@ struct WelcomeView: View {
             .padding(.bottom, 40)
         }
         .background(Color.wikiBackground)
-        .alert(Localized.tr("misc.success"), isPresented: $showInjectSuccess) {
-            Button(Localized.tr("misc.awesome"), role: .cancel) { }
+        .alert(L10n.Common.tr("success"), isPresented: $showInjectSuccess) {
+            Button(L10n.Common.tr("awesome"), role: .cancel) { }
         } message: {
             Text(Localized.trf("settings.injectDemo.successMessage", injectedCount))
         }
@@ -87,7 +98,8 @@ struct WelcomeGrowthChartSection: View {
 
 struct WelcomeRecentUpdatesSection: View {
     @Environment(KMStore.self) var store
-    @Binding var selectedTab: ContentView.AppTab
+    @Environment(AppRouter.self) var router
+    @Binding var selectedTab: AppTab
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
@@ -96,7 +108,7 @@ struct WelcomeRecentUpdatesSection: View {
                 Spacer()
             }.padding(.horizontal)
             ForEach(Array(store.pages.sorted { $0.updated > $1.updated }.prefix(5))) { page in
-                Button(action: { store.selectedTool = nil; store.selectedPageID = page.id }) {
+                Button(action: { router.navigateToPage(id: page.id) }) {
                     PageRowView(page: page, compact: true).padding(.horizontal)
                 }.buttonStyle(.plain)
             }
@@ -125,8 +137,7 @@ struct WelcomeQuickStartGuideSection: View {
             // 快捷注入演示数据入口
             Button(action: {
                 HapticManager.shared.trigger(.selection)
-                injectedCount = DemoDataGenerator.generate(in: store.sqliteStore)
-                store.refresh()
+                injectedCount = store.generateDemoData()
                 HapticManager.shared.trigger(.success)
                 showInjectSuccess = true
             }) {
@@ -163,11 +174,11 @@ struct WelcomeQuickStartGuideSection: View {
 
 struct WelcomeQuickActionsSection: View {
     @Environment(KMStore.self) var store
-    @Binding var selectedTab: ContentView.AppTab
+    @Binding var selectedTab: AppTab
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            QuickActionRow(icon: "plus.circle.fill", title: Localized.tr("action.createPage"), subtitle: Localized.tr("action.createPage.subtitle"), color: .wikiAccent) { store.showCreateSheet = true }
-            QuickActionRow(icon: "tray.and.arrow.down.fill", title: Localized.tr("action.ingestKnowledge"), subtitle: Localized.tr("action.ingestKnowledge.subtitle"), color: .wikiSource) { selectedTab = .ingest }
+            QuickActionRow(icon: "plus.circle.fill", title: L10n.Action.tr("createPage"), subtitle: L10n.Action.tr("createPage.subtitle"), color: .wikiAccent) { store.showCreateSheet = true }
+            QuickActionRow(icon: "tray.and.arrow.down.fill", title: L10n.Action.tr("ingestKnowledge"), subtitle: L10n.Action.tr("ingestKnowledge.subtitle"), color: .wikiSource) { selectedTab = .ingest }
         }.padding(.horizontal)
     }
 }

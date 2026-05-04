@@ -1,3 +1,13 @@
+// KMiCloudSyncService.swift
+//
+// 作者: Wang Chong
+// 功能说明: enum iCloudSyncError
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import CloudKit
 
@@ -11,11 +21,11 @@ enum iCloudSyncError: LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .iCloudNotAvailable: return Localized.tr("icloud.error.notAvailable")
-        case .cloudKitError(let error): return "\(Localized.tr("icloud.error.cloudKit"))：\(error.localizedDescription)"
-        case .encodingError: return Localized.tr("icloud.error.encoding")
-        case .decodingError: return Localized.tr("icloud.error.decoding")
-        case .conflictResolutionFailed: return Localized.tr("icloud.error.conflictResolution")
+        case .iCloudNotAvailable: return L10n.ICloud.tr("error.notAvailable")
+        case .cloudKitError(let error): return "\(L10n.ICloud.tr("error.cloudKit"))：\(error.localizedDescription)"
+        case .encodingError: return L10n.ICloud.tr("error.encoding")
+        case .decodingError: return L10n.ICloud.tr("error.decoding")
+        case .conflictResolutionFailed: return L10n.ICloud.tr("error.conflictResolution")
         }
     }
 }
@@ -78,7 +88,7 @@ class iCloudSyncService: ObservableObject {
         container = nil
         database = nil
         iCloudAvailable = false
-        syncStatus = .error(Localized.tr("icloud.notAvailable"))
+        syncStatus = .error(L10n.ICloud.tr("notAvailable"))
         #elseif canImport(AppKit)
         // Mac Catalyst or macOS: CloudKit may not work without proper entitlements
         // Gracefully disable rather than crash
@@ -86,7 +96,7 @@ class iCloudSyncService: ObservableObject {
         container = nil
         database = nil
         iCloudAvailable = false
-        syncStatus = .error(Localized.tr("icloud.notAvailable"))
+        syncStatus = .error(L10n.ICloud.tr("notAvailable"))
         #else
         let token = FileManager.default.ubiquityIdentityToken
         cloudKitAvailable = token != nil
@@ -99,7 +109,7 @@ class iCloudSyncService: ObservableObject {
             container = nil
             database = nil
             iCloudAvailable = false
-            syncStatus = .error(Localized.tr("icloud.notAvailable"))
+            syncStatus = .error(L10n.ICloud.tr("notAvailable"))
         }
         #endif
     }
@@ -111,7 +121,7 @@ class iCloudSyncService: ObservableObject {
             Task { @MainActor in
                 self?.iCloudAvailable = (status == .available)
                 if status != .available {
-                    self?.syncStatus = .error(Localized.tr("icloud.notAvailable"))
+                    self?.syncStatus = .error(L10n.ICloud.tr("notAvailable"))
                 }
             }
         }
@@ -426,9 +436,9 @@ enum ConflictResolution: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .keepLocal: return Localized.tr("icloud.keepLocal")
-        case .keepRemote: return Localized.tr("icloud.keepRemote")
-        case .merge: return Localized.tr("icloud.merge")
+        case .keepLocal: return L10n.ICloud.tr("keepLocal")
+        case .keepRemote: return L10n.ICloud.tr("keepRemote")
+        case .merge: return L10n.ICloud.tr("merge")
         }
     }
 }

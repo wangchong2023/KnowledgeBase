@@ -1,3 +1,13 @@
+// SplashView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 启动画面：名言引导 + 程序化生成的书本 + 神经网络星空背景
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - SplashView
@@ -14,7 +24,7 @@ struct SplashView: View {
     
     var body: some View {
         ZStack {
-            // MARK: 程序化背景
+            // MARK: - 程序化背景
             SplashBackgroundView(starTwinkle: starTwinkle, nodeGlow: nodeGlow)
                 .ignoresSafeArea()
             

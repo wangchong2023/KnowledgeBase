@@ -1,6 +1,6 @@
-# Knowledge Management 国际化与本地化指南 (Localization Guide)
+# 智元 (KM) 国际化与本地化指南 (Localization Guide)
 
-为了让 Knowledge Management 走向全球，我们采用“双层本地化”架构。
+为了让 智元 (KM) 走向全球，我们采用“双层本地化”架构。
 
 ## 1. 核心应用翻译 (App i18n)
 *   **资产位置**: `Sources/Localization/Localizable.xcstrings` (String Catalog 格式)

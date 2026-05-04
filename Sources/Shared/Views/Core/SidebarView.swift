@@ -1,3 +1,14 @@
+// SidebarView.swift
+//
+// 作者: Wang Chong
+// 功能说明: 应用的核心导航枢纽，负责在一级菜单、二级工具列表与三级详情页之间进行路由分发。
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 // MARK: - 侧边栏导航中心
@@ -7,11 +18,36 @@ enum SidebarSelection: Hashable {
     case page(UUID)
     case tool(KMStore.ToolItem)
     case filteredIndex(PageType)
+    
+    /// 将侧边栏选择映射为路由目标
+    func asRoute() -> AppRoute {
+        switch self {
+        case .page(let id): return .pageDetail(id: id)
+        case .tool(let tool):
+            switch tool {
+            case .dashboard: return .dashboard
+            case .index: return .index()
+            case .lint: return .lint
+            case .taskCenter: return .taskCenter
+            case .tagCloud: return .tagCloud
+            case .chat: return .chat
+            case .synthesis: return .synthesis
+            case .weeklyReport: return .weeklyReport
+            case .log: return .log
+            case .collab: return .collab
+            default: return .index()
+            }
+        case .filteredIndex(let type): return .index(filterType: type)
+        }
+    }
 }
 
 struct SidebarView: View {
     @Environment(KMStore.self) var store
+    @Environment(IngestStore.self) var ingestStore
+    @Environment(AppRouter.self) var router
     @ObservedObject var taskCenter = TaskCenter.shared
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     var heroNamespace: Namespace.ID
     var selection: Binding<SidebarSelection?>? = nil
     
@@ -23,63 +59,38 @@ struct SidebarView: View {
     @SceneStorage("sidebar.selectedTool") private var restoredTool: String?
     @SceneStorage("sidebar.isRecentExpanded") private var isRecentExpanded: Bool = true
 
-    /// 合并外部绑定与 store/SceneStorage 副作用的自定义绑定
+    /// 合并外部绑定与 AppRouter 状态
     private var effectiveBinding: Binding<SidebarSelection?> {
-        if let externalBinding = selection {
-            return Binding(
-                get: { 
-                    let val = externalBinding.wrappedValue
-                    // print("🔍 [NAV-DIAG] SidebarView effectiveBinding (external) get: \(String(describing: val))")
-                    return val
-                },
-                set: { newValue in
-                    print("🔍 [NAV-DIAG] SidebarView effectiveBinding (external) set: \(String(describing: newValue))")
-                    externalBinding.wrappedValue = newValue
-                    applySelectionSideEffects(newValue)
-                }
-            )
-        }
-        return selectionBinding
+        @Bindable var router = router
+        return $router.sidebarSelection
     }
 
-    private var selectionBinding: Binding<SidebarSelection?> {
-        Binding(
-            get: {
-                let toolStr = restoredTool ?? KMStore.ToolItem.index.rawValue
-                if let tool = KMStore.ToolItem(rawValue: toolStr) { return .tool(tool) }
-                if let idStr = restoredPageID, let id = UUID(uuidString: idStr) { return .page(id) }
-                return .tool(.index)
-            },
-            set: { newValue in
-                print("🔍 [NAV-DIAG] SidebarView selectionBinding (internal) set: \(String(describing: newValue))")
-                applySelectionSideEffects(newValue)
-            }
-        )
-    }
-
-    /// 将选择变更同步到 SceneStorage 和 store
-    private func applySelectionSideEffects(_ newValue: SidebarSelection?) {
-        switch newValue {
+    /// 将路由状态同步到 SceneStorage
+    private func syncToSceneStorage(_ selection: SidebarSelection?) {
+        switch selection {
         case .page(let id):
             restoredTool = nil
             restoredPageID = id.uuidString
-            store.selectedPageID = id
-            store.selectedTool = nil
         case .tool(let tool):
             restoredPageID = nil
             restoredTool = tool.rawValue
-            store.selectedTool = tool
-            store.selectedPageID = nil
         case .filteredIndex:
             restoredPageID = nil
             restoredTool = nil
-            store.selectedTool = nil
-            store.selectedPageID = nil
         case .none:
             restoredPageID = nil
             restoredTool = nil
-            store.selectedPageID = nil
-            store.selectedTool = nil
+        }
+    }
+    
+    /// 从 SceneStorage 恢复路由状态
+    private func restoreFromSceneStorage() {
+        if let idStr = restoredPageID, let id = UUID(uuidString: idStr) {
+            router.sidebarSelection = .page(id)
+        } else if let toolStr = restoredTool, let tool = KMStore.ToolItem(rawValue: toolStr) {
+            router.sidebarSelection = .tool(tool)
+        } else {
+            router.sidebarSelection = .tool(.index)
         }
     }
 
@@ -181,7 +192,7 @@ struct SidebarView: View {
 
                 NavigationLink(value: SidebarSelection.tool(.taskCenter)) {
                     HStack {
-                        Label(Localized.tr("aitask.center.title"), systemImage: "arrow.triangle.2.circlepath")
+                        Label(L10n.AI.Task.centerTitle, systemImage: "arrow.triangle.2.circlepath")
                         Spacer()
                         if taskCenter.unreadCount > 0 {
                             Text("\(taskCenter.unreadCount)")
@@ -211,11 +222,11 @@ struct SidebarView: View {
                     HapticManager.shared.trigger(.success)
                 }
             }
-            Button(Localized.tr("misc.cancel"), role: .cancel) {
+            Button(L10n.Common.tr("cancel"), role: .cancel) {
                 pageToDelete = nil
             }
         } message: {
-            Text(Localized.tr("settings.clearAll.message")) // 复用不可恢复的警告文案
+            Text(L10n.Settings.tr("clearAll.message")) // 复用不可恢复的警告文案
         }
         #if os(macOS)
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
@@ -236,6 +247,17 @@ struct SidebarView: View {
                 .help(Localized.tr("security.lockVault"))
             }
         }
+        .onAppear {
+            restoreFromSceneStorage()
+            
+            // 在 iPhone (Compact) 模式下，返回侧边栏时清空选中高亮，避免视觉上的“固定选中”感
+            if horizontalSizeClass == .compact {
+                router.sidebarSelection = nil
+            }
+        }
+        .onChange(of: router.sidebarSelection) { _, newValue in
+            syncToSceneStorage(newValue)
+        }
     }
     
     #if os(macOS)
@@ -244,10 +266,7 @@ struct SidebarView: View {
             provider.loadItem(forTypeIdentifier: "public.file-url", options: nil) { (urlData, error) in
                 if let data = urlData as? Data, let url = URL(dataRepresentation: data, relativeTo: nil) {
                     Task { @MainActor in
-                        LogService.shared.debug("📥 [Mac] 正在导入拖拽文件：\(url.lastPathComponent)")
-                        if let content = try? String(contentsOf: url) {
-                            IngestQueue.shared.enqueue(title: url.deletingPathExtension().lastPathComponent, content: content, store: store)
-                        }
+                        ingestStore.importFile(at: url)
                     }
                 }
             }
@@ -267,9 +286,9 @@ struct SidebarView: View {
         
         #if os(macOS)
         Button(action: {
-            LogService.shared.debug("🖥️ [macOS] 正在新窗口打开页面：\(page.title)")
+            // macOS 新窗口功能预留
         }) {
-            Label(Localized.tr("misc.openInNewWindow"), systemImage: "macwindow.badge.plus")
+            Label(L10n.Common.tr("openInNewWindow"), systemImage: "macwindow.badge.plus")
         }
         #endif
         

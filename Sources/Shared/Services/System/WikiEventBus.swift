@@ -1,3 +1,13 @@
+// WikiEventBus.swift
+//
+// 作者: Wang Chong
+// 功能说明: 系统级事件总线 (Architect 视角：解耦服务间通信)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 import Combine
 
@@ -9,8 +19,9 @@ final class WikiEventBus {
     
     /// 定义系统关键事件
     enum WikiEvent {
-        case pageCreated(id: UUID, title: String)
-        case pageUpdated(id: UUID)
+        case pageCreated(id: UUID, title: String, nodeCount: Int, linkCount: Int)
+        case pageUpdated(id: UUID, nodeCount: Int, linkCount: Int)
+        case pagesCleared
         case aiTaskStarted(type: String)
         case aiTaskCompleted(type: String, success: Bool)
         case securityStateChanged(isLocked: Bool)

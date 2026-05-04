@@ -1,3 +1,13 @@
+// OnDeviceComponents.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct OnDeviceTestView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 
 // MARK: - On-Device Test View
@@ -117,7 +127,7 @@ struct OnDeviceTestView: View {
                 let generated = try await onDeviceService.generate(prompt: prompt, maxTokens: 128)
                 result = generated
             } catch {
-                result = "\(Localized.tr("misc.error")): \(error.localizedDescription)"
+                result = "\(L10n.Common.tr("error")): \(error.localizedDescription)"
             }
             isGenerating = false
         }

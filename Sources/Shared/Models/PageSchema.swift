@@ -1,3 +1,14 @@
+// PageSchema.swift
+//
+// 作者: Wang Chong
+// 功能说明: 页面 Schema：定义特定类型页面必须包含的内容结构
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-03
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 /// 页面 Schema：定义特定类型页面必须包含的内容结构
@@ -16,21 +27,21 @@ final class SchemaService {
         .entity: PageSchema(
             type: .entity,
             requiredFields: [
-                Localized.tr("schema.entity.field.definition"),
-                Localized.tr("schema.entity.field.attributes"),
-                Localized.tr("schema.entity.field.relations")
+                L10n.Schema.tr("entity.field.definition"),
+                L10n.Schema.tr("entity.field.attributes"),
+                L10n.Schema.tr("entity.field.relations")
             ],
-            template: Localized.tr("schema.entity.template"),
-            promptInstruction: Localized.tr("schema.entity.prompt")
+            template: L10n.Schema.tr("entity.template"),
+            promptInstruction: L10n.Schema.tr("entity.prompt")
         ),
         .concept: PageSchema(
             type: .concept,
             requiredFields: [
-                Localized.tr("schema.concept.field.theory"),
-                Localized.tr("schema.concept.field.applications")
+                L10n.Schema.tr("concept.field.theory"),
+                L10n.Schema.tr("concept.field.applications")
             ],
-            template: Localized.tr("schema.concept.template"),
-            promptInstruction: Localized.tr("schema.concept.prompt")
+            template: L10n.Schema.tr("concept.template"),
+            promptInstruction: L10n.Schema.tr("concept.prompt")
         )
     ]
     

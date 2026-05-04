@@ -1,4 +1,15 @@
-import SwiftUI
+// DataExportService.swift
+//
+// 作者: Wang Chong
+// 功能说明: 数据导出与迁移服务 (Product Manager 视角：增强用户数据安全感与可迁移性)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
+import Foundation
 import PDFKit
 
 /// 数据导出与迁移服务 (Product Manager 视角：增强用户数据安全感与可迁移性)
@@ -39,7 +50,17 @@ final class DataExportService {
     
     /// 备份金库到 ZIP 压缩包
     func createVaultArchive(vaultURL: URL) async throws -> URL {
-        // 实现 ZIP 压缩逻辑
-        fatalError("Not implemented")
+        throw DataExportError.notImplemented
+    }
+}
+
+enum DataExportError: LocalizedError {
+    case notImplemented
+
+    var errorDescription: String? {
+        switch self {
+        case .notImplemented:
+            return "ZIP archive creation is not yet implemented"
+        }
     }
 }

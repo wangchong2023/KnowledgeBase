@@ -1,3 +1,13 @@
+// ServiceContainer.swift
+//
+// 作者: Wang Chong
+// 功能说明: 依赖注入容器 (L2 层：解耦中枢)
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import Foundation
 
 /// 依赖注入容器 (L2 层：解耦中枢)
@@ -13,6 +23,11 @@ final class ServiceContainer: @unchecked Sendable {
     func register<T>(_ service: T, for type: T.Type) {
         let key = String(describing: type)
         services[key] = service
+    }
+    
+    /// 重置所有服务（主要用于测试环境隔离）
+    func reset() {
+        services.removeAll()
     }
     
     /// 解析服务

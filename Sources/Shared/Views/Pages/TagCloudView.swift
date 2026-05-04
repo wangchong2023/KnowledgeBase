@@ -1,3 +1,14 @@
+// TagCloudView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct TagCloudView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import SwiftUI
 
 #if os(macOS)
@@ -87,7 +98,7 @@ struct TagCloudViewContent: View {
                         if !isEditMode { selectedTagsForBulk.removeAll() }
                     }
                 }) {
-                    Label(isEditMode ? Localized.tr("misc.done") : Localized.tr("tags.manageTitle"), 
+                    Label(isEditMode ? L10n.Common.tr("done") : Localized.tr("tags.manageTitle"), 
                           systemImage: isEditMode ? "checkmark.circle" : "checklist")
                         .font(.footnote.weight(.medium))
                         .foregroundStyle(isEditMode ? .green : .wikiAccent)
@@ -124,8 +135,8 @@ struct TagCloudViewContent: View {
                 set: { if !$0 { tagToRename = nil } }
             )) {
                 TextField(Localized.tr("tag.newName"), text: $newTagName)
-                Button(Localized.tr("misc.cancel"), role: .cancel) { tagToRename = nil }
-                Button(Localized.tr("misc.ok")) {
+                Button(L10n.Common.tr("cancel"), role: .cancel) { tagToRename = nil }
+                Button(L10n.Common.tr("ok")) {
                     performRename()
                 }
             } message: {
@@ -137,18 +148,18 @@ struct TagCloudViewContent: View {
                 isPresented: $showDeleteConfirm,
                 titleVisibility: .visible
             ) {
-                Button(Localized.tr("misc.delete"), role: .destructive) {
+                Button(L10n.Common.tr("delete"), role: .destructive) {
                     performDelete()
                 }
-                Button(Localized.tr("misc.cancel"), role: .cancel) { tagToDelete = nil }
+                Button(L10n.Common.tr("cancel"), role: .cancel) { tagToDelete = nil }
             } message: {
                 Text(Localized.tr("settings.clearAll.message"))
             }
             // 新增标签对话框 (保持 alert 因为需要文本输入)
             .alert(Localized.tr("tags.addNew"), isPresented: $showAddTagDialog) {
                 TextField(Localized.tr("tags.inputName"), text: $addTagName)
-                Button(Localized.tr("misc.cancel"), role: .cancel) { addTagName = "" }
-                Button(Localized.tr("misc.create")) {
+                Button(L10n.Common.tr("cancel"), role: .cancel) { addTagName = "" }
+                Button(L10n.Common.tr("create")) {
                     performAddTag()
                 }
             } message: {
@@ -160,15 +171,13 @@ struct TagCloudViewContent: View {
                 isPresented: $showBulkDeleteConfirm,
                 titleVisibility: .visible
             ) {
-                Button(Localized.tr("misc.deleteAll"), role: .destructive) {
-                    for tag in selectedTagsForBulk {
-                        store.deleteTag(tag)
-                    }
+                Button(L10n.Common.tr("deleteAll"), role: .destructive) {
+                    store.bulkDeleteTags(selectedTagsForBulk)
+                    HapticManager.shared.trigger(.success)
                     selectedTagsForBulk.removeAll()
                     isEditMode = false
-                    HapticManager.shared.trigger(.success)
                 }
-                Button(Localized.tr("misc.cancel"), role: .cancel) { }
+                Button(L10n.Common.tr("cancel"), role: .cancel) { }
             } message: {
                 Text(Localized.tr("settings.clearAll.message"))
             }
@@ -185,7 +194,7 @@ struct TagCloudViewContent: View {
                 .foregroundStyle(.white)
             Spacer()
             Button(role: .destructive, action: { showBulkDeleteConfirm = true }) {
-                Text(Localized.tr("misc.bulkDelete"))
+                Text(L10n.Common.tr("bulkDelete"))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
                     .background(Color.red)
@@ -388,13 +397,7 @@ struct TagCloudViewContent: View {
         let trimmed = addTagName.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
         
-        // 创建一个存根页面来引入这个新标签
-        _ = store.createPage(
-            title: Localized.trf("tags.pageTitle", trimmed),
-            type: .concept,
-            content: Localized.trf("tags.pageContent", trimmed),
-            tags: [trimmed]
-        )
+        store.addNewTag(trimmed)
         
         addTagName = ""
         showAddTagDialog = false

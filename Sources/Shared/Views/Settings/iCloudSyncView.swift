@@ -1,284 +1,140 @@
+// iCloudSyncView.swift
+//
+// 作者: Wang Chong
+// 功能说明: struct iCloudSyncView
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+//   - 更新: 2026-05-04
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 @preconcurrency import SwiftUI
 
 // MARK: - iCloud Sync Settings View
 struct iCloudSyncView: View {
-    @ObservedObject var syncService: iCloudSyncService
-    var store: KMStore
-    
-    @State private var isSyncing = false
-    @State private var showError = false
-    @State private var errorMessage = ""
-    @State private var showConflictAlert = false
-    @State private var showPullConfirmation = false
-    @State private var showClearCloudConfirmation = false
-    @State private var showAutoSyncError = false
-    @State private var autoSyncErrorMessage = ""
-    @State private var conflictResolution: ConflictResolution = {
-        if let raw = UserDefaults.standard.string(forKey: "knowledge-management_conflict_resolution"),
-           let resolved = ConflictResolution(rawValue: raw) {
-            return resolved
-        }
-        return .merge
-    }()
-    @State private var autoSync = UserDefaults.standard.bool(forKey: "knowledge-management_auto_sync")
-    @State private var autoSyncTimer: Timer?
-    
-    // MARK: - Constants
-    /// Auto-sync interval in seconds (5 minutes)
-    private static let autoSyncInterval: TimeInterval = 300
-    
+    @Environment(KMStore.self) var store
+    @Environment(SettingsStore.self) var settingsStore
+
+    @Bindable var coordinator: iCloudSyncCoordinator
+
     var body: some View {
         List {
             // MARK: - Status Section
             Section {
-                SyncStatusRow(syncService: syncService)
+                SyncStatusRow(syncService: coordinator.syncService)
             } header: {
-                Text(Localized.tr("icloud.syncStatus"))
+                Text(L10n.ICloud.tr("syncStatus"))
             }
 
             // MARK: - Actions Section
             SyncActionsSection(
-                syncService: syncService,
-                isSyncing: isSyncing,
-                onPush: pushToCloud,
-                onPullRequest: { showPullConfirmation = true },
-                onBidirectional: bidirectionalSync
+                syncService: coordinator.syncService,
+                isSyncing: coordinator.isSyncing,
+                onPush: coordinator.pushToCloud,
+                onPullRequest: { coordinator.showPullConfirmation = true },
+                onBidirectional: coordinator.bidirectionalSync
             )
 
             // MARK: - Settings Section
             SyncSettingsSection(
-                autoSync: $autoSync,
-                conflictResolution: $conflictResolution,
+                autoSync: $coordinator.autoSync,
+                conflictResolution: $coordinator.conflictResolution,
                 onAutoSyncChange: { enabled in
                     if enabled {
-                        startAutoSyncIfNeeded()
+                        coordinator.startAutoSyncIfNeeded()
                     } else {
-                        autoSyncTimer?.invalidate()
-                        autoSyncTimer = nil
+                        coordinator.cancelAutoSync()
                     }
                 }
             )
-            
+
             // MARK: - Info Section
             Section {
                 VStack(alignment: .leading, spacing: 12) {
-                    SyncInfoRow(icon: "1.circle.fill", text: Localized.tr("icloud.info1"))
-                    SyncInfoRow(icon: "2.circle.fill", text: Localized.tr("icloud.info2"))
-                    SyncInfoRow(icon: "3.circle.fill", text: Localized.tr("icloud.info3"))
-                    SyncInfoRow(icon: "4.circle.fill", text: Localized.tr("icloud.info4"))
+                    SyncInfoRow(icon: "1.circle.fill", text: L10n.ICloud.tr("info1"))
+                    SyncInfoRow(icon: "2.circle.fill", text: L10n.ICloud.tr("info2"))
+                    SyncInfoRow(icon: "3.circle.fill", text: L10n.ICloud.tr("info3"))
+                    SyncInfoRow(icon: "4.circle.fill", text: L10n.ICloud.tr("info4"))
                 }
                 .padding(.vertical, 4)
             } header: {
-                Text(Localized.tr("icloud.aboutSync"))
+                Text(L10n.ICloud.tr("aboutSync"))
             }
-            
+
             // MARK: - Danger Section
             Section {
                 Button(role: .destructive) {
-                    showClearCloudConfirmation = true
+                    coordinator.showClearCloudConfirmation = true
                 } label: {
-                    Label(Localized.tr("icloud.clearCloudData"), systemImage: "trash.icloud")
+                    Label(L10n.ICloud.tr("clearCloudData"), systemImage: "trash.icloud")
                         .foregroundStyle(.red)
                 }
-                .disabled(isSyncing)
+                .disabled(coordinator.isSyncing)
             }
         }
-#if os(iOS)
 #if os(iOS)
         .listStyle(.insetGrouped)
 #endif
-#endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle(Localized.tr("icloud.title"))
-        .alert(Localized.tr("icloud.syncError"), isPresented: $showError) {
-            Button(Localized.tr("misc.ok"), role: .cancel) {}
+        .navigationTitle(L10n.ICloud.tr("title"))
+        .alert(L10n.ICloud.tr("syncError"), isPresented: $coordinator.showError) {
+            Button(L10n.Common.tr("ok"), role: .cancel) {}
         } message: {
-            Text(errorMessage)
+            Text(coordinator.errorMessage)
         }
-        .alert(Localized.tr("icloud.conflictDetected"), isPresented: $showConflictAlert) {
+        .alert(L10n.ICloud.tr("conflictDetected"), isPresented: $coordinator.showConflictAlert) {
             Button(ConflictResolution.merge.displayName) {
-                conflictResolution = .merge
-                UserDefaults.standard.set(ConflictResolution.merge.rawValue, forKey: "knowledge-management_conflict_resolution")
+                coordinator.conflictResolution = .merge
+                settingsStore.iCloudConflictResolution = ConflictResolution.merge.rawValue
             }
             Button(ConflictResolution.keepLocal.displayName) {
-                conflictResolution = .keepLocal
-                UserDefaults.standard.set(ConflictResolution.keepLocal.rawValue, forKey: "knowledge-management_conflict_resolution")
+                coordinator.conflictResolution = .keepLocal
+                settingsStore.iCloudConflictResolution = ConflictResolution.keepLocal.rawValue
             }
             Button(ConflictResolution.keepRemote.displayName) {
-                conflictResolution = .keepRemote
-                UserDefaults.standard.set(ConflictResolution.keepRemote.rawValue, forKey: "knowledge-management_conflict_resolution")
+                coordinator.conflictResolution = .keepRemote
+                settingsStore.iCloudConflictResolution = ConflictResolution.keepRemote.rawValue
             }
-            Button(Localized.tr("misc.cancel"), role: .cancel) {}
+            Button(L10n.Common.tr("cancel"), role: .cancel) {}
         } message: {
-            Text(Localized.tr("icloud.conflictMessage"))
+            Text(L10n.ICloud.tr("conflictMessage"))
         }
-        .confirmationDialog(Localized.tr("icloud.pullWillOverwrite"), isPresented: $showPullConfirmation, titleVisibility: .visible) {
-            Button(Localized.tr("icloud.download"), role: .destructive) {
-                performActualPull()
+        .confirmationDialog(L10n.ICloud.tr("pullWillOverwrite"), isPresented: $coordinator.showPullConfirmation, titleVisibility: .visible) {
+            Button(L10n.ICloud.tr("download"), role: .destructive) {
+                coordinator.pullFromCloud()
             }
-            Button(Localized.tr("misc.cancel"), role: .cancel) {}
+            Button(L10n.Common.tr("cancel"), role: .cancel) {}
         } message: {
-            Text(Localized.tr("icloud.pullOverwriteMessage"))
+            Text(L10n.ICloud.tr("pullOverwriteMessage"))
         }
-        .confirmationDialog(Localized.tr("icloud.clearCloudData"), isPresented: $showClearCloudConfirmation, titleVisibility: .visible) {
-            Button(Localized.tr("misc.clearAll"), role: .destructive) {
-                clearCloudData()
-                HapticManager.shared.trigger(.success)
+        .confirmationDialog(L10n.ICloud.tr("clearCloudData"), isPresented: $coordinator.showClearCloudConfirmation, titleVisibility: .visible) {
+            Button(L10n.Common.tr("clearAll"), role: .destructive) {
+                coordinator.clearCloudData()
             }
-            Button(Localized.tr("misc.cancel"), role: .cancel) {}
+            Button(L10n.Common.tr("cancel"), role: .cancel) {}
         } message: {
-            Text(Localized.tr("icloud.clearCloudDataMessage")) // 确保 Localized 有此 Key
+            Text(L10n.ICloud.tr("clearCloudDataMessage"))
         }
-        .alert(Localized.tr("icloud.autoSyncFailed"), isPresented: $showAutoSyncError) {
-            Button(Localized.tr("misc.ok"), role: .cancel) {}
+        .alert(L10n.ICloud.tr("autoSyncFailed"), isPresented: $coordinator.showAutoSyncError) {
+            Button(L10n.Common.tr("ok"), role: .cancel) {}
         } message: {
-            Text(autoSyncErrorMessage)
+            Text(coordinator.autoSyncErrorMessage)
         }
         .onAppear {
-            startAutoSyncIfNeeded()
+            coordinator.store = store
+            coordinator.settingsStore = settingsStore
+            coordinator.onAppear()
+        }
+        .onChange(of: coordinator.autoSync) { _, newValue in
+            settingsStore.iCloudAutoSync = newValue
+        }
+        .onChange(of: coordinator.conflictResolution) { _, newValue in
+            settingsStore.iCloudConflictResolution = newValue.rawValue
         }
         .onDisappear {
-            autoSyncTimer?.invalidate()
-            autoSyncTimer = nil
-        }
-    }
-    
-    // MARK: - Auto Sync
-    private func startAutoSyncIfNeeded() {
-        autoSyncTimer?.invalidate()
-        guard autoSync, syncService.iCloudAvailable else { return }
-        
-        // Auto-sync every 5 minutes
-        autoSyncTimer = Timer.scheduledTimer(withTimeInterval: Self.autoSyncInterval, repeats: true) { _ in
-            Task { @MainActor in
-                guard !isSyncing else { return }
-                await performAutoSync()
-            }
-        }
-        
-        // Also perform an immediate sync on appear
-        Task { @MainActor in
-            guard !isSyncing else { return }
-            await performAutoSync()
-        }
-    }
-    
-    private func performAutoSync() async {
-        isSyncing = true
-        syncService.onConflictDetected = { _, _, _, _ in
-            return conflictResolution
-        }
-        
-        do {
-            let (finalPages, _) = try await syncService.sync(
-                localPages: store.pages,
-                localLogs: store.logEntries
-            )
-            if !finalPages.isEmpty {
-                replaceLocalData(with: finalPages)
-            }
-        } catch {
-            await MainActor.run {
-                autoSyncErrorMessage = error.localizedDescription
-                showAutoSyncError = true
-            }
-        }
-        isSyncing = false
-    }
-    
-    // MARK: - Actions
-    private func pushToCloud() {
-        isSyncing = true
-        Task {
-            do {
-                try await syncService.pushToCloud(pages: store.pages, logEntries: store.logEntries)
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-            }
-            await MainActor.run { isSyncing = false }
-        }
-    }
-    
-    private func pullFromCloud() {
-        isSyncing = true
-        Task {
-            do {
-                let (pages, _) = try await syncService.pullFromCloud()
-                await MainActor.run {
-                    if !pages.isEmpty {
-                        replaceLocalData(with: pages)
-                    }
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-            }
-            await MainActor.run { isSyncing = false }
-        }
-    }
-
-    private func performActualPull() {
-        pullFromCloud()
-    }
-    
-    private func bidirectionalSync() {
-        isSyncing = true
-        syncService.onConflictDetected = { _, _, _, _ in
-            // In UI context, return the user's chosen resolution
-            return conflictResolution
-        }
-        
-        Task {
-            do {
-                let (finalPages, _) = try await syncService.sync(
-                    localPages: store.pages,
-                    localLogs: store.logEntries
-                )
-                await MainActor.run {
-                    replaceLocalData(with: finalPages)
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-            }
-            await MainActor.run { isSyncing = false }
-        }
-    }
-    
-    // MARK: - Helpers
-    /// Replaces all local data with imported pages from sync results.
-    private func replaceLocalData(with pages: [WikiPage]) {
-        try? store.clearAllData()
-        for page in pages {
-            store.addImportedPage(page)
-        }
-        store.saveToDisk()
-    }
-    
-    private func clearCloudData() {
-        isSyncing = true
-        Task {
-            do {
-                try await syncService.pushToCloud(pages: [], logEntries: [])
-                await MainActor.run {
-                    syncService.syncStatus = .idle
-                    syncService.lastSyncDate = nil
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    showError = true
-                }
-            }
-            await MainActor.run { isSyncing = false }
+            coordinator.onDisappear()
         }
     }
 }

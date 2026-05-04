@@ -1,7 +1,46 @@
+// KMNewFeaturesTests.swift
+//
+// 作者: Wang Chong
+// 功能说明: KMNew Features Tests.swift
+// 版本: 1.0
+// 修改记录:
+//   - 创建: 2026-05-02
+// 日期: 2026-05-04
+// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+
 import XCTest
 @testable import KM
 
 final class KMNewFeaturesTests: XCTestCase {
+    
+    @MainActor
+    override func setUp() async throws {
+        try await super.setUp()
+        ServiceContainer.shared.reset()
+        DatabaseManager.shared.reset()
+        
+        // 重置单例状态
+        TaskCenter.shared.reset()
+        PromptService.shared.reset()
+        
+        let testDBURL = URL(string: "file::memory:?cache=shared")!
+        let sqliteStore = SQLiteStore(dbURL: testDBURL)
+        ServiceContainer.shared.register(sqliteStore, for: SQLiteStore.self)
+        ServiceContainer.shared.register(LogService(), for: LogServiceProtocol.self)
+        ServiceContainer.shared.register(LinkService(), for: LinkService.self)
+        ServiceContainer.shared.register(LintService(), for: LintService.self)
+        ServiceContainer.shared.register(UndoService(), for: UndoService.self)
+        ServiceContainer.shared.register(BackupService(), for: BackupService.self)
+    }
+    
+    @MainActor
+    override func tearDown() async throws {
+        TaskCenter.shared.reset()
+        PromptService.shared.reset()
+        DatabaseManager.shared.reset()
+        ServiceContainer.shared.reset()
+        try await super.tearDown()
+    }
 
     // MARK: - QuizModel Parsing Tests
     func testQuizModelParsing() {
@@ -32,9 +71,10 @@ final class KMNewFeaturesTests: XCTestCase {
         }
     }
 
-    // MARK: - AITaskCenter Tests
-    func testAITaskCenterManagement() {
-        let center = AITaskCenter.shared
+    // MARK: - TaskCenter Tests
+    @MainActor
+    func testTaskCenterManagement() {
+        let center = TaskCenter.shared
         let initialCount = center.tasks.count
         
         let taskID = center.addTask(name: "测试任务", target: "测试目标")
@@ -68,12 +108,16 @@ final class KMNewFeaturesTests: XCTestCase {
         service.mindmapPrompt = "New Custom Prompt"
         service.save()
         
-        // 模拟重启（重新初始化）
-        let newService = PromptService()
+        // 模拟重启（使用 shared 实例，因为 init 已私有）
+        let newService = PromptService.shared
         XCTAssertEqual(newService.mindmapPrompt, "New Custom Prompt")
         
         service.reset()
-        XCTAssertEqual(service.mindmapPrompt, DefaultPrompts.mindmap)
+        XCTAssertEqual(service.mindmapPrompt, Localized.tr("prompt.default.mindmap"))
+        
+        // 恢复原状
+        service.mindmapPrompt = originalMindmap
+        service.save()
     }
 
     // MARK: - RecursiveChunker Semantic Tests
@@ -93,6 +137,7 @@ final class KMNewFeaturesTests: XCTestCase {
     }
 
     // MARK: - Hybrid Search Logic Tests
+    @MainActor
     func testHybridSearchQueryExpansion() {
         let store = SQLiteStore()
         let query = "Karpathy Deep Learning"
@@ -114,7 +159,7 @@ final class KMNewFeaturesTests: XCTestCase {
 
     // MARK: - VaultService Bookmark Persistence
     func testVaultServiceBookmarkPersistence() {
-        let service = VaultService.shared
+        let service = VaultStorageService.shared
         let dummyURL = URL(fileURLWithPath: "/tmp/test_vault")
         
         // 模拟书签存储（注意：单元测试中可能因权限无法真实创建 Security-Scoped Bookmark）
