@@ -1,4 +1,5 @@
 import Foundation
+@testable import KM
 
 /// RAG 自动化评估引擎
 /// 用于计算 AI 检索结果与黄金数据集的匹配度
@@ -9,17 +10,17 @@ final class RAGEvaluator {
     }
     
     /// 执行回归测试
-    func evaluate(llmService: LLMService, store: SQLiteStore) async -> EvaluationResult {
+    func evaluate(llmService: LLMService, store: SQLiteStore) async throws -> EvaluationResult {
         let goldenSetURL = Bundle.main.url(forResource: "RAG_GoldenSet", withExtension: "json")!
-        let data = try! Data(contentsOf: goldenSetURL)
-        let cases = try! JSONDecoder().decode([GoldenCase].self, from: data)
+        let data = try Data(contentsOf: goldenSetURL)
+        let cases = try JSONDecoder().decode([GoldenCase].self, from: data)
         
         var totalScore: Double = 0
         var failures: [String] = []
         
         for kase in cases {
             // 1. 模拟 AI 检索
-            let response = await llmService.generateSummary(for: kase.document)
+            let response = try await llmService.generate(prompt: kase.document, systemPrompt: "请对以下内容进行摘要分析。")
             
             // 2. 关键词匹配打分 (简单 NLP 逻辑)
             let matchCount = kase.expected_keywords.filter { response.contains($0) }.count

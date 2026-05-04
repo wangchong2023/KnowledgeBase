@@ -3,6 +3,7 @@ import XCTest
 
 /// 边界与异常测试 (Expert QA Item #4)
 /// 模拟极端环境下的 IngestQueue 表现。
+@MainActor
 final class IngestQueueTests: XCTestCase {
     var store: KMStore!
     

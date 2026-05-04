@@ -98,11 +98,11 @@ private struct LogEntryRow: View {
                 // 动作图标
                 ZStack {
                     Circle()
-                        .fill(entry.action.color.opacity(0.1))
+                        .fill(Color.fromModelColorName(entry.action.colorName).opacity(0.1))
                         .frame(width: 36, height: 36)
                     
                     Image(systemName: entry.action.icon)
-                        .foregroundStyle(entry.action.color)
+                        .foregroundStyle(Color.fromModelColorName(entry.action.colorName))
                         .font(.system(size: 14, weight: .bold))
                 }
                 
@@ -110,7 +110,7 @@ private struct LogEntryRow: View {
                     HStack {
                         Text(entry.action.localizedName)
                             .font(.headline)
-                            .foregroundStyle(entry.action.color)
+                            .foregroundStyle(Color.fromModelColorName(entry.action.colorName))
                         
                         Text(entry.target)
                             .font(.headline)

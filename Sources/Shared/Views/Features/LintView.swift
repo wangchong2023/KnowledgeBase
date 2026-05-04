@@ -590,7 +590,7 @@ struct LintIssueRow: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Image(systemName: issue.type.icon)
-                    .foregroundStyle(issue.severity.color)
+                    .foregroundStyle(Color.fromModelColorName(issue.severity.colorName))
                     .frame(width: 16, height: 16)
 
                 Text(issue.message)

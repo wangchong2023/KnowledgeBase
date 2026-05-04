@@ -2,6 +2,7 @@ import XCTest
 @testable import KM
 
 /// LLMService 单元测试 (软件工程视角：确保 AI 逻辑鲁棒性)
+@MainActor
 final class LLMServiceTests: XCTestCase {
     var service: LLMService!
     

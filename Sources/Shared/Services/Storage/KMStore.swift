@@ -171,13 +171,13 @@ final class KMStore: @preconcurrency GraphDataProvider {
             }
         }
         
-        /// 获取对应的格式颜色
-        var formatColor: Color {
+        /// 获取对应的格式颜色名称
+        var formatColorName: String {
             switch self {
-            case .mindmap: return .blue
-            case .slides: return .orange
-            case .quiz: return .green
-            case .report: return .red
+            case .mindmap: return "blue"
+            case .slides: return "orange"
+            case .quiz: return "green"
+            case .report: return "red"
             }
         }
     }

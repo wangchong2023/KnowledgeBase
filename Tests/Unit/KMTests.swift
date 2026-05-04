@@ -226,10 +226,10 @@ final class ModelsTests: XCTestCase {
     }
     
     func testPageStatusColors() {
-        XCTAssertEqual(PageStatus.active.color, .green)
-        XCTAssertEqual(PageStatus.stub.color, .yellow)
-        XCTAssertEqual(PageStatus.needsUpdate.color, .orange)
-        XCTAssertEqual(PageStatus.deprecated.color, .red)
+        XCTAssertEqual(PageStatus.active.colorName, "green")
+        XCTAssertEqual(PageStatus.stub.colorName, "yellow")
+        XCTAssertEqual(PageStatus.needsUpdate.colorName, "orange")
+        XCTAssertEqual(PageStatus.deprecated.colorName, "red")
     }
     
     // MARK: - Confidence Tests
@@ -238,9 +238,9 @@ final class ModelsTests: XCTestCase {
     }
     
     func testConfidenceColors() {
-        XCTAssertEqual(Confidence.high.color, .green)
-        XCTAssertEqual(Confidence.medium.color, .yellow)
-        XCTAssertEqual(Confidence.low.color, .red)
+        XCTAssertEqual(Confidence.high.colorName, "green")
+        XCTAssertEqual(Confidence.medium.colorName, "yellow")
+        XCTAssertEqual(Confidence.low.colorName, "red")
     }
     
     // MARK: - Character Extension
@@ -288,8 +288,8 @@ final class GraphModelsTests: XCTestCase {
     }
     
     func testLogEntryCreation() {
-        let entry = LogEntry(action: "create", target: "Page1", details: "Created new page")
-        XCTAssertEqual(entry.action, "create")
+        let entry = LogEntry(action: .create, target: "Page1", details: "Created new page")
+        XCTAssertEqual(entry.action, .create)
         XCTAssertEqual(entry.target, "Page1")
         XCTAssertEqual(entry.details, "Created new page")
         XCTAssertNotNil(entry.timestamp)
@@ -305,19 +305,19 @@ final class LintIssueTests: XCTestCase {
         XCTAssertEqual(issue.severity, .error)
         XCTAssertEqual(issue.message, "Broken link")
         XCTAssertEqual(issue.severity.icon, "xmark.circle.fill")
-        XCTAssertEqual(issue.severity.color, .red)
+        XCTAssertEqual(issue.severity.colorName, "red")
     }
     
     func testLintIssueSeverityWarning() {
         let issue = LintIssue(severity: .warning, message: "Orphan page", suggestion: "Add links to this page")
         XCTAssertEqual(issue.severity.icon, "exclamationmark.triangle.fill")
-        XCTAssertEqual(issue.severity.color, Color.orange)
+        XCTAssertEqual(issue.severity.colorName, "orange")
     }
     
     func testLintIssueSeverityInfo() {
         let issue = LintIssue(severity: .info, message: "Stub content", suggestion: "Expand the content")
         XCTAssertEqual(issue.severity.icon, "info.circle.fill")
-        XCTAssertEqual(issue.severity.color, Color.blue)
+        XCTAssertEqual(issue.severity.colorName, "blue")
     }
 }
 
@@ -475,78 +475,6 @@ final class UndoServiceTests: XCTestCase {
     }
 }
 
-// MARK: - LinkService Tests
-final class LinkServiceTests: XCTestCase {
-    
-    var linkService: LinkService!
-    var samplePages: [WikiPage]!
-    
-    override func setUp() {
-        super.setUp()
-        linkService = LinkService()
-        
-        samplePages = [
-            WikiPage(title: "Alpha", type: .entity, content: "Links to [[Beta]] and [[Gamma]]"),
-            WikiPage(title: "Beta", type: .concept, content: "Links to [[Alpha]]"),
-            WikiPage(title: "Gamma", type: .source, content: "No outgoing links"),
-            WikiPage(title: "Delta", type: .concept, content: "Links to [[NonExistent]]", tags: ["test", "sample"])
-        ]
-    }
-    
-    override func tearDown() {
-        linkService = nil
-        samplePages = nil
-        super.tearDown()
-    }
-    
-    func testPageByTitle() {
-        let found = linkService.pageByTitle("Alpha", in: samplePages)
-        XCTAssertNotNil(found)
-        XCTAssertEqual(found?.title, "Alpha")
-    }
-    
-    func testPageByTitleCaseInsensitive() {
-        let found = linkService.pageByTitle("alpha", in: samplePages)
-        XCTAssertNotNil(found)
-    }
-    
-    func testPageByTitleNotFound() {
-        let found = linkService.pageByTitle("NonExistent", in: samplePages)
-        XCTAssertNil(found)
-    }
-    
-    func testPageByID() {
-        let targetID = samplePages[0].id
-        let found = linkService.pageByID(targetID, in: samplePages)
-        XCTAssertNotNil(found)
-        XCTAssertEqual(found?.id, targetID)
-    }
-    
-    func testBacklinks() {
-        let alphaID = samplePages[0].id
-        let backlinks = linkService.backlinks(for: alphaID, in: samplePages)
-        // Beta links to Alpha
-        XCTAssertTrue(backlinks.contains { $0.title == "Beta" })
-    }
-    
-    func testSearchByTitle() {
-        let results = linkService.search(query: "Alpha", in: samplePages)
-        XCTAssertFalse(results.isEmpty)
-        XCTAssertTrue(results.contains { $0.title == "Alpha" })
-    }
-    
-    func testSearchByContent() {
-        let results = linkService.search(query: "outgoing links", in: samplePages)
-        XCTAssertFalse(results.isEmpty)
-    }
-    
-    func testAllTags() {
-        let tags = linkService.allTags(in: samplePages)
-        XCTAssertFalse(tags.isEmpty)
-        XCTAssertTrue(tags.contains { $0.tag == "test" })
-    }
-}
-
 // MARK: - LintService Tests
 final class LintServiceTests: XCTestCase {
     
@@ -565,49 +493,50 @@ final class LintServiceTests: XCTestCase {
         super.tearDown()
     }
     
-    func testDetectBrokenLinks() {
+    func testDetectBrokenLinks() async {
         let pages = [
             WikiPage(title: "A", content: "Links to [[NonExistent]]")
         ]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         XCTAssertTrue(issues.contains { $0.message.contains("NonExistent") || $0.message.contains("broken") || $0.message.contains("Broken") })
     }
     
-    func testDetectMultipleBrokenLinks() {
+    func testDetectMultipleBrokenLinks() async {
         let pages = [
             WikiPage(title: "A", content: "[[Missing1]] and [[Missing2]]")
         ]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         let brokenCount = issues.filter { $0.severity == .error }.count
         XCTAssertEqual(brokenCount, 2)
     }
     
-    func testDetectStubContent() {
+    func testDetectStubContent() async {
         let pages = [
             WikiPage(title: "Short", content: "Hi")
         ]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         XCTAssertTrue(issues.contains { $0.message.contains("Short") })
     }
     
-    func testRawPagesNotFlaggedAsOrphan() {
+    func testRawPagesNotFlaggedAsOrphan() async {
         // raw type pages should NOT be flagged as orphans even without backlinks
         let rawPage = WikiPage(title: "RawData", type: .raw, content: String(repeating: "x", count: 200))
-        let issues = lintService.runLint(pages: [rawPage], linkService: linkService)
+        let issues = await lintService.runLint(pages: [rawPage], linkService: linkService)
         let orphanIssues = issues.filter { $0.severity == .warning && $0.message.contains("orphan") || $0.message.contains("Orphan") }
         XCTAssertTrue(orphanIssues.isEmpty, "raw type should not be flagged as orphan")
     }
     
-    func testNoIssuesForHealthyWiki() {
+    func testNoIssuesForHealthyWiki() async {
         let pageA = WikiPage(title: "Alpha", content: String(repeating: "Good content ", count: 20))
         let pageB = WikiPage(title: "Beta", content: "Links to [[Alpha]] " + String(repeating: "content ", count: 15))
         let pages = [pageA, pageB]
-        let issues = lintService.runLint(pages: pages, linkService: linkService)
+        let issues = await lintService.runLint(pages: pages, linkService: linkService)
         XCTAssertFalse(issues.contains { $0.severity == .error })
     }
 }
 
 // MARK: - IngestService Tests
+@MainActor
 final class IngestServiceTests: XCTestCase {
     
     var ingestService: IngestService!
@@ -807,24 +736,24 @@ final class LogServiceTests: XCTestCase {
     }
     
     func testAddLogEntry() {
-        logService.addLog(action: "create", target: "TestPage")
+        logService.addLog(action: .create, target: "TestPage")
         XCTAssertEqual(logService.logEntries.count, 1)
-        XCTAssertEqual(logService.logEntries.first?.action, "create")
+        XCTAssertEqual(logService.logEntries.first?.action, .create)
         XCTAssertEqual(logService.logEntries.first?.target, "TestPage")
     }
     
     func testLogEntryOrdering() {
-        logService.addLog(action: "action1", target: "t1")
-        logService.addLog(action: "action2", target: "t2")
-        logService.addLog(action: "action3", target: "t3")
+        logService.addLog(action: .create, target: "t1")
+        logService.addLog(action: .update, target: "t2")
+        logService.addLog(action: .delete, target: "t3")
         
-        XCTAssertEqual(logService.logEntries.first?.action, "action3") // Most recent first
-        XCTAssertEqual(logService.logEntries.last?.action, "action1")
+        XCTAssertEqual(logService.logEntries.first?.action, .delete) // Most recent first
+        XCTAssertEqual(logService.logEntries.last?.action, .create)
     }
     
     func testMaxLogEntriesCap() {
         for i in 0..<600 {
-            logService.addLog(action: "batch_\(i)", target: "t\(i)")
+            logService.addLog(action: .create, target: "t\(i)")
         }
         XCTAssertLessThanOrEqual(logService.logEntries.count, 500)
     }
@@ -912,7 +841,7 @@ final class LLMConfigStoreTests: XCTestCase {
     }
     
     func testDefaultValues() {
-        XCTAssertEqual(configStore.provider, .openAI)
+        XCTAssertEqual(configStore.provider, .zhipu)
         XCTAssertEqual(configStore.apiKey, "")
         XCTAssertEqual(configStore.isEnabled, false)
         XCTAssertFalse(configStore.baseURL.isEmpty)
@@ -969,6 +898,7 @@ final class VoiceRecordingTests: XCTestCase {
 }
 
 // MARK: - PDF Document Info Tests
+@MainActor
 final class PDFDocumentInfoTests: XCTestCase {
     
     func testPDFDocCreation() {

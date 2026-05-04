@@ -1,4 +1,4 @@
-import SwiftUI
+
 
 // MARK: - Page Type
 enum PageType: String, Codable, CaseIterable, Identifiable {
@@ -61,12 +61,12 @@ enum PageStatus: String, Codable, CaseIterable {
         }
     }
     
-    var color: Color {
+    var colorName: String {
         switch self {
-        case .active: return .green
-        case .stub: return .yellow
-        case .needsUpdate: return .orange
-        case .deprecated: return .red
+        case .active: return "green"
+        case .stub: return "yellow"
+        case .needsUpdate: return "orange"
+        case .deprecated: return "red"
         }
     }
 }
@@ -85,11 +85,11 @@ enum Confidence: String, Codable, CaseIterable {
         }
     }
     
-    var color: Color {
+    var colorName: String {
         switch self {
-        case .high: return .green
-        case .medium: return .yellow
-        case .low: return .red
+        case .high: return "green"
+        case .medium: return "yellow"
+        case .low: return "red"
         }
     }
 }

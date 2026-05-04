@@ -240,7 +240,7 @@ struct IndexRowView: View {
 
             // Confidence indicator
             Circle()
-                .fill(page.confidence.color)
+                .fill(Color.fromModelColorName(page.confidence.colorName))
                 .frame(width: 8, height: 8)
         }
         .padding(.vertical, 4)

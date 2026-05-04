@@ -1,4 +1,4 @@
-import SwiftUI
+
 
 /// 操作日志动作类型 (Product Manager 视角：标准化的动作分类，驱动 UI 表现)
 enum LogAction: String, Codable, CaseIterable {
@@ -35,18 +35,18 @@ enum LogAction: String, Codable, CaseIterable {
     }
     
     /// 动作对应的品牌色
-    var color: Color {
+    var colorName: String {
         switch self {
-        case .create: return .green
-        case .update: return .blue
-        case .delete, .deletePDF, .importPDFFailed, .aiscanFailed: return .red
-        case .lint, .healthCheck: return .orange
-        case .ingest, .importPDF, .export: return .wikiSource
-        case .smartIngest: return .wikiAccent
-        case .systemInit: return .purple
-        case .aiscanSkipped: return .wikiSecondary
-        case .highlight: return .wikiAccent
-        default: return .wikiSecondary
+        case .create: return "green"
+        case .update: return "blue"
+        case .delete, .deletePDF, .importPDFFailed, .aiscanFailed: return "red"
+        case .lint, .healthCheck: return "orange"
+        case .ingest, .importPDF, .export: return "wikiSource"
+        case .smartIngest: return "wikiAccent"
+        case .systemInit: return "purple"
+        case .aiscanSkipped: return "wikiSecondary"
+        case .highlight: return "wikiAccent"
+        default: return "wikiSecondary"
         }
     }
     

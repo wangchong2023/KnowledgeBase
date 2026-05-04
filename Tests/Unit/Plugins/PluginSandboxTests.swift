@@ -67,7 +67,7 @@ final class PluginSandboxTests: XCTestCase {
     // MARK: - 崩溃隔离
 
     func testPluginExceptionDoesNotCrashRegistry() {
-        let crashingPlugin = MockCrashingPlugin()
+        let crashingPlugin = MockCrashingPlugin(id: "test.crash", name: "崩溃测试")
         registry.loadPlugin(crashingPlugin)
 
         let result = registry.applyPreProcess(to: "测试")
@@ -91,7 +91,7 @@ final class PluginSandboxTests: XCTestCase {
 
 // MARK: - Mock 插件
 
-private final class MockKnowledgePlugin: KnowledgePlugin {
+private class MockKnowledgePlugin: KnowledgePlugin {
     let manifest: PluginManifest
     var monetization: MonetizationInfo? { nil }
     private(set) var didLoad = false

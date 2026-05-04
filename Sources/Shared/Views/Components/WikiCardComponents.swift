@@ -191,7 +191,7 @@ struct PageRowView: View {
             
             // Status indicator
             Circle()
-                .fill(page.status.color)
+                .fill(Color.fromModelColorName(page.status.colorName))
                 .frame(width: 8, height: 8)
         }
         .padding(.horizontal, 12)

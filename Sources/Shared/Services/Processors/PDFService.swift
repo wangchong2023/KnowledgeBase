@@ -1,4 +1,3 @@
-import SwiftUI
 import PDFKit
 
 // MARK: - PDF Document Model
@@ -69,16 +68,7 @@ struct PDFHighlight: Identifiable, Codable {
         self.creationDate = creationDate
     }
     
-    var highlightColor: Color {
-        switch color {
-        case "yellow": return .yellow
-        case "green": return .green
-        case "blue": return .blue
-        case "pink": return .pink
-        case "purple": return .purple
-        default: return .yellow
-        }
-    }
+    var highlightColorName: String { color }
 }
 
 // MARK: - PDF Service

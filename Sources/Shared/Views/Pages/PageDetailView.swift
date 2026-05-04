@@ -202,7 +202,7 @@ struct PageDetailView: View {
                     store.updatePage(page, forceDeepScan: false)
                 }) {
                     Label(status.displayName, systemImage: "circle.fill")
-                        .foregroundStyle(status.color)
+                        .foregroundStyle(Color.fromModelColorName(status.colorName))
                 }
             }
         } label: {

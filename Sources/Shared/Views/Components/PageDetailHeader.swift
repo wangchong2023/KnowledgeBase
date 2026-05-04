@@ -182,16 +182,16 @@ private struct StatusBadge: View {
     var body: some View {
         HStack(spacing: 4) {
             Circle()
-                .fill(page.status.color)
+                .fill(Color.fromModelColorName(page.status.colorName))
                 .frame(width: 6, height: 6)
             Text(page.status.displayName)
                 .font(.caption)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(page.status.color.opacity(0.15))
+        .background(Color.fromModelColorName(page.status.colorName).opacity(0.15))
         .clipShape(Capsule())
-        .foregroundStyle(page.status.color)
+        .foregroundStyle(Color.fromModelColorName(page.status.colorName))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Localized.trf("page.statusAccessibility", page.status.displayName))
     }
@@ -210,9 +210,9 @@ private struct ConfidenceBadge: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(page.confidence.color.opacity(0.15))
+        .background(Color.fromModelColorName(page.confidence.colorName).opacity(0.15))
         .clipShape(Capsule())
-        .foregroundStyle(page.confidence.color)
+        .foregroundStyle(Color.fromModelColorName(page.confidence.colorName))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Localized.trf("page.confidenceAccessibility", page.confidence.displayName))
     }

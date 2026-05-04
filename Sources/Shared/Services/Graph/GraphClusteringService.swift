@@ -1,16 +1,15 @@
 import Foundation
-import SwiftUI
 
 /// 图谱聚类服务 (Architect 视角：知识涌现)
 /// 负责对知识库中的页面进行语义聚类。
 final class GraphClusteringService {
-    
+
     struct Cluster: Identifiable {
         let id = UUID()
         let name: String
         let pageIDs: Set<UUID>
         let centroid: [Float]
-        let color: SwiftUI.Color
+        let colorName: String
     }
     
     /// 执行 K-Means 聚类
@@ -40,14 +39,14 @@ final class GraphClusteringService {
         }
         
         // 3. 包装结果
-        let clusterColors: [SwiftUI.Color] = [.blue, .purple, .orange, .green, .pink, .teal, .indigo]
+        let clusterColors: [String] = ["blue", "purple", "orange", "green", "pink", "teal", "indigo"]
         
         return (0..<k).map { i in
             Cluster(
                 name: Localized.trf("graph.cluster.name", i + 1),
                 pageIDs: Set(clusters[i]),
                 centroid: centroids[i],
-                color: clusterColors[i % clusterColors.count]
+                colorName: clusterColors[i % clusterColors.count]
             )
         }
     }

@@ -303,8 +303,8 @@ struct SynthesisView: View {
     private func docRowContent(doc: KMStore.SynthesisDocument, type: KMStore.SynthesisType) -> some View {
         HStack(spacing: 16) {
             ZStack {
-                RoundedRectangle(cornerRadius: 10).fill(type.formatColor.opacity(0.1)).frame(width: 40, height: 40)
-                Image(systemName: type.formatIcon).foregroundStyle(type.formatColor)
+                RoundedRectangle(cornerRadius: 10).fill(Color.fromModelColorName(type.formatColorName).opacity(0.1)).frame(width: 40, height: 40)
+                Image(systemName: type.formatIcon).foregroundStyle(Color.fromModelColorName(type.formatColorName))
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text(doc.name).font(.subheadline.weight(.semibold))

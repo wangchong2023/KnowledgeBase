@@ -13,6 +13,7 @@ final class WatchConnectivityTests: XCTestCase {
     }
     
     /// 测试数据打包逻辑
+    @MainActor
     func testContentPackaging() {
         let testText = "手表端采集的测试内容"
         // 模拟发送动作（由于 WCSession 在测试环境无法真实激活，我们验证其调用链路或状态）

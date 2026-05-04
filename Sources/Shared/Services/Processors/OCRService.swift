@@ -1,5 +1,5 @@
-@preconcurrency import SwiftUI
 @preconcurrency import Vision
+import Combine
 import PhotosUI
 
 // MARK: - OCR Service

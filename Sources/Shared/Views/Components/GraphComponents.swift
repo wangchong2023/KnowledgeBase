@@ -31,7 +31,7 @@ struct GraphNodeView: View {
     var body: some View {
         Group {
             if isVisible {
-                let nodeBaseColor = useClustering ? (clusters.first(where: { $0.pageIDs.contains(node.id) })?.color ?? node.type.themedColor) : node.type.themedColor
+                let nodeBaseColor = useClustering ? (clusters.first(where: { $0.pageIDs.contains(node.id) }).map { Color.fromModelColorName($0.colorName) } ?? node.type.themedColor) : node.type.themedColor
                 let nodeSize: CGFloat = isSelected ? 40 : 28
                 let isLowDetail = scale < AppConfig.UI.graphLODZoomThreshold // LOD 阈值
                 
@@ -56,7 +56,7 @@ struct GraphNodeView: View {
     
     private var nodeContent: some View {
         ZStack {
-            let nodeBaseColor = useClustering ? (clusters.first(where: { $0.pageIDs.contains(node.id) })?.color ?? node.type.themedColor) : node.type.themedColor
+            let nodeBaseColor = useClustering ? (clusters.first(where: { $0.pageIDs.contains(node.id) }).map { Color.fromModelColorName($0.colorName) } ?? node.type.themedColor) : node.type.themedColor
 
             // 1. 深度发光 (Aura Effect)
             if isSelected {
@@ -289,7 +289,7 @@ struct GraphLegend: View {
                 ForEach(clusters) { cluster in
                     HStack(spacing: 6) {
                         Circle()
-                            .fill(cluster.color)
+                            .fill(Color.fromModelColorName(cluster.colorName))
                             .frame(width: 10, height: 10)
                         Text(cluster.name)
                             .font(.caption2)

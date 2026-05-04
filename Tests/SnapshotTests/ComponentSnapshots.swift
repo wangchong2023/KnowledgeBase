@@ -20,7 +20,7 @@ final class ComponentSnapshots: XCTestCase {
         let node = GraphNode(
             id: UUID(),
             title: "测试节点",
-            type: .idea,
+            type: .concept,
             position: .zero
         )
         

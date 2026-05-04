@@ -3,6 +3,7 @@ import XCTest
 
 /// 性能基准测试 (Expert QA Item #4)
 /// 监控向量检索在不同数据量级下的延迟。
+@MainActor
 final class SearchPerformanceTests: XCTestCase {
     var store: KMStore!
     

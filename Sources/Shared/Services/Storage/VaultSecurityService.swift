@@ -1,6 +1,6 @@
 import Foundation
 import LocalAuthentication
-import SwiftUI
+import Combine
 
 /// 金库安全服务 (QA & Security 视角：保护用户隐私)
 @MainActor
@@ -25,7 +25,7 @@ final class VaultSecurityService: ObservableObject {
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, error in
             DispatchQueue.main.async {
                 if success {
-                    withAnimation { self.isLocked = false }
+                    self.isLocked = false
                     HapticManager.shared.trigger(.unlock)
                 } else {
                     // 解锁失败逻辑
@@ -36,7 +36,7 @@ final class VaultSecurityService: ObservableObject {
     }
     
     func lock() {
-        withAnimation { isLocked = true }
+        isLocked = true
         HapticManager.shared.trigger(.lock)
     }
 }

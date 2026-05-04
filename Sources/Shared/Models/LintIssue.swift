@@ -1,4 +1,6 @@
-import SwiftUI
+
+
+import Foundation
 
 // MARK: - Potential Link Suggestion
 struct PotentialLinkSuggestion: Identifiable, Codable, Sendable {
@@ -50,11 +52,11 @@ struct LintIssue: Identifiable, Codable, Sendable {
             }
         }
         
-        var color: Color {
+        var colorName: String {
             switch self {
-            case .error: return .red
-            case .warning: return .orange
-            case .info: return .blue
+            case .error: return "red"
+            case .warning: return "orange"
+            case .info: return "blue"
             }
         }
     }
