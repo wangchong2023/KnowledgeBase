@@ -392,7 +392,7 @@
         }
       }
     },
-    "iconPicker.academic": {
+    "editor.iconPicker.academic": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -409,7 +409,7 @@
         }
       }
     },
-    "iconPicker.allIcons": {
+    "editor.iconPicker.allIcons": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -426,7 +426,7 @@
         }
       }
     },
-    "iconPicker.common": {
+    "editor.iconPicker.common": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -443,7 +443,7 @@
         }
       }
     },
-    "iconPicker.customSelected": {
+    "editor.iconPicker.customSelected": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -460,7 +460,7 @@
         }
       }
     },
-    "iconPicker.nature": {
+    "editor.iconPicker.nature": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -477,7 +477,7 @@
         }
       }
     },
-    "iconPicker.reset": {
+    "editor.iconPicker.reset": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -494,7 +494,7 @@
         }
       }
     },
-    "iconPicker.selectIcon": {
+    "editor.iconPicker.selectIcon": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -511,7 +511,7 @@
         }
       }
     },
-    "iconPicker.symbols": {
+    "editor.iconPicker.symbols": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -528,7 +528,7 @@
         }
       }
     },
-    "iconPicker.transport": {
+    "editor.iconPicker.transport": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -545,7 +545,7 @@
         }
       }
     },
-    "iconPicker.useDefault": {
+    "editor.iconPicker.useDefault": {
       "extractionState": "manual",
       "localizations": {
         "en": {

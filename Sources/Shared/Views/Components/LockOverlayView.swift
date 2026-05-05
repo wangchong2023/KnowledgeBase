@@ -10,7 +10,8 @@
 
 import SwiftUI
 
-/// 锁定界面 (Security & Design 视角：提供高级感与安全感)
+/// 隐私锁屏覆盖视图
+/// 负责在应用进入后台或由于空闲触发锁定时，提供全屏的生物识别解锁界面，确保知识库内容的安全性
 struct LockOverlayView: View {
     @Environment(KMStore.self) var store
     @State private var isAnimating = false

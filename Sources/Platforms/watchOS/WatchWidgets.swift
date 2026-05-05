@@ -12,7 +12,9 @@ import WidgetKit
 import SwiftUI
 import AppIntents
 
-/// 定义表盘点击意图
+// MARK: - 手表端小组件
+/// 手表端点击意图定义
+/// 负责响应表盘 Complication 的点击事件，支持快速跳转至采集界面
 struct CaptureIntent: AppIntent {
     static var title: LocalizedStringResource = "快速记录"
     static var description = IntentDescription("直接进入语音采集界面")

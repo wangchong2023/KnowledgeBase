@@ -20,6 +20,9 @@
 # 从 project.yml 生成 Xcode 项目（配置变更后必须执行）
 xcodegen generate
 
+# 同步本地化词条（分表合并到主表）
+python3 Tools/update_localization.py
+
 # 构建 iOS
 xcodebuild build -project KM.xcodeproj -scheme KM -destination 'generic/platform=iOS'
 

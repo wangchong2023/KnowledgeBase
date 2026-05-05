@@ -72,19 +72,65 @@ enum SynthesisProcessor {
     
     /// 对 Mermaid 进行语法纠错加固 (处理节点文本中的非法字符)
     private static func sanitizeMermaidSyntax(_ code: String) -> String {
+        let isMindmap = code.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("mindmap")
         var lines = code.components(separatedBy: .newlines)
+        
         for i in 0..<lines.count {
             var line = lines[i]
-            // 处理节点文本中的特殊字符 (:, (, ), [, ])
-            if let start = line.firstIndex(of: "[") ?? line.firstIndex(of: "("),
-               let end = line.lastIndex(of: "]") ?? line.lastIndex(of: ")") {
-                let range = start...end
-                var content = String(line[range])
-                content = content.replacingOccurrences(of: ":", with: "：")
-                                 .replacingOccurrences(of: "((", with: "（（")
-                                 .replacingOccurrences(of: "))", with: "））")
-                line.replaceSubrange(range, with: content)
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty || trimmed == "mindmap" { continue }
+            
+            // 获取缩进
+            let indentation = line.prefix { $0.isWhitespace }
+            
+            if isMindmap {
+                // 针对 mindmap 的特殊处理：
+                // 1. 移除行尾可能导致解析错误的连字符
+                var content = trimmed.replacingOccurrences(of: #"-+$"#, with: "", options: .regularExpression)
+                
+                // 2. 如果包含特殊字符且没带括号，套上引号
+                let hasBrackets = (content.contains("((") && content.contains("))")) ||
+                                  (content.contains("[") && content.contains("]")) ||
+                                  (content.contains("{{") && content.contains("}}")) ||
+                                  (content.contains("(") && content.contains(")"))
+                
+                if !hasBrackets && !content.hasPrefix("\"") {
+                    // 清理内容中的非法引号
+                    let safeText = content.replacingOccurrences(of: "\"", with: "'")
+                                          .replacingOccurrences(of: ":", with: "：")
+                    content = "\"\(safeText)\""
+                } else if hasBrackets {
+                    // 如果有括号，确保括号内的内容也是安全的
+                    content = content.replacingOccurrences(of: ":", with: "：")
+                }
+                
+                line = String(indentation) + content
+            } else {
+                // 针对 graph 等其他图表的通用处理
+                // 1. 处理节点定义 ID[Label] -> ID["Label"]
+                let pattern = #"(\w+)(\[+|\(+|\{+)(.+?)(\]+|\)+|\}+)"#
+                if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+                    let range = NSRange(location: 0, length: line.utf16.count)
+                    line = regex.stringByReplacingMatches(in: line, options: [], range: range, withTemplate: #"$1["$3"]"#)
+                }
+                
+                // 2. 标签内容净化
+                if let start = line.firstIndex(of: "["), let end = line.lastIndex(of: "]") {
+                    let range = line.index(after: start)..<end
+                    let inner = line[range]
+                    var innerText = String(inner)
+                    if innerText.hasPrefix("\"") && innerText.hasSuffix("\"") {
+                        innerText = String(innerText.dropFirst().dropLast())
+                    }
+                    
+                    let cleaned = innerText.replacingOccurrences(of: "(", with: "（")
+                                           .replacingOccurrences(of: ")", with: "）")
+                                           .replacingOccurrences(of: "\"", with: "'")
+                                           .trimmingCharacters(in: .whitespaces)
+                    line.replaceSubrange(range, with: "\"\(cleaned)\"")
+                }
             }
+            
             lines[i] = line
         }
         return lines.joined(separator: "\n")
@@ -103,5 +149,26 @@ enum SynthesisProcessor {
         }
         
         return nil
+    }
+
+    /// 清理 Markdown 内容中的冗余转义（如 \+ -> +）
+    static func cleanMarkdown(_ text: String) -> String {
+        var cleaned = text
+        // 移除常见的冗余转义字符，LLM 经常在列表中或 Wiki-links 中转义这些字符
+        let replacements = [
+            "\\+": "+",
+            "\\-": "-",
+            "\\*": "*",
+            "\\. ": ". ",
+            "\\!": "!",
+            "\\[\\[": "[[",
+            "\\]\\]": "]]"
+        ]
+        
+        for (target, replacement) in replacements {
+            cleaned = cleaned.replacingOccurrences(of: target, with: replacement)
+        }
+        
+        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

@@ -13,6 +13,8 @@ import SwiftUI
 import PDFKit
 
 // MARK: - PDF Ingest Sheet
+/// PDF 资料入库配置面板组件
+/// 负责配置 PDF 内容的提取方式（全文、范围或仅高亮），并设定目标 Wiki 页面的元数据
 struct PDFIngestSheet: View {
     let documentInfo: PDFDocumentInfo
     @ObservedObject var store: KMStore
@@ -186,6 +188,8 @@ struct PDFIngestSheet: View {
 }
 
 // MARK: - PDF Document Row
+/// PDF 文档列表行组件
+/// 负责展示 PDF 文件的基本元数据（标题、页数、高亮统计）及预览图标
 struct PDFDocumentRow: View {
     let doc: PDFDocumentInfo
     
@@ -242,6 +246,8 @@ struct PDFDocumentRow: View {
 }
 
 // MARK: - PDF Preview Wrapper
+/// PDF 预览包装器组件
+/// 负责在 SwiftUI 中嵌入原生 PDFView 渲染引擎，支持文档加载与自动缩放
 struct PDFPreviewWrapper: UIViewRepresentable {
     let url: URL
     

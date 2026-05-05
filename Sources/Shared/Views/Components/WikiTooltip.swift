@@ -13,6 +13,8 @@ import SwiftUI
 // MARK: - Wiki Tooltip
 /// 引导提示组件，用于首次使用时的操作引导。
 @MainActor
+/// 操作引导提示组件
+/// 负责在 UI 元素周围弹出气泡样式的提示信息，用于新手引导或新功能展示
 struct WikiTooltip: View {
     let title: String
     let description: String
@@ -109,6 +111,8 @@ struct WikiTooltip: View {
 }
 
 // MARK: - Triangle Shape
+/// 基础三角形形状
+/// 负责绘制气泡提示组件的指向箭头，支持 2D 路径闭合
 struct Triangle: Shape {
     func path(in rect: CGRect) -> Path {
         var path = Path()

@@ -764,7 +764,7 @@
 		3D852B9830A9CEC2268636BE /* HostingSetupSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingSetupSheet.swift; sourceTree = "<group>"; };
 		3DE119B2B6CBC92C34EBE6F6 /* Graph3DView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graph3DView.swift; sourceTree = "<group>"; };
 		3E215C1D5252B75BD61F8371 /* LinkServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkServiceTests.swift; sourceTree = "<group>"; };
-		3F025CDA6513CA81C575A796 /* KM.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KM.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F025CDA6513CA81C575A796 /* KM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F4D126CA4C7E6B4323231BA /* Graph3DComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Graph3DComponents.swift; sourceTree = "<group>"; };
 		3FB657831535FE375B8E45F2 /* Watch.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Watch.xcstrings; sourceTree = "<group>"; };
 		3FF5F2D3BCC92EB96795221C /* LLMContextBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMContextBuilder.swift; sourceTree = "<group>"; };
@@ -872,7 +872,7 @@
 		96E89E570FCEDD46EAFFF300 /* HapticFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticFeedback.swift; sourceTree = "<group>"; };
 		974813529F3E444AA2443C04 /* KMKeyboardShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMKeyboardShortcuts.swift; sourceTree = "<group>"; };
 		97A0DB92CD641F2AD1CFF423 /* WikiColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiColors.swift; sourceTree = "<group>"; };
-		97B9165FA18BE560F82960C7 /* KMTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = KMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		97B9165FA18BE560F82960C7 /* KMTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KMTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		986513DE457F4E33A820F151 /* Creation.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Creation.xcstrings; sourceTree = "<group>"; };
 		98C3CE54C581E27BCCDE7C63 /* Backup.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Backup.xcstrings; sourceTree = "<group>"; };
 		9916BD51C6D5FFA90B394E7E /* WikiToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiToast.swift; sourceTree = "<group>"; };
@@ -933,7 +933,7 @@
 		DA8A9B52AEA23691E3671D82 /* GraphCommunityProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphCommunityProcessor.swift; sourceTree = "<group>"; };
 		DAA08E6A63BB0CD8A712D07E /* PDFProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFProcessor.swift; sourceTree = "<group>"; };
 		DB5C5884A272E79725865FFA /* KMTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KMTests.swift; sourceTree = "<group>"; };
-		DB92E873FF99FD383B5F2A5C /* KMMac.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = KMMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB92E873FF99FD383B5F2A5C /* KMMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KMMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC13E29AA70D68AA61B5EB02 /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
 		DCB6C3B2981E7B646F959299 /* WikiLoadingOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WikiLoadingOverlay.swift; sourceTree = "<group>"; };
 		DE5B39868C8E30E96E036E60 /* SettingsAboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAboutView.swift; sourceTree = "<group>"; };
@@ -1931,20 +1931,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
-				TargetAttributes = {
-					35CB6EBE1A48004070C5309B = {
-						DevelopmentTeam = "";
-					};
-					CA1AF4AAC4C825B2211572A8 = {
-						DevelopmentTeam = "";
-					};
-					F3454A8405300C9A74110D24 = {
-						DevelopmentTeam = "";
-					};
-					FCE448115FE8F3DB6D17B1BE = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = B0FFD40DBADD66CDE5CC78B4 /* Build configuration list for PBXProject "KM" */;
 			developmentRegion = en;
@@ -2757,12 +2743,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 100;
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				INFOPLIST_FILE = Sources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZhiYuan;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.km.app;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wangchong.zhiyuan;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -2772,6 +2763,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2788,6 +2780,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Sources/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = com.km.app.watch;
@@ -2873,6 +2866,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				INFOPLIST_FILE = Sources/MacInfo.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2892,6 +2886,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				INFOPLIST_FILE = Sources/MacInfo.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2974,12 +2969,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Sources/KM.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 100;
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				INFOPLIST_FILE = Sources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZhiYuan;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.km.app;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wangchong.zhiyuan;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -2989,6 +2989,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3005,6 +3006,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 8A472TXX33;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Sources/Info.plist;
 				PRODUCT_BUNDLE_IDENTIFIER = com.km.app.watch;

@@ -14,8 +14,9 @@
 
 import SwiftUI
 
-// MARK: - Voice Note View
+// MARK: - 语音笔记入口
 /// 语音笔记功能主视图
+/// 负责语音输入的实时采集、波形可视化展示、流式语音转文字（STT）及知识摘要提取
 struct VoiceNoteView: View {
     @StateObject private var speechService = SpeechProcessor()
     @Environment(KMStore.self) var store
@@ -95,12 +96,10 @@ struct VoiceNoteView: View {
             .pickerStyle(.menu)
             .tint(.wikiAccent)
         }
-        .padding(14)
-        .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+        .wikiContainer(cornerRadius: WikiUI.cardRadius, padding: true)
     }
     
-    // MARK: - Recording Section
+    // MARK: - 录音控制板块
     private var recordingSection: some View {
         VStack(spacing: 14) {
             if !speechService.hasPermission {
@@ -133,9 +132,7 @@ struct VoiceNoteView: View {
                     .clipShape(Capsule())
             }
         }
-        .padding()
-        .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+        .wikiContainer(cornerRadius: WikiUI.cardRadius, padding: true)
     }
     
     private var recordButton: some View {
@@ -181,7 +178,7 @@ struct VoiceNoteView: View {
         }
     }
     
-    // MARK: - Waveform
+    // MARK: - 波形展示
     private var waveformSection: some View {
         VStack(spacing: 8) {
             Text(Localized.tr("speech.audioLevel"))
@@ -197,12 +194,10 @@ struct VoiceNoteView: View {
             }
             .frame(height: 44)
         }
-        .padding(14)
-        .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+        .wikiContainer(cornerRadius: WikiUI.cardRadius, padding: true)
     }
     
-    // MARK: - Transcription Result
+    // MARK: - 转写结果
     private var transcriptionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -261,9 +256,7 @@ struct VoiceNoteView: View {
                 }
             }
         }
-        .padding(14)
-        .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+        .wikiContainer(cornerRadius: WikiUI.cardRadius, padding: true)
     }
     
     // MARK: - Recordings History

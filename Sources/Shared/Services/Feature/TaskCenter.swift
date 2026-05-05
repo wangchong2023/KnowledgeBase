@@ -79,6 +79,22 @@ class TaskCenter: ObservableObject {
     
     @Published var tasks: [GlobalTask] = []
     @Published var latestStatus: String = ""
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        setupSubscriptions()
+    }
+    
+    private func setupSubscriptions() {
+        WikiEventBus.shared.subscribe()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] event in
+                if case .clearAllDataRequested = event {
+                    self?.reset()
+                }
+            }
+            .store(in: &cancellables)
+    }
     
     /// 更新全局最新状态文案 (用于触发 UI 脉搏动效)
     func updateLatestStatus(_ text: String) {

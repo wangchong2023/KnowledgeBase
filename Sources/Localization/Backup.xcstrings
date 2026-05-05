@@ -324,7 +324,7 @@
         }
       }
     },
-    "deleteConfirmTitle": {
+    "backup.deleteConfirmTitle": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -341,7 +341,7 @@
         }
       }
     },
-    "deleteConfirmMessage": {
+    "backup.deleteConfirmMessage": {
       "extractionState": "manual",
       "localizations": {
         "en": {

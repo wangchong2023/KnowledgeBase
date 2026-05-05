@@ -137,18 +137,15 @@ struct GraphLayoutProcessor {
         let centerX = canvasWidth / 2
         let centerY = canvasHeight / 2
 
-        // ── 性能优化：空间索引优化：网格剖分排斥力计算 (O(N)) ──
+        // ── 1. 性能优化：空间索引优化：网格剖分排斥力计算 (O(N)) ──
         let gridSize: CGFloat = 120
         var grid: [Int: [Int]] = [:]
+        grid.reserveCapacity(nodeCount) // 预留容量减少分配
         
-        func gridKey(x: CGFloat, y: CGFloat) -> Int {
-            let gx = Int(x / gridSize)
-            let gy = Int(y / gridSize)
-            return (gx << 16) | (gy & 0xFFFF)
-        }
-
         for i in nodes.indices {
-            let key = gridKey(x: nodes[i].position.x, y: nodes[i].position.y)
+            let gx = Int(nodes[i].position.x / gridSize)
+            let gy = Int(nodes[i].position.y / gridSize)
+            let key = (gx << 16) | (gy & 0xFFFF)
             grid[key, default: []].append(i)
         }
         
@@ -161,11 +158,11 @@ struct GraphLayoutProcessor {
                     let key = ((gx + ox) << 16) | ((gy + oy) & 0xFFFF)
                     guard let neighbors = grid[key] else { continue }
                     
-                    for j in neighbors where i < j { // 性能优化：每对节点只计算一次力
+                    for j in neighbors where i < j {
                         let dx = nodes[i].position.x - nodes[j].position.x
                         let dy = nodes[i].position.y - nodes[j].position.y
                         let distSq = dx * dx + dy * dy
-                        if distSq > 14400 || distSq < 4 { continue } // 120^2 = 14400
+                        if distSq > 14400 || distSq < 4 { continue }
                         
                         let dist = sqrt(distSq)
                         let force = config.repulsion / distSq
@@ -181,8 +178,8 @@ struct GraphLayoutProcessor {
             }
         }
 
-        // 边的吸引力 (优化后：O(E))
-        // 预先建立 ID 到 Index 的映射（仅在必要时建立，避免每帧重复创建大数据结构）
+        // ── 2. 边的吸引力 (优化后：O(E)) ──
+        // 性能关键：仅在此处建立一次索引映射
         let nodeIndexMap = Dictionary(uniqueKeysWithValues: nodes.enumerated().map { ($0.element.id, $0.offset) })
 
         for edge in edges {
@@ -191,42 +188,41 @@ struct GraphLayoutProcessor {
             let dx = nodes[j].position.x - nodes[i].position.x
             let dy = nodes[j].position.y - nodes[i].position.y
             
-            // 改进：使用更稳定的吸引力模型
-            let dist = sqrt(dx * dx + dy * dy)
-            if dist < 1 { continue }
+            let distSq = dx * dx + dy * dy
+            if distSq < 1 { continue }
+            let dist = sqrt(distSq)
             
             let force = dist * config.attraction
-            forces[i].x += (dx / dist) * force
-            forces[i].y += (dy / dist) * force
-            forces[j].x -= (dx / dist) * force
-            forces[j].y -= (dy / dist) * force
+            let fx = (dx / dist) * force
+            let fy = (dy / dist) * force
+            
+            forces[i].x += fx
+            forces[i].y += fy
+            forces[j].x -= fx
+            forces[j].y -= fy
         }
 
-        // 向心引力
-        for i in nodes.indices {
-            forces[i].x += (centerX - nodes[i].position.x) * effectiveGravity
-            forces[i].y += (centerY - nodes[i].position.y) * effectiveGravity
-        }
-
-        // 社区引力 (Community Gravity)
-        var communityCenters: [Int: CGPoint] = [:]
-        var communityCounts: [Int: Int] = [:]
-
+        // ── 3. 向心引力与社区引力 ──
+        // 预计算社区中心
+        var communityCenters: [Int: (sum: CGPoint, count: Int)] = [:]
         for node in nodes {
             if let commID = node.communityID {
-                communityCenters[commID, default: .zero].x += node.position.x
-                communityCenters[commID, default: .zero].y += node.position.y
-                communityCounts[commID, default: 0] += 1
+                var current = communityCenters[commID, default: (.zero, 0)]
+                current.sum.x += node.position.x
+                current.sum.y += node.position.y
+                current.count += 1
+                communityCenters[commID] = current
             }
         }
 
-        for (id, count) in communityCounts where count > 0 {
-            communityCenters[id]?.x /= CGFloat(count)
-            communityCenters[id]?.y /= CGFloat(count)
-        }
-
         for i in nodes.indices {
-            if let commID = nodes[i].communityID, let center = communityCenters[commID] {
+            // 中心引力
+            forces[i].x += (centerX - nodes[i].position.x) * effectiveGravity
+            forces[i].y += (centerY - nodes[i].position.y) * effectiveGravity
+            
+            // 社区引力
+            if let commID = nodes[i].communityID, let centerData = communityCenters[commID] {
+                let center = CGPoint(x: centerData.sum.x / CGFloat(centerData.count), y: centerData.sum.y / CGFloat(centerData.count))
                 let dx = center.x - nodes[i].position.x
                 let dy = center.y - nodes[i].position.y
                 let clusterAttraction: CGFloat = 0.05
@@ -235,13 +231,14 @@ struct GraphLayoutProcessor {
             }
         }
 
-        // 应用力 + 边界约束
+        // ── 4. 应用力 + 边界约束 ──
         for i in nodes.indices {
             nodes[i].position.x += forces[i].x * effectiveDamping
             nodes[i].position.y += forces[i].y * effectiveDamping
 
+            // 限制在画布内
             nodes[i].position.x = max(config.padding, min(canvasWidth - config.padding, nodes[i].position.x))
-            nodes[i].position.y = max(config.padding, min(canvasHeight - config.padding - WikiUI.chipRadius, nodes[i].position.y))
+            nodes[i].position.y = max(config.padding, min(canvasHeight - config.padding, nodes[i].position.y))
         }
     }
 }

@@ -10,6 +10,7 @@
 
 import Foundation
 import Observation
+import Combine
 
 /// AI 工作流存储，管理 AI 扫描状态、洞察及建议。
 @MainActor
@@ -69,7 +70,22 @@ final class AIWorkflowStore {
     @ObservationIgnored @Inject private var logger: any LoggerProtocol
     @ObservationIgnored @Inject private var linkService: LinkService
 
-    init() {}
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        setupSubscriptions()
+    }
+    
+    private func setupSubscriptions() {
+        WikiEventBus.shared.subscribe()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] event in
+                if case .clearAllDataRequested = event {
+                    self?.clearAll()
+                }
+            }
+            .store(in: &cancellables)
+    }
     
     // ── AI 洞察管理 ──
 
@@ -282,6 +298,25 @@ final class AIWorkflowStore {
         lintIssues = []
         lastLintScore = 0
         lastLintDate = nil
+        
+        // 清理磁盘上的动态缓存 Key
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())
+        let year = components.yearForWeekOfYear ?? 0
+        let week = components.weekOfYear ?? 0
+        let lang = Localized.currentLanguage
+        
+        let weeklyKey = "weekly_insight_\(year)_\(week)_\(lang)"
+        UserDefaults.standard.removeObject(forKey: weeklyKey)
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let dailyKey = "daily_recap_\(formatter.string(from: Date()))_\(lang)"
+        UserDefaults.standard.removeObject(forKey: dailyKey)
+        
+        UserDefaults.standard.removeObject(forKey: "lastLintIssues")
+        
+        logger.addLog(action: .systemInit, target: "AIWorkflowStore", details: "AI Workflow data and disk cache cleared.", module: "AIWorkflowStore")
     }
 
     // ── 建议清理方法 ──

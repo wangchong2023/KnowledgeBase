@@ -10,7 +10,8 @@
 
 import SwiftUI
 
-/// 空间导航面包屑 (UX 视角：解决深度跳转后的心理迷失)
+/// 空间导航面包屑视图
+/// 负责展示知识页面的层级路径，支持快速回溯及深度跳转后的导航反馈
 struct BreadcrumbView: View {
     let history: [WikiPage]
     let onNavigate: (UUID) -> Void

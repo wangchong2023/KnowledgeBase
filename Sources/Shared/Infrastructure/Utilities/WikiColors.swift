@@ -97,8 +97,14 @@ extension Color {
         Color(light: Color(hex: "6b6b87"), dark: Color(hex: "8b8ba7"))
     }
     static var wikiBorder: Color {
-        Color(light: Color(hex: "e0e0ea"), dark: Color(hex: "3a3a5c"))
+        Color(light: Color(hex: "ebebf2"), dark: Color(hex: "303142"))
     }
+    
+    /// 页面主容器的柔和描边颜色
+    static var wikiMainBorder: Color {
+        Color(light: Color(hex: "d1d1e0"), dark: Color(hex: "40415a"))
+    }
+
     static var wikiEntity: Color {
         Color(light: Color(hex: "3a8aee"), dark: Color(hex: "4a9eff"))
     }
@@ -172,6 +178,7 @@ extension ShapeStyle where Self == Color {
     static var wikiText: Color { Color.wikiText }
     static var wikiSecondary: Color { Color.wikiSecondary }
     static var wikiBorder: Color { Color.wikiBorder }
+    static var wikiMainBorder: Color { Color.wikiMainBorder }
     static var wikiEntity: Color { Color.wikiEntity }
     static var wikiConcept: Color { Color.wikiConcept }
     static var wikiSource: Color { Color.wikiSource }

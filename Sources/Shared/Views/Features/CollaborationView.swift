@@ -11,14 +11,18 @@
 import SwiftUI
 import MultipeerConnectivity
 
-// MARK: - Collaboration View (entry point with NavigationStack)
+// MARK: - 导航入口
+/// 多设备协作功能主容器视图
+/// 负责为协作内容提供独立的导航堆栈，管理 MultipeerConnectivity 的顶层生命周期
 struct CollaborationView: View {
     var body: some View {
         CollaborationViewContent()
     }
 }
 
-// MARK: - Collaboration View Content (for use inside parent NavigationStack)
+// MARK: - 视图核心
+/// 多设备协作核心业务视图
+/// 负责 P2P 会话的建立（Host/Join）、邻近房间扫描、实时编辑流展示及成员状态监控
 struct CollaborationViewContent: View {
     @StateObject private var collabService = CollaborationService()
     @Environment(KMStore.self) var store

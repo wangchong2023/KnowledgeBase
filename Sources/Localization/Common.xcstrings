@@ -278,6 +278,23 @@
         }
       }
     },
+    "misc.deleteConfirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Confirmation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确认删除"
+          }
+        }
+      }
+    },
     "misc.deleteAll": {
       "localizations": {
         "en": {

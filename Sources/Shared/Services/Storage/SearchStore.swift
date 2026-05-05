@@ -28,7 +28,18 @@ final class SearchStore {
     @ObservationIgnored @Inject private var linkService: LinkService
     @ObservationIgnored @Inject private var sqliteStore: SQLiteStore
     
-    init() {}
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        WikiEventBus.shared.subscribe()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] event in
+                if case .clearAllDataRequested = event {
+                    self?.clearAll()
+                }
+            }
+            .store(in: &cancellables)
+    }
     
     /// 执行高级（混合）搜索
     func performAdvancedSearch(query: String) async -> [WikiPage] {

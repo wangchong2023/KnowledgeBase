@@ -12,6 +12,8 @@ import SwiftUI
 
 // MARK: - Wiki Loading Overlay
 /// 全屏加载遮罩，统一各页面的 Loading 状态展示。
+/// 全屏加载覆盖层组件
+/// 负责在执行高开销异步操作（如数据库重建、大文件导入）时提供沉浸式的 Loading 界面，防止误操作
 struct WikiLoadingOverlay: View {
     /// 是否显示加载遮罩
     let isLoading: Bool
@@ -64,6 +66,8 @@ struct WikiLoadingOverlay: View {
 
 // MARK: - Loading Button Style
 /// 内嵌在按钮中的 Loading 指示器修饰符。
+/// 按钮加载状态修饰符
+/// 负责在普通按钮中嵌入进度指示器，并自动处理禁用状态与文字切换逻辑
 struct LoadingButtonModifier: ViewModifier {
     let isLoading: Bool
     let loadingText: String?
@@ -109,6 +113,8 @@ extension View {
 
 // MARK: - Inline Progress Row
 /// 行内加载指示器（用于 List 或 HStack 中的单行加载状态）。
+/// 行内进度指示器组件
+/// 负责在列表行或表单单元中展示轻量级的加载状态，不干扰全局交互
 struct WikiInlineProgress: View {
     let message: String
 

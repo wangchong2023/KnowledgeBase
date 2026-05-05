@@ -22,6 +22,7 @@ final class WikiEventBus {
         case pageCreated(id: UUID, title: String, nodeCount: Int, linkCount: Int)
         case pageUpdated(id: UUID, nodeCount: Int, linkCount: Int)
         case pagesCleared
+        case clearAllDataRequested // 新增：全局数据清理请求
         case aiTaskStarted(type: String)
         case aiTaskCompleted(type: String, success: Bool)
         case securityStateChanged(isLocked: Bool)

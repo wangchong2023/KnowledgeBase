@@ -11,7 +11,8 @@
 
 import SwiftUI
 
-/// PDF 导出报告视图 (UI Designer 视角：精致的排版与品牌化呈现)
+/// PDF 报告预览与导出视图
+/// 负责将选定的 Wiki 页面格式化为标准 A4 布局，提供品牌化页眉、层级内容渲染及自动分页支持
 struct ExportReportView: View {
     let pages: [WikiPage]
     

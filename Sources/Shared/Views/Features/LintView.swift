@@ -14,7 +14,9 @@
 
 import SwiftUI
 
-// MARK: - 健康检查视图 (导航入口)
+// MARK: - 治理中心入口
+/// 知识治理中心主视图容器
+/// 负责为健康检查与 AI 建议提供独立的导航上下文，管理顶层治理生命周期
 struct LintView: View {
     @Binding var selection: SidebarSelection?
     var body: some View {
@@ -22,7 +24,9 @@ struct LintView: View {
     }
 }
 
-// MARK: - 健康检查核心内容 ( Dashboard 模式)
+// MARK: - 治理中心核心
+/// 知识治理核心内容视图
+/// 负责健康得分看板（Dashboard）渲染、结构化问题分析、AI 治理建议展示及自动化修复逻辑
 struct LintViewContent: View {
     @Binding var selection: SidebarSelection?
     @Environment(KMStore.self) var store
@@ -56,7 +60,7 @@ struct LintViewContent: View {
             .pickerStyle(.segmented)
             .padding(.horizontal)
             .padding(.vertical, 10)
-            .background(Color.wikiCard)
+            .background(WikiUI.containerBackground)
 
             // 内容区
             Group {
@@ -87,7 +91,7 @@ struct LintViewContent: View {
                         .font(.system(size: WikiUI.subheadlineFontSize, weight: .bold))
                         .foregroundStyle(.wikiText)
                         .frame(width: WikiUI.titleIconSize * 1.3, height: WikiUI.titleIconSize * 1.3)
-                        .background(Color.wikiCard)
+                        .background(WikiUI.containerBackground)
                         .clipShape(Circle())
                         .contentShape(Circle()) // 确保热区完整
                         .shadow(color: .black.opacity(0.1), radius: 2)
@@ -113,12 +117,17 @@ struct LintViewContent: View {
                         Text(isRunning || aiStore.isScanningAI ? L10n.Lint.tr("scanning") : (selectedTab == 0 ? L10n.Lint.tr("runCheck") : L10n.Lint.tr("runAIScan")))
                     }
                     .font(.subheadline.bold())
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(buttonGradient.opacity(0.15))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(buttonGradient.opacity(0.12))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(buttonGradient.opacity(0.1), lineWidth: 1)
+                    )
                     .foregroundStyle(buttonGradient)
-                    .clipShape(Capsule())
-                    .animation(nil, value: isRunning || aiStore.isScanningAI) // 禁止内容内部动画，彻底杜绝重影
                 }
                 .buttonStyle(.plain)
                 .disabled(isRunning || aiStore.isScanningAI)
@@ -160,12 +169,7 @@ struct LintViewContent: View {
                                          issues: aiStore.lintIssues.filter { $0.severity == .info }, 
                                          icon: "info.circle.fill", color: .blue)
                         }
-                        .background(Color.wikiCard)
-                        .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.primary.opacity(0.05), lineWidth: 1)
-                        }
+                        .wikiContainer(cornerRadius: 16, padding: false)
                         .padding(.horizontal)
                     }
                 }
@@ -194,13 +198,7 @@ struct LintViewContent: View {
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
-                    .padding(8)
-                    .background(Color.wikiCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
-                    )
+                    .wikiContainer(cornerRadius: 10, padding: true)
                 }
                 .padding(.leading, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -258,11 +256,11 @@ struct LintViewContent: View {
                 .font(.system(size: 10, weight: .semibold, design: .rounded))
                 .foregroundStyle(.wikiSecondary)
                 .padding(12)
-                .background(Color.wikiCard)
+                .background(WikiUI.containerBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
-                        .stroke(Color.wikiBorder.opacity(0.4), lineWidth: 1)
+                        .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
                 )
                 .padding(.trailing, 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
@@ -333,11 +331,11 @@ struct LintViewContent: View {
         }
         .frame(maxWidth: .infinity)
         .padding(16)
-        .background(Color.wikiCard)
+        .background(WikiUI.containerBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.wikiBorder.opacity(0.5), lineWidth: 1)
+                .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
         )
         .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 4)
     }
@@ -574,7 +572,9 @@ struct PotentialLinkRow: View {
 }
 
 
-// MARK: - Lint Issue Row
+// MARK: - 质量问题行渲染
+/// 单个知识质量问题的展示行组件
+/// 负责展示特定质量问题的详情、修复建议，并提供 AI 深度分析入口及页面快捷跳转能力
 struct LintIssueRow: View {
     let issue: LintIssue
     @Environment(KMStore.self) var store

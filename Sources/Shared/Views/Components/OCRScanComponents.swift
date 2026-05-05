@@ -15,6 +15,8 @@ import PhotosUI
 // MARK: - OCR Image Picker Area
 /// OCR 图片选择区域：显示选中图片或占位符 + 相册选择按钮 + 识别按钮
 @MainActor
+/// OCR 图片选择与识别触发区域组件
+/// 负责图片的选取（从相册）、预览展示及触发后端 OCR 识别流程的交互
 struct OCRImagePickerArea: View {
     let selectedImage: WikiImage?
     let isProcessing: Bool
@@ -112,6 +114,8 @@ struct OCRImagePickerArea: View {
 
 // MARK: - OCR Result Display
 /// OCR 识别结果展示区：显示识别的文本和字符数统计
+/// OCR 识别结果实时展示组件
+/// 负责显示提取出的文本内容，并提供手动修正输入、字符计数及剪贴板复制功能
 struct OCRResultDisplay: View {
     @Binding var recognizedText: String
     let onCopy: () -> Void
@@ -158,6 +162,8 @@ struct OCRResultDisplay: View {
 
 // MARK: - OCR Save Form
 /// OCR 保存表单：页面标题/类型选择/图标/标签/保存按钮
+/// OCR 资料入库表单组件
+/// 负责在保存识别结果前配置页面元数据（标题、类型、标签），并执行最终的入库持久化操作
 struct OCRSaveForm: View {
     @Binding var targetTitle: String
     @Binding var targetType: PageType
@@ -266,6 +272,8 @@ struct OCRSaveForm: View {
 
 // MARK: - Tag Pill
 /// 标签胶囊组件
+/// 标签胶囊小组件
+/// 负责在 OCR 保存表单中以胶囊形态展示已选标签，并提供删除交互
 struct TagPill: View {
     let tag: String
     var onRemove: () -> Void = {}

@@ -239,13 +239,13 @@ struct SidebarView: View {
         #endif
         .navigationTitle(Localized.tr("sidebar.title"))
         .toolbar {
-            ToolbarItem(placement: .automatic) {
+            ToolbarItem(placement: .primaryAction) {
                 Button(action: {
-                    HapticFeedback.shared.trigger(.selection)
+                    HapticFeedback.shared.trigger(.lock)
                     store.securityService.lock()
                 }) {
                     Image(systemName: "lock.fill")
-                        .foregroundStyle(.red.opacity(0.8))
+                        .foregroundStyle(.red.opacity(0.9))
                 }
                 .help(Localized.tr("security.lockVault"))
             }

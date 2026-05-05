@@ -11,14 +11,18 @@
 
 import SwiftUI
 
-// MARK: - Log View (entry point with NavigationStack)
+// MARK: - 导航入口
+/// 操作日志主视图容器
+/// 负责为日志内容提供独立的导航堆栈，支持在设置页或侧边栏中嵌入
 struct LogView: View {
     var body: some View {
         LogViewContent()
     }
 }
 
-// MARK: - Log View Content (for use inside parent NavigationStack)
+// MARK: - 视图核心
+/// 操作日志核心内容列表视图
+/// 负责从存储引擎加载日志条目，处理清空逻辑，并管理条目的展开/折叠状态
 struct LogViewContent: View {
     @Environment(KMStore.self) var store
     @State private var expandedEntryIDs: Set<UUID> = []
@@ -98,7 +102,9 @@ struct LogViewContent: View {
     }
 }
 
-// MARK: - Log Entry Row
+// MARK: - 日志项渲染
+/// 日志条目行渲染组件
+/// 负责展示单条日志的动词、目标对象、模块、时间戳，并在展开时显示耗时详情与原始元数据
 private struct LogEntryRow: View {
     let entry: LogEntry
     let isExpanded: Bool
@@ -127,6 +133,16 @@ private struct LogEntryRow: View {
                             .font(.headline)
                             .foregroundStyle(.wikiText)
                             .lineLimit(1)
+                        
+                        if let mod = entry.module {
+                            Text(mod)
+                                .font(.caption2.bold())
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.wikiSecondary.opacity(0.1))
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .foregroundStyle(.wikiSecondary)
+                        }
                     }
                     Text(entry.timestamp.formatted(date: .abbreviated, time: .shortened))
                         .font(.caption2)
@@ -141,7 +157,45 @@ private struct LogEntryRow: View {
             }
 
             if isExpanded {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 12) {
+                    // 时间详情
+                    HStack(spacing: 20) {
+                        if let start = entry.startTime {
+                            VStack(alignment: .leading) {
+                                Text(Localized.tr("log.startTime"))
+                                    .font(.caption2)
+                                    .foregroundStyle(.wikiSecondary)
+                                Text(start.formatted(date: .omitted, time: .standard))
+                                    .font(.system(.caption2, design: .monospaced))
+                            }
+                        }
+                        
+                        if let end = entry.endTime {
+                            VStack(alignment: .leading) {
+                                Text(Localized.tr("log.endTime"))
+                                    .font(.caption2)
+                                    .foregroundStyle(.wikiSecondary)
+                                Text(end.formatted(date: .omitted, time: .standard))
+                                    .font(.system(.caption2, design: .monospaced))
+                            }
+                        }
+                        
+                        if let dur = entry.duration {
+                            VStack(alignment: .leading) {
+                                Text(Localized.tr("log.duration"))
+                                    .font(.caption2)
+                                    .foregroundStyle(.wikiSecondary)
+                                Text(String(format: "%.2fs", dur))
+                                    .font(.system(.caption2, design: .monospaced).bold())
+                                    .foregroundStyle(.wikiAccent)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.wikiCard.opacity(0.4))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+
                     if !entry.details.isEmpty {
                         Text(entry.details)
                             .font(.system(.caption, design: .monospaced))
@@ -150,10 +204,6 @@ private struct LogEntryRow: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .background(Color.wikiBackground)
                             .clipShape(RoundedRectangle(cornerRadius: 8))
-                    } else {
-                        Text(Localized.tr("log.noDetails"))
-                            .font(.caption2)
-                            .foregroundStyle(.wikiSecondary.opacity(0.6))
                     }
                 }
                 .padding(.leading, 44)

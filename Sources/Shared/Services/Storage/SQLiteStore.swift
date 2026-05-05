@@ -29,19 +29,27 @@ final class SQLiteStore {
     // MARK: - 子组件
     private let repository: WikiPageStore
     private(set) var embeddingManager: EmbeddingManager!
-    private var observationTask: Task<Void, Never>?
+    // 使用 @ObservationIgnored 并标记为 nonisolated(unsafe) 以允许在 deinit 中安全取消
+    @ObservationIgnored
+    private nonisolated(unsafe) var observationTask: Task<Void, Never>?
     private var currentTransaction: DatabaseWriter? // 临时持有用于事务
 
     // MARK: - 回调钩子
     var onLog: ((LogAction, String, String) -> Void)?
     var onSaveNeeded: (() -> Void)?
     
+    // MARK: - 动态计算属性
+    
+    /// 获取当前活跃数据库的物理路径
+    /// - Returns: 数据库文件的 URL 路径
     var dbPath: URL { 
         // 核心修复：通过 dbWriter 协议安全获取路径，避免在 DatabaseQueue 模式下强行解包 dbPool
         URL(fileURLWithPath: DatabaseManager.shared.dbWriter?.path ?? "") 
     }
 
     // MARK: - 初始化
+    /// 初始化存储门面，执行数据库连接、完整性校验、迁移及观察者启动
+    /// - Parameter providedURL: 可选的自定义数据库路径，若为 nil 则使用默认路径
     init(dbURL providedURL: URL? = nil) {
         let docsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
             ?? URL(fileURLWithPath: NSTemporaryDirectory())
@@ -80,6 +88,8 @@ final class SQLiteStore {
         embeddingManager.syncEmbeddings(pages: pages)
     }
 
+    /// 处理从旧版 JSON 文件到 SQLite 的数据平滑迁移
+    /// - Parameter docsDir: 文档目录路径
     private func migrateLegacyJSONIfNeeded(docsDir: URL) {
         let jsonURL = docsDir.appendingPathComponent("wikicraft_pages.json")
         guard FileManager.default.fileExists(atPath: jsonURL.path) else { return }
@@ -103,6 +113,8 @@ final class SQLiteStore {
         }
     }
 
+    /// 开启数据库记录观察任务，监听全表变更并自动同步至内存 pages
+    /// - Parameter dbWriter: 数据库写入器实例
     private func setupObservation(with dbWriter: (any DatabaseWriter)?) {
         guard let dbWriter = dbWriter else { return }
         observationTask = Task { [weak self] in
@@ -115,7 +127,8 @@ final class SQLiteStore {
         }
     }
 
-    /// 使用泛型方法启动观察，以“打开” existential type (any DatabaseReader)
+    /// 执行具体的 ValueObservation 循环，保持数据一致性与 RAG 同步
+    /// - Parameter reader: 数据库读取器实例
     private func startObservation(on reader: some DatabaseReader) async throws {
         let observation = ValueObservation.tracking { db in
             try WikiPage.order(Column("updated").desc).fetchAll(db)
@@ -129,17 +142,53 @@ final class SQLiteStore {
         }
     }
 
+    /// 关闭当前观察任务，用于重置数据库或资源清理
     func close() {
         observationTask?.cancel()
+        observationTask = nil
+    }
+
+    /// 彻底重置数据库物理文件并重新初始化观察流。
+    /// 彻底重置数据库物理文件并重新初始化观察流
+    /// - Throws: 移除文件或重新 Setup 过程中的错误
+    func resetDatabase() throws {
+        // 1. 停止当前观察并关闭连接
+        close()
+        let path = dbPath
+        DatabaseManager.shared.reset()
+        
+        // 2. 物理删除文件
+        if FileManager.default.fileExists(atPath: path.path) {
+            try FileManager.default.removeItem(at: path)
+        }
+        
+        // 3. 重新执行 Setup
+        try DatabaseManager.shared.setup(at: path)
+        
+        // 4. 重新启动观察
+        setupObservation(with: DatabaseManager.shared.dbWriter)
+        
+        Logger.shared.addLog(action: .systemInit, target: "SQLiteStore", details: "Database reset and observation restarted.")
     }
 
     deinit {
-        // Resources are managed by DatabasePool automatically.
+        // deinit 是 nonisolated 上下文，直接操作存储属性
+        observationTask?.cancel()
     }
 
     // MARK: - CRUD 操作 (增删改查)
     
-    /// 创建新页面
+    /// 创建并保存新页面，同步处理链接提取与向量化
+    /// - Parameters:
+    ///   - title: 页面标题
+    ///   - type: 页面类型
+    ///   - customIcon: 自定义图标
+    ///   - content: 页面 Markdown 内容
+    ///   - tags: 标签列表
+    ///   - sourceURL: 来源 URL
+    ///   - rawSnippet: 原始片段
+    ///   - forceDeepScan: 是否强制执行深度分块扫描
+    /// - Returns: 返回创建成功的 WikiPage 实例
     @discardableResult
     func createPage(
         title: String,
@@ -180,7 +229,8 @@ final class SQLiteStore {
         return page
     }
 
-    /// 执行批量写入事务（推荐方式）
+    /// 执行数据库写入事务，确保批量操作的原子性
+    /// - Parameter updates: 闭包，接收 Database 实例并执行操作
     func performBatchWrite(_ updates: @escaping (Database) throws -> Void) {
         do {
             try DatabaseManager.shared.dbWriter?.write(updates)
@@ -189,7 +239,10 @@ final class SQLiteStore {
         }
     }
 
-    /// 更新现有页面
+    /// 更新现有页面元数据，同步更新链接与向量，并根据内容长度触发 Deep Scan
+    /// - Parameters:
+    ///   - page: 待更新的页面对象
+    ///   - forceDeepScan: 是否强制重新分块向量化
     func updatePage(_ page: WikiPage, forceDeepScan: Bool) {
         if pages.contains(where: { $0.id == page.id }) {
             var updated = page
@@ -214,7 +267,8 @@ final class SQLiteStore {
         }
     }
 
-    /// 同步远程页面 (核心 LWW 冲突解决逻辑)
+    /// 同步远程页面，应用 Lamport Timestamp 的 LWW 合并策略解决多端冲突
+    /// - Parameter remotePage: 来自外部（如 iCloud）的页面对象
     func syncRemotePage(_ remotePage: WikiPage) {
         if let localIndex = pages.firstIndex(where: { $0.id == remotePage.id }) {
             let localPage = pages[localIndex]
@@ -241,7 +295,8 @@ final class SQLiteStore {
         }
     }
 
-    /// 删除页面，并处理相关的引用清理
+    /// 删除页面，并递归清理其他页面对该页面的 UUID 引用
+    /// - Parameter page: 待删除的页面对象
     func deletePage(_ page: WikiPage) {
         // 首先移除其他页面中对该页面的引用
         for i in pages.indices {
@@ -260,7 +315,10 @@ final class SQLiteStore {
         }
     }
 
-    /// 批量重命名标签
+    /// 批量重命名全局标签
+    /// - Parameters:
+    ///   - oldTag: 旧标签名称
+    ///   - newTag: 新标签名称
     func renameTag(_ oldTag: String, to newTag: String) {
         performBatchWrite { db in
             for p in self.pages {
@@ -273,7 +331,8 @@ final class SQLiteStore {
         }
     }
 
-    /// 批量删除标签
+    /// 批量从所有页面中移除指定标签
+    /// - Parameter tag: 待移除的标签名称
     func deleteTag(_ tag: String) {
         performBatchWrite { db in
             for p in self.pages {
@@ -296,10 +355,16 @@ final class SQLiteStore {
 
     // MARK: - 检索方法
     
+    /// 根据 UUID 查找页面对象
+    /// - Parameter id: 页面唯一标识
+    /// - Returns: 找到的页面或 nil
     func pageByID(_ id: UUID) -> WikiPage? {
         pages.first { $0.id == id }
     }
 
+    /// 根据标题或别名查找页面，支持大小写不敏感匹配
+    /// - Parameter title: 目标标题或别名
+    /// - Returns: 找到的页面或 nil
     func pageByTitle(_ title: String) -> WikiPage? {
         let lower = title.lowercased()
         if let exact = try? repository.fetchByTitle(title) {
@@ -310,14 +375,18 @@ final class SQLiteStore {
         }
     }
 
-    /// 获取引用了指定页面的所有页面
+    /// 获取引用了指定页面的所有“反向链接”页面
+    /// - Parameter pageID: 目标页面的 UUID
+    /// - Returns: 引用者页面列表
     func fetchBacklinksByID(for pageID: UUID) -> [WikiPage] {
         guard let page = pageByID(pageID) else { return [] }
         let sourceIDs = (try? repository.fetchBacklinks(for: page.title)) ?? []
         return sourceIDs.compactMap { id in pageByID(id) }
     }
 
-    /// 混合搜索
+    /// 混合搜索，优先调用 FTS5 全文索引，若查询为空则返回全表
+    /// - Parameter query: 搜索关键字
+    /// - Returns: 匹配的页面列表
     func searchPages(query: String) -> [WikiPage] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return pages }
@@ -331,11 +400,16 @@ final class SQLiteStore {
     }
 
     /// 对 FTS5 关键字进行安全转义，防止 SQL 注入或语法错误
+    /// - Parameter query: 原始查询字符串
+    /// - Returns: 转义后的查询字符串
     private func sanitizeFTSQuery(_ query: String) -> String {
         // 在 FTS5 中，转义双引号的方式是使用两个双引号
         return query.replacingOccurrences(of: "\"", with: "\"\"")
     }
 
+    /// 从查询字符串中提取关键词进行分词分析
+    /// - Parameter query: 搜索字符串
+    /// - Returns: 关键词数组
     private func extractSearchKeywords(from query: String) -> [String] {
         let tagger = NLTagger(tagSchemes: [.lexicalClass])
         tagger.string = query
@@ -357,29 +431,31 @@ final class SQLiteStore {
     var sourceCount: Int { (try? repository.count(type: .source)) ?? 0 }
     var totalWords: Int { pages.reduce(0) { $0 + $1.wordCount } }
 
-    // MARK: - 批量操作
+    // MARK: - 批量重构
+    
+    /// 全量替换现有数据，用于导入或同步
+    /// - Parameter newPages: 新页面列表
     func replaceAllPages(_ newPages: [WikiPage]) {
         try? repository.deleteAll()
         for page in newPages {
             try? repository.save(page)
         }
-        // pages = newPages // <- 移除：由 ValueObservation 自动同步
     }
 
+    /// 清空所有页面数据
     func removeAllPages() {
         try? repository.deleteAll()
-        // pages = [] // <- 移除：由 ValueObservation 自动同步
     }
 
     // MARK: - 载入与重载
+    
+    /// 强制从磁盘重载数据，触发 UI 刷新
     func reloadFromDisk() {
-        // 由于有 ValueObservation，通常不需要手动重载，
-        // 但如果需要强制刷新 UI 状态，可以调用此方法。
         onSaveNeeded?()
     }
 
-    // MARK: - 种子数据
-    /// 在首次启动时创建欢迎页面。
+    /// 在首次启动时注入预置的欢迎页面与教学引导
+    /// - Parameter logAction: 日志回调闭包
     func seedDefaultContent(logAction: (LogAction, String, String) -> Void) {
         let hasSeeded = UserDefaults.standard.bool(forKey: "has_seeded_initial_content")
         // 如果已经填充过且数据库不为空，则跳过
@@ -426,6 +502,8 @@ final class SQLiteStore {
     
     // MARK: - RAG & Deep Scan
     
+    /// 执行知识深度扫描，利用 TextChunkerProcessor 进行语义切分并异步向量化
+    /// - Parameter page: 目标页面
     private func performDeepScan(for page: WikiPage) {
         let chunker = TextChunkerProcessor()
         let chunks = chunker.split(text: page.content)
@@ -448,6 +526,9 @@ extension SQLiteStore: AnyPageStore {
     @discardableResult
     func createPage(title: String, type: PageType, content: String, tags: [String], sourceURL: String?, rawSnippet: String?, forceDeepScan: Bool) -> WikiPage {
         createPage(title: title, type: type, customIcon: nil, content: content, tags: tags, sourceURL: sourceURL, rawSnippet: rawSnippet, forceDeepScan: forceDeepScan)
+    }
+    func addLog(action: LogAction, target: String, details: String, duration: TimeInterval?, startTime: Date?, endTime: Date?, module: String?) {
+        Logger.shared.addLog(action: action, target: target, details: details, duration: duration, startTime: startTime, endTime: endTime, module: module ?? "SQLiteStore")
     }
 }
 

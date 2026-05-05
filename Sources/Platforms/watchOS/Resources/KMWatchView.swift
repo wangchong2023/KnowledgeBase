@@ -11,15 +11,16 @@
 
 import SwiftUI
 
-// MARK: - Watch-specific Colors
+// MARK: - 手表端专用颜色
 private extension Color {
     static let watchAccent = Color.blue
     static let watchText = Color.primary
     static let watchSecondary = Color.secondary
 }
 
-// MARK: - Apple Watch Quick View
-/// Apple Watch 简易视图，展示知识库关键统计和最近页面
+// MARK: - 手表端简易统计视图
+/// 手表端简易统计视图
+/// 负责展示知识库的核心元数据统计（页面总数、字数）及最近更新记录
 struct WatchWikiStatsView: View {
     @State private var totalPages = 0
     @State private var totalWords = 0
@@ -28,7 +29,7 @@ struct WatchWikiStatsView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                // Stats circle
+                // 1. 页面总数环形图
                 ZStack {
                     Circle()
                         .stroke(Color.watchAccent.opacity(0.2), lineWidth: 6)
@@ -50,7 +51,7 @@ struct WatchWikiStatsView: View {
                     }
                 }
                 
-                // Word count
+                // 2. 总字数统计
                 HStack(spacing: 8) {
                     VStack(spacing: 2) {
                         Text(formatNumber(totalWords))
@@ -64,7 +65,7 @@ struct WatchWikiStatsView: View {
                 
                 Divider()
                 
-                // Recent pages
+                // 3. 最近更新列表
                 VStack(alignment: .leading, spacing: 6) {
                     Text(L.tr("watch.recentUpdates"))
                         .font(.caption2.weight(.semibold))
@@ -109,7 +110,7 @@ struct WatchWikiStatsView: View {
     }
 }
 
-// MARK: - Watch L (minimal localization for watchOS target)
+// MARK: - 本地化助手 (手表端精简版)
 private enum L {
     static func tr(_ key: String) -> String {
         let table: [String: String] = [

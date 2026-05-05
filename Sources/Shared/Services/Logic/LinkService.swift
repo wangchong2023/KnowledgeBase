@@ -15,11 +15,23 @@ import Foundation
 actor LinkService {
     
     // MARK: - Link Resolution
+    /**
+     * @description: 根据标题或别名查找页面 (不区分大小写)
+     * @param {String} title 目标标题
+     * @param {[WikiPage]} pages 搜索范围
+     * @return {WikiPage?} 匹配到的页面
+     */
     func pageByTitle(_ title: String, in pages: [WikiPage]) -> WikiPage? {
         pages.first { $0.title.lowercased() == title.lowercased() }
             ?? pages.first { $0.aliases.contains(where: { $0.lowercased() == title.lowercased() }) }
     }
 
+    /**
+     * @description: 获取引用了指定页面的所有反向链接页面
+     * @param {UUID} pageID 目标页面 ID
+     * @param {[WikiPage]} pages 搜索范围
+     * @return {[WikiPage]} 引用者页面列表
+     */
     func backlinks(for pageID: UUID, in pages: [WikiPage]) -> [WikiPage] {
         guard let page = pages.first(where: { $0.id == pageID }) else { return [] }
         return pages.filter { p in
@@ -30,6 +42,12 @@ actor LinkService {
         }
     }
 
+    /**
+     * @description: 根据 ID 获取页面
+     * @param {UUID} id 目标 ID
+     * @param {[WikiPage]} pages 搜索范围
+     * @return {WikiPage?} 匹配到的页面
+     */
     func pageByID(_ id: UUID, in pages: [WikiPage]) -> WikiPage? {
         pages.first { $0.id == id }
     }
@@ -165,7 +183,11 @@ actor LinkService {
         return sortedIDs.compactMap { id in allCandidates.first { $0.id == id } }
     }
 
-    // MARK: - Tag Aggregation
+    /**
+     * @description: 提取全库所有标签及其引用计数，并按热度降序排列
+     * @param {[WikiPage]} pages 页面全集
+     * @return {[(tag: String, count: Int)]} 标签元组数组
+     */
     func allTags(in pages: [WikiPage]) -> [(tag: String, count: Int)] {
         var tagCount: [String: Int] = [:]
         for page in pages {
@@ -181,8 +203,13 @@ actor LinkService {
     
     // MARK: - Refactoring Logic
     
-    /// 准备页面重命名：扫描所有页面并替换内容中的旧链接
-    /// 返回需要更新的页面列表（包括重命名后的主页面）
+    /**
+     * @description: 准备页面重命名流程，扫描库中所有对该页面的 [[]] 引用并执行替换
+     * @param {WikiPage} page 待重命名的原始页面
+     * @param {String} newTitle 新标题
+     * @param {[WikiPage]} allPages 页面全集
+     * @return {[WikiPage]} 返回所有受影响且已更新内容的页面列表
+     */
     func prepareRename(page: WikiPage, to newTitle: String, in allPages: [WikiPage]) -> [WikiPage] {
         let oldTitle = page.title
         var modifiedPages: [WikiPage] = []

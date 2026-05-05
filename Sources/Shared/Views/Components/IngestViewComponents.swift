@@ -19,6 +19,8 @@ extension Notification.Name {
 }
 
 // MARK: - Ingest Hero Section
+/// 导入模块顶部宣传区域组件
+/// 负责展示导入功能的品牌视觉元素及核心价值主张
 struct IngestHeroSection: View {
     var body: some View {
         VStack(spacing: 12) {
@@ -43,6 +45,8 @@ struct IngestHeroSection: View {
 }
 
 // MARK: - Ingest Entry Cards Section
+/// 导入入口卡片组组件
+/// 负责展示文件导入、手动录入、网页导入、OCR 扫描等多种导入方式的启动网格
 struct IngestEntryCardsSection: View {
     @Binding var showManualForm: Bool
     @Binding var showOCRScan: Bool
@@ -175,6 +179,8 @@ struct IngestEntryCardsSection: View {
 }
 
 // MARK: - Ingest Manual Form Section
+/// 手动录入表单区域组件
+/// 负责提供 Wiki 页面核心元数据（标题、类型、标签、内容）的手动编辑界面，支持智能辅助开关
 struct IngestManualFormSection: View {
     @Binding var newTitle: String
     @Binding var newContent: String
@@ -227,6 +233,7 @@ struct IngestManualFormSection: View {
                 Text(L10n.Ingest.tr("field.tags"))
                     .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
+                    .frame(maxWidth: .infinity, alignment: .leading) // 强制左对齐
                 WikiTagField(placeholder: L10n.Ingest.tr("field.tagsPlaceholder"), tags: $newTags)
             }
 
@@ -235,7 +242,8 @@ struct IngestManualFormSection: View {
                 Text(L10n.Ingest.tr("field.content"))
                     .font(fieldLabelFont)
                     .foregroundStyle(.wikiSecondary)
-                WikiMonospacedEditor(text: $newContent, minHeight: 200)
+                    .frame(maxWidth: .infinity, alignment: .leading) // 强制左对齐
+                WikiMonospacedEditor(text: $newContent, minHeight: 180) // 略微降低默认高度
             }
         }
         .padding(.horizontal)
@@ -447,6 +455,8 @@ struct IngestManualFormSection: View {
 }
 
 // MARK: - Smart Ingest Preview
+/// 智能导入预览卡片组件
+/// 负责展示 LLM 预处理后的建议结果（标题、摘要、自动标签等），供用户确认或修正
 struct SmartIngestPreview: View {
     let result: SmartIngestResult
     let onConfirm: () -> Void
@@ -532,6 +542,8 @@ struct SmartIngestPreview: View {
 }
 
 // MARK: - Ingest Tips Section
+/// 导入操作提示区域组件
+/// 负责提供各导入方式的功能说明及操作建议，提升用户初次使用体验
 struct IngestTipsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -583,6 +595,8 @@ struct IngestTipsSection: View {
 }
 
 // MARK: - URL Import Sheet
+/// 网页链接导入面板组件
+/// 负责提供 URL 地址录入界面，并触发基于网页抓取的自动化导入流程
 struct URLImportSheet: View {
     @Binding var urlText: String
     let onImport: () -> Void

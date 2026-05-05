@@ -8,6 +8,7 @@
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
+#if ICLOUD_ENABLED
 import Foundation
 import Combine
 
@@ -16,14 +17,14 @@ import Combine
 @MainActor
 final class iCloudSyncManager {
     static let shared = iCloudSyncManager()
-    
+
     private let kvStore = NSUbiquitousKeyValueStore.default
     private var cancellables = Set<AnyCancellable>()
-    
+
     private init() {
         setupSync()
     }
-    
+
     /// 启动同步逻辑
     func setupSync() {
         // 1. 监听远程变更 (从 iCloud 拉取到本地)
@@ -32,14 +33,14 @@ final class iCloudSyncManager {
                 self?.pullFromCloud()
             }
             .store(in: &cancellables)
-        
+
         // 2. 初始同步
         kvStore.synchronize()
         pullFromCloud()
-        
+
         // 3. 监听本地变更并推送 (在此可添加具体的 AppStorage 键名监听)
     }
-    
+
     /// 将云端数据拉取到本地 UserDefaults
     private func pullFromCloud() {
         let keys = ["llm_api_key", "llm_model", "llm_enabled", "llm_provider_type"]
@@ -49,10 +50,11 @@ final class iCloudSyncManager {
             }
         }
     }
-    
+
     /// 将本地数据同步至云端
     func pushToCloud(key: String, value: Any) {
         kvStore.set(value, forKey: key)
         kvStore.synchronize()
     }
 }
+#endif // ICLOUD_ENABLED

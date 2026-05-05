@@ -11,8 +11,9 @@
 
 import SwiftUI
 
-/// 任务中心视图
-/// 展示当前正在运行及最近完成的任务列表（含 AI 任务与导入任务）。
+// MARK: - 任务中心入口
+/// 任务中心主视图
+/// 负责全局异步任务（如 AI 扫描、文档导入、知识合成）的队列监控、状态管理与历史追溯
 struct TaskCenterView: View {
     @ObservedObject var taskCenter = TaskCenter.shared
     @Environment(KMStore.self) var store
@@ -129,18 +130,6 @@ struct TaskCenterView: View {
         .onAppear {
             taskCenter.markAllAsRead()
         }
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                if !taskCenter.tasks.isEmpty {
-                    Button(role: .destructive) {
-                        HapticFeedback.shared.trigger(.warning)
-                        showClearConfirm = true
-                    } label: {
-                        Label(L10n.Common.tr("clear"), systemImage: "trash.slash.fill")
-                    }
-                }
-            }
-        }
         .confirmationDialog(
             L10n.AI.Task.tr("clearConfirmTitle"),
             isPresented: $showClearConfirm,
@@ -209,13 +198,13 @@ struct TaskCenterView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(runningCount > 0 ? color.opacity(0.3) : Color.wikiBorder.opacity(0.2), lineWidth: 1)
+        .wikiContainer(
+            cornerRadius: 20,
+            background: WikiUI.containerBackground,
+            border: runningCount > 0 ? color.opacity(0.3) : WikiUI.containerBorder,
+            padding: false
         )
+        .padding(.vertical, 14)
         .shadow(color: Color.black.opacity(0.02), radius: 8, x: 0, y: 4)
     }
     
@@ -297,6 +286,8 @@ struct TaskCenterView: View {
     }
 }
 
+/// 任务条目行组件
+/// 负责单个异步任务的进度条展示、状态文本反馈及关联页面的快捷跳转交互
 private struct TaskRow: View {
     let task: GlobalTask
     

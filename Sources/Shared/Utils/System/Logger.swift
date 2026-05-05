@@ -14,11 +14,48 @@
 import Foundation
 import Combine
 
+// MARK: - Models
+
+/// 审计日志条目模型，记录系统操作的元数据
+struct LogEntry: Identifiable, Codable {
+    var id: UUID
+    var action: LogAction
+    var target: String
+    var details: String
+    var timestamp: Date
+    var duration: TimeInterval?
+    var startTime: Date?
+    var endTime: Date?
+    var module: String? // 来源模块，如 SystemVault, KMStore
+    
+    init(
+        id: UUID = UUID(),
+        action: LogAction,
+        target: String,
+        details: String = "",
+        timestamp: Date = Date(),
+        duration: TimeInterval? = nil,
+        startTime: Date? = nil,
+        endTime: Date? = nil,
+        module: String? = nil
+    ) {
+        self.id = id
+        self.action = action
+        self.target = target
+        self.details = details
+        self.timestamp = timestamp
+        self.duration = duration
+        self.startTime = startTime
+        self.endTime = endTime
+        self.module = module
+    }
+}
+
 /// 日志记录协议，定义日志输出与持久化的核心行为
 protocol LoggerProtocol: AnyObject, Sendable {
     var logEntries: [LogEntry] { get }
     var logEntriesPublisher: AnyPublisher<[LogEntry], Never> { get }
-    func addLog(action: LogAction, target: String, details: String)
+    func addLog(action: LogAction, target: String, details: String, duration: TimeInterval?, startTime: Date?, endTime: Date?, module: String?)
     func debug(_ message: String, file: String, function: String, line: Int)
     func error(_ message: String, error: Error?, file: String, function: String, line: Int)
     func saveToDisk()
@@ -27,12 +64,24 @@ protocol LoggerProtocol: AnyObject, Sendable {
 }
 
 extension LoggerProtocol {
-    /// 默认实现，简化调用
     func debug(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         self.debug(message, file: file, function: function, line: line)
     }
     func error(_ message: String, error: Error? = nil, file: String = #file, function: String = #function, line: Int = #line) {
         self.error(message, error: error, file: file, function: function, line: line)
+    }
+    
+    /// 提供 addLog 的默认参数支持
+    func addLog(
+        action: LogAction,
+        target: String,
+        details: String = "",
+        duration: TimeInterval? = nil,
+        startTime: Date? = nil,
+        endTime: Date? = nil,
+        module: String? = nil
+    ) {
+        self.addLog(action: action, target: target, details: details, duration: duration, startTime: startTime, endTime: endTime, module: module)
     }
 }
 
@@ -46,6 +95,8 @@ final class Logger: ObservableObject, LoggerProtocol, @unchecked Sendable {
     var logEntriesPublisher: AnyPublisher<[LogEntry], Never> {
         $logEntries.eraseToAnyPublisher()
     }
+    
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
     
     func debug(_ message: String, file: String = #file, function: String = #function, line: Int = #line) {
         #if DEBUG
@@ -82,11 +133,42 @@ final class Logger: ObservableObject, LoggerProtocol, @unchecked Sendable {
     init(customDirectory: URL? = nil) {
         self.customDirectory = customDirectory
         loadFromDisk()
+        setupSubscriptions()
+    }
+
+    private func setupSubscriptions() {
+        // 使用异步 Task 以安全访问 MainActor 隔离的 WikiEventBus
+        Task { @MainActor in
+            WikiEventBus.shared.subscribe()
+                .receive(on: RunLoop.main)
+                .sink { [weak self] event in
+                    if case .clearAllDataRequested = event {
+                        self?.clearAllLogs()
+                    }
+                }
+                .store(in: &cancellables)
+        }
     }
 
     // MARK: - Add Entry
-    func addLog(action: LogAction, target: String, details: String = "") {
-        let entry = LogEntry(action: action, target: target, details: details)
+    func addLog(
+        action: LogAction,
+        target: String,
+        details: String = "",
+        duration: TimeInterval? = nil,
+        startTime: Date? = nil,
+        endTime: Date? = nil,
+        module: String? = nil
+    ) {
+        let entry = LogEntry(
+            action: action,
+            target: target,
+            details: details,
+            duration: duration,
+            startTime: startTime,
+            endTime: endTime,
+            module: module
+        )
         Task { @MainActor in
             logEntries.insert(entry, at: 0)
             if logEntries.count > AppConfig.maxLogEntries { 
@@ -98,14 +180,19 @@ final class Logger: ObservableObject, LoggerProtocol, @unchecked Sendable {
 
     // MARK: - Persistence
     func saveToDisk() {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        // 在主线程捕获快照，避免竞态
+        let entries = self.logEntries
+        
+        DispatchQueue.global(qos: .background).async {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
 
-        do {
-            let data = try encoder.encode(logEntries)
-            try data.write(to: logsFileURL, options: .atomicWrite)
-        } catch {
-            print(String(format: Localized.tr("log.error.saveFailed"), error.localizedDescription))
+            do {
+                let data = try encoder.encode(entries)
+                try data.write(to: self.logsFileURL, options: .atomicWrite)
+            } catch {
+                print("❌ [Logger] Failed to save logs: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -135,10 +222,7 @@ final class Logger: ObservableObject, LoggerProtocol, @unchecked Sendable {
     func clearAllLogs() {
         Task { @MainActor in
             logEntries.removeAll()
-            // 异步执行磁盘操作，避免阻塞主线程
-            DispatchQueue.global(qos: .background).async {
-                self.saveToDisk()
-            }
+            saveToDisk()
         }
     }
 }

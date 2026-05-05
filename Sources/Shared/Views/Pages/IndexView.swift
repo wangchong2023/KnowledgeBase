@@ -206,7 +206,7 @@ struct IndexStatView: View {
         .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
         .overlay(
             RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                .stroke(color.opacity(0.15), lineWidth: 1)
+                .stroke(color.opacity(0.1), lineWidth: 1)
         )
     }
 }
@@ -229,6 +229,7 @@ struct IndexRowView: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.wikiText)
                     .lineLimit(1)
+                    .blur(radius: (page.isPrivate && store.isPrivacyModeEnabled) ? 4 : 0)
 
                 HStack(spacing: 6) {
                     Text(Localized.trf("index.wordCount", page.wordCount))
@@ -244,9 +245,19 @@ struct IndexRowView: View {
                             .foregroundStyle(.wikiSecondary)
                     }
                 }
+                .blur(radius: (page.isPrivate && store.isPrivacyModeEnabled) ? 3 : 0)
             }
 
             Spacer()
+
+            if page.isPrivate {
+                Image(systemName: store.isPrivacyModeEnabled ? "lock.fill" : "lock.open.fill")
+                    .font(.system(size: 10))
+                    .foregroundStyle(store.isPrivacyModeEnabled ? .wikiAccent : .wikiSecondary)
+                    .padding(4)
+                    .background(Color.wikiAccent.opacity(store.isPrivacyModeEnabled ? 0.1 : 0.05))
+                    .clipShape(Circle())
+            }
 
             // Confidence indicator
             Circle()
@@ -254,5 +265,10 @@ struct IndexRowView: View {
                 .frame(width: 8, height: 8)
         }
         .padding(.vertical, 4)
+        .overlay {
+            if page.isPrivate && store.isPrivacyModeEnabled {
+                Color.wikiBackground.opacity(0.01) // 拦截点击（如果需要的话，但这里 NavigationLink 还需要工作）
+            }
+        }
     }
 }

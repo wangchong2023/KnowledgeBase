@@ -8,10 +8,13 @@
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
+#if ICLOUD_ENABLED
 import SwiftUI
 
 // MARK: - Sync Status Row
 /// iCloud 同步状态行：图标 + 状态文字 + 上次同步时间
+/// iCloud 同步状态展示行组件
+/// 负责实时展示与云端同步的健康度、进度及最后一次成功同步的时间戳
 struct SyncStatusRow: View {
     let syncService: iCloudSyncService
 
@@ -63,6 +66,8 @@ struct SyncStatusRow: View {
 
 // MARK: - Sync Actions Section
 /// iCloud 同步操作区：推送到云端 / 从云端拉取 / 双向同步
+/// iCloud 同步手动操作区域组件
+/// 负责提供上传本地、拉取云端及双向合并等显式同步指令的交互入口
 struct SyncActionsSection: View {
     let syncService: iCloudSyncService
     let isSyncing: Bool
@@ -103,6 +108,8 @@ struct SyncActionsSection: View {
 
 // MARK: - Sync Settings Section
 /// iCloud 自动同步和冲突解决策略设置
+/// iCloud 同步策略配置区域组件
+/// 负责配置自动同步开关及版本冲突时的解决策略（如保留云端、保留本地或按时间戳合并）
 struct SyncSettingsSection: View {
     @Binding var autoSync: Bool
     @Binding var conflictResolution: ConflictResolution
@@ -138,6 +145,8 @@ struct SyncSettingsSection: View {
 
 // MARK: - Sync Info Row
 /// iCloud 说明信息行
+/// iCloud 同步信息提示行组件
+/// 负责展示有关云同步的安全提示或功能局限性说明，提升用户信任感
 struct SyncInfoRow: View {
     let icon: String
     let text: String
@@ -155,3 +164,4 @@ struct SyncInfoRow: View {
         }
     }
 }
+#endif // ICLOUD_ENABLED

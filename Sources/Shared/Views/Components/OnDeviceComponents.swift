@@ -12,6 +12,8 @@
 
 // MARK: - On-Device Test View
 @MainActor
+/// 设备端模型测试预览组件
+/// 负责在 UI 中提供直接调用 CoreML 或 MLCLLM 模型的沙盒界面，验证生成效果与性能指标
 struct OnDeviceTestView: View {
     @ObservedObject var onDeviceService: OnDeviceLLMService
     @Environment(\.dismiss) private var dismiss
@@ -135,6 +137,8 @@ struct OnDeviceTestView: View {
 }
 
 // MARK: - On-Device Model Row
+/// 设备端模型列表行组件
+/// 负责展示本地模型的基本信息（名称、体积、来源类型），并提供选中状态反馈
 struct OnDeviceModelRow: View {
     let model: OnDeviceModel
     let isSelected: Bool

@@ -13,6 +13,8 @@ import SwiftUI
 
 // MARK: - Navigation Action
 /// 提供一种跨视图层级触发导航的方式，绕过对单一全局 Path 的硬编码依赖。
+/// 语义化导航操作闭包封装
+/// 负责在组件间安全地传递导航指令，绕过 SwiftUI 默认的强耦合路径绑定
 struct NavigateAction: Sendable {
     private let action: @Sendable (WikiPage) -> Void
     
@@ -41,6 +43,8 @@ extension EnvironmentValues {
 
 // MARK: - Glass Card
 /// 玻璃质感卡片：带磨砂玻璃背景 + 柔和阴影
+/// 磨砂玻璃质感卡片容器
+/// 负责为内容提供半透明、多层深度的背景及发光边框，提升界面的空间感与现代感
 struct WikiGlassCard<Content: View>: View {
     let content: Content
     var cornerRadius: CGFloat = WikiUI.medium
@@ -78,6 +82,8 @@ struct WikiGlassCard<Content: View>: View {
 
 // MARK: - Shimmer Loading
 /// 闪烁加载动画效果
+/// 扫光特效动画视图
+/// 负责生成流动的线性渐变遮罩，常用于骨架屏或内容加载中的视觉占位
 struct WikiShimmer: View {
     @State private var phase: CGFloat = 0
 
@@ -138,6 +144,8 @@ extension View {
 
 // MARK: - Glow Effect
 /// 发光效果装饰
+/// 发光图标装饰组件
+/// 负责为图标添加多层扩散的颜色晕染效果，用于强调重要操作或系统提示
 struct WikiGlow: View {
     let icon: String
     var color: Color = .wikiAccent
@@ -167,6 +175,8 @@ struct WikiGlow: View {
 
 // MARK: - Section Divider with Icon
 /// 带图标的分隔线
+/// 语义化分隔线组件
+/// 负责在内容区块间插入带有可选图标与标题的视觉分割，支持自定义描边颜色
 struct WikiDivider: View {
     var icon: String? = nil
     var title: String? = nil
@@ -193,6 +203,8 @@ struct WikiDivider: View {
 
 // MARK: - Accent Line
 /// 左侧强调色线条装饰
+/// 侧边强调线条装饰
+/// 负责在文本或区块左侧插入一条固定宽度的颜色条，常用于引用、警示或关键信息标注
 struct WikiAccentLine: View {
     var color: Color = .wikiAccent
     var width: CGFloat = 3
@@ -207,6 +219,8 @@ struct WikiAccentLine: View {
 
 // MARK: - Badge
 /// 小徽章/角标
+/// 通用角标/徽章组件
+/// 负责在右上角或行内展示数字、状态文字，支持胶囊型与圆形两种形态
 struct WikiBadge: View {
     let text: String
     var color: Color = .wikiAccent
@@ -236,6 +250,8 @@ struct WikiBadge: View {
 
 // MARK: - Gradient Background Layer
 /// 背景渐变装饰层
+/// 渐变背景装饰层
+/// 负责生成通用的线性渐变背景，通常作为页面或卡片的视觉底层，增强色彩层次
 struct WikiGradientBG: View {
     var colors: [Color] = [.wikiAccent.opacity(0.08), .clear]
     var startPoint: UnitPoint = .topLeading
@@ -252,6 +268,8 @@ struct WikiGradientBG: View {
 
 // MARK: - Dot Pattern Background
 /// 点阵背景装饰
+/// 科技感点阵背景装饰
+/// 负责在容器背景中绘制半透明的规律点阵，常用于 3D 图谱或数据实验室的背景装饰
 struct WikiDotPattern: View {
     var dotColor: Color = .wikiBorder
     var spacing: CGFloat = 20
@@ -278,6 +296,8 @@ struct WikiDotPattern: View {
 
 // MARK: - Card Decoration
 /// 卡片顶部装饰条
+/// 卡片顶部强调装饰条
+/// 负责在卡片最上方插入极细的颜色条，用于区分不同类别的知识卡片
 struct WikiCardAccent: View {
     var color: Color = .wikiAccent
     var height: CGFloat = 3
@@ -291,6 +311,8 @@ struct WikiCardAccent: View {
 
 // MARK: - Icon Box
 /// 图标背景框
+/// 品牌图标背景框
+/// 负责在标准化的圆角矩形背景中渲染图标，具备自动配色与尺寸适配逻辑
 struct WikiIconBox: View {
     let icon: String
     var color: Color = .wikiAccent
@@ -311,6 +333,8 @@ struct WikiIconBox: View {
 
 // MARK: - Skeleton Loader
 /// 骨架屏占位
+/// 骨架屏内容占位符
+/// 负责在数据加载期间展示带有扫光动画的条状块，模拟真实内容布局，减少用户感知焦虑
 struct WikiSkeleton: View {
     var height: CGFloat = 16
     var cornerRadius: CGFloat = WikiUI.tiny
@@ -325,6 +349,8 @@ struct WikiSkeleton: View {
 
 // MARK: - Pulse Indicator
 /// 脉冲指示点
+/// 脉冲状态指示点
+/// 负责展示一个带有向外扩散波纹动画的小圆点，常用于表示“在线”、“正在录音”或“后台处理中”
 struct WikiPulseDot: View {
     var color: Color = .wikiAccent
     var size: CGFloat = 8

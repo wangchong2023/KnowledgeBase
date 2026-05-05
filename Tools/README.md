@@ -2,6 +2,12 @@
 
 本目录包含用于加速 ZhiYuan 开发与测试的辅助脚本与工具。
 
+## 目录结构原则
+
+- **长期存在**：对于需要长期维护的工具和脚本，直接放置在 `Tools/` 根目录下。
+- **临时使用**：对于一次性或实验性的脚本，放置在 `Tools/Temp/` 目录下，并注意及时清理。
+- **文档同步**：每当新增或移动脚本时，必须同步更新本 `README.md`。
+
 ## 1. 数据库种子工具 (`seed_data.py`)
 
 用于快速初始化或重建模拟器环境下的测试数据。
@@ -44,7 +50,22 @@ python3 Tools/MockServer/server.py
 
 ---
 
-## 3. 注意事项
+## 3. 本地化同步工具 (`update_localization.py`)
+
+用于自动合并分表词条到主表。
+
+### 核心功能
+- **自动合并**：将 `Sources/Localization/` 目录下所有 `.xcstrings` 文件的内容同步到 `Localizable.xcstrings`。
+- **环境兼容**：解决部分构建环境下无法识别多本地化文件的问题。
+
+### 使用方法
+```bash
+python3 Tools/update_localization.py
+```
+
+---
+
+## 4. 注意事项
 - **Python 环境**：建议使用 Python 3.8+。
 - **权限说明**：在 macOS 上操作模拟器容器路径可能需要全盘访问权限（通常 Terminal 会自动请求）。
 - **同步建议**：建议在修改数据库架构（Schema）后，同步更新 `seed_data.py` 中的 `INSERT` 语句。

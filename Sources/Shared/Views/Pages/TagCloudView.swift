@@ -1,11 +1,16 @@
 // TagCloudView.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct TagCloudView
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的标签管理中心（TagCloudView）。
+// 它作为全局标签的聚合展示与维护入口，具备以下核心能力：
+// 1. 动态标签云：通过 FlowLayout 自动排列标签，并根据页面引用热度实时更新实时计数。
+// 2. 增强型 CRUD 交互：支持标签的新增、重命名、单项删除及基于多选模式的批量删除。
+// 3. 关联检索：点击标签可实时筛选并展示关联的 Wiki 页面，形成“标签 -> 内容”快速导航。
+// 4. 视觉规范对齐：严格遵循系统的模块化 UI 语言，确保边框宽度与卡片间距在全平台一致。
+// 版本: 1.3
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
+//   - 2026-05-05: 修复标签云容器宽度未撑满导致边框与下方列表不齐的问题
+//   - 2026-05-05: 完善详细中文文档注释，规范函数头
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
@@ -16,16 +21,23 @@ import AppKit
 #endif
 
 // MARK: - 标签云视图 (导航容器)
+/// 标签管理的顶层视图容器，负责承载主内容
 struct TagCloudView: View {
+    /// 初始选中的标签（由外部跳转传入）
     var initialTag: String? = nil
+    
     var body: some View {
         TagCloudViewContent(initialTag: initialTag)
     }
 }
 
 // MARK: - 标签管理主内容
+/// 标签管理的核心业务逻辑与界面实现
 struct TagCloudViewContent: View {
+    // ── 外部依赖 ──
     @Environment(KMStore.self) var store
+    
+    // ── 交互状态 ──
     @State private var selectedTag: String?
     @State private var tagToRename: String?
     @State private var newTagName = ""
@@ -34,19 +46,22 @@ struct TagCloudViewContent: View {
     @State private var showAddTagDialog = false
     @State private var addTagName = ""
     
-    init(initialTag: String? = nil) {
-        _selectedTag = State(initialValue: initialTag)
-    }
-    
-    // 批量管理状态
+    // ── 批量管理 ──
     @State private var isEditMode = false
     @State private var selectedTagsForBulk = Set<String>()
     @State private var showBulkDeleteConfirm = false
     @State private var searchText = ""
 
-    /// 从存储中心获取所有标签及其计数
+    /// 数据源：所有标签及其引用计数
     @State private var tags: [(tag: String, count: Int)] = []
 
+    /// 初始化路由状态
+    /// - Parameter initialTag: 外部传入的初始选中标签
+    init(initialTag: String? = nil) {
+        _selectedTag = State(initialValue: initialTag)
+    }
+    
+    /// 执行数据抓取
     private func fetchData() async {
         let allTags = await store.getAllTags()
         await MainActor.run {
@@ -54,13 +69,13 @@ struct TagCloudViewContent: View {
         }
     }
 
-    /// 筛选后的标签列表
+    /// 经过搜索过滤后的标签列表
     var filteredTags: [(tag: String, count: Int)] {
         if searchText.isEmpty { return tags }
         return tags.filter { $0.tag.localizedCaseInsensitiveContains(searchText) }
     }
 
-    /// 根据选中的标签筛选页面
+    /// 基于选中标签筛选的页面列表
     var filteredPages: [WikiPage] {
         guard let tag = selectedTag else { return store.pages }
         return store.pages.filter { $0.tags.contains(tag) }
@@ -75,20 +90,21 @@ struct TagCloudViewContent: View {
             .task {
                 await fetchData()
             }
-            .onChange(of: store.pages) { oldValue, newValue in
+            .onChange(of: store.pages) { _, _ in
                 Task { await fetchData() }
             }
     }
 
+    /// 组合主界面布局
     private var mainContent: some View {
         VStack(spacing: 0) {
-            // 操作栏：添加与管理按钮
+            // 1. 顶部操作栏
             HStack(spacing: 20) {
                 Spacer()
                 if !isEditMode {
                     Button(action: { showAddTagDialog = true }) {
                         Label(Localized.tr("tags.addNew"), systemImage: "plus.circle")
-                            .font(.footnote.weight(.medium))
+                            .font(.subheadline.bold())
                     }
                 }
                 
@@ -100,30 +116,50 @@ struct TagCloudViewContent: View {
                 }) {
                     Label(isEditMode ? L10n.Common.tr("done") : Localized.tr("tags.manageTitle"), 
                           systemImage: isEditMode ? "checkmark.circle" : "checklist")
-                        .font(.footnote.weight(.medium))
+                        .font(.subheadline.bold())
                         .foregroundStyle(isEditMode ? .green : .wikiAccent)
                 }
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
 
-            // 标签云展示区
+            // 2. 标签云展示区（带标准边框的卡片）
             if tags.isEmpty {
                 emptyTagsView
             } else {
-                tagScrollView
-                    .background(Color.wikiCard.opacity(0.2))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .padding(.horizontal, 16)
-                    .overlay(alignment: .bottom) {
-                        if isEditMode && !selectedTagsForBulk.isEmpty {
-                            bulkActionBar
-                        }
+                VStack(spacing: 0) {
+                    tagScrollView
+                }
+                .frame(maxWidth: .infinity)
+                .background(WikiUI.containerBackground)
+                .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: WikiUI.cardRadius)
+                        .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
+                )
+                .overlay(alignment: .bottom) {
+                    if isEditMode && !selectedTagsForBulk.isEmpty {
+                        bulkActionBar
                     }
+                }
             }
 
-            // 下方页面列表区
+            // 3. 关联页面列表（确保与上方卡片视觉对齐）
             pagesListView
+                .background(WikiUI.containerBackground)
+                .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: WikiUI.cardRadius)
+                        .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
+                )
         }
     }
 
@@ -277,7 +313,7 @@ struct TagCloudViewContent: View {
             )
             .overlay(
                 Capsule()
-                    .stroke(isSelected ? Color.wikiAccent.opacity(0.4) : Color.wikiBorder.opacity(0.35), lineWidth: 0.5)
+                    .stroke(isSelected ? Color.wikiAccent.opacity(0.8) : Color.wikiBorder.opacity(0.6), lineWidth: 1.2)
             )
             .scaleEffect(isSelected ? 1.04 : 1.0)
             .shadow(color: isSelected ? Color.wikiAccent.opacity(0.12) : Color.clear, radius: 10, y: 4)
@@ -357,6 +393,7 @@ struct TagCloudViewContent: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
+                .frame(maxHeight: .infinity)
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: isEditMode ? "checklist" : "tag")
@@ -366,7 +403,7 @@ struct TagCloudViewContent: View {
                         .font(.subheadline)
                         .foregroundStyle(.wikiSecondary)
                 }
-                .frame(maxHeight: .infinity)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.wikiBackground.opacity(0.01)) // 响应点击
                 .onTapGesture {
                     if isEditMode { isEditMode = false }
@@ -377,6 +414,10 @@ struct TagCloudViewContent: View {
 
     // MARK: - 业务逻辑执行
 
+    /**
+     * @description: 执行标签重命名逻辑，同步更新 Wiki 页面引用及当前选中状态
+     * @return {*}
+     */
     private func performRename() {
         guard let old = tagToRename, !newTagName.trimmingCharacters(in: .whitespaces).isEmpty else { return }
         let trimmed = newTagName.trimmingCharacters(in: .whitespaces)
@@ -385,6 +426,10 @@ struct TagCloudViewContent: View {
         tagToRename = nil
     }
 
+    /**
+     * @description: 执行标签删除逻辑，并重置选中状态
+     * @return {*}
+     */
     private func performDelete() {
         if let tag = tagToDelete {
             store.deleteTag(tag)
@@ -393,6 +438,10 @@ struct TagCloudViewContent: View {
         tagToDelete = nil
     }
 
+    /**
+     * @description: 创建新标签并自动设为选中状态
+     * @return {*}
+     */
     private func performAddTag() {
         let trimmed = addTagName.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }

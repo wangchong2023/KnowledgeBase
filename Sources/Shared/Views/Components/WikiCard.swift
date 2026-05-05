@@ -12,6 +12,8 @@ import SwiftUI
 
 // MARK: - Wiki Card Modifier
 /// 应用 Wiki 卡片背景的 ViewModifier。
+/// 应用 Wiki 卡片背景的视图修饰符
+/// 负责注入一致的内边距、背景色及圆角样式
 struct WikiCardModifier: ViewModifier {
     var cornerRadius: CGFloat = WikiUI.cardRadius
     var padding: CGFloat = WikiUI.cardPadding
@@ -27,6 +29,8 @@ struct WikiCardModifier: ViewModifier {
 
 // MARK: - Wiki Card (Container)
 /// 统一的卡片容器，统一背景、圆角、内边距。
+/// 标准 Wiki 卡片容器组件
+/// 提供符合设计系统的阴影、圆角及背景封装
 struct WikiCard<Content: View>: View {
     let content: Content
     var cornerRadius: CGFloat = WikiUI.cardRadius
@@ -42,14 +46,16 @@ struct WikiCard<Content: View>: View {
 
 // MARK: - Wiki Bordered Card
 /// 带边框的卡片，用于入口卡片等需要描边的场景。
+/// 带描边效果的 Wiki 卡片
+/// 适用于需要视觉分割或引导点击的入口区域
 struct WikiBorderedCard<Content: View>: View {
     let content: Content
     var cornerRadius: CGFloat = WikiUI.cardRadius
-    var borderColor: Color = .clear
+    var borderColor: Color = .wikiMainBorder
 
     init(
         cornerRadius: CGFloat = WikiUI.cardRadius,
-        borderColor: Color = .clear,
+        borderColor: Color = .wikiMainBorder,
         @ViewBuilder content: () -> Content
     ) {
         self.cornerRadius = cornerRadius
@@ -66,7 +72,7 @@ struct WikiBorderedCard<Content: View>: View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(borderColor.opacity(0.3), lineWidth: 1)
+                    .stroke(borderColor, lineWidth: 1)
             )
     }
 }
@@ -81,6 +87,8 @@ extension View {
 
 // MARK: - Wiki Section Header
 /// 统一的分组标题样式。
+/// 统一的章节标题组件
+/// 支持左侧图标、标题文本及右侧自定义工具栏
 struct WikiSectionHeader: View {
     let title: String
     var icon: String? = nil
@@ -210,6 +218,8 @@ struct WikiIconChip: View {
 
 // MARK: - Wiki Primary Button
 /// 主要操作按钮，渐变背景跟随用户选择的主题色。
+/// 品牌色主操作按钮
+/// 支持渐变背景、加载状态及主题色自动适配
 struct WikiPrimaryButton: View {
     let title: String
     var icon: String? = nil
@@ -316,52 +326,64 @@ struct WikiTagField: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            FlowLayout(spacing: 8) {
+            FlowLayout(spacing: 6) {
                 ForEach(tags, id: \.self) { tag in
-                    HStack(spacing: 4) {
+                    HStack(spacing: 3) {
                         Text("#\(tag)")
-                            .font(.caption.weight(.medium))
+                            .font(.system(size: 11, weight: .medium))
                         Button(action: { 
-                            withAnimation(.spring()) {
+                            withAnimation(.spring(response: 0.3)) {
                                 tags.removeAll { $0 == tag }
                             }
                         }) {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.caption2)
+                            Image(systemName: "xmark")
+                                .font(.system(size: 9, weight: .bold))
                                 .foregroundStyle(.wikiSecondary)
                         }
                         .buttonStyle(.plain)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.wikiAccent.opacity(0.12))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.wikiAccent.opacity(0.1))
                     .clipShape(Capsule())
                     .foregroundStyle(.wikiAccent)
                 }
                 
                 TextField(placeholder, text: $newTag)
                     .textFieldStyle(.plain)
-                    .onSubmit {
-                        let trimmed = newTag.trimmingCharacters(in: .whitespaces)
-                            .replacingOccurrences(of: "#", with: "")
-                        if !trimmed.isEmpty && !tags.contains(trimmed) {
-                            withAnimation(.spring()) {
-                                tags.append(trimmed)
-                            }
+                    .font(.subheadline)
+                    .onChange(of: newTag) { _, newValue in
+                        // 自动检测空格或逗号进行分词
+                        if newValue.hasSuffix(" ") || newValue.hasSuffix(",") || newValue.hasSuffix("，") {
+                            addCurrentTag()
                         }
-                        newTag = ""
                     }
-                    .frame(minWidth: 120)
+                    .onSubmit {
+                        addCurrentTag()
+                    }
+                    .frame(minWidth: 100)
                     .foregroundStyle(.wikiText)
             }
-            .padding(10)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
             .background(Color.wikiCard)
-            .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+            .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: WikiUI.smallRadius)
-                    .stroke(Color.wikiSecondary.opacity(0.2), lineWidth: 1)
+                RoundedRectangle(cornerRadius: WikiUI.standardRadius)
+                    .stroke(Color.wikiBorder.opacity(0.5), lineWidth: 1)
             )
         }
+    }
+    
+    private func addCurrentTag() {
+        let trimmed = newTag.trimmingCharacters(in: .whitespaces.union(.init(charactersIn: ",，")))
+            .replacingOccurrences(of: "#", with: "")
+        if !trimmed.isEmpty && !tags.contains(trimmed) {
+            withAnimation(.spring(response: 0.3)) {
+                tags.append(trimmed)
+            }
+        }
+        newTag = ""
     }
 }
 

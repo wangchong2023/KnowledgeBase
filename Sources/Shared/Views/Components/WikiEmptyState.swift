@@ -18,6 +18,8 @@ import SwiftUI
 ///   - description: 可选描述文本
 ///   - hint: 可选提示（通常是高亮小字）
 ///   - action: 可选操作按钮配置
+/// 智适应空状态视图
+/// 负责在列表或内容为空时展示视觉占位符、说明文案及引导操作按钮
 struct WikiEmptyState: View {
     let icon: String
     let title: String

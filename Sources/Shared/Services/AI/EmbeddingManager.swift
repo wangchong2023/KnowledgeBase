@@ -1,10 +1,10 @@
 // EmbeddingManager.swift
 //
 // 作者: Wang Chong
-// 功能说明: 商用级向量管理中心
-// 版本: 1.0
+// 功能说明: 向量管理中心，负责向量的异步计算、持久化同步以及基于 Accelerate 框架的高性能检索。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
+//   - 2026-05-05: 升级文档规范，优化线程安全访问逻辑
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
@@ -12,7 +12,7 @@ import Foundation
 import NaturalLanguage
 import Accelerate
 
-/// 商用级向量管理中心
+/// 向量管理中心
 /// 负责向量的异步计算、持久化同步以及基于 Accelerate 框架的高性能检索。
 final class EmbeddingManager {
     private let repository: WikiPageStore

@@ -1,11 +1,15 @@
 // KnowledgeDashboardView.swift
 //
 // 作者: Wang Chong
-// 功能说明: 知识资产仪表盘 (Designer & PM 视角：可视化知识价值)
-// 版本: 1.0
+// 功能说明: 本文件实现了知识资产仪表盘（KnowledgeDashboardView），为用户提供全局视角的资产统计、连接密度分析及每日洞察。
+// 核心职责：
+// 1. 资产全景监控：汇总统计页面总数与连接总数，直观呈现知识库规模。
+// 2. 深度关系挖掘：分析标签分布与连接密度，通过可视化手段揭示知识领域的冷热程度。
+// 3. AI 驱动洞察：集成每日闪念与荣誉系统，提升用户对知识库的探索欲与互动性。
+// 4. 视觉规范对齐：全面采用 WikiUI 容器规范，确保仪表盘组件在视觉上与知识图谱保持高度一致。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
+//   - 2026-05-05: 升级全系统容器规范，补全中文文档注释
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
@@ -56,7 +60,7 @@ struct KnowledgeDashboardView: View {
                     
                     ZStack {
                         RoundedRectangle(cornerRadius: 16)
-                            .fill(Color.wikiCard)
+                            .fill(WikiUI.containerBackground)
                             .frame(height: 200)
                         
                         // 简易可视化模拟：连接分布
@@ -118,11 +122,11 @@ struct KnowledgeDashboardView: View {
                             .foregroundStyle(.wikiSecondary.opacity(0.5))
                     }
                     .padding()
-                    .background(Color.wikiCard)
+                    .background(WikiUI.containerBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.wikiBorder.opacity(0.15), lineWidth: 1)
+                            .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
                     )
                 }
                 .buttonStyle(.plain)
@@ -185,11 +189,11 @@ private struct HotTopicCard: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 14)
-        .background(Color.wikiCard)
+        .background(WikiUI.containerBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.wikiBorder.opacity(0.15), lineWidth: 1)
+                .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
         )
         .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 2)
     }
@@ -233,7 +237,7 @@ private struct MetricBox: View {
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding()
-        .background(Color.wikiCard)
+        .background(WikiUI.containerBackground)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .shadow(color: .black.opacity(0.05), radius: 5, x: 0, y: 2)
     }
@@ -295,7 +299,7 @@ struct DailyRecapSection: View {
                         }
                     }
                     .padding()
-                    .background(Color.wikiCard)
+                    .background(WikiUI.containerBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                 }
                 .buttonStyle(.plain)

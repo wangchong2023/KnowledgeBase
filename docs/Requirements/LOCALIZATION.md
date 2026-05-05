@@ -7,6 +7,7 @@
 *   **工作流**:
     1.  开发者在代码中使用 `Localized.tr("key")`。
     2.  翻译者在 `.strings` 文件中对应各语言。
+    3.  **同步**: 运行 `python3 Tools/update_localization.py` 将各业务域的分表（如 `Graph.xcstrings`）词条同步到主表。
 *   **规范**: 必须保留 `%@` 等占位符，且中文翻译需遵循《中文文案排版指引》。
 
 ## 2. 插件市场本地化 (Market i18n)

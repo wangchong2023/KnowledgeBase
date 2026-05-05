@@ -8,6 +8,7 @@
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
+#if ICLOUD_ENABLED
 import Foundation
 import Observation
 
@@ -188,3 +189,4 @@ final class iCloudSyncCoordinator {
         store.saveToDisk()
     }
 }
+#endif // ICLOUD_ENABLED

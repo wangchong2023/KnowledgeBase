@@ -14,8 +14,8 @@
 
 import SwiftUI
 
-// MARK: - App Root View
-/// 全局根视图容器
+/// 应用程序根视图
+/// 负责全局导航分发（Tab/SplitView）、安全遮罩及全局弹窗调度
 @MainActor
 struct ContentView: View {
     @Environment(KMStore.self) var store

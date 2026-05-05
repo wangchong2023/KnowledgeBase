@@ -10,7 +10,9 @@
 
 import SwiftUI
 
-/// 手表端语音采集视图
+// MARK: - 手表端语音采集
+/// Apple Watch 语音笔记采集视图
+/// 负责在手表端通过系统语音输入获取文本，并通过 WatchConnectivity 实时同步至主应用
 struct WatchDictationView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(KMStore.self) var store

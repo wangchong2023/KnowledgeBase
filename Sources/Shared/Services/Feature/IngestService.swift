@@ -54,6 +54,7 @@ protocol AnyPageStore {
     @discardableResult
     func createPage(title: String, type: PageType, content: String, tags: [String], sourceURL: String?, rawSnippet: String?, forceDeepScan: Bool) -> WikiPage
     func updatePage(_ page: WikiPage, forceDeepScan: Bool)
+    func addLog(action: LogAction, target: String, details: String, duration: TimeInterval?, startTime: Date?, endTime: Date?, module: String?)
 }
 // Note: SQLiteStore conformance is declared in SQLiteStore.swift to avoid circular dependency
 
@@ -74,6 +75,7 @@ final class IngestService {
         llmService: (any LLMServiceProtocol)? = nil,
         pageStore: any AnyPageStore
     ) -> WikiPage {
+        let startTime = Date()
         // --- 语义增强流程 (处理图表) ---
         // TODO: 异步 LLM 语义增强（当前 defer，后续接入）
         // if let llm = llmService, content.contains("| --- |") || content.contains("![]") { }
@@ -102,6 +104,17 @@ final class IngestService {
         var page = rawPage
         page.content = updatedContent
         pageStore.updatePage(page, forceDeepScan: forceDeepScan)
+
+        let duration = Date().timeIntervalSince(startTime)
+        pageStore.addLog(
+            action: .create,
+            target: title,
+            details: "Ingested \(content.count) chars. DeepScan: \(forceDeepScan)",
+            duration: duration,
+            startTime: startTime,
+            endTime: Date(),
+            module: "IngestService"
+        )
 
         return page
     }

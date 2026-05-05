@@ -15,6 +15,8 @@
 import SwiftUI
 
 // MARK: - Chat Bubble View
+/// 聊天气泡视图
+/// 支持用户消息（右侧、渐变背景）与 AI 消息（左侧、卡片背景）的差异化渲染
 struct ChatBubbleView: View {
     let message: ChatMessage
     let pages: [WikiPage]
@@ -215,6 +217,8 @@ struct ChatBubbleView: View {
 }
 
 // MARK: - Chat Content View (renders wikilinks as tappable)
+/// 聊天消息内容渲染引擎
+/// 负责 Markdown 文本的解析、Wiki-link 的交互化处理及超长文本的折叠逻辑
 struct ChatContentView: View {
     let text: String
     let pages: [WikiPage]
@@ -308,6 +312,8 @@ struct ChatLinkParser {
 }
 
 // MARK: - Pulsing Dot Animation
+/// 脉冲缩放动画修饰符
+/// 用于在 AI 思考或加载状态下提供平滑的视觉律动反馈
 struct PulsingDot: ViewModifier {
     let delay: Double
     @State private var isAnimating = false

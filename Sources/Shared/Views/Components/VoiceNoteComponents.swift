@@ -11,6 +11,8 @@
 import SwiftUI
 
 // MARK: - Save Voice Note Sheet
+/// 语音笔记保存配置面板组件
+/// 负责在保存语音识别结果前配置页面标题、类型，并展示转录文本预览供最终确认
 struct SaveVoiceNoteSheet: View {
     @ObservedObject var speechService: SpeechProcessor
     @Binding var title: String
@@ -114,6 +116,8 @@ struct SaveVoiceNoteSheet: View {
 }
 
 // MARK: - Voice Recording Row
+/// 语音录音列表行组件
+/// 负责展示语音笔记的摘要信息（标题、部分文本、创建日期）及波形图标
 struct VoiceRecordingRow: View {
     let recording: VoiceRecording
     

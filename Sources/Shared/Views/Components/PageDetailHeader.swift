@@ -12,6 +12,10 @@ import SwiftUI
 
 // MARK: - Page Detail Header
 /// Page detail header displaying type/status/confidence badges, title, aliases, tags, and meta info.
+/// 页面详情顶栏组件
+/// 负责展示知识页面的标题、类型标识、最近修改时间及操作入口（如书签、分享、删除）
+/// 页面详情页顶部头部组件
+/// 负责在详情页显著位置展示核心元数据（标题、类型、状态、置信度、别名、标签及统计信息），支持 Hero 动画
 struct PageDetailHeader: View {
     let page: WikiPage
     var heroNamespace: Namespace.ID? = nil
@@ -158,6 +162,8 @@ struct PageDetailHeader: View {
 }
 
 // MARK: - Type Badge
+/// 页面类型标识徽章小组件
+/// 负责以胶囊形态展示页面所属分类图标及名称，并适配 Hero 动画转场标识
 private struct TypeBadge: View {
     let page: WikiPage
     var heroNamespace: Namespace.ID?
@@ -186,6 +192,8 @@ private struct TypeBadge: View {
 }
 
 // MARK: - Status Badge
+/// 页面状态标识徽章小组件
+/// 负责展示页面的生命周期状态（如草稿、已发布、已废弃），并提供颜色编码的视觉提示
 private struct StatusBadge: View {
     let page: WikiPage
     
@@ -208,6 +216,8 @@ private struct StatusBadge: View {
 }
 
 // MARK: - Confidence Badge
+/// 页面置信度标识徽章小组件
+/// 负责展示内容的可靠性指标，通常由 AI 自动打分或人工审核确认
 private struct ConfidenceBadge: View {
     let page: WikiPage
     

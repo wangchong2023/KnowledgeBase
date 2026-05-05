@@ -10,6 +10,8 @@
 
 import SwiftUI
 
+/// 知识标签胶囊组件
+/// 提供一致的标签视觉样式，支持点击交互与删除操作
 struct TagCapsule: View {
     let tag: String
     let count: Int

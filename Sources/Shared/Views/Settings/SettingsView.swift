@@ -1,17 +1,23 @@
 // SettingsView.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct SettingsView
-// 版本: 1.0
+// 功能说明: 本文件定义了“设置”页面，负责管理应用的外观（主题/语言）、AI 配置、数据同步/备份以及安全隐私设置。
+// 核心功能点：
+// 1. 系统配置：动态切换色彩模式（深色/浅色）与多语言环境。
+// 2. AI 实验室：配置远程及本地 LLM 模型，管理提示词合成系统。
+// 3. 数据生命周期：处理 iCloud 双向同步、数据库备份导出、以及危险的“重置数据”操作（带确认对话框）。
+// 4. 安全中心：控制隐私模式（隐藏敏感内容）与面容 ID/指纹保护，通过 SecurityService 进行硬件鉴权。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
+//   - 2026-05-05: 完善中文文档，修复面容ID开关在硬件不可用时未正确置灰的问题
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// 设置页面主视图
+/// 负责协调系统偏好、AI 配置、数据同步及安全隐私的交互界面
 struct SettingsView: View {
     @Environment(KMStore.self) var store
     @Environment(SettingsStore.self) var settingsStore
@@ -24,12 +30,18 @@ struct SettingsView: View {
     @State private var injectedCount: Int = 0
     @State private var showResetOnboardingConfirmation = false
     @State private var isExportingAll = false
+    #if ICLOUD_ENABLED
     @State private var coordinator = iCloudSyncCoordinator()
+    #endif
     @State private var selectedLanguage: LanguageMode = Localized.languageMode
     @Binding var languageForceUpdate: Bool
     @State private var showFolderImporterForImport = false
     @State private var showClearAllConfirmation = false
     
+    /**
+     * @description: 触发硬件层面的生物识别认证（FaceID/TouchID）
+     * @return {Bool} 认证是否成功
+     */
     @MainActor
     private func authenticate() async -> Bool {
         await store.securityService.authenticateWithBiometrics()
@@ -132,6 +144,7 @@ struct SettingsView: View {
                 
                 // ── 同步与备份 ──
                 Section {
+                    #if ICLOUD_ENABLED
                     SettingsNavigationRow(icon: "icloud", title: L10n.Settings.tr("iCloudSync"), identifier: "settings.icloud") {
                         iCloudSyncView(coordinator: coordinator)
                     } trailing: {
@@ -145,6 +158,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
+                    #endif
 
                     SettingsNavigationRow(icon: "externaldrive.fill", title: L10n.Backup.title, identifier: "settings.backup") {
                         BackupView()
@@ -198,6 +212,7 @@ struct SettingsView: View {
                                 .foregroundStyle(.blue)
                         }
                     }
+                    .disabled(!store.securityService.biometricsAvailable)
                     .accessibilityIdentifier("settings.biometric")
 
                     SettingsNavigationRow(icon: "clock.arrow.circlepath", title: L10n.Settings.tr("operationLog"), identifier: "settings.log") {
@@ -219,8 +234,12 @@ struct SettingsView: View {
                     .alert(L10n.Settings.tr("injectConfirm.title"), isPresented: $showInjectConfirmation) {
                         Button(L10n.Common.tr("confirm")) {
                             let count = store.generateDemoData()
-                            HapticFeedback.shared.trigger(.success)
-                            ToastManager.shared.show(type: .success, message: L10n.Settings.trf("injectDemo.successMessage", count))
+                            HapticFeedback.shared.trigger(count > 0 ? .success : .error)
+                            if count > 0 {
+                                ToastManager.shared.show(type: .success, message: L10n.Settings.trf("injectDemo.successMessage", count))
+                            } else {
+                                ToastManager.shared.show(type: .error, message: Localized.tr("settings.inject.noDataGenerated"))
+                            }
                         }
                         Button(L10n.Common.tr("cancel"), role: .cancel) { }
                     } message: {
@@ -306,7 +325,7 @@ struct SettingsView: View {
                             defer { url.stopAccessingSecurityScopedResource() }
                             
                             await MainActor.run {
-                                store.mountVault(at: url)
+                                store.ingestFolder(at: url)
                                 TaskCenter.shared.updateTask(taskID, status: .completed)
                                 HapticFeedback.shared.trigger(.success)
                             }

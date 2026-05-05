@@ -47,7 +47,7 @@ struct IconPickerView: View {
     ]
 
     private func categoryDisplayName(_ key: String) -> String {
-        Localized.tr(key)
+        L10n.Editor.tr(key)
     }
 
     private let gridColumns = Array(repeating: GridItem(.flexible(), spacing: 12), count: 6)

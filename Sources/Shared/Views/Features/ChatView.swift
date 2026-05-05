@@ -15,8 +15,9 @@
 import SwiftUI
 import WebKit
 
-// MARK: - Chat View (entry point with NavigationStack)
-/// AI 助手聊天视图入口
+// MARK: - 导航入口
+/// AI 助手对话功能主容器视图
+/// 负责管理对话界面的顶层生命周期、导航路由及 AppTab 状态同步
 struct ChatView: View {
     @Binding var selectedTab: AppTab
     var body: some View {
@@ -24,7 +25,9 @@ struct ChatView: View {
     }
 }
 
-// MARK: - Chat View Content (for use inside parent NavigationStack)
+// MARK: - 视图核心
+/// AI 助手对话核心业务视图
+/// 负责消息流的异步渲染、输入状态管理、RAG 检索指令调度及对话历史导出逻辑
 struct ChatViewContent: View {
     @Environment(KMStore.self) var store
     @EnvironmentObject var llmService: LLMService

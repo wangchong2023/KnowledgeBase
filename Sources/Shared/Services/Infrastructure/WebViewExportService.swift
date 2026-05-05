@@ -2,10 +2,9 @@
 //
 // 作者: Wang Chong
 // 功能说明: 网页导出服务 (L0 基础架构层)
-// 版本: 1.0
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-03
-// 日期: 2026-05-04
+//   - 2026-05-05: 修复多任务并发导致的报错与崩溃，引入串行导出锁定机制。
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -18,7 +17,7 @@ final class WebViewExportService: NSObject {
     static let shared = WebViewExportService()
     
     private var webView: WKWebView?
-    private var exportContinuation: CheckedContinuation<URL, Error>?
+    private var isExporting = false
     
     private override init() {
         super.init()
@@ -29,7 +28,7 @@ final class WebViewExportService: NSObject {
         let config = WKWebViewConfiguration()
         config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
         
-        webView = WKWebView(frame: .zero, configuration: config)
+        webView = WKWebView(frame: CGRect(x: 0, y: 0, width: 800, height: 1000), configuration: config)
         webView?.navigationDelegate = self
         
         // 读取本地 JS 内容
@@ -46,15 +45,16 @@ final class WebViewExportService: NSObject {
             <script>\(markedJS)</script>
             <script>\(mermaidJS)</script>
             <style>
-                body { font-family: -apple-system, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
+                body { font-family: -apple-system, sans-serif; padding: 40px; color: #333; line-height: 1.6; background-color: white; }
                 h1 { color: #222; text-align: center; margin-bottom: 40px; padding-bottom: 10px; }
-                pre { background: #f6f8fa; padding: 16px; border-radius: 8px; }
+                pre { background: #f6f8fa; padding: 16px; border-radius: 8px; white-space: pre-wrap; word-break: break-all; }
                 code { font-family: ui-monospace, monospace; }
                 blockquote { border-left: 4px solid #dfe2e5; color: #6a737d; padding-left: 16px; margin-left: 0; }
                 table { border-collapse: collapse; width: 100%; margin: 16px 0; }
                 th, td { border: 1px solid #dfe2e5; padding: 8px 12px; }
                 th { background-color: #f6f8fa; }
                 #mermaid-root { width: 100%; display: flex; justify-content: center; }
+                img { max-width: 100%; height: auto; }
             </style>
         </head>
         <body>
@@ -76,6 +76,20 @@ final class WebViewExportService: NSObject {
     
     /// 将 Markdown 导出为 PDF
     func exportToPDF(markdown: String, fileName: String) async throws -> URL {
+        if isExporting {
+            try? await Task.sleep(for: .milliseconds(500))
+            if isExporting { throw NSError(domain: "WebViewExport", code: 429, userInfo: [NSLocalizedDescriptionKey: "System busy, please try later."]) }
+        }
+        
+        isExporting = true
+        defer { 
+            isExporting = false
+            // 导出后清理，释放内存，防止 coredump
+            Task { @MainActor in
+                _ = try? await webView?.evaluateJavaScript("document.body.innerHTML = '';")
+            }
+        }
+
         guard let webView = webView else { throw NSError(domain: "WebViewExport", code: 500) }
         
         let escapedMarkdown = markdown.replacingOccurrences(of: "\\", with: "\\\\")
@@ -84,10 +98,17 @@ final class WebViewExportService: NSObject {
         
         let js = """
         (async () => {
-            document.getElementById('mermaid-root').innerHTML = '';
+            const root = document.getElementById('mermaid-root');
+            if (root) root.innerHTML = '';
             const content = document.getElementById('content');
-            content.innerHTML = marked.parse(`\(escapedMarkdown)`);
-            await new Promise(r => setTimeout(r, 300));
+            if (content) content.innerHTML = marked.parse(`\(escapedMarkdown)`);
+            
+            // 等待图片等资源加载
+            await new Promise(r => {
+                if (document.readyState === 'complete') r();
+                else window.addEventListener('load', r);
+                setTimeout(r, 800); // 增加保底时间
+            });
             return true;
         })();
         """
@@ -98,6 +119,16 @@ final class WebViewExportService: NSObject {
 
     /// 将 Mermaid 导出为 PDF
     func exportMindmapToPDF(mermaidCode: String, fileName: String) async throws -> URL {
+        if isExporting { throw NSError(domain: "WebViewExport", code: 429) }
+        
+        isExporting = true
+        defer { 
+            isExporting = false 
+            Task { @MainActor in
+                _ = try? await webView?.evaluateJavaScript("document.body.innerHTML = '';")
+            }
+        }
+
         guard let webView = webView else { throw NSError(domain: "WebViewExport", code: 500) }
         
         let escapedCode = mermaidCode.replacingOccurrences(of: "\\", with: "\\\\")
@@ -106,12 +137,19 @@ final class WebViewExportService: NSObject {
         
         let js = """
         (async () => {
-            document.getElementById('content').innerHTML = '';
+            const content = document.getElementById('content');
+            if (content) content.innerHTML = '';
             const root = document.getElementById('mermaid-root');
+            if (!root) return false;
+            
             mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose', mindmap: { useMaxWidth: true } });
-            const { svg } = await mermaid.render('mindmap-export', `\(escapedCode)`);
-            root.innerHTML = svg;
-            await new Promise(r => setTimeout(r, 500));
+            try {
+                const { svg } = await mermaid.render('mindmap-export', `\(escapedCode)`);
+                root.innerHTML = svg;
+            } catch (e) {
+                root.innerHTML = '<div style="color:red">' + e.message + '</div>';
+            }
+            await new Promise(r => setTimeout(r, 800));
             return true;
         })();
         """
@@ -122,20 +160,23 @@ final class WebViewExportService: NSObject {
 
     private func createPDF(fileName: String) async throws -> URL {
         guard let webView = webView else { throw NSError(domain: "WebViewExport", code: 500) }
+        
         return try await withCheckedThrowingContinuation { continuation in
             let config = WKPDFConfiguration()
-            webView.createPDF(configuration: config) { result in
-                switch result {
-                case .success(let data):
-                    let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(fileName).pdf")
-                    do {
-                        try data.write(to: url)
-                        continuation.resume(returning: url)
-                    } catch {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                webView.createPDF(configuration: config) { result in
+                    switch result {
+                    case .success(let data):
+                        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(fileName).pdf")
+                        do {
+                            try data.write(to: url)
+                            continuation.resume(returning: url)
+                        } catch {
+                            continuation.resume(throwing: error)
+                        }
+                    case .failure(let error):
                         continuation.resume(throwing: error)
                     }
-                case .failure(let error):
-                    continuation.resume(throwing: error)
                 }
             }
         }
@@ -143,9 +184,12 @@ final class WebViewExportService: NSObject {
     
     /// 将 Markdown 导出为 PPTX
     func exportToPPTX(markdown: String, fileName: String) async throws -> URL {
+        if isExporting { throw NSError(domain: "WebViewExport", code: 429) }
+        isExporting = true
+        defer { isExporting = false }
+
         guard let webView = webView else { throw NSError(domain: "WebViewExport", code: 500) }
         
-        // 解析 Markdown 为幻灯片数据 (简单解析)
         let slides = parseMarkdownForSlides(markdown)
         let slidesJSON = try JSONEncoder().encode(slides)
         let slidesJSString = String(data: slidesJSON, encoding: .utf8) ?? "[]"
@@ -160,17 +204,14 @@ final class WebViewExportService: NSObject {
             
             slidesData.forEach(data => {
                 let slide = pptx.addSlide();
-                // 渐变背景或纯色
                 slide.background = { fill: 'F5F7FA' };
                 
-                // 标题
                 slide.addText(data.title, { 
                     x: 0.5, y: 0.5, w: '90%', h: 1, 
                     fontSize: 36, bold: true, color: '2D3436',
                     fontFace: 'Arial', align: 'center'
                 });
                 
-                // 正文
                 if (data.bullets && data.bullets.length > 0) {
                     slide.addText(data.bullets.map(b => ({ text: b, options: { bullet: true, indentLevel: 0, breakLine: true } })), { 
                         x: 1.0, y: 1.8, w: '80%', h: 3.5, 
@@ -179,7 +220,6 @@ final class WebViewExportService: NSObject {
                     });
                 }
                 
-                // 页码
                 slide.addText('\(L10n.Transfer.Export.trf("generatedBy", Localized.tr("app.name")))', { x: 0.5, y: 5.0, fontSize: 10, color: 'B2BEC3' });
             });
             

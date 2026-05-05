@@ -12,6 +12,8 @@ import SwiftUI
 import Combine
 
 // MARK: - Wiki Toast Type
+/// 轻提示类型枚举
+/// 负责定义 Toast 的视觉风格（图标与色彩）及其代表的业务状态
 enum WikiToastType: Equatable {
     case success
     case error
@@ -38,6 +40,8 @@ enum WikiToastType: Equatable {
 }
 
 // MARK: - Wiki Toast Model
+/// 轻提示数据模型
+/// 负责封装单条 Toast 的展示内容、类型标识及显示时长，具备唯一标识符
 struct WikiToast: Identifiable, Equatable {
     let id = UUID()
     let type: WikiToastType
@@ -45,8 +49,10 @@ struct WikiToast: Identifiable, Equatable {
     var duration: Double = 3.0
 }
 
-// MARK: - Toast Manager
+// MARK: - 提示管理器
 @MainActor
+/// 轻提示全局管理单例
+/// 负责 Toast 的队列调度、生命周期计时（自动隐藏）及并发状态管理，确保 UI 层的非阻塞反馈
 final class ToastManager: ObservableObject {
     static let shared = ToastManager()
     
@@ -78,6 +84,10 @@ final class ToastManager: ObservableObject {
 }
 
 // MARK: - Wiki Toast View
+/// 系统轻提示（Toast）组件
+/// 提供非侵入式的状态反馈信息，支持成功、错误、警告等多种语义化样式
+/// 轻提示（Toast）视觉组件
+/// 负责在界面顶部提供非侵入式的即时反馈，支持模糊背板与弹性入场动画
 struct WikiToastView: View {
     let toast: WikiToast
     let onDismiss: () -> Void
@@ -126,6 +136,8 @@ struct WikiToastView: View {
 }
 
 // MARK: - View Modifier
+/// 轻提示视图修饰符
+/// 负责将 Toast 展示层注入到视图树的最顶层，实现跨页面的即时消息提示能力
 struct WikiToastModifier: ViewModifier {
     @StateObject private var manager = ToastManager.shared
     

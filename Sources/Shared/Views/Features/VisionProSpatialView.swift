@@ -1,7 +1,7 @@
 // VisionProSpatialView.swift
 //
 // 作者: Wang Chong
-// 功能说明: Spatial computing views for Apple Vision Pro.
+// 功能说明: Apple Vision Pro 空间计算视图，提供沉浸式知识可视化体验。
 // 版本: 1.0
 // 修改记录:
 //   - 创建: 2026-05-02
@@ -10,16 +10,14 @@
 
 import SwiftUI
 
-// MARK: - Vision Pro Spatial View
-/// Spatial computing views for Apple Vision Pro.
-/// Provides immersive knowledge graph and page browsing in 3D space.
-/// Uses conditional compilation to ensure compatibility on non-visionOS platforms.
-
+// MARK: - 空间计算视图
 #if os(visionOS)
 import RealityKit
 import RealityKitContent
 #endif
 
+/// Vision Pro 空间计算视图
+/// 负责在 visionOS 环境下渲染沉浸式 3D 知识图谱，并为 iOS/macOS 平台提供视差模拟效果
 struct VisionProSpatialView: View {
     @Environment(KMStore.self) var store
     @State private var orbitAngle: Angle = .degrees(0)
@@ -187,9 +185,7 @@ struct VisionProSpatialView: View {
                     SpatialFeatureRow(icon: "eye.fill", title: Localized.tr("spatial.feature.gaze"), desc: Localized.tr("spatial.feature.gaze.desc"))
                     SpatialFeatureRow(icon: "person.crop.circle.badge.plus", title: Localized.tr("spatial.feature.spatialAudio"), desc: Localized.tr("spatial.feature.spatialAudio.desc"))
                 }
-                .padding()
-                .background(Color.wikiCard)
-                .clipShape(RoundedRectangle(cornerRadius: WikiUI.largeRadius))
+                .wikiContainer(cornerRadius: WikiUI.largeRadius, padding: true)
                 
                 // Device Requirement
                 VStack(spacing: 8) {
@@ -209,8 +205,9 @@ struct VisionProSpatialView: View {
     }
 }
 
-// MARK: - Spatial Parallax Preview (iOS)
-/// A simulated 3D parallax effect using layered cards with offset
+// MARK: - 空间视差预览
+/// 空间视差预览组件（iOS/macOS）
+/// 负责在非沉浸式平台上通过多层卡片位移算法模拟 3D 深度感，提供跨平台的空间体验一致性
 struct SpatialParallaxPreview: View {
     let pages: [WikiPage]
     @State private var dragOffset: CGSize = .zero
@@ -261,7 +258,9 @@ struct SpatialParallaxPreview: View {
     }
 }
 
-// MARK: - Spatial Node Card
+// MARK: - 空间节点卡片
+/// 空间节点展示卡片组件
+/// 负责展示单个知识节点的关键元数据，具备高斯模糊背景与品牌色发光效果，适配沉浸式 UI
 struct SpatialNodeCard: View {
     let page: WikiPage
     

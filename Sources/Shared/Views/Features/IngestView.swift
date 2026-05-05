@@ -1,7 +1,7 @@
 // IngestView.swift
 //
 // 作者: Wang Chong
-// 功能说明: Single activity log entry for the ingest activity panel.
+// 功能说明: 知识摄入（Ingest）功能主视图，协调多渠道导入流程。
 // 版本: 1.0
 // 修改记录:
 //   - 创建: 2026-05-02
@@ -12,8 +12,9 @@
 @preconcurrency import SwiftUI
 import UniformTypeIdentifiers
 
-// MARK: - Activity Item Model
-/// Single activity log entry for the ingest activity panel.
+// MARK: - 活动项模型
+/// 摄入活动数据模型
+/// 负责封装单个内容摄入任务的元数据，包括标题、状态、时间戳及关联的 Wiki 页面标识符
 @MainActor
 struct ActivityItem: Identifiable {
     let id = UUID()
@@ -48,9 +49,9 @@ struct ActivityItem: Identifiable {
     }
 }
 
-// MARK: - Ingest View (Refactored — Composed from Sub-components)
-/// 知识导入视图，由 5 个子组件组成：
-/// IngestHeroSection / IngestEntryCardsSection / IngestManualFormSection / SmartIngestPreview / IngestTipsSection
+// MARK: - 视图核心
+/// 知识摄入（Ingest）中心主视图
+/// 负责协调多渠道（文件导入、语音转写、OCR 扫描、URL 抓取及剪贴板）的知识获取流程，管理异步任务队列与入库配置
 struct IngestView: View {
     @Environment(KMStore.self) var store
     @Environment(IngestStore.self) var ingestStore
@@ -462,7 +463,9 @@ struct IngestView: View {
     }
 }
 
-// MARK: - Activity Row View
+// MARK: - 活动行渲染
+/// 摄入活动状态行组件
+/// 负责单个摄入任务的实时进度展示、成功/失败反馈及关联页面的快捷跳转
 struct ActivityRow: View {
     @Environment(KMStore.self) var store
     @Environment(AppRouter.self) var router

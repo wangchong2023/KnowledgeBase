@@ -10,7 +10,8 @@
 
 import SwiftUI
 
-/// AI 脉搏指示器 (PM 视角：增强用户对 AI 处理状态的感知)
+/// AI 脉搏指示器
+/// 负责增强用户对 AI 处理状态（如思考、全库扫描）的感知，提供动态波纹动画及实时状态文本展示
 struct AIPulseIndicator: View {
     @Environment(KMStore.self) var store
     @State private var isAnimating = false

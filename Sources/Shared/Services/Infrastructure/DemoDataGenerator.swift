@@ -33,11 +33,7 @@ struct DemoDataGenerator {
         var count = 0
         
         // 2. 使用 performBatchWrite 确保所有演示数据在同一个事务中插入
-        // 这不仅提升了性能，还确保了 ValueObservation 只在最后触发一次刷新
         store.performBatchWrite { db in
-            guard let writer = DatabaseManager.shared.dbWriter else { return }
-            let repo = WikiPageStore(dbWriter: writer)
-
             let pagesToCreate: [(String, PageType, String, [String])] = [
                 (Localized.tr("demo.aiAgent.title"), .concept, Localized.tr("demo.aiAgent.content"), ["AI", "Agent", Localized.tr("sidebar.system")]),
                 (Localized.tr("demo.planning.title"), .concept, Localized.tr("demo.planning.content"), ["AI", "Planning", Localized.tr("sidebar.tools")]),
@@ -47,8 +43,9 @@ struct DemoDataGenerator {
             ]
             
             for (title, type, content, tags) in pagesToCreate {
+                // 直接使用 WikiPage 的存储能力，避免对 Repository 实例的复杂依赖检查
                 let page = WikiPage(title: title, type: type, content: content, tags: tags)
-                try repo.save(page, using: db)
+                try page.save(db)
                 count += 1
             }
         }
@@ -72,9 +69,6 @@ struct DemoDataGenerator {
         let targetCount = 1000
         
         store.performBatchWrite { db in
-            guard let writer = DatabaseManager.shared.dbWriter else { return }
-            let repo = WikiPageStore(dbWriter: writer)
-
             // 预生成标题列表，用于建立随机链接
             let titles = (1...targetCount).map { "StressNode_\($0)" }
             let types: [PageType] = [.concept, .entity, .source, .comparison, .map]
@@ -105,7 +99,7 @@ struct DemoDataGenerator {
                     tags: ["StressTest", "Performance"]
                 )
                 
-                try repo.save(page, using: db)
+                try page.save(db)
                 count += 1
                 
                 if count % 100 == 0 {

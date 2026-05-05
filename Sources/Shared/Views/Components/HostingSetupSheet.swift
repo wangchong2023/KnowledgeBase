@@ -11,6 +11,8 @@
 import SwiftUI
 
 // MARK: - Hosting Setup Sheet
+/// 协作托管设置面板组件
+/// 负责在发起 P2P 协作会话前配置房间名称、展示安全提示及启动服务监听
 struct HostingSetupSheet: View {
     @ObservedObject var collabService: CollaborationService
     @Binding var roomName: String

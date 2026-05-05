@@ -21,6 +21,8 @@ import AppKit
 /// SceneKit 视图的可点击封装，支持节点点击检测
 #if canImport(UIKit)
 @MainActor
+/// SceneKit 场景包装器组件
+/// 负责在 SwiftUI 中嵌入 3D 渲染引擎，并实现基于点击位置的 3D 节点命中测试（Hit Test）
 struct TappableSceneView: UIViewRepresentable {
     let scene: SCNScene?
     let onNodeTap: (UUID?) -> Void
@@ -128,6 +130,8 @@ struct TappableSceneView: NSViewRepresentable {
 
 // MARK: - CGPoint3D
 /// 3D 坐标点
+/// 3D 坐标空间点模型
+/// 负责定义节点在 SceneKit 笛卡尔坐标系中的 X/Y/Z 位置
 struct CGPoint3D {
     let x: CGFloat
     let y: CGFloat
@@ -136,6 +140,8 @@ struct CGPoint3D {
 
 // MARK: - Graph3D Controls Overlay
 /// 3D 图谱控制面板：自动旋转/重置相机/筛选按钮
+/// 3D 图谱控制面板组件
+/// 负责提供相机对焦、全屏切换、自动旋转及页面类型过滤等空间导航控制功能
 struct Graph3DControlsOverlay: View {
     @Binding var autoRotate: Bool
     @Binding var filterType: PageType?
@@ -307,6 +313,8 @@ struct Graph3DControlsOverlay: View {
 
 // MARK: - Graph3D Node Info Bar
 /// 3D 图谱节点信息栏：显示选中节点的类型、标题和"查看页面"按钮
+/// 3D 节点详情浮栏组件
+/// 负责在选中 3D 节点时提供轻量级的信息摘要及进入详情页的快速入口
 struct Graph3DNodeInfoBar: View {
     let page: WikiPage
     let onViewPage: () -> Void

@@ -10,8 +10,9 @@
 
 import SwiftUI
 
-/// KMWatch 主界面 (Apple Watch)
-/// 专注于极简查阅与快速采集。
+// MARK: - 手表端主视图
+/// Apple Watch 核心内容视图
+/// 负责在手表端展示最近更新的知识页面，并提供语音采集（Dictation）的入口
 struct WatchContentView: View {
     @Environment(KMStore.self) var store
     @State private var isShowingDictation = false

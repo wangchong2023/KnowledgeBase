@@ -1,29 +1,30 @@
 // LLMClient.swift
 //
 // 作者: Wang Chong
-// 功能说明: Handles all HTTP communication with OpenAI-compatible LLM APIs.
-// 版本: 1.0
+// 功能说明: 负责与兼容 OpenAI 协议的 LLM API 进行所有 HTTP 通信，支持非流式和流式 (SSE) 请求。
+// 版本: 1.1
 // 修改记录:
 //   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级文档规范，优化流式解析稳定性
+// 日期: 2026-05-05
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
 
-// MARK: - LLM HTTP Client
-/// Handles all HTTP communication with OpenAI-compatible LLM APIs.
-/// Supports both non-streaming and streaming (SSE) requests.
+// MARK: - LLM 网络客户端
+/// 负责与兼容 OpenAI 协议的 LLM API 进行所有 HTTP 通信。
+/// 支持普通请求与流式 (SSE) 响应。
 final class LLMClient: @unchecked Sendable {
     
-    // MARK: - Config
+    // MARK: - 配置
     private let baseURL: String
     private let apiKey: String
     private var currentTask: URLSessionDataTask?
     
-    // MARK: - Constants
-    /// Timeout for non-streaming requests (seconds)
+    // MARK: - 常量
+    /// 普通请求超时时间（秒）
     private static let defaultTimeout: TimeInterval = 60
-    /// Timeout for streaming requests (seconds, longer to accommodate slow responses)
+    /// 流式请求超时时间（秒，考虑到首字响应可能较慢）
     private static let streamingTimeout: TimeInterval = 120
     
     init(baseURL: String, apiKey: String) {
@@ -31,13 +32,13 @@ final class LLMClient: @unchecked Sendable {
         self.apiKey = apiKey
     }
     
-    // MARK: - URL Normalization
+    // MARK: - 地址规范化
     private var normalizedBaseURL: String {
         baseURL.hasSuffix("/") ? String(baseURL.dropLast()) : baseURL
     }
     
-    // MARK: - Non-streaming Request
-    /// Sends a chat completion request and returns the parsed JSON response.
+    // MARK: - 普通请求
+    /// 发送对话补全请求并返回解析后的 JSON 响应
     func sendRequest(body: [String: Any]) async throws -> [String: Any] {
         guard let url = URL(string: "\(normalizedBaseURL)/chat/completions") else {
             throw LLMError.invalidURL
@@ -58,8 +59,8 @@ final class LLMClient: @unchecked Sendable {
             throw LLMError.invalidResponse
         }
         
-        if httpResponse.statusCode == 401 { throw APIError(statusCode: 401, message: "Unauthorized: Invalid API Key") }
-        if httpResponse.statusCode == 429 { throw APIError(statusCode: 429, message: "Rate Limited: Too many requests") }
+        if httpResponse.statusCode == 401 { throw APIError(statusCode: 401, message: "鉴权失败：无效的 API Key") }
+        if httpResponse.statusCode == 429 { throw APIError(statusCode: 429, message: "请求过快：触发速率限制") }
         
         guard httpResponse.statusCode == 200 else {
             if let errorBody = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -67,7 +68,7 @@ final class LLMClient: @unchecked Sendable {
                let message = error["message"] as? String {
                 throw APIError(statusCode: httpResponse.statusCode, message: message)
             }
-            throw APIError(statusCode: httpResponse.statusCode, message: "HTTP Error \(httpResponse.statusCode)")
+            throw APIError(statusCode: httpResponse.statusCode, message: "HTTP 错误：状态码 \(httpResponse.statusCode)")
         }
         
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
@@ -77,7 +78,8 @@ final class LLMClient: @unchecked Sendable {
         return json
     }
     
-    /// Sends a streaming chat completion request and returns the raw AsyncBytes stream.
+    // MARK: - 流式请求
+    /// 发送流式对话补全请求并返回原始 AsyncBytes 流
     func sendStreamingRequest(body: [String: Any]) async throws -> URLSession.AsyncBytes {
         let urlString = "\(self.normalizedBaseURL)/chat/completions"
         let token = self.apiKey
@@ -105,28 +107,28 @@ final class LLMClient: @unchecked Sendable {
         return bytes
     }
     
-    // MARK: - Cancel
+    // MARK: - 取消任务
     func cancel() {
         currentTask?.cancel()
         currentTask = nil
     }
 
-    // MARK: - Error Types
+    // MARK: - 错误类型定义
     struct APIError: Error, LocalizedError {
         let statusCode: Int
         let message: String
         
         var errorDescription: String? {
-            return "\(message) (Status: \(statusCode))"
+            return "\(message) (状态码: \(statusCode))"
         }
     }
 }
 
-// MARK: - SSE Stream Parser
-/// Parses Server-Sent Events from a streaming response.
+// MARK: - SSE 流解析器
+/// 负责从流式响应中解析服务器发送事件 (SSE)。
 final class SSEParser {
     
-    /// Parse SSE bytes into a sequence of content strings.
+    /// 将 SSE 字节流解析为内容字符串序列
     static func parse(bytes: URLSession.AsyncBytes) -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
             Task {

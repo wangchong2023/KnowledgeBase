@@ -86,11 +86,12 @@ enum Localized {
 
     static var isChinese: Bool { currentLanguage == "zh-Hans" }
 
-    // MARK: - Translation
-    /// 动态读取 .strings 文件，确保能响应运行时语言切换
-    /// - Parameters:
-    ///   - key: 本地化 Key
-    ///   - table: 所在的 .strings / .xcstrings 文件名 (默认为 Localizable)
+    /**
+     * @description: 读取本地化字符串，支持动态语言切换与多表查询
+     * @param {String} key 本地化键值
+     * @param {String?} table 目标翻译表名称 (String Catalog 文件名)
+     * @return {String} 翻译后的文本，若未找到则返回带标记的 Key
+     */
     static func tr(_ key: String, table: String? = nil) -> String {
         let lang = currentLanguage
         
@@ -131,11 +132,13 @@ enum Localized {
         return result
     }
 
-    /// 使用 String Catalog 进行格式化翻译
-    /// - Parameters:
-    ///   - key: 本地化 Key
-    ///   - table: 所在的 .strings / .xcstrings 文件名 (默认为 Localizable)
-    ///   - args: 格式化参数
+    /**
+     * @description: 读取并格式化本地化字符串 (带参数替换)
+     * @param {String} key 本地化键值
+     * @param {String?} table 目标翻译表名称
+     * @param {CVarArg...} args 格式化变量
+     * @return {String} 格式化后的翻译文本
+     */
     static func trf(_ key: String, table: String? = nil, _ args: CVarArg...) -> String {
         let template = tr(key, table: table ?? "Localizable")
         if args.isEmpty {

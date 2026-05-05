@@ -14,18 +14,20 @@
 import UIKit
 #endif
 
-// MARK: - Coordinator State Container
-/// 用 class 封装光标状态，避免 struct @Binding 在闭包中的捕获问题。
-/// 同时作为 EditorActionExecutor 的访问点（coordinator 在 makeCoordinator 时注入）。
+// MARK: - 协调器状态容器
 @MainActor
+/// 编辑器光标状态容器
+/// 负责跨组件共享光标位置与选区范围，并作为编辑器动作执行器的访问枢纽
 final class CursorState: ObservableObject {
     @Published var cursorPosition: Int = 0
     @Published var selectedRange: NSRange = NSRange(location: 0, length: 0)
     var executor: EditorActionExecutor?
 }
 
-// MARK: - Coordinator
+// MARK: - 文本视图协调器
 @MainActor
+/// Markdown 文本视图协调器
+/// 负责处理底层 UITextView 的委派回调，实现文本变更同步与光标状态追踪
 final class MarkdownTextViewCoordinator: NSObject, UITextViewDelegate {
     let cursorState: CursorState
     /// 指向活跃的 UITextView，用于 executeAction 直接操作光标
@@ -53,6 +55,8 @@ final class MarkdownTextViewCoordinator: NSObject, UITextViewDelegate {
 
 // MARK: - Markdown Text View Representable
 #if os(iOS)
+/// Markdown 文本视图包装器组件
+/// 负责在 SwiftUI 中嵌入原生高性能 UITextView，支持实时语法高亮感知（由协调器处理）及双向文本绑定
 struct MarkdownTextViewRepresentable: UIViewRepresentable {
     @Binding var text: String
     @Binding var cursorPosition: Int
@@ -107,9 +111,10 @@ struct MarkdownTextViewRepresentable: UIViewRepresentable {
 }
 #endif
 
-// MARK: - Cursor-aware Action Executor
-/// 持有 coordinator 引用，提供光标感知文本操作。
+// MARK: - 动作执行器
 @MainActor
+/// 编辑器动作执行器
+/// 负责执行具体编辑命令（如插入、包裹选区），实现光标感知的自动化文本操作
 final class EditorActionExecutor {
     let coordinator: MarkdownTextViewCoordinator
 
@@ -156,6 +161,8 @@ final class EditorActionExecutor {
 }
 
 // MARK: - Markdown Editor Toolbar
+/// Markdown 编辑器辅助工具栏组件
+/// 负责提供 Markdown 常用语法的快速录入入口，增强移动端及桌面端的编辑效率
 struct MarkdownEditorToolbar: View {
     let cursorPosition: Int
     let selectedRange: NSRange

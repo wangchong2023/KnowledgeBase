@@ -1,16 +1,16 @@
 // KMWindowSceneDelegate.swift
 //
 // 作者: Wang Chong
-// 功能说明: class KMWindowSceneDelegate
-// 版本: 1.0
+// 功能说明: 窗口场景代理，支持多窗口环境下的根视图初始化与环境注入
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
+//   - 2026-05-05: 升级文档规范，支持多窗口环境
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
 
-// MARK: - Scene Delegate for Multi-Window Support
+// MARK: - 场景代理（多窗口支持）
 @available(iOS 16.0, macCatalyst 16.0, *)
 class KMWindowSceneDelegate: NSObject, UIWindowSceneDelegate {
     var window: UIWindow?

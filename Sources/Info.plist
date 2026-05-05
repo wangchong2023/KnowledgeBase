@@ -4,10 +4,12 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>ZhiYuan</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.km.app</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLocalizations</key>
@@ -17,16 +19,39 @@
 	</array>
 	<key>CFBundleName</key>
 	<string>ZhiYuan</string>
-	<key>CFBundleDisplayName</key>
-	<string>ZhiYuan</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.km.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>km</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ZhiYuan needs camera access to scan document text (OCR).</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 ZhiYuan. All rights reserved.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>ZhiYuan needs microphone access to record voice notes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>ZhiYuan needs photo library access for OCR text scanning.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>ZhiYuan needs speech recognition to transcribe your voice notes.</string>
+	<key>NSSpotlightUsageDescription</key>
+	<string>ZhiYuan will index your knowledge vault so you can find pages directly via system search.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -34,13 +59,13 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
 	<key>UILuunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
 		<string>LaunchBackground</string>
 	</dict>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>arm64</string>
@@ -58,32 +83,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>com.km.app</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>km</string>
-			</array>
-		</dict>
-	</array>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>ZhiYuan needs microphone access to record voice notes.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>ZhiYuan needs speech recognition to transcribe your voice notes.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>ZhiYuan needs camera access to scan document text (OCR).</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>ZhiYuan needs photo library access for OCR text scanning.</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
-	<key>NSSpotlightUsageDescription</key>
-	<string>ZhiYuan will index your knowledge vault so you can find pages directly via system search.</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2026 KM. All rights reserved.</string>
 </dict>
 </plist>

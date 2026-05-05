@@ -16,33 +16,22 @@ import Foundation
 @MainActor
 final class AISynthesisService {
     static let shared = AISynthesisService()
-    private let llm: LLMService
     
-    private init(llm: LLMService = .shared) {
-        self.llm = llm
+    @Inject private var llm: LLMService
+    
+    private init() {
         ServiceContainer.shared.register(self, for: AISynthesisService.self)
     }
     
-    /// 生成语义总结
     func summarize(content: String) async throws -> String {
         let prompt = PromptService.shared.summaryPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
-        return try await llm.generate(prompt: prompt, systemPrompt: "")
+        let result = try await llm.generate(prompt: prompt, systemPrompt: "")
+        return SynthesisProcessor.cleanMarkdown(result)
     }
     
     /// 生成思维导图 (Mermaid)
     func generateMindMap(content: String) async throws -> String {
-        let mindmapInstructions = """
-        请根据提供的内容，生成一个层级清晰的 Mermaid 思维导图 (Mindmap)。
-        要求：
-        1. 首行必须是 '# <总结标题>'（语言与内容一致）。
-        2. 以 'mindmap' 开头。
-        3. 根节点用 'root((标题))'。
-        4. 使用缩进表示层级，禁止使用 '-' 开头。
-        5. 节点文字禁止包含任何括号 '()'、冒号 ':' 或方括号 '[]'。
-        6. 禁止使用 Markdown 代码块包裹（即禁止使用 ``` 符号）。
-        """
-        
-        let prompt = mindmapInstructions + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.mindmapPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         let systemPrompt = """
         You are a Mermaid mindmap expert. 
         Always start with '# <Summary Title>'.
@@ -54,16 +43,16 @@ final class AISynthesisService {
         return SynthesisProcessor.formatMermaid(result, fallbackPrefix: "mindmap")
     }
     
-    /// 提取行动项
     func extractActions(content: String) async throws -> String {
         let prompt = PromptService.shared.actionPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
-        return try await llm.generate(prompt: prompt, systemPrompt: "")
+        let result = try await llm.generate(prompt: prompt, systemPrompt: "")
+        return SynthesisProcessor.cleanMarkdown(result)
     }
     
-    /// 生成演示文稿大纲 (Markdown Slides)
     func generatePresentation(content: String) async throws -> String {
         let prompt = PromptService.shared.slidesPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
-        return try await llm.generate(prompt: prompt, systemPrompt: "You are a presentation expert. Use Markdown. Use '# ' for Title slide, '## ' for new slides. Use bullet points.")
+        let result = try await llm.generate(prompt: prompt, systemPrompt: "You are a presentation expert. Use Markdown. Use '# ' for Title slide, '## ' for new slides. Use bullet points.")
+        return SynthesisProcessor.cleanMarkdown(result)
     }
 
     /// 将 Markdown 转换为 PPTX 文件
@@ -98,18 +87,7 @@ final class AISynthesisService {
 
     /// 生成信息图表 (Mermaid)
     func generateInfographic(content: String) async throws -> String {
-        let infographicInstructions = """
-        请根据提供的内容，生成一张逻辑严密的 Mermaid 可视化信息图 (Flowchart)。
-        要求：
-        1. 首行必须是 '# <总结标题>'（语言与内容一致）。
-        2. 第二行开始输出 Mermaid 代码，以 'graph TD' (或 LR/BT) 开头。
-        3. 节点定义规则：ID[文字] 或 ID((文字))。
-        4. 严禁在节点文字内使用冒号、半角括号或方括号。
-        5. 重点展示知识点之间的因果、组成或流程关系。
-        6. 禁止使用 Markdown 代码块包裹（即禁止使用 ``` 符号）。
-        """
-        
-        let prompt = infographicInstructions + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
+        let prompt = PromptService.shared.infographicPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
         let systemPrompt = """
         You are a senior data visualization expert. 
         Create a professional Mermaid graph TD structure.
@@ -121,12 +99,10 @@ final class AISynthesisService {
         return SynthesisProcessor.formatMermaid(result, fallbackPrefix: "graph TD")
     }
     
-
-
-    /// 生成深度报告
     func generateReport(content: String) async throws -> String {
         let prompt = PromptService.shared.reportPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
-        return try await llm.generate(prompt: prompt, systemPrompt: "You are a report writer. First line MUST be '# <title>' summarizing the report topic. Use Markdown headings for sections.")
+        let result = try await llm.generate(prompt: prompt, systemPrompt: "You are a report writer. First line MUST be '# <title>' summarizing the report topic. Use Markdown headings for sections.")
+        return SynthesisProcessor.cleanMarkdown(result)
     }
 
     /// 针对具体的 Lint 问题提供 AI 修复建议
@@ -180,7 +156,3 @@ final class AISynthesisService {
     }
 }
 
-// 补充单例支持
-extension LLMService {
-    static let shared = LLMService()
-}

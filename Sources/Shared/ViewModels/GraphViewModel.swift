@@ -22,7 +22,15 @@ final class GraphViewModel {
     var lastScale: CGFloat = 1.0
     var offset: CGSize = .zero
     var lastOffset: CGSize = .zero
-    var isAnimating = false
+    var isAnimating = false {
+        didSet {
+            if isAnimating {
+                startSimulation()
+            } else {
+                stopSimulation()
+            }
+        }
+    }
     var isLayouting = false
     var showLegend = false
     var showInsights = false
@@ -33,6 +41,8 @@ final class GraphViewModel {
     var insightOrphans: [UUID] = []
     var insightSparse: [UUID] = []
     var insightBridges: [UUID] = []
+
+    private var simulationTask: Task<Void, Never>?
 
     func getFilteredNodes() -> [GraphNode] {
         guard let filter = filterType else { return nodes }
@@ -45,5 +55,53 @@ final class GraphViewModel {
         return edges.filter { edge in
             filteredIDs.contains(edge.source) && filteredIDs.contains(edge.target)
         }
+    }
+
+    // MARK: - Physics Simulation Loop
+    
+    /// 开启物理仿真循环
+    private func startSimulation() {
+        guard simulationTask == nil else { return }
+        
+        simulationTask = Task {
+            while !Task.isCancelled && isAnimating {
+                // 在后台执行物理计算，避免阻塞主线程
+                let currentNodes = self.nodes
+                let currentEdges = self.edges
+                let currentSize = self.graphSize
+                
+                guard !currentNodes.isEmpty else { break }
+                
+                // 性能优化：节点过多时，降低物理模拟的复杂度
+                let iterationTemp: CGFloat = currentNodes.count > 500 ? 0.02 : 0.08
+                
+                var updatedNodes = currentNodes
+                GraphLayoutProcessor.applyForces(
+                    nodes: &updatedNodes,
+                    edges: currentEdges,
+                    canvasWidth: currentSize.width,
+                    canvasHeight: currentSize.height,
+                    config: .default,
+                    temperature: iterationTemp
+                )
+                
+                // 回到主线程更新状态
+                await MainActor.run {
+                    // 只有在动画仍然开启的情况下才应用更新
+                    if self.isAnimating {
+                        self.nodes = updatedNodes
+                    }
+                }
+                
+                // 控制帧率约 60FPS
+                try? await Task.sleep(for: .nanoseconds(16_000_000))
+            }
+        }
+    }
+    
+    /// 停止物理仿真循环
+    private func stopSimulation() {
+        simulationTask?.cancel()
+        simulationTask = nil
     }
 }

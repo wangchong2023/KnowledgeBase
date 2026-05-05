@@ -18,6 +18,8 @@ struct IdentifiableURL: Identifiable {
 }
 
 @MainActor
+/// Mermaid 图表渲染视图
+/// 负责在 WebKit 容器中加载 Mermaid.js 并渲染流程图、甘特图等知识图谱扩展内容
 struct MermaidWebView: View {
     let mermaidCode: String
     @State private var webView: WKWebView?
@@ -123,6 +125,13 @@ struct MermaidWKWebView: UIViewRepresentable {
     }
     
     private func generateHTML() -> String {
+        let escapedCode = mermaidCode
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "`", with: "\\`")
+            .replacingOccurrences(of: "$", with: "\\$")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "")
+
         return """
         <!DOCTYPE html>
         <html>
@@ -131,8 +140,10 @@ struct MermaidWKWebView: UIViewRepresentable {
             <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
             <style>
                 body { background-color: transparent; margin: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; width: 100vw; font-family: -apple-system; }
-                .mermaid { background-color: transparent; width: 100%; height: 100%; padding: 20px; box-sizing: border-box; }
+                #mermaid-root { background-color: transparent; width: 100%; height: 100%; padding: 20px; box-sizing: border-box; }
                 svg { max-width: 100% !important; height: auto !important; }
+                .error-container { color: #ff453a; text-align: center; padding: 40px 20px; font-size: 14px; background: rgba(255,69,58,0.1); border-radius: 12px; margin: 20px; border: 1px solid rgba(255,69,58,0.2); }
+                .error-details { font-family: monospace; font-size: 11px; margin-top: 12px; opacity: 0.7; word-break: break-all; text-align: left; }
             </style>
         </head>
         <body>
@@ -145,11 +156,17 @@ struct MermaidWKWebView: UIViewRepresentable {
                     mindmap: { useMaxWidth: true }
                 });
                 (async () => {
+                    const root = document.getElementById('mermaid-root');
                     try {
-                        const { svg } = await mermaid.render('mindmap-svg', `\(mermaidCode.replacingOccurrences(of: "`", with: "\\`").replacingOccurrences(of: "$", with: "\\$"))`);
-                        document.getElementById('mermaid-root').innerHTML = svg;
+                        const { svg } = await mermaid.render('mindmap-svg', `\(escapedCode)`);
+                        root.innerHTML = svg;
                     } catch (e) {
-                        document.getElementById('mermaid-root').innerHTML = '<div style="color:#999;text-align:center;padding:40px 20px;font-size:14px">\(Localized.tr("synthesis.mindmap.renderError"))</div>';
+                        root.innerHTML = `
+                            <div class="error-container">
+                                <div>\(Localized.tr("synthesis.mindmap.renderError"))</div>
+                                <div class="error-details">${e.message || e}</div>
+                            </div>
+                        `;
                     }
                 })();
             </script>
@@ -186,6 +203,13 @@ struct MermaidWKWebViewMac: NSViewRepresentable {
     }
     
     private func generateHTML() -> String {
+        let escapedCode = mermaidCode
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "`", with: "\\`")
+            .replacingOccurrences(of: "$", with: "\\$")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "")
+
         return """
         <!DOCTYPE html>
         <html>
@@ -193,20 +217,35 @@ struct MermaidWKWebViewMac: NSViewRepresentable {
             <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
             <style>
                 body { background-color: transparent; margin: 0; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; font-family: -apple-system; color: white; }
-                .mermaid { background-color: transparent; width: 100%; padding: 20px; box-sizing: border-box; }
+                #mermaid-root { background-color: transparent; width: 100%; padding: 20px; box-sizing: border-box; }
+                svg { max-width: 100% !important; height: auto !important; }
+                .error-container { color: #ff453a; text-align: center; padding: 40px 20px; font-size: 14px; background: rgba(255,69,58,0.1); border-radius: 12px; margin: 20px; border: 1px solid rgba(255,69,58,0.2); }
+                .error-details { font-family: monospace; font-size: 11px; margin-top: 12px; opacity: 0.7; word-break: break-all; text-align: left; }
             </style>
         </head>
         <body>
-            <div class="mermaid">
-                \(mermaidCode)
-            </div>
+            <div id="mermaid-root"></div>
             <script>
-                mermaid.initialize({ 
-                    startOnLoad: true, 
-                    theme: 'dark', 
+                mermaid.initialize({
+                    startOnLoad: false,
+                    theme: 'dark',
                     securityLevel: 'loose',
                     mindmap: { useMaxWidth: true }
                 });
+                (async () => {
+                    const root = document.getElementById('mermaid-root');
+                    try {
+                        const { svg } = await mermaid.render('mindmap-svg', `\(escapedCode)`);
+                        root.innerHTML = svg;
+                    } catch (e) {
+                        root.innerHTML = `
+                            <div class="error-container">
+                                <div>\(Localized.tr("synthesis.mindmap.renderError"))</div>
+                                <div class="error-details">${e.message || e}</div>
+                            </div>
+                        `;
+                    }
+                })();
             </script>
         </body>
         </html>

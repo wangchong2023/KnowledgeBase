@@ -1,15 +1,21 @@
 // SynthesisStore.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct SynthesisDocument
-// 版本: 1.0
+// 功能说明: 本文件实现了知识合成数据管理仓储（SynthesisStore），负责管理通过 AI 生成的各类高级知识产出（文档、测验、图表）。
+// 核心职责：
+// 1. 持久化存储：将合成文档通过 UserDefaults 进行分类本地化存储，支持不同类型的并发管理。
+// 2. 任务状态机：维护各类合成任务的生命周期状态（空闲、生成中、已完成、错误）。
+// 3. 数据生命周期：提供文档的重命名、单项删除、批量清理及导出 PDF/PPTX 的能力。
+// 4. 驱动 UI：通过 Swift 6 Observation 机制实时驱动 SynthesisView 的视图更新。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-04
+//   - 2026-05-05: 增加详细中文文档注释，规范函数头
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
 import Observation
+import Combine
 
 @MainActor
 @Observable
@@ -20,6 +26,7 @@ final class SynthesisStore {
         let name: String
         let content: String
         let createdAt: Date
+        let size: Int // 内容字节大小
     }
 
     enum SynthesisType: String, CaseIterable, Codable, Identifiable, Sendable {
@@ -97,10 +104,25 @@ final class SynthesisStore {
 
     let maxSynthesisDocsPerType = 5
 
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
+
     init() {
         loadSynthesisResults()
+        
+        WikiEventBus.shared.subscribe()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] event in
+                if case .clearAllDataRequested = event {
+                    self?.clearAll()
+                }
+            }
+            .store(in: &cancellables)
     }
 
+    /**
+     * @description: 从持久化存储 (UserDefaults) 中加载所有已合成的历史文档
+     * @return {*}
+     */
     func loadSynthesisResults() {
         for type in SynthesisType.allCases {
             let key = "synthesis_docs_\(type.rawValue)"
@@ -113,48 +135,78 @@ final class SynthesisStore {
         }
     }
 
+    /**
+     * @description: 保存单次合成结果，自动提取标题并净化文本语法
+     * @param {SynthesisType} type 合成类型
+     * @param {String} content 原始文本内容
+     * @return {*}
+     */
     func saveSynthesisResult(type: SynthesisType, content: String) {
-        let title = extractTitle(from: content, type: type)
+        // 在保存前清理 LLM 可能产生的冗余转义字符
+        let cleanedContent = Self.cleanMarkdown(content)
+        let title = extractTitle(from: cleanedContent, type: type)
         let name = "\(title) - \(formatDateFull(Date()))"
-        let doc = SynthesisDocument(id: UUID(), type: type, name: name, content: content, createdAt: Date())
+        let size = cleanedContent.utf8.count
+        let doc = SynthesisDocument(id: UUID(), type: type, name: name, content: cleanedContent, createdAt: Date(), size: size)
 
-        var existing = _synthesisResults[type] ?? []
+        var existing = synthesisResults[type] ?? []
         existing.insert(doc, at: 0)
-        // 不再自动裁剪，而是由 UI 层面拦截
-        _synthesisResults[type] = existing
-        withMutation(keyPath: \.synthesisStates) {
-            _synthesisStates[type] = .completed
-        }
+        synthesisResults[type] = existing
+        synthesisStates[type] = .completed
         persistResults(for: type)
     }
 
+    /**
+     * @description: 为已合成的文档重命名
+     * @param {SynthesisType} type 合成类型
+     * @param {UUID} docID 文档 ID
+     * @param {String} newName 新名称
+     * @return {*}
+     */
     func renameSynthesisDoc(type: SynthesisType, docID: UUID, newName: String) {
         guard var docs = _synthesisResults[type],
               let idx = docs.firstIndex(where: { $0.id == docID }) else { return }
-        docs[idx] = SynthesisDocument(id: docs[idx].id, type: docs[idx].type, name: newName, content: docs[idx].content, createdAt: docs[idx].createdAt)
-        _synthesisResults[type] = docs
+        let original = docs[idx]
+        docs[idx] = SynthesisDocument(id: original.id, type: original.type, name: newName, content: original.content, createdAt: original.createdAt, size: original.size)
+        synthesisResults[type] = docs
         persistResults(for: type)
     }
 
+    /**
+     * @description: 删除特定的合成文档
+     * @param {SynthesisType} type 合成类型
+     * @param {UUID} docID 文档 ID
+     * @return {*}
+     */
     func deleteSynthesisDoc(type: SynthesisType, docID: UUID) {
         guard var docs = _synthesisResults[type] else { return }
         docs.removeAll { $0.id == docID }
-        _synthesisResults[type] = docs
+        synthesisResults[type] = docs
         persistResults(for: type)
     }
 
+    /**
+     * @description: 批量删除合成文档
+     * @param {Set<UUID>} ids 待删除的 ID 集合
+     * @return {*}
+     */
     func batchDeleteSynthesisDocs(ids: Set<UUID>) {
         for type in SynthesisType.allCases {
             guard var docs = _synthesisResults[type], !docs.isEmpty else { continue }
             let originalCount = docs.count
             docs.removeAll { ids.contains($0.id) }
             if docs.count != originalCount {
-                _synthesisResults[type] = docs
+                synthesisResults[type] = docs
                 persistResults(for: type)
             }
         }
     }
 
+    /**
+     * @description: 物理持久化特定类型的文档列表至磁盘
+     * @param {SynthesisType} type 合成类型
+     * @return {*}
+     */
     private func persistResults(for type: SynthesisType) {
         guard let docs = _synthesisResults[type] else { return }
         if let data = try? JSONEncoder().encode(docs) {
@@ -162,6 +214,12 @@ final class SynthesisStore {
         }
     }
 
+    /**
+     * @description: 调度 AI 合成任务，协调 TaskCenter 状态并处理并发冲突
+     * @param {SynthesisType} type 合成类型
+     * @param {String} combinedContent 待合成的聚合上下文内容
+     * @return {*}
+     */
     func performSynthesis(type: SynthesisType, combinedContent: String) {
         guard synthesisStates[type] != SynthesisStatus.generating else { return }
 
@@ -207,6 +265,11 @@ final class SynthesisStore {
         }
     }
 
+    /**
+     * @description: 将合成文档导出为物理文件（PDF/PPTX）
+     * @param {SynthesisDocument} doc 目标文档
+     * @return {URL} 导出文件的临时路径
+     */
     func exportSynthesisDocument(_ doc: SynthesisDocument) async throws -> URL {
         let fileName = doc.name.replacingOccurrences(of: "/", with: "-")
                                .replacingOccurrences(of: ":", with: "-")
@@ -220,12 +283,39 @@ final class SynthesisStore {
         }
     }
 
+    /**
+     * @description: 彻底清空所有合成历史记录
+     * @return {*}
+     */
     func clearAll() {
-        _synthesisResults.removeAll()
+        synthesisResults.removeAll()
         for type in SynthesisType.allCases {
             UserDefaults.standard.removeObject(forKey: "synthesis_docs_\(type.rawValue)")
             synthesisStates[type] = .idle
         }
+    }
+
+    /**
+     * @description: 清理 Markdown 内容中的冗余转义字符（如 \#, \-, \[\[ 等）
+     * @param {String} text 原始文本
+     * @return {String} 净化后的文本
+     */
+    static func cleanMarkdown(_ text: String) -> String {
+        var cleaned = text
+        
+        // 使用正则批量移除常见的冗余转义字符，LLM 经常在生成列表、链接或特殊符号时过度转义
+        // 匹配反斜杠后紧跟 Markdown 特殊字符：# ( ) [ ] { } _ ~ + - * . ! |
+        let pattern = #"\\([\#\(\)\[\]\{\}\_\~\+\-\*\.\!\|])"#
+        if let regex = try? NSRegularExpression(pattern: pattern, options: []) {
+            let range = NSRange(location: 0, length: cleaned.utf16.count)
+            cleaned = regex.stringByReplacingMatches(in: cleaned, options: [], range: range, withTemplate: "$1")
+        }
+        
+        // 特别修复 [[ ]] 的转义
+        cleaned = cleaned.replacingOccurrences(of: "\\[\\[", with: "[[")
+                        .replacingOccurrences(of: "\\]\\]", with: "]]")
+        
+        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func extractTitle(from content: String, type: SynthesisType) -> String {

@@ -1,10 +1,10 @@
 // IngestQueue.swift
 //
 // 作者: Wang Chong
-// 功能说明: 离线处理队列 (Architect 视角：高并发与后台解耦)
-// 版本: 1.0
+// 功能说明: 离线处理队列，负责在大规模导入文档时，将向量化与 AI 编译任务压入后台队列，不阻塞前台 UI。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
+//   - 2026-05-05: 升级文档规范，支持多端并发任务调度
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
@@ -14,7 +14,7 @@ import Combine
 import BackgroundTasks
 #endif
 
-/// 离线处理队列 (Architect 视角：高并发与后台解耦)
+/// 离线处理队列
 /// 负责在大规模导入文档时，将向量化与 AI 编译任务压入后台队列，不阻塞前台 UI。
 @MainActor
 final class IngestQueue: ObservableObject {
@@ -25,14 +25,14 @@ final class IngestQueue: ObservableObject {
     
     private let operationQueue: OperationQueue = {
         let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 2 // 限制并发，保护移动端 NPU/电池
+        queue.maxConcurrentOperationCount = 2 // 限制并发，保护移动端设备能效
         queue.qualityOfService = .utility
         return queue
     }()
     
     private init() {}
     
-    /// 注册后台处理任务 (Senior Dev Item #4)
+    /// 注册后台处理任务
     func registerBackgroundTasks() {
 #if !os(macOS)
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.zhimind.ingest.process", using: nil) { task in
@@ -54,7 +54,7 @@ final class IngestQueue: ObservableObject {
                     Logger.shared.debug("📦 [IngestQueue] 正在处理任务：\(title)")
                     let result = try await llmService.smartIngest(title: title, rawContent: content, pages: pages)
                     
-                    // 更新数据库 (Fixed for Swift 6)
+                    // 更新数据库
                     let page = WikiPage(title: title, content: result.compiledContent, tags: result.suggestedTags)
                     
                     await MainActor.run {

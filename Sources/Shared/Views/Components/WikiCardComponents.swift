@@ -11,6 +11,8 @@
 import SwiftUI
 
 // MARK: - Stat Card
+/// 统计指标卡片小组件
+/// 负责以紧凑网格形式展示关键业务指标（如页面总数、最近新增、同步成功率等）
 struct StatCard: View {
     let title: String
     let value: String

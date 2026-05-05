@@ -24,7 +24,13 @@ final class WebScraperProcessor: @unchecked Sendable {
     
     /// 抓取网页内容并转换为 Markdown (使用 Jina Reader API 作为中转，适合 LLM)
     func fetchMarkdown(from urlString: String) async throws -> (markdown: String, title: String) {
-        guard let url = URL(string: urlString) else {
+        let startTime = Date()
+        var normalizedString = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !normalizedString.lowercased().hasPrefix("http://") && !normalizedString.lowercased().hasPrefix("https://") {
+            normalizedString = "https://" + normalizedString
+        }
+        
+        guard let url = URL(string: normalizedString) else {
             throw ScraperError.invalidURL
         }
         
@@ -37,21 +43,64 @@ final class WebScraperProcessor: @unchecked Sendable {
         var request = URLRequest(url: jinaURL)
         request.timeoutInterval = 30
         
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            throw ScraperError.parsingFailed
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw ScraperError.parsingFailed
+            }
+            
+            if httpResponse.statusCode != 200 {
+                let body = String(data: data, encoding: .utf8) ?? "No body"
+                print("Scraper HTTP Error \(httpResponse.statusCode): \(body)")
+                throw ScraperError.networkError(NSError(domain: "WebScraper", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "HTTP \(httpResponse.statusCode)"]))
+            }
+            
+            guard let content = String(data: data, encoding: .utf8) else {
+                throw ScraperError.parsingFailed
+            }
+            
+            // 尝试从 Markdown 中提取标题（通常第一行是 # Title）
+            let lines = content.components(separatedBy: .newlines)
+            let title = lines.first(where: { $0.hasPrefix("# ") })?.replacingOccurrences(of: "# ", with: "") 
+                        ?? url.host ?? "未命名网页"
+            
+            let duration = Date().timeIntervalSince(startTime)
+            Logger.shared.addLog(
+                action: .ingest,
+                target: url.host ?? urlString,
+                details: "Successfully scraped webpage. Length: \(content.count)",
+                duration: duration,
+                startTime: startTime,
+                endTime: Date(),
+                module: "WebScraper"
+            )
+            
+            return (content, title)
+        } catch let error as ScraperError {
+            let duration = Date().timeIntervalSince(startTime)
+            Logger.shared.addLog(
+                action: .error,
+                target: urlString,
+                details: "Scraper Error: \(error)",
+                duration: duration,
+                startTime: startTime,
+                endTime: Date(),
+                module: "WebScraper"
+            )
+            throw error
+        } catch {
+            let duration = Date().timeIntervalSince(startTime)
+            Logger.shared.addLog(
+                action: .error,
+                target: urlString,
+                details: "Network Error: \(error.localizedDescription)",
+                duration: duration,
+                startTime: startTime,
+                endTime: Date(),
+                module: "WebScraper"
+            )
+            throw ScraperError.networkError(error)
         }
-        
-        guard let content = String(data: data, encoding: .utf8) else {
-            throw ScraperError.parsingFailed
-        }
-        
-        // 尝试从 Markdown 中提取标题（通常第一行是 # Title）
-        let lines = content.components(separatedBy: .newlines)
-        let title = lines.first(where: { $0.hasPrefix("# ") })?.replacingOccurrences(of: "# ", with: "") 
-                    ?? url.host ?? "未命名网页"
-        
-        return (content, title)
     }
 }

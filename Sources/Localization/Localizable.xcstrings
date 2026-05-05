@@ -545,6 +545,57 @@
         }
       }
     },
+    "log.startTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始时间"
+          }
+        }
+      }
+    },
+    "log.endTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "End Time"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "结束时间"
+          }
+        }
+      }
+    },
+    "log.duration": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duration"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "耗时"
+          }
+        }
+      }
+    },
     "ai.status.thinking": {
       "extractionState": "manual",
       "localizations": {
@@ -620,6 +671,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "全部清除"
+          }
+        }
+      }
+    },
+    "aitask.clearConfirmMessage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will clear all completed and failed task records. This action cannot be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作将清除所有已完成和失败的任务记录，不可恢复。"
+          }
+        }
+      }
+    },
+    "aitask.clearConfirmTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Task History"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空任务历史"
           }
         }
       }
@@ -3446,6 +3531,7 @@
       }
     },
     "dashboard.dailyInsights": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -3459,8 +3545,7 @@
             "value": "每日灵感"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "dashboard.dailyInsights.refresh": {
       "extractionState": "manual",
@@ -3530,6 +3615,323 @@
         }
       }
     },
+    "dashboard.index.comparisonCount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d comparisons"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d 个比较"
+          }
+        }
+      }
+    },
+    "dashboard.index.conceptCount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d concepts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d 个概念"
+          }
+        }
+      }
+    },
+    "dashboard.index.concepts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concepts"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "概念"
+          }
+        }
+      }
+    },
+    "dashboard.index.entities": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entities"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实体"
+          }
+        }
+      }
+    },
+    "dashboard.index.entityCount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d entities"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d 个实体"
+          }
+        }
+      }
+    },
+    "dashboard.index.overview": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overview"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "概览"
+          }
+        }
+      }
+    },
+    "dashboard.index.pages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "页面"
+          }
+        }
+      }
+    },
+    "dashboard.index.sourceCount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d sources"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d 个来源"
+          }
+        }
+      }
+    },
+    "dashboard.index.sources": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sources"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来源"
+          }
+        }
+      }
+    },
+    "dashboard.index.wordCount": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d words"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%d 字"
+          }
+        }
+      }
+    },
+    "dashboard.insight.generateReport": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击生成个人智库周报"
+          }
+        }
+      }
+    },
+    "dashboard.insight.growth.explosive": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Explosive Growth"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "爆发式增长"
+          }
+        }
+      }
+    },
+    "dashboard.insight.growth.steady": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Steady Accumulation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稳步积累"
+          }
+        }
+      }
+    },
+    "dashboard.insight.recap.tip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to see more connection suggestions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点击查看更多关联建议"
+          }
+        }
+      }
+    },
+    "dashboard.insight.tips.content": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Based on this week's knowledge growth, it is recommended to continue exploring connections in related fields and try to connect fragmented knowledge points through mindmaps."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "基于本周的知识增长情况，建议你继续深入探索相关领域的关联，并尝试通过思维导图将零散的知识点串联起来。"
+          }
+        }
+      }
+    },
+    "dashboard.insight.tips.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep Insights"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深度建议"
+          }
+        }
+      }
+    },
+    "dashboard.insight.weekly.prompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "# Role: Senior Knowledge Architect\n# Context: User added nodes: [%@].\n# Task: Generate a weekly report, including cognitive anchors, connection density, etc. Requirement: Within 250 words."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "# Role: 资深知识架构师\n# Context: 用户添加了节点：[%@]。\n# Task: 生成周度报告，包含认知锚点、关联密度等。要求 250 字以内。"
+          }
+        }
+      }
+    },
+    "dashboard.insight.weekly.systemPrompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are a senior knowledge architect, skilled at summarizing knowledge systems."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你是一个资深知识架构师，擅长总结知识体系。"
+          }
+        }
+      }
+    },
+    "dashboard.insight.weeklyTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weekly Insight"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知识周报"
+          }
+        }
+      }
+    },
     "dashboard.pages": {
       "extractionState": "manual",
       "localizations": {
@@ -3594,6 +3996,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Spotlight 索引失败: %@"
+          }
+        }
+      }
+    },
+    "deleteConfirmMessage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to permanently delete this backup? This action cannot be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "您确定要永久删除此备份吗？此操作不可撤销。"
+          }
+        }
+      }
+    },
+    "deleteConfirmTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Backup"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除备份"
           }
         }
       }
@@ -5934,6 +6370,7 @@
       }
     },
     "ingest.deepScan": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -5947,10 +6384,10 @@
             "value": "深度扫描 (RAG)"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.deepScanDesc": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -5964,8 +6401,7 @@
             "value": "对知识库进行全量向量化检索，自动发现新旧知识点之间的潜在关联。"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.ecoIndexingLowPower": {
       "extractionState": "manual",
@@ -6137,6 +6573,7 @@
       }
     },
     "ingest.fileImport": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6150,10 +6587,10 @@
             "value": "文件导入"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.fileImportHint": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6167,8 +6604,7 @@
             "value": "支持 Markdown, PDF, TXT 等格式"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.fileTooLarge": {
       "extractionState": "manual",
@@ -6324,6 +6760,7 @@
       }
     },
     "ingest.method.file": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6337,10 +6774,10 @@
             "value": "文件拖拽"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.method.fileDesc": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6354,10 +6791,10 @@
             "value": "支持多文件批量导入"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.method.manual": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6371,10 +6808,10 @@
             "value": "结构化编辑"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.method.manualDesc": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6388,10 +6825,10 @@
             "value": "支持 Markdown 语法"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.method.ocr": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6405,10 +6842,10 @@
             "value": "实时扫描"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.method.ocrDesc": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6422,8 +6859,7 @@
             "value": "高精度文字识别"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.ocrScan": {
       "extractionState": "manual",
@@ -6528,6 +6964,7 @@
       }
     },
     "ingest.processing": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6541,8 +6978,7 @@
             "value": "正在处理..."
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.processingRAGFormat": {
       "extractionState": "manual",
@@ -6567,6 +7003,7 @@
       }
     },
     "ingest.queue.desc": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6580,10 +7017,10 @@
             "value": "正在处理的导入任务"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.queue.title": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6597,10 +7034,10 @@
             "value": "导入队列"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.recentActivities": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6614,8 +7051,7 @@
             "value": "最近活动"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.smartIngestDoneDesc": {
       "extractionState": "manual",
@@ -6856,6 +7292,7 @@
       }
     },
     "ingest.urlImport": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6869,10 +7306,10 @@
             "value": "链接导入"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.urlImportHint": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6886,10 +7323,10 @@
             "value": "从网页或文章链接提取知识"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.urlImportPlaceholder": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6903,10 +7340,10 @@
             "value": "输入或粘贴网页链接 (每行一个)"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.voiceNote": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6920,10 +7357,10 @@
             "value": "语音笔记"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.voiceNoteHint": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6937,10 +7374,10 @@
             "value": "通过语音转文字录入知识"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "ingest.webDesc": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -6954,8 +7391,7 @@
             "value": "支持大多数网页、文章和 PDF 链接。AI 将自动提取核心内容。"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "insight.daily.prompt.oldest": {
       "extractionState": "manual",
@@ -10362,6 +10798,7 @@
       }
     },
     "misc.action": {
+      "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
@@ -10375,8 +10812,7 @@
             "value": "操作"
           }
         }
-      },
-      "extractionState": "manual"
+      }
     },
     "misc.add": {
       "extractionState": "manual",
@@ -14852,16 +15288,16 @@
     "prompt.default.infographic": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Infographic"
-          }
-        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "可视化信息图"
+            "value": "请根据提供的内容，生成一张逻辑严密的 Mermaid 可视化信息图 (Flowchart)。\n要求：\n1. 首行必须是 '# <总结标题>'（语言与内容一致）。\n2. 第二行开始输出 Mermaid 代码，以 'graph TD' (或 LR/BT) 开头。\n3. 节点定义必须使用 ID[\"文字内容\"] 格式（严格使用双引号包裹文字）。\n4. 文字内容中严禁包含任何引号、方括号、圆括号或冒号。\n5. 重点展示知识点之间的因果、组成或流程关系。\n6. 禁止使用 Markdown 代码块包裹（即禁止使用 ``` 符号）。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate a Mermaid flowchart..."
           }
         }
       }
@@ -14886,16 +15322,16 @@
     "prompt.default.mindmap": {
       "extractionState": "manual",
       "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Please generate a Mermaid mindmap. Requirements:\n1. Start with the `mindmap` keyword.\n2. Root node format: `root((Title))`.\n3. Do NOT include parentheses `()` or colons `:` in node labels. Use quotes for special characters, e.g., `\"Text (Bracket)\"`.\n4. Use 2-space indentation for levels. Do NOT use `-` or `*` prefixes.\n5. Output ONLY the code block."
-          }
-        },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "请生成 Mermaid 思维导图。要求：\n1. 以 `mindmap` 开头。\n2. 根节点用 `root((标题))`。\n3. 节点文字禁止包含任何括号 `()` 或冒号 `:`，特殊字符须用引号包裹，如 `\"文字(括号)\"`。\n4. 使用缩进表示层级，禁止使用 `-` 开头。\n5. 仅输出代码块。"
+            "value": "请根据提供的内容，生成一个层级清晰的 Mermaid 思维导图 (Mindmap)。\n要求：\n1. 首行必须是 '# <总结标题>'（语言与内容一致）。\n2. 以 'mindmap' 开头。\n3. 根节点用 'root((标题))'。\n4. 使用缩进表示层级，禁止使用 '-' 开头。\n5. 节点文字禁止包含任何括号 '()'、冒号 ':' 或方括号 '[]'。\n6. 禁止使用 Markdown 代码块包裹（即禁止使用 ``` 符号）。"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generate a Mermaid mindmap..."
           }
         }
       }
@@ -19777,6 +20213,40 @@
         }
       }
     },
+    "synthesis.batchDeleteConfirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete selected synthesized documents"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除选中的合成文档"
+          }
+        }
+      }
+    },
+    "synthesis.clearAllConfirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear all synthesized documents"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空全部合成文档"
+          }
+        }
+      }
+    },
     "synthesis.documentList": {
       "extractionState": "manual",
       "localizations": {
@@ -19807,23 +20277,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "已达到此类文档的存储上限"
-          }
-        }
-      }
-    },
-    "synthesis.limitReachedWarning": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Storage limit reached"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "已达存储上限"
           }
         }
       }
@@ -19886,6 +20339,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择知识页面，将其合成为思维导图、演示文稿、测试或深度报告。"
+          }
+        }
+      }
+    },
+    "synthesis.limitReachedWarning": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage limit reached"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已达存储上限"
           }
         }
       }
@@ -21473,392 +21943,194 @@
         }
       }
     },
-    "dashboard.index.comparisonCount": {
+    "editor.iconPicker.academic": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d comparisons"
+            "value": "Academic"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d 个比较"
+            "value": "学术"
           }
         }
       }
     },
-    "dashboard.index.conceptCount": {
+    "editor.iconPicker.allIcons": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d concepts"
+            "value": "All Icons"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d 个概念"
+            "value": "全部图标"
           }
         }
       }
     },
-    "dashboard.index.concepts": {
+    "editor.iconPicker.common": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Concepts"
+            "value": "Common"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "概念"
+            "value": "常用"
           }
         }
       }
     },
-    "dashboard.index.entities": {
+    "editor.iconPicker.customSelected": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Entities"
+            "value": "Custom icon selected"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "实体"
+            "value": "已选择自定义图标"
           }
         }
       }
     },
-    "dashboard.index.entityCount": {
+    "editor.iconPicker.nature": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d entities"
+            "value": "Nature"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d 个实体"
+            "value": "自然"
           }
         }
       }
     },
-    "dashboard.index.overview": {
+    "editor.iconPicker.reset": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Overview"
+            "value": "Reset"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "概览"
+            "value": "重置"
           }
         }
       }
     },
-    "dashboard.index.pages": {
+    "editor.iconPicker.selectIcon": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pages"
+            "value": "Select Icon"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "页面"
+            "value": "选择图标"
           }
         }
       }
     },
-    "dashboard.index.sourceCount": {
+    "editor.iconPicker.symbols": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d sources"
+            "value": "Symbols"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d 个来源"
+            "value": "符号"
           }
         }
       }
     },
-    "dashboard.index.sources": {
+    "editor.iconPicker.transport": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sources"
+            "value": "Transport"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "来源"
+            "value": "交通"
           }
         }
       }
     },
-    "dashboard.index.wordCount": {
+    "editor.iconPicker.useDefault": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d words"
+            "value": "Use default icon"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%d 字"
+            "value": "使用默认图标"
           }
         }
       }
     },
-    "dashboard.insight.generateReport": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "点击生成个人智库周报"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.growth.explosive": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Explosive Growth"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "爆发式增长"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.growth.steady": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Steady Accumulation"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "稳步积累"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.recap.tip": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tap to see more connection suggestions"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "点击查看更多关联建议"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.tips.content": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Based on this week's knowledge growth, it is recommended to continue exploring connections in related fields and try to connect fragmented knowledge points through mindmaps."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "基于本周的知识增长情况，建议你继续深入探索相关领域的关联，并尝试通过思维导图将零散的知识点串联起来。"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.tips.title": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deep Insights"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "深度建议"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.weekly.prompt": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "# Role: Senior Knowledge Architect\n# Context: User added nodes: [%@].\n# Task: Generate a weekly report, including cognitive anchors, connection density, etc. Requirement: Within 250 words."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "# Role: 资深知识架构师\n# Context: 用户添加了节点：[%@]。\n# Task: 生成周度报告，包含认知锚点、关联密度等。要求 250 字以内。"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.weekly.systemPrompt": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "You are a senior knowledge architect, skilled at summarizing knowledge systems."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你是一个资深知识架构师，擅长总结知识体系。"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "dashboard.insight.weeklyTitle": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weekly Insight"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "知识周报"
-          }
-        }
-      },
-      "extractionState": "manual"
-    },
-    "synthesis.clearAllConfirm": {
+    "creation.newPage": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clear all synthesized documents"
+            "value": "New Page"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清空全部合成文档"
+            "value": "新建页面"
           }
         }
       }
     },
-    "synthesis.batchDeleteConfirm": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete selected synthesized documents"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "删除选中的合成文档"
-          }
-        }
-      }
-    },
-    "aitask.clearConfirmTitle": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clear Task History"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清空任务历史"
-          }
-        }
-      }
-    },
-    "aitask.clearConfirmMessage": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This will clear all completed and failed task records. This action cannot be undone."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "此操作将清除所有已完成和失败的任务记录，不可恢复。"
-          }
-        }
-      }
-    },
-    "deleteConfirmTitle": {
+    "backup.deleteConfirmTitle": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -21875,7 +22147,7 @@
         }
       }
     },
-    "deleteConfirmMessage": {
+    "backup.deleteConfirmMessage": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -21888,6 +22160,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "您确定要永久删除此备份吗？此操作不可撤销。"
+          }
+        }
+      }
+    },
+    "misc.deleteConfirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Confirmation"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "确认删除"
           }
         }
       }

@@ -10,7 +10,9 @@
 
 import SwiftUI
 
-/// 奖章墙视图：展示用户已获得和待挑战的成就
+// MARK: - 勋章墙
+/// 奖章墙视图
+/// 负责展示用户的知识成就体系、勋章获得情况及成长里程碑进度
 struct MedalWallView: View {
     @Environment(KMStore.self) var store
     @StateObject private var medalService = MedalService.shared

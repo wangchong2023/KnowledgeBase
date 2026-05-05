@@ -1,20 +1,20 @@
 // Graph3DView.swift
 //
 // 作者: Wang Chong
-// 功能说明: 3D knowledge graph visualization using SceneKit.
+// 功能说明: 基于 SceneKit 的 3D 知识图谱可视化视图。
 // 版本: 1.0
 // 修改记录:
 //   - 创建: 2026-05-02
-//   - 更新: 2026-05-03
-// 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+//   - 更新: 2026-05-05
+// 日期: 2026-05-05
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 import SceneKit
 
-// MARK: - Graph 3D View
-/// 3D knowledge graph visualization using SceneKit.
-/// Nodes float in 3D space, connected by edges, with force-directed layout.
+// MARK: - 3D 图谱容器
+/// 3D 知识图谱视图
+/// 负责在 3D 空间（SceneKit）中渲染知识节点与关联线条，提供力导向布局、自动旋转及空间交互体验
 struct Graph3DView: View {
     @Environment(KMStore.self) var store
     @State private var scene: SCNScene?
@@ -150,10 +150,10 @@ struct Graph3DView: View {
     
     private func buildScene() {
         let newScene = SCNScene()
-        // Deep space background - only in fullscreen
+        // 仅在全屏模式下显示深空背景
         newScene.background.contents = isFullScreen ? UIColor.black : nil
         
-        // Add stars
+        // 添加背景星尘
         addStarfield(to: newScene)
 
         setupLighting(scene: newScene)
@@ -223,7 +223,7 @@ struct Graph3DView: View {
         let camera = SCNNode()
         camera.camera = SCNCamera()
         camera.camera?.zNear = 0.1
-        camera.camera?.zFar = 1000 // Increased range to prevent cutting off distant nodes
+        camera.camera?.zFar = 1000 // 增加渲染范围以防远处节点被裁切
         camera.position = SCNVector3(0, 15, Float(cameraDistance))
         camera.look(at: SCNVector3(0, 0, 0))
         camera.name = "mainCamera"
@@ -309,7 +309,8 @@ struct Graph3DView: View {
     private func calculateNodeSize(for page: WikiPage) -> CGFloat {
         let backlinkCount = store.pages.filter { $0.outgoingLinks.contains(page.title) }.count
         let linkCount = page.outgoingLinks.count + backlinkCount
-        return CGFloat(max(0.6, min(2.0, 0.8 + Double(linkCount) * 0.2)))
+        // 调大尺寸：基础尺寸从 0.6->1.2，增长系数从 0.2->0.4，最大上限从 2.0->4.0
+        return CGFloat(max(1.2, min(4.0, 1.5 + Double(linkCount) * 0.4)))
     }
 
     private func createLabelNode(title: String, nodeSize: CGFloat) -> SCNNode {
@@ -340,10 +341,10 @@ struct Graph3DView: View {
     }
 
     private func createEdgeNodes(pages: [WikiPage], nodeMap: [UUID: SCNNode], scene: SCNScene) {
-        var processedEdges = Set<String>() // 用来去重 "ID1-ID2"
+        var processedEdges = Set<String>() // 用于去重已处理的边
         
         for page in pages {
-            // 1. 处理 outgoingLinks
+            // 1. 处理出链
             for linkTitle in page.outgoingLinks {
                 if let linkedPage = store.pages.first(where: { $0.title == linkTitle }),
                    let sourceNode = nodeMap[page.id],
@@ -358,7 +359,7 @@ struct Graph3DView: View {
                 }
             }
             
-            // 2. 处理 relatedPageIDs (对应 GraphLayoutProcessor 逻辑)
+            // 2. 处理相关页面标识 (对应图谱布局处理逻辑)
             for relatedID in page.relatedPageIDs {
                 if let targetNode = nodeMap[relatedID],
                    let sourceNode = nodeMap[page.id] {

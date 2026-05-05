@@ -1,10 +1,10 @@
 // DatabaseManager.swift
 //
 // 作者: Wang Chong
-// 功能说明: 数据库相关错误
-// 版本: 1.0
+// 功能说明: 数据库管理器，负责 GRDB 的初始化、配置、并发管理及 Schema 迁移。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-04
+//   - 2026-05-05: 升级文档规范，优化内存数据库检测逻辑
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
@@ -21,6 +21,7 @@ enum DatabaseError: Error {
 /// 使用 DatabasePool 以获得最高性能的 WAL 模式并发访问能力。
 @MainActor
 final class DatabaseManager {
+    /// 全局单例
     static let shared = DatabaseManager()
     
     /// 标记当前是否处于测试环境
@@ -38,7 +39,10 @@ final class DatabaseManager {
         // 延迟初始化，由 setup() 显式启动
     }
     
-    /// 初始化数据库连接与 Migrator
+    /// 初始化数据库连接
+    /// 配置 WAL 模式、外键约束并执行 Schema 迁移
+    /// - Parameter dbURL: 数据库文件的 URL 路径
+    /// - Throws: 数据库打开或迁移失败时的错误
     func setup(at dbURL: URL) throws {
         // 如果已经初始化过且路径一致，则跳过
         let isMemory = dbURL.absoluteString.contains(":memory:")
@@ -82,7 +86,7 @@ final class DatabaseManager {
         }
     }
     
-    /// 关闭连接并重置管理器状态
+    /// 关闭当前数据库连接并重置单例状态
     func reset() {
         dbWriter = nil
     }

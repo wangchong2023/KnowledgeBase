@@ -7,14 +7,26 @@
 //   - 创建: 2026-05-04
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
-
 import SwiftUI
 import Observation
+import Combine
 
 /// 全局设置存储，管理隐私模式、安全验证及显示偏好。
 @MainActor
 @Observable
 final class SettingsStore {
+    @ObservationIgnored private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        WikiEventBus.shared.subscribe()
+            .receive(on: RunLoop.main)
+            .sink { [weak self] event in
+                if case .clearAllDataRequested = event {
+                    self?.reset()
+                }
+            }
+            .store(in: &cancellables)
+    }
     // ── 隐私与安全 ──
     @ObservationIgnored private var _isPrivacyModeEnabled: Bool = UserDefaults.standard.object(forKey: "isPrivacyModeEnabled") as? Bool ?? true
     var isPrivacyModeEnabled: Bool {
@@ -30,7 +42,7 @@ final class SettingsStore {
         }
     }
     
-    @ObservationIgnored private var _isBiometricEnabled: Bool = UserDefaults.standard.object(forKey: "isBiometricEnabled") as? Bool ?? false
+    @ObservationIgnored private var _isBiometricEnabled: Bool = UserDefaults.standard.object(forKey: "isBiometricEnabled") as? Bool ?? true
     var isBiometricEnabled: Bool {
         get {
             access(keyPath: \.isBiometricEnabled)
@@ -69,12 +81,10 @@ final class SettingsStore {
         get { UserDefaults.standard.string(forKey: "knowledge-management_username") ?? "" }
         set { UserDefaults.standard.set(newValue, forKey: "knowledge-management_username") }
     }
-
-    init() {}
     
     func reset() {
         isPrivacyModeEnabled = true
-        isBiometricEnabled = false
+        isBiometricEnabled = true
         showPerfDashboard = false
         hasShownGraphCoachMark = false
         UserDefaults.standard.removeObject(forKey: "knowledge-management_conflict_resolution")

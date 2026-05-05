@@ -16,6 +16,8 @@ import UniformTypeIdentifiers
 
 // MARK: - Page Drag Item
 /// Custom transfer type for page items
+/// 页面拖拽传输模型
+/// 负责在应用内或跨应用间传输 Wiki 页面的核心元数据，符合 Transferable 协议
 struct PageDragItem: Transferable, Codable {
     let pageID: UUID
     let pageTitle: String
@@ -32,6 +34,8 @@ extension UTType {
 }
 
 // MARK: - Drag & Drop Modifier for Pages
+/// 页面拖放修饰符组件
+/// 负责为视图注入原生拖拽支持，并提供自定义的拖拽实时预览效果
 struct PageDragDropModifier: ViewModifier {
     let page: WikiPage
 
@@ -74,6 +78,8 @@ struct PagesListDropDelegate: DropDelegate {
 
 // MARK: - File Drop Delegate
 /// Handles dropping external files (PDF, text) into the app
+/// 外部文件投放代理组件
+/// 负责处理从外部（如访达或桌面）投放至应用内的 PDF、文本等物理文件流
 struct FileDropDelegate: DropDelegate {
     let onFileDrop: (URL) -> Void
 

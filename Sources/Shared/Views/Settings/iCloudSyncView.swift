@@ -9,6 +9,7 @@
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
+#if ICLOUD_ENABLED
 @preconcurrency import SwiftUI
 
 // MARK: - iCloud Sync Settings View
@@ -138,3 +139,4 @@ struct iCloudSyncView: View {
         }
     }
 }
+#endif // ICLOUD_ENABLED

@@ -11,6 +11,8 @@
 import SwiftUI
 
 // MARK: - Wikilink Picker Sheet
+/// WikiLink 选择器面板组件
+/// 负责在编辑器中搜索并插入双链引用的选择界面，支持模糊搜索及页面类型过滤
 struct WikilinkPickerSheet: View {
     @Binding var page: WikiPage
     @Binding var editorContent: String
@@ -93,6 +95,8 @@ struct WikilinkPickerSheet: View {
 }
 
 // MARK: - Editor Toolbar Button
+/// 编辑器工具栏按钮组件
+/// 负责展示编辑器底部的辅助操作按钮（如插入加粗、链接等），采用一致的紧凑型布局
 struct EditorToolbarButton: View {
     let title: String
     let icon: String
@@ -118,6 +122,8 @@ struct EditorToolbarButton: View {
 
 // MARK: - Tag Chip
 /// 可删除的标签胶囊。
+/// 标签胶囊组件
+/// 负责在编辑器顶部展示已添加的标签，支持单个标签的快速移除与高亮样式
 struct TagChip: View {
     let tag: String
     let onRemove: () -> Void
@@ -142,6 +148,8 @@ struct TagChip: View {
 
 // MARK: - Alias Chip
 /// 可删除的别名胶囊。
+/// 别名胶囊组件
+/// 负责在编辑器中展示页面的别名信息，提供视觉区分度及移除交互
 struct AliasChip: View {
     let alias: String
     let onRemove: () -> Void
@@ -166,6 +174,8 @@ struct AliasChip: View {
 
 // MARK: - Inline Tag Input
 /// 内联标签输入框。
+/// 内联标签输入组件
+/// 负责在编辑器内提供非阻塞式的标签添加输入框，支持回车确认与取消操作
 struct InlineTagInput: View {
     @Binding var text: String
     let onCommit: () -> Void

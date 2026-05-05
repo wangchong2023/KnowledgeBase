@@ -12,6 +12,8 @@ import SwiftUI
 
 // MARK: - Collab Info Row
 /// 协作信息提示行（图标 + 文字），轻量级复用组件。
+/// 协作信息提示行组件
+/// 负责以紧凑的图标与文本形式展示协作相关的元数据信息
 struct CollabInfoRow: View {
     let icon: String
     let text: String
@@ -31,6 +33,8 @@ struct CollabInfoRow: View {
 
 // MARK: - Discovered Room Row
 /// 发现房间列表行。
+/// 发现房间列表行组件
+/// 负责展示局域网内扫描到的可用协作房间，支持展示房主信息及点击加入交互
 struct DiscoveredRoomRow: View {
     let room: DiscoveredRoom
     let onJoin: () -> Void
@@ -66,6 +70,8 @@ struct DiscoveredRoomRow: View {
 
 // MARK: - Connected Peer Row
 /// 已连接用户行。
+/// 已连接用户行组件
+/// 负责展示当前会话中已连接的其他成员身份信息、角色及加入时间
 struct ConnectedPeerRow: View {
     let peer: CollabUser
     var showRole: Bool = false
@@ -98,6 +104,8 @@ struct ConnectedPeerRow: View {
 
 // MARK: - Recent Edit Row
 /// 最近编辑记录行。
+/// 最近编辑记录行组件
+/// 负责实时展示会话中发生的原子编辑操作流，增强协同感与操作追溯
 struct RecentEditRow: View {
     let edit: CollabEdit
 
@@ -131,6 +139,8 @@ struct RecentEditRow: View {
 
 // MARK: - Role Badge
 /// 角色徽章（Owner/Editor/Viewer）。
+/// 协作角色徽章组件
+/// 负责根据用户的协作权限（房主/编辑/查看）展示视觉化的角色标识
 struct CollabRoleBadge: View {
     let role: CollabRole
     

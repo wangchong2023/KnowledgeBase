@@ -17,25 +17,29 @@ import Foundation
 enum LLMResponseProcessor {
     /// Parse a JSON string array from LLM output, stripping markdown fences if present.
     static func parseJSONArray(_ text: String) -> [String] {
-        let cleaned = text
-            .replacingOccurrences(of: "```json", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
+        let cleaned = stripMarkdown(text)
         if let data = cleaned.data(using: .utf8),
            let array = try? JSONDecoder().decode([String].self, from: data) {
             return array
         }
-
-        let pattern = "\\[[\\s\\S]*\\]"
-        if let range = cleaned.range(of: pattern, options: .regularExpression) {
-            let jsonPart = String(cleaned[range])
-            if let data = jsonPart.data(using: .utf8),
-               let array = try? JSONDecoder().decode([String].self, from: data) {
-                return array
-            }
-        }
-
         return []
+    }
+
+    static func parseSmartIngest(_ text: String) -> SmartIngestResult? {
+        let cleaned = stripMarkdown(text)
+        guard let data = cleaned.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(SmartIngestResult.self, from: data)
+    }
+
+    static func parseRefactorSuggestions(_ text: String) -> [RefactorSuggestion] {
+        let cleaned = stripMarkdown(text)
+        guard let data = cleaned.data(using: .utf8) else { return [] }
+        return (try? JSONDecoder().decode([RefactorSuggestion].self, from: data)) ?? []
+    }
+
+    private static func stripMarkdown(_ text: String) -> String {
+        text.replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
