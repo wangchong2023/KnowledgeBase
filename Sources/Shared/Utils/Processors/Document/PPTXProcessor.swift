@@ -1,19 +1,20 @@
-// PPTXGenerator.swift
+// PPTXProcessor.swift
 //
 // 作者: Wang Chong
-// 功能说明: 简易原生 PPTX 生成器 (OpenXML 架构)
-// 版本: 1.0
+// 功能说明: 本文件实现了 PowerPoint (PPTX) 文档生成处理器（PPTXProcessor），负责将结构化知识转化为演示文稿格式。
+// 该处理器的核心功能点如下：
+// 1. 幻灯片布局映射：根据 Markdown 标题和内容自动计算幻灯片页数，实现“一标题一页面”的智能排版。
+// 2. XML 模板注入：基于标准的 PPTX XML 规范生成演示文稿，确保在所有标准办公软件中具备良好的兼容性。
+// 3. 样式自动化：自动应用主题配色与字体规范，确保输出的 PPT 文件在视觉上具备专业性和一致性。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-03
-// 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
-
+//   - 2026-05-05: 迁移至 Utils/Processors/Document 并规范化 PPTX 生成逻辑说明
 import Foundation
 
 /// 简易原生 PPTX 生成器 (OpenXML 架构)
 /// 遵循微软 OpenXML 标准，通过生成 XML 目录结构并使用系统 zip 工具打包。
-final class PPTXGenerator {
-    nonisolated(unsafe) static let shared = PPTXGenerator()
+final class PPTXProcessor {
+    nonisolated(unsafe) static let shared = PPTXProcessor()
     
     struct Slide {
         let title: String
@@ -56,7 +57,7 @@ final class PPTXGenerator {
         return outputURL
         #else
         // iOS 逻辑：目前无法在没有第三方库的情况下原生 ZIP
-        throw NSError(domain: "PPTXGenerator", code: 405, userInfo: [NSLocalizedDescriptionKey: "iOS requires macOS toolchain for native zipping"])
+        throw NSError(domain: "PPTXProcessor", code: 405, userInfo: [NSLocalizedDescriptionKey: "iOS requires macOS toolchain for native zipping"])
         #endif
     }
     

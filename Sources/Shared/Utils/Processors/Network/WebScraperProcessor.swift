@@ -1,17 +1,20 @@
-// LinkScraperService.swift
+// WebScraperProcessor.swift
 //
 // 作者: Wang Chong
-// 功能说明: 链接解析服务：负责从网页或 YouTube 提取 Markdown 内容
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的网络内容抓取处理器（WebScraperProcessor），负责将外部 URL 资源转化为系统可识别的 Markdown 格式。
+// 该处理器主要通过集成第三方解析引擎（如 Jina Reader）实现以下核心功能：
+// 1. 跨平台网页抓取：支持将任意网页 URL 转换为干净、去除噪声的 Markdown 文本，极大地方便了 LLM 的后续处理。
+// 2. 自动标题提取：通过解析抓取后的内容流自动识别网页主标题，为知识页面的初始化提供元数据支持。
+// 3. 网络异常处理：内置了超时机制与状态码校验，确保在复杂网络环境下资料采集任务的稳定性。
+// 版本: 1.2
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 由 LinkProcessor 更名为 WebScraperProcessor，移入 Network 目录，并同步升级文档规范
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
 
-/// 链接解析服务：负责从网页或 YouTube 提取 Markdown 内容
-final class LinkScraperService: @unchecked Sendable {
+/// 网页内容提取处理器：负责从 URL 提取 Markdown 内容
+final class WebScraperProcessor: @unchecked Sendable {
     
     enum ScraperError: Error {
         case invalidURL

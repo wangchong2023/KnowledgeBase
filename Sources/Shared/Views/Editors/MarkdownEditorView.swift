@@ -71,7 +71,7 @@ struct MarkdownEditorView: View {
     @State private var pendingAction: EditorPendingAction?
     @State private var showPhotosPicker = false
     @State private var isProcessingOCR = false
-    @EnvironmentObject var ocrService: OCRService
+    @EnvironmentObject var ocrService: OCRProcessor
 
     var body: some View {
         VStack(spacing: 0) {
@@ -280,7 +280,7 @@ struct OCRPickerModifier: ViewModifier {
     @Binding var isPresented: Bool
     let onResult: (String) -> Void
     @State private var selectedItem: PhotosPickerItem?
-    @EnvironmentObject var ocrService: OCRService
+    @EnvironmentObject var ocrService: OCRProcessor
 
     func body(content: Content) -> some View {
         content

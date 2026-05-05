@@ -1,0 +1,279 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild build -project KM.xcodeproj -scheme KM -destination "platform=iOS Simulator,name=iPad Pro 13-inch (M5)" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=
+
+Build settings from command line:
+    CODE_SIGN_IDENTITY = 
+    CODE_SIGNING_ALLOWED = NO
+    CODE_SIGNING_REQUIRED = NO
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  swift-syntax: https://github.com/swiftlang/swift-syntax @ 603.0.1
+  GRDB: https://github.com/groue/GRDB.swift.git @ 6.29.3
+  xctest-dynamic-overlay: https://github.com/pointfreeco/xctest-dynamic-overlay @ 1.9.0
+  swift-snapshot-testing: https://github.com/pointfreeco/swift-snapshot-testing @ 1.19.2
+  swift-custom-dump: https://github.com/pointfreeco/swift-custom-dump @ 1.5.0
+
+note: Using codesigning identity override: 
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (5 targets)
+    Target 'KM' in project 'KM'
+        ➜ Explicit dependency on target 'GRDB' in project 'GRDB'
+    Target 'GRDB' in project 'GRDB'
+        ➜ Explicit dependency on target 'GRDB' in project 'GRDB'
+        ➜ Explicit dependency on target 'GRDB_GRDB' in project 'GRDB'
+    Target 'GRDB' in project 'GRDB'
+        ➜ Explicit dependency on target 'GRDB_GRDB' in project 'GRDB'
+        ➜ Explicit dependency on target 'CSQLite' in project 'GRDB'
+    Target 'CSQLite' in project 'GRDB' (no dependencies)
+    Target 'GRDB_GRDB' in project 'GRDB' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk /Users/constantine/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+    cd /Users/constantine/Documents/work/code/projects/km/KM.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -o /Users/constantine/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+
+ProcessInfoPlistFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/GRDB_GRDB.bundle/Info.plist /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/GRDB.build/Debug-iphonesimulator/GRDB_GRDB.build/empty-GRDB_GRDB.plist (in target 'GRDB_GRDB' from project 'GRDB')
+    cd /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/SourcePackages/checkouts/GRDB.swift
+    builtin-infoPlistUtility /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/GRDB.build/Debug-iphonesimulator/GRDB_GRDB.build/empty-GRDB_GRDB.plist -producttype com.apple.product-type.bundle -expandbuildsettings -format binary -platform iphonesimulator -o /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/GRDB_GRDB.bundle/Info.plist
+
+CompileAssetCatalogVariant thinned /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app /Users/constantine/Documents/work/code/projects/km/Sources/Assets.xcassets (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/actool /Users/constantine/Documents/work/code/projects/km/Sources/Assets.xcassets --compile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --filter-for-thinning-device-configuration iPad17,4-A --filter-for-device-os-version 26.4.1 --development-region en --target-device iphone --target-device ipad --minimum-deployment-target 17.0 --platform iphonesimulator
+/* com.apple.actool.compilation-results */
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_generated_info.plist_thinned
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_output/thinned/AppIcon60x60@2x.png
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_output/thinned/AppIcon76x76@2x~ipad.png
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_output/thinned/Assets.car
+
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/CoreModels.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/CoreModels.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Ingest.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Ingest.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Schema.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Schema.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Chat.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Chat.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Backup.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Backup.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/ICloud.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/ICloud.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Actions.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Actions.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Transfer.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Transfer.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Common.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Common.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/InfoPlist.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/InfoPlist.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Settings.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Settings.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Watch.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Watch.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/AITasks.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/AITasks.xcstrings
+
+CompileXCStrings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/ /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Widget.xcstrings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcstringstool compile --output-directory /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build /Users/constantine/Documents/work/code/projects/km/Sources/Localization/Widget.xcstrings
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Schema.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Schema.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Schema.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Schema.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Schema.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Actions.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Actions.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Actions.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Actions.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Actions.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Backup.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Backup.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Backup.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Backup.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Backup.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Schema.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Schema.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Schema.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Schema.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Schema.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Backup.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Backup.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Backup.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Backup.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Backup.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Actions.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Actions.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Actions.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Actions.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Actions.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Widget.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Widget.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Widget.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Widget.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Widget.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Widget.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Widget.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Widget.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Widget.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Widget.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Watch.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Watch.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Watch.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Watch.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Watch.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Watch.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Watch.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Watch.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Watch.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Watch.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/InfoPlist.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/InfoPlist.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/InfoPlist.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/CoreModels.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/CoreModels.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename CoreModels.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/CoreModels.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/CoreModels.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/InfoPlist.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/InfoPlist.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename InfoPlist.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/InfoPlist.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/InfoPlist.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Chat.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Chat.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Chat.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Chat.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Chat.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/CoreModels.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/CoreModels.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename CoreModels.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/CoreModels.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/CoreModels.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Chat.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Chat.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Chat.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Chat.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Chat.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/ICloud.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/ICloud.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename ICloud.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/ICloud.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/ICloud.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/ICloud.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/ICloud.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename ICloud.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/ICloud.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/ICloud.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Transfer.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Transfer.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Transfer.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Transfer.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Transfer.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Transfer.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Transfer.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Transfer.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Transfer.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Transfer.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Common.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Common.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Common.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Common.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Common.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Common.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Common.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Common.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Common.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Common.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Ingest.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Ingest.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Ingest.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Ingest.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Ingest.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Ingest.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Ingest.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Ingest.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Ingest.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Ingest.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/Settings.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Settings.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Settings.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Settings.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/Settings.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/Settings.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Settings.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename Settings.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Settings.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/Settings.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj/AITasks.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/AITasks.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename AITasks.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/en.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/AITasks.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/en.lproj/AITasks.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+CopyStringsFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj/AITasks.strings /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/AITasks.strings (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-copyStrings --validate --outputencoding binary --outfilename AITasks.strings --outdir /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/zh-Hans.lproj -- /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/AITasks.strings
+/Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/zh-Hans.lproj/AITasks.strings:1:1: note: detected encoding of input file as Unicode (UTF-8) (in target 'KM' from project 'KM')
+
+LinkAssetCatalog /Users/constantine/Documents/work/code/projects/km/Sources/Assets.xcassets (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-linkAssetCatalog --thinned /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_output/thinned --thinned-dependencies /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_dependencies_thinned --thinned-info-plist-content /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_generated_info.plist_thinned --unthinned /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_output/unthinned --unthinned-dependencies /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_dependencies_unthinned --unthinned-info-plist-content /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_generated_info.plist_unthinned --output /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app --plist-output /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_generated_info.plist
+note: Emplaced /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/Assets.car (in target 'KM' from project 'KM')
+note: Emplaced /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/AppIcon60x60@2x.png (in target 'KM' from project 'KM')
+note: Emplaced /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/AppIcon76x76@2x~ipad.png (in target 'KM' from project 'KM')
+
+ProcessInfoPlistFile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/Info.plist /Users/constantine/Documents/work/code/projects/km/Sources/Info.plist (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-infoPlistUtility /Users/constantine/Documents/work/code/projects/km/Sources/Info.plist -producttype com.apple.product-type.application -genpkginfo /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/PkgInfo -expandbuildsettings -format binary -platform iphonesimulator -additionalcontentfile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/Base.lproj/LaunchScreen-SBPartialInfo.plist -additionalcontentfile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/assetcatalog_generated_info.plist -scanforprivacyfile /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/GRDB_GRDB.bundle -o /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/Info.plist
+
+CopySwiftLibs /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app (in target 'KM' from project 'KM')
+    cd /Users/constantine/Documents/work/code/projects/km
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/KM.debug.dylib --scan-folder /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/Frameworks --scan-folder /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/PlugIns --scan-folder /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/SystemExtensions --scan-folder /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/Extensions --platform iphonesimulator --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Products/Debug-iphonesimulator/KM.app/Frameworks --strip-bitcode --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/constantine/Library/Developer/Xcode/DerivedData/KM-dumqlooxnczgiebhdhmwylfdzlpq/Build/Intermediates.noindex/KM.build/Debug-iphonesimulator/KM.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os
+Ignoring --strip-bitcode because --sign was not passed
+
+** BUILD SUCCEEDED **
+

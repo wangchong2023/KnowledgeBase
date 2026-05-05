@@ -49,7 +49,7 @@ final class PencilManager: NSObject {
 extension PencilManager: UIPencilInteractionDelegate {
     func pencilInteractionDidTap(_ interaction: UIPencilInteraction) {
         // 响应双击
-        LogService.shared.debug("✏️ Apple Pencil 双击触发")
+        Logger.shared.debug("✏️ Apple Pencil 双击触发")
         onDoubleTap?()
     }
 }

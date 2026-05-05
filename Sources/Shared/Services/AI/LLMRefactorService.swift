@@ -49,7 +49,7 @@ final class LLMRefactorService: Sendable {
             return []
         }
 
-        return LLMUtils.parseJSONArray(text)
+        return LLMResponseProcessor.parseJSONArray(text)
     }
 
     /// 增量折叠 (Smart Folding)

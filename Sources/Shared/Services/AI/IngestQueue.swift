@@ -51,7 +51,7 @@ final class IngestQueue: ObservableObject {
             // 执行耗时的 AI 智能编译与向量化
             Task {
                 do {
-                    LogService.shared.debug("📦 [IngestQueue] 正在处理任务：\(title)")
+                    Logger.shared.debug("📦 [IngestQueue] 正在处理任务：\(title)")
                     let result = try await llmService.smartIngest(title: title, rawContent: content, pages: pages)
                     
                     // 更新数据库 (Fixed for Swift 6)
@@ -62,7 +62,7 @@ final class IngestQueue: ObservableObject {
                         self.decrementCount()
                     }
                 } catch {
-                    LogService.shared.error("❌ [IngestQueue] 任务失败：\(title), Error: \(error)")
+                    Logger.shared.error("❌ [IngestQueue] 任务失败：\(title), Error: \(error)")
                     await MainActor.run { self.decrementCount() }
                 }
             }
@@ -106,7 +106,7 @@ final class IngestQueue: ObservableObject {
         do {
             try BGTaskScheduler.shared.submit(request)
         } catch {
-            LogService.shared.error("❌ [IngestQueue] 无法调度后台任务：\(error)")
+            Logger.shared.error("❌ [IngestQueue] 无法调度后台任务：\(error)")
         }
 #endif
     }

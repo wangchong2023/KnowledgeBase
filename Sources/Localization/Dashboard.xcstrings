@@ -12,7 +12,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每日闪念"
+            "value": "每日灵感"
           }
         }
       },
@@ -137,7 +137,7 @@
       },
       "extractionState": "manual"
     },
-    "index.comparisonCount": {
+    "dashboard.index.comparisonCount": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -154,7 +154,7 @@
         }
       }
     },
-    "index.conceptCount": {
+    "dashboard.index.conceptCount": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -171,7 +171,7 @@
         }
       }
     },
-    "index.concepts": {
+    "dashboard.index.concepts": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -188,7 +188,7 @@
         }
       }
     },
-    "index.entities": {
+    "dashboard.index.entities": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -205,7 +205,7 @@
         }
       }
     },
-    "index.entityCount": {
+    "dashboard.index.entityCount": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -222,7 +222,7 @@
         }
       }
     },
-    "index.overview": {
+    "dashboard.index.overview": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -239,7 +239,7 @@
         }
       }
     },
-    "index.pages": {
+    "dashboard.index.pages": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -256,7 +256,7 @@
         }
       }
     },
-    "index.sourceCount": {
+    "dashboard.index.sourceCount": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -273,7 +273,7 @@
         }
       }
     },
-    "index.sources": {
+    "dashboard.index.sources": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -290,7 +290,7 @@
         }
       }
     },
-    "index.wordCount": {
+    "dashboard.index.wordCount": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -358,7 +358,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.generateReport": {
+    "dashboard.insight.generateReport": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -369,7 +369,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.growth.explosive": {
+    "dashboard.insight.growth.explosive": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -386,7 +386,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.growth.steady": {
+    "dashboard.insight.growth.steady": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -403,7 +403,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.recap.tip": {
+    "dashboard.insight.recap.tip": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -420,7 +420,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.tips.content": {
+    "dashboard.insight.tips.content": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -437,7 +437,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.tips.title": {
+    "dashboard.insight.tips.title": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -454,7 +454,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.weekly.prompt": {
+    "dashboard.insight.weekly.prompt": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -471,7 +471,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.weekly.systemPrompt": {
+    "dashboard.insight.weekly.systemPrompt": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -488,7 +488,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.weeklyTitle": {
+    "dashboard.insight.weeklyTitle": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -505,5 +505,6 @@
       },
       "extractionState": "manual"
     }
-  }
+  },
+  "version": "1.0"
 }

@@ -51,7 +51,7 @@ final class PluginRegistry: ObservableObject {
     func loadPlugin(_ plugin: KnowledgePlugin) {
         // 版本兼容性检查
         if plugin.manifest.version.hasPrefix("1.") {
-            LogService.shared.debug("📦 [Adapter] 检测到 1.x 插件 \(plugin.manifest.name)，已启用 v1_Compatibility_Shim。")
+            Logger.shared.debug("📦 [Adapter] 检测到 1.x 插件 \(plugin.manifest.name)，已启用 v1_Compatibility_Shim。")
         }
         
         // 创建沙盒上下文
@@ -71,13 +71,13 @@ final class PluginRegistry: ObservableObject {
         var hostVersion: String { "2.0.0" } // nonisolated copy, avoids @MainActor crossing
         
         func log(_ message: String) {
-            LogService.shared.debug("🔌 [Plugin:\(manifest.id)] \(message)")
+            Logger.shared.debug("🔌 [Plugin:\(manifest.id)] \(message)")
         }
         
         func requestAIAccess(prompt: String) async -> String? {
             // 安全审计：检查 manifest 是否声明了 'llm' 权限
             guard manifest.permissions.contains("llm") else {
-                LogService.shared.error("🛡️ [安全拦截] 插件 \(manifest.id) 尝试调用 LLM，但未在 manifest 中声明 'llm' 权限。", error: nil)
+                Logger.shared.error("🛡️ [安全拦截] 插件 \(manifest.id) 尝试调用 LLM，但未在 manifest 中声明 'llm' 权限。", error: nil)
                 return nil
             }
             return try? await ServiceContainer.shared.resolve((any LLMServiceProtocol).self).generate(prompt: prompt, systemPrompt: "你是一个智能插件辅助助手")
@@ -85,7 +85,7 @@ final class PluginRegistry: ObservableObject {
         
         func queryPages(matching query: String) async -> [WikiPage] {
             guard manifest.permissions.contains("pages.read") else {
-                LogService.shared.error("🛡️ [安全拦截] 插件 \(manifest.id) 尝试查询页面，但未声明 'pages.read' 权限。", error: nil)
+                Logger.shared.error("🛡️ [安全拦截] 插件 \(manifest.id) 尝试查询页面，但未声明 'pages.read' 权限。", error: nil)
                 return []
             }
             let pages = await PluginRegistry.shared.pagesProvider?() ?? []
@@ -110,7 +110,7 @@ final class PluginRegistry: ObservableObject {
             // 动态流控审计 (Throttling)
             let callCount = pluginCallCounts[intercepter.manifest.id] ?? 0
             if callCount > maxCallsPerWindow {
-                LogService.shared.debug("⚠️ [Throttling] 插件 \(intercepter.manifest.id) 调用过于频繁，已自动降级。")
+                Logger.shared.debug("⚠️ [Throttling] 插件 \(intercepter.manifest.id) 调用过于频繁，已自动降级。")
                 continue
             }
             pluginCallCounts[intercepter.manifest.id] = callCount + 1
@@ -129,7 +129,7 @@ final class PluginRegistry: ObservableObject {
             
             // 安全校验：权限检查
             if !intercepter.manifest.permissions.contains("writeContent") {
-                LogService.shared.error("🛡️ [安全拦截] 插件 \(intercepter.manifest.name) 尝试修改内容，但未声明 writeContent 权限。", error: nil)
+                Logger.shared.error("🛡️ [安全拦截] 插件 \(intercepter.manifest.name) 尝试修改内容，但未声明 writeContent 权限。", error: nil)
                 continue
             }
 
@@ -138,7 +138,7 @@ final class PluginRegistry: ObservableObject {
                 let duration = CFAbsoluteTimeGetCurrent() - start
                 
                 if duration > pluginTimeout {
-                    LogService.shared.error("⚠️ [熔断警告] 插件 \(intercepter.manifest.name) 执行超时 (\(String(format: "%.2f", duration))s)，将被限制。")
+                    Logger.shared.error("⚠️ [熔断警告] 插件 \(intercepter.manifest.name) 执行超时 (\(String(format: "%.2f", duration))s)，将被限制。")
                     analytics?.trackEvent("plugin_circuit_break", properties: ["id": intercepter.manifest.id, "duration": duration])
                 }
                 
@@ -151,7 +151,7 @@ final class PluginRegistry: ObservableObject {
                     "type": "preProcess"
                 ])
             } catch {
-                LogService.shared.error("🛡️ [崩溃隔离] 插件 \(intercepter.manifest.name) 执行异常，已自动跳过。", error: error)
+                Logger.shared.error("🛡️ [崩溃隔离] 插件 \(intercepter.manifest.name) 执行异常，已自动跳过。", error: error)
                 analytics?.trackEvent("plugin_crash", properties: ["id": intercepter.manifest.id, "error": error.localizedDescription])
                 // 继续下一个插件，不中断主流程
             }

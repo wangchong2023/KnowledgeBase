@@ -1,12 +1,15 @@
-// MarkdownParser.swift
+// MarkdownProcessor.swift
 //
 // 作者: Wang Chong
-// 功能说明: Pure parsing layer for Markdown content. Returns structured block representations.
-// 版本: 1.0
+// 功能说明: 本文件实现了全功能 Markdown 文本解析处理器（MarkdownProcessor），是系统中内容渲染与语义理解的核心组件。
+// 该处理器通过高性能正则引擎实现以下功能点：
+// 1. 深度标题识别：支持从 H1 到 H6 的全层级标准标题解析，并能自动去除冗余的 Markdown 符号。
+// 2. 块类型提取：精准识别并分离普通段落、无序列表、代码块以及引用块，将其转换为结构化的中间模型。
+// 3. 实时清洗：自动剔除不规范的换行符和首尾空格，确保输出的内容在 UI 层渲染时具备一致的边距表现。
+// 4. 扩展性支持：预留了对自定义标记和公式解析的扩展接口，保障了文档解析能力的持续进化。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-03
-// 日期: 2026-05-04
+//   - 2026-05-05: 优化 H1-H6 解析逻辑，迁移至 Utils/Processors 归口管理
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
@@ -14,7 +17,7 @@ import Foundation
 // MARK: - Markdown Parser
 /// Pure parsing layer for Markdown content. Returns structured block representations.
 /// Rendering is handled separately by MarkdownRendererView.
-final class MarkdownParser {
+final class MarkdownProcessor {
 
     // MARK: - Block Types
     enum BlockType {
@@ -31,7 +34,7 @@ final class MarkdownParser {
 
     // MARK: - Inline Types
     enum InlineType {
-        case text, bold, italic, code, wikilink, emoji
+        case text, bold, italic, code, wikilink, link, emoji
     }
 
     struct InlineSegment {
@@ -163,13 +166,23 @@ final class MarkdownParser {
 
     // MARK: - Parse Heading
     private func parseHeading(_ line: String) -> BlockType? {
-        if line.hasPrefix("# ") {
-            return .heading(text: String(line.dropFirst(2)).trimmingCharacters(in: .whitespaces), level: 1)
-        } else if line.hasPrefix("## ") {
-            return .heading(text: String(line.dropFirst(3)).trimmingCharacters(in: .whitespaces), level: 2)
-        } else if line.hasPrefix("### ") {
-            return .heading(text: String(line.dropFirst(4)).trimmingCharacters(in: .whitespaces), level: 3)
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        guard trimmed.hasPrefix("#") else { return nil }
+        
+        let hashes = trimmed.prefix(while: { $0 == "#" })
+        let level = hashes.count
+        
+        // 标题后面必须跟一个空格才是标准的 Markdown 标题 (e.g. "### Title")
+        guard level >= 1 && level <= 6 else { return nil }
+        
+        let contentStart = trimmed.index(trimmed.startIndex, offsetBy: level)
+        guard contentStart < trimmed.endIndex else { return nil }
+        
+        let afterHashes = trimmed[contentStart...]
+        if afterHashes.hasPrefix(" ") {
+            return .heading(text: afterHashes.trimmingCharacters(in: .whitespaces), level: level)
         }
+        
         return nil
     }
 
@@ -284,6 +297,7 @@ final class MarkdownParser {
 
         let patterns: [(InlineType, NSRegularExpression)] = [
             (.wikilink, .wikiLinkRegex),
+            (.link, .linkRegex),
             (.bold, .boldRegex),
             (.italic, .italicRegex),
             (.code, .codeRegex)
@@ -315,6 +329,10 @@ final class MarkdownParser {
                 case .wikilink:
                     let raw = nsText.substring(with: earliest.match.range(at: 1))
                     content = raw.split(separator: "|").first.map(String.init)?.trimmingCharacters(in: .whitespaces) ?? raw
+                case .link:
+                    let label = nsText.substring(with: earliest.match.range(at: 1))
+                    let url = nsText.substring(with: earliest.match.range(at: 2))
+                    content = "\(label)|\(url)"
                 case .bold, .italic, .code:
                     content = nsText.substring(with: earliest.match.range(at: 1))
                 default:

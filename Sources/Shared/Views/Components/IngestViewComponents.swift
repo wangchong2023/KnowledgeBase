@@ -1,12 +1,14 @@
 // IngestViewComponents.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct IngestHeroSection
-// 版本: 1.0
+// 功能说明: 本文件实现了知识导入模块（IngestView）所需的 UI 原子组件与业务行视图，旨在提供直观且高效的资料采集体验。
+// 该组件包通过以下核心功能点保障了外部资料向本地知识库转化的丝滑感：
+// 1. 多态导入行渲染：支持网页链接、PDF 预览及剪贴板内容的不同视觉呈现，并集成了基于 WikiUI 的动态进度反馈。
+// 2. 智能标签预览：实现了资料预处理后的建议标签展示，利用微型圆角（Tiny Radius）与语义化色彩标识资料的类别与置信度。
+// 3. 队列交互增强：提供了滑动手势支持与状态实时同步逻辑，确保用户在处理大规模导入任务时具备清晰的操纵感。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，修复 WikiUI 成员引用错误，统一间距常量
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -406,7 +408,7 @@ struct IngestManualFormSection: View {
                         .foregroundStyle(newCustomIcon != nil ? .wikiAccent : .wikiSecondary)
                         .frame(width: 20, height: 20)
                         .background((newCustomIcon != nil ? Color.wikiAccent : newType.themedColor).opacity(0.15))
-                        .clipShape(RoundedRectangle(cornerRadius: WikiUI.tinyRadius))
+                        .clipShape(RoundedRectangle(cornerRadius: WikiUI.tiny))
                     Text(newCustomIcon != nil ? L10n.Ingest.tr("iconCustom") : L10n.Ingest.tr("iconDefault"))
                         .font(horizontalSizeClass == .regular ? .subheadline : .caption)
                         .foregroundStyle(newCustomIcon != nil ? .wikiAccent : .wikiSecondary)

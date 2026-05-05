@@ -84,7 +84,7 @@ struct LogViewContent: View {
             titleVisibility: .visible
         ) {
             Button(L10n.Common.tr("clearAll"), role: .destructive) {
-                HapticManager.shared.trigger(.warning)
+                HapticFeedback.shared.trigger(.warning)
                 store.clearLogs()
             }
             Button(L10n.Common.tr("cancel"), role: .cancel) {}

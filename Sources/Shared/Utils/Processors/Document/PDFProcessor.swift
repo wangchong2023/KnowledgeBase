@@ -1,13 +1,14 @@
-// PDFService.swift
+// PDFProcessor.swift
 //
 // 作者: Wang Chong
-// 功能说明: PDF 文档信息模型
-// 版本: 1.0
+// 功能说明: 本文件实现了 PDF 原始数据解析处理器（PDFProcessor），专门负责从 PDF 文档中提取文本流与结构化信息。
+// 该处理器的核心能力包括：
+// 1. 文本流提取：通过调用 PDFKit 核心库，实现对多页文档的高性能文本提取，支持自动处理换行与段落合并。
+// 2. 页面布局分析：支持提取页码、大纲标题等元数据，为后续的知识分块提供结构化上下文。
+// 3. 容错解析：能够处理加密（受限访问）或编码异常的 PDF 文件，并提供详细的错误反馈。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
-
+//   - 2026-05-05: 迁移至 Utils/Processors/Document 并完善 PDF 解析逻辑说明
 import SwiftUI
 import PDFKit
 
@@ -106,13 +107,13 @@ struct PDFHighlight: Identifiable, Codable {
 ///
 /// ## 使用方式
 /// ```swift
-/// let pdfService = PDFService.shared
+/// let pdfService = PDFProcessor.shared
 /// if let document = pdfService.loadPDF(fileName: "document.pdf") {
 ///     let text = pdfService.extractText(from: document)
 /// }
 /// ```
-class PDFService {
-    nonisolated(unsafe) static let shared = PDFService()
+class PDFProcessor {
+    nonisolated(unsafe) static let shared = PDFProcessor()
     
     private let documentsDirectory: URL
     

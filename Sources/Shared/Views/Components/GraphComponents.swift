@@ -58,7 +58,7 @@ struct GraphNodeView: View {
                 }
                 .position(node.position)
                 .onTapGesture { 
-                    HapticManager.shared.trigger(.link)
+                    HapticFeedback.shared.trigger(.link)
                     onSelect() 
                 }
             }
@@ -107,7 +107,7 @@ struct GraphNodeView: View {
                         isHovered = hovering
                     }
                     if hovering {
-                        HapticManager.shared.trigger(.selection)
+                        HapticFeedback.shared.trigger(.selection)
                     }
                 }
                 .overlay {
@@ -167,7 +167,7 @@ struct GraphNodeView: View {
                 .foregroundStyle(.white)
         }
         .onTapGesture {
-            HapticManager.shared.trigger(.link)
+            HapticFeedback.shared.trigger(.link)
             onSelect()
         }
         .accessibilityElement(children: .ignore)

@@ -106,7 +106,7 @@ final class BackupService: ObservableObject {
             // Clean old backups
             cleanOldBackups()
         } catch {
-            LogService.shared.addLog(action: .error, target: "BackupService", details: String(format: Localized.tr("backup.log.createFailed"), error.localizedDescription))
+            Logger.shared.addLog(action: .error, target: "BackupService", details: String(format: Localized.tr("backup.log.createFailed"), error.localizedDescription))
         }
     }
 
@@ -120,7 +120,7 @@ final class BackupService: ObservableObject {
             let data = try Data(contentsOf: url)
             return try decoder.decode([WikiPage].self, from: data)
         } catch {
-            LogService.shared.addLog(action: .error, target: "BackupService", details: String(format: Localized.tr("backup.log.restoreFailed"), error.localizedDescription))
+            Logger.shared.addLog(action: .error, target: "BackupService", details: String(format: Localized.tr("backup.log.restoreFailed"), error.localizedDescription))
             return nil
         }
     }
@@ -139,7 +139,7 @@ final class BackupService: ObservableObject {
         let dirtyFlag = baseDirectory.appendingPathComponent(".knowledge-management_dirty")
 
         if FileManager.default.fileExists(atPath: dirtyFlag.path) {
-            LogService.shared.addLog(action: .systemInit, target: "BackupService", details: Localized.tr("backup.log.crashRecovery"))
+            Logger.shared.addLog(action: .systemInit, target: "BackupService", details: Localized.tr("backup.log.crashRecovery"))
             // The dirty flag means the app crashed before completing a save
             // BackupService will make the latest backup available for recovery
             try? FileManager.default.removeItem(at: dirtyFlag)
@@ -186,7 +186,7 @@ final class BackupService: ObservableObject {
             let url = backupDirectory.appendingPathComponent("backup_index.json")
             try data.write(to: url, options: .atomicWrite)
         } catch {
-            LogService.shared.addLog(action: .error, target: "BackupService", details: String(format: Localized.tr("backup.log.saveIndexFailed"), error.localizedDescription))
+            Logger.shared.addLog(action: .error, target: "BackupService", details: String(format: Localized.tr("backup.log.saveIndexFailed"), error.localizedDescription))
         }
     }
     

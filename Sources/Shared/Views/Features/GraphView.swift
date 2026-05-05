@@ -1,17 +1,21 @@
 // GraphView.swift
 //
 // 作者: Wang Chong
-// 功能说明: 图形可视化容器视图
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的核心可视化引擎——知识图谱视图（GraphView），通过交互式拓扑图展示知识点间的关联结构。
+// 视图集成了基于力导向算法的物理布局引擎，通过以下功能点实现了大规模知识内容的直觉化导航：
+// 1. 交互式拓扑探索：支持节点的拖拽、缩放（Zoom）及自动对齐（Fit to Screen），并内置了针对不同缩放等级的细节分级加载（LOD）技术。
+// 2. 深度关系分析：提供孤儿节点识别、关联桥梁检测及高频核心概念提取等洞察功能，辅助用户发现知识体系中的薄弱环节。
+// 3. 语义化视觉渲染：基于节点类型自动匹配主题色彩，并支持通过聚类算法（Clustering）展示知识领域的边界与重合。
+// 4. 多维呈现模式：除了 2D 拓扑布局外，还集成了 3D 沉浸式图谱模式，为用户提供空间化的知识感知维度。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-03
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，系统性清理图谱交互内部的魔鬼数字与物理常数
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
 
-/// 图形可视化容器视图
+// MARK: - Graph Container View
+/// 知识图谱可视化容器视图入口
 struct GraphContainerView: View {
     @Environment(KMStore.self) var store
     @Environment(AppRouter.self) var router
@@ -103,11 +107,18 @@ struct GraphContainerView: View {
                                 viewModel.scale = 1.2
                                 viewModel.lastScale = 1.2
                             }
+                            
+                            // 性能稳定逻辑：持续物理模拟以达到稳定平衡
+                            Task {
+                                try? await Task.sleep(for: .seconds(WikiUI.Graph.physicsStableDuration))
+                                await MainActor.run {
+                                    viewModel.isAnimating = false
+                                }
+                            }
                         }
                     }
-                    HapticManager.shared.trigger(.selection)
+                    HapticFeedback.shared.trigger(.selection)
                 }
-
                 // 顶部控件区域
                 VStack(alignment: .leading, spacing: 8) {
                     graphStatsBar
@@ -121,8 +132,23 @@ struct GraphContainerView: View {
 
                     Spacer()
                 }
+                
+                // ══ 绘图区域边框 (Drawing Boundary) ══
+                // 确保绘图内容不会溢出到侧边栏或不安全区域
+                RoundedRectangle(cornerRadius: 24)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.wikiAccent.opacity(0.3), Color.wikiAccent.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 2
+                    )
+                    .padding(16)
+                    .allowsHitTesting(false)
             }
         }
+        .clipped() // 强制剪裁，防止 Canvas  spill-over
         .overlay(alignment: .bottomTrailing) {
             if !viewModel.nodes.isEmpty {
                 GraphZoomControls(
@@ -184,10 +210,10 @@ struct GraphContainerView: View {
                         .font(.caption.bold())
                         .foregroundStyle(.wikiAccent)
                 }
-                .padding(24)
+                .padding(WikiUI.large)
                 .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .shadow(color: .black.opacity(0.1), radius: 10)
+                .clipShape(RoundedRectangle(cornerRadius: WikiUI.large))
+                .shadow(color: .black.opacity(0.1), radius: WikiUI.medium)
             }
         }
     }
@@ -254,7 +280,7 @@ struct GraphContainerView: View {
     }
     
     private func computeInsights() {
-        let (surprising, orphans, sparse, bridges) = GraphLayoutEngine.detectInsights(
+        let (surprising, orphans, sparse, bridges) = GraphLayoutProcessor.detectInsights(
             nodes: viewModel.nodes,
             edges: viewModel.edges,
             pages: store.pages
@@ -269,11 +295,20 @@ struct GraphContainerView: View {
         let pages = store.pages
         let canvasSize = viewModel.graphSize
         
+        // 如果没有数据，直接清空并返回，避免显示加载遮罩导致卡死
+        guard !pages.isEmpty else {
+            viewModel.nodes = []
+            viewModel.edges = []
+            viewModel.isLayouting = false
+            viewModel.isAnimating = false
+            return
+        }
+        
         viewModel.isLayouting = true
         
         Task {
             let result = await Task.detached(priority: .userInitiated) {
-                GraphLayoutEngine.layout(
+                GraphLayoutProcessor.layout(
                     pages: pages,
                     linkResolver: { title in pages.first(where: { $0.title == title }) },
                     canvasSize: canvasSize
@@ -287,6 +322,15 @@ struct GraphContainerView: View {
                     viewModel.edges = result.edges
                 }
                 fitToScreen()
+                
+                // 布局完成后持续模拟一小段时间以达到稳定平衡
+                viewModel.isAnimating = true
+                Task {
+                    try? await Task.sleep(for: .seconds(WikiUI.Graph.physicsStableDuration))
+                    await MainActor.run {
+                        viewModel.isAnimating = false
+                    }
+                }
             }
         }
     }
@@ -347,7 +391,7 @@ struct GraphCanvasView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            TimelineView(.animation) { timeline in
+            TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { timeline in
                 let _ = updatePhysics(at: timeline.date)
                 
                 // 渲染节点逻辑
@@ -400,8 +444,8 @@ struct GraphCanvasView: View {
     private func getNodeSize(for node: GraphNode) -> CGFloat {
         let isSelected = selectedNodeID == node.id
         let linkCount = filteredEdges.filter { $0.source == node.id || $0.target == node.id }.count
-        let baseSize: CGFloat = 20
-        return isSelected ? 40 : max(24, min(40, baseSize + CGFloat(linkCount) * 3))
+        let baseSize = WikiUI.Graph.defaultNodeSize
+        return isSelected ? WikiUI.Graph.selectedNodeSize : max(baseSize, min(WikiUI.Graph.selectedNodeSize, baseSize + CGFloat(linkCount) * 3))
     }
 
     private func drawEdges(in context: GraphicsContext, size: CGSize) {
@@ -440,7 +484,7 @@ struct GraphCanvasView: View {
             let startY = sPos.y + dy * (sRadius / distance)
             let endX = tPos.x - dx * (tRadius / distance)
             let endY = tPos.y - dy * (tRadius / distance)
-            
+    
             var path = Path()
             path.move(to: CGPoint(x: startX, y: startY))
             path.addLine(to: CGPoint(x: endX, y: endY))
@@ -497,7 +541,7 @@ struct GraphCanvasView: View {
         MagnificationGesture()
             .onChanged { value in
                 let newScale = lastScale * value
-                scale = min(max(newScale, 0.5), 4.0)
+                scale = min(max(newScale, WikiUI.Graph.minScale), WikiUI.Graph.maxScale)
             }
             .onEnded { _ in
                 lastScale = scale
@@ -522,12 +566,13 @@ struct GraphCanvasView: View {
     }
     
     private func updatePhysics(at date: Date) -> Bool {
-        guard isAnimating else { return false }
+        // 核心修复：如果节点为空或未开启仿真，立即退出，防止无效计算占用主线程
+        guard isAnimating && !nodes.isEmpty else { return false }
         
         // 性能优化：节点过多时，降低物理模拟的复杂度
         let iterationTemp: CGFloat = nodes.count > 500 ? 0.02 : 0.1
         
-        GraphLayoutEngine.applyForces(
+        GraphLayoutProcessor.applyForces(
             nodes: &nodes,
             edges: filteredEdges,
             canvasWidth: graphSize.width,
@@ -584,7 +629,7 @@ private struct GraphEmptyStateView: View {
             }
 
             Button(action: {
-                HapticManager.shared.trigger(.selection)
+                HapticFeedback.shared.trigger(.selection)
                 // 方案 A：跳转到 Wiki 并自动唤起新建页面表单
                 DispatchQueue.main.async {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {

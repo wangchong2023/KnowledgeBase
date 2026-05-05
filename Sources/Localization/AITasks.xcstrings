@@ -632,6 +632,40 @@
         }
       },
       "extractionState": "manual"
+    },
+    "aitask.clearConfirmTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Task History"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清空任务历史"
+          }
+        }
+      }
+    },
+    "aitask.clearConfirmMessage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This will clear all completed and failed task records. This action cannot be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此操作将清除所有已完成和失败的任务记录，不可恢复。"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

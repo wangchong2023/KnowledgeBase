@@ -112,7 +112,7 @@ struct LockOverlayView: View {
                 // 4. Elegant Unlock Button
                 Button(action: { 
                     #if os(iOS)
-                    HapticManager.shared.trigger(.selection)
+                    HapticFeedback.shared.trigger(.selection)
                     #endif
                     store.securityService.unlock() 
                 }) {

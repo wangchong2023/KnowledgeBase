@@ -66,7 +66,7 @@ final class AIWorkflowStore {
     @ObservationIgnored @Inject private var llmService: any LLMServiceProtocol
     @ObservationIgnored @Inject private var sqliteStore: SQLiteStore
     @ObservationIgnored @Inject private var lintService: LintService
-    @ObservationIgnored @Inject private var logService: any LogServiceProtocol
+    @ObservationIgnored @Inject private var logger: any LoggerProtocol
     @ObservationIgnored @Inject private var linkService: LinkService
 
     init() {}
@@ -86,7 +86,7 @@ final class AIWorkflowStore {
             weeklyInsight = insight
             saveCachedWeeklyInsight(insight)
         } catch {
-            logService.addLog(action: .error, target: "AIWorkflowStore", details: "Weekly Insight Error: \(error.localizedDescription)")
+            logger.addLog(action: .error, target: "AIWorkflowStore", details: "Weekly Insight Error: \(error.localizedDescription)")
         }
     }
 
@@ -128,7 +128,7 @@ final class AIWorkflowStore {
             )
             dailyRecap = result
         } catch {
-            logService.addLog(action: .error, target: "AIWorkflowStore", details: "Generate daily recap failed: \(error.localizedDescription)")
+            logger.addLog(action: .error, target: "AIWorkflowStore", details: "Generate daily recap failed: \(error.localizedDescription)")
         }
     }
 
@@ -144,7 +144,7 @@ final class AIWorkflowStore {
 
     func runAIScan() async {
         guard llmService.isEnabled else { 
-            logService.addLog(action: .aiscanSkipped, target: "System", details: "LLM service disabled")
+            logger.addLog(action: .aiscanSkipped, target: "System", details: "LLM service disabled")
             return 
         }
         
@@ -176,14 +176,14 @@ final class AIWorkflowStore {
             isScanningAI = false
             TaskCenter.shared.updateTask(taskID, status: .completed)
         } catch {
-            logService.addLog(action: .aiscanFailed, target: "System", details: error.localizedDescription)
+            logger.addLog(action: .aiscanFailed, target: "System", details: error.localizedDescription)
             isScanningAI = false 
             TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
         }
     }
 
     func fetchFixSuggestion(for issue: LintIssue) async throws -> String {
-        HapticManager.shared.trigger(.selection)
+        HapticFeedback.shared.trigger(.selection)
         return try await AISynthesisService.shared.suggestFix(issue: issue, pages: sqliteStore.pages)
     }
 
@@ -209,7 +209,7 @@ final class AIWorkflowStore {
             do {
                 let summary = try await AISynthesisService.shared.summarize(content: content)
                 activePageAIResult = summary
-                HapticManager.shared.trigger(.success)
+                HapticFeedback.shared.trigger(.success)
             } catch {
                 ToastManager.shared.show(type: .error, message: error.localizedDescription)
             }
@@ -227,7 +227,7 @@ final class AIWorkflowStore {
             do {
                 let actions = try await AISynthesisService.shared.extractActions(content: content)
                 activePageAIResult = actions
-                HapticManager.shared.trigger(.success)
+                HapticFeedback.shared.trigger(.success)
             } catch {
                 ToastManager.shared.show(type: .error, message: error.localizedDescription)
             }
@@ -264,7 +264,7 @@ final class AIWorkflowStore {
                 } else {
                     activePageAIResult = result
                 }
-                HapticManager.shared.trigger(.success)
+                HapticFeedback.shared.trigger(.success)
             } catch {
                 TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
                 ToastManager.shared.show(type: .error, message: error.localizedDescription)

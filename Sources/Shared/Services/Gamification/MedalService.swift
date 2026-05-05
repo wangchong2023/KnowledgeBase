@@ -103,7 +103,7 @@ final class MedalService: ObservableObject {
         earnedMedalIDs.insert(medal.id)
         newlyEarnedMedal = medal
         saveEarnedMedals()
-        HapticManager.shared.trigger(.success)
+        HapticFeedback.shared.trigger(.success)
     }
     
     private func saveEarnedMedals() {

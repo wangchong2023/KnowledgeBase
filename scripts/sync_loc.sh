@@ -52,7 +52,7 @@ for file_path in all_files:
             source_data = json.load(f)
             strings = source_data.get("strings", {})
             for key, value in strings.items():
-                if key not in target_data["strings"]:
+                if key not in target_data["strings"] or target_data["strings"][key] != value:
                     target_data["strings"][key] = value
                     merged_count += 1
         except Exception as e:

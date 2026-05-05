@@ -20,6 +20,7 @@ final class AISynthesisService {
     
     private init(llm: LLMService = .shared) {
         self.llm = llm
+        ServiceContainer.shared.register(self, for: AISynthesisService.self)
     }
     
     /// 生成语义总结
@@ -30,61 +31,27 @@ final class AISynthesisService {
     
     /// 生成思维导图 (Mermaid)
     func generateMindMap(content: String) async throws -> String {
-        let prompt = PromptService.shared.mindmapPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
-        let result = try await llm.generate(prompt: prompt, systemPrompt: "You are a Mermaid mindmap expert. Output ONLY valid mindmap code. Start strictly with 'mindmap'. Use root((Title)) for root node. Indent with 2 spaces. Do not use colons or parentheses in node text unless quoted.")
+        let mindmapInstructions = """
+        请根据提供的内容，生成一个层级清晰的 Mermaid 思维导图 (Mindmap)。
+        要求：
+        1. 首行必须是 '# <总结标题>'（语言与内容一致）。
+        2. 以 'mindmap' 开头。
+        3. 根节点用 'root((标题))'。
+        4. 使用缩进表示层级，禁止使用 '-' 开头。
+        5. 节点文字禁止包含任何括号 '()'、冒号 ':' 或方括号 '[]'。
+        6. 禁止使用 Markdown 代码块包裹（即禁止使用 ``` 符号）。
+        """
         
-        var cleaned = result
-        
-        // 1. 正则精准提取 mindmap 部分，处理可能的 markdown 围栏或前后文
-        if let range = cleaned.range(of: #"(?s)mindmap.*"#, options: .regularExpression) {
-            cleaned = String(cleaned[range])
-        }
-        
-        // 2. 移除常见的 markdown 标记
-        cleaned = cleaned.replacingOccurrences(of: "```mermaid", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        // 3. 逐行修复非法语法
-        let lines = cleaned.components(separatedBy: .newlines)
-        let processedLines = lines.map { line -> String in
-            var fixed = line
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            
-            // 忽略空行
-            if trimmed.isEmpty { return "" }
-            
-            // 处理 AI 习惯性添加的列表符号（如 - 或 *）
-            if trimmed.hasPrefix("- ") {
-                fixed = line.replacingOccurrences(of: "- ", with: "  ")
-            } else if trimmed.hasPrefix("* ") {
-                fixed = line.replacingOccurrences(of: "* ", with: "  ")
-            }
-            
-            // 针对 Mermaid Mindmap 的特殊转义
-            // 如果行内包含括号且不是 mindmap 关键字或 root((...)) 格式，则将括号替换为全角
-            if !fixed.contains("mindmap") && !fixed.contains("((") {
-                if fixed.contains("(") || fixed.contains(")") {
-                    fixed = fixed.replacingOccurrences(of: "(", with: "（").replacingOccurrences(of: ")", with: "）")
-                }
-            }
-            
-            // 冒号替换为全角，防止解析错误
-            if fixed.contains(":") && !fixed.contains("mindmap") {
-                fixed = fixed.replacingOccurrences(of: ":", with: "：")
-            }
-            
-            return fixed
-        }
-        
-        cleaned = processedLines.filter { !$0.isEmpty }.joined(separator: "\n")
-        
-        // 如果清理后不以 mindmap 开头，强行修补
-        if !cleaned.lowercased().hasPrefix("mindmap") {
-            cleaned = "mindmap\n  " + cleaned
-        }
-        
-        return cleaned
+        let prompt = mindmapInstructions + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
+        let systemPrompt = """
+        You are a Mermaid mindmap expert. 
+        Always start with '# <Summary Title>'.
+        Then follow with the Mermaid code starting strictly with 'mindmap'.
+        Indent with 2 spaces.
+        Do NOT use code fences (```).
+        """
+        let result = try await llm.generate(prompt: prompt, systemPrompt: systemPrompt)
+        return SynthesisProcessor.formatMermaid(result, fallbackPrefix: "mindmap")
     }
     
     /// 提取行动项
@@ -117,100 +84,44 @@ final class AISynthesisService {
         """
         let result = try await llm.generate(prompt: prompt, systemPrompt: "You are a quiz generator. Output ONLY valid JSON (no markdown fences) in this exact format: \(jsonFormat). answer is 0-based index (0=A,1=B,2=C,3=D). explanation tells why the answer is correct. Do NOT wrap in ```json```.")
 
-        // 尝试直接解析为 QuizModel 兼容 JSON（优先交互式测验）
-        if canDecodeAsQuizModel(result) {
+        // 使用专用的 QuizProcessor 进行处理
+        if QuizProcessor.canDecodeAsQuizModel(result) {
             return result
         }
 
-        // 兜底：尝试解析其他 JSON 格式并转换为 Markdown
-        if let formatted = tryFormatJSONQuiz(result) {
+        if let formatted = QuizProcessor.convertJSONToMarkdown(result) {
             return formatted
         }
 
         return result
     }
 
-    private func canDecodeAsQuizModel(_ text: String) -> Bool {
-        let cleaned = text.replacingOccurrences(of: "```json", with: "")
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let data = cleaned.data(using: .utf8) else { return false }
-        return (try? JSONDecoder().decode(QuizModelShell.self, from: data)) != nil
-    }
-
-    private struct QuizModelShell: Codable {
-        let title: String
-        let questions: [QuestionShell]
-        struct QuestionShell: Codable {
-            let id: Int?
-            let text: String
-            let options: [String]
-            let answer: Int
-            let explanation: String?
-        }
-    }
-
-    private func tryFormatJSONQuiz(_ text: String) -> String? {
-        let cleaned = text.replacingOccurrences(of: "```json", with: "").replacingOccurrences(of: "```", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let data = cleaned.data(using: .utf8) else { return nil }
-        
-        struct QuizJSON: Codable {
-            let title: String?
-            let questions: [QuestionJSON]
-        }
-        struct QuestionJSON: Codable {
-            let id: Int?
-            let text: String
-            let options: [String]
-            let answer: AnyCodable?
-            let explanation: String?
-        }
-        
-        // 简单的 AnyCodable 处理数字或字符串索引
-        enum AnyCodable: Codable {
-            case int(Int)
-            case string(String)
-            init(from decoder: Decoder) throws {
-                let container = try decoder.singleValueContainer()
-                if let i = try? container.decode(Int.self) { self = .int(i) }
-                else if let s = try? container.decode(String.self) { self = .string(s) }
-                else { throw DecodingError.dataCorruptedError(in: container, debugDescription: "Not int or string") }
-            }
-            func encode(to encoder: Encoder) throws { /* unused */ }
-            var stringValue: String {
-                switch self {
-                case .int(let i): return "\(i)"
-                case .string(let s): return s
-                }
-            }
-        }
-
-        guard let quiz = try? JSONDecoder().decode(QuizJSON.self, from: data) else { return nil }
-        
-        var md = "# \(quiz.title ?? Localized.tr("quiz.title"))\n\n"
-        for (index, q) in quiz.questions.enumerated() {
-            md += "## \(index + 1). \(q.text)\n\n"
-            for opt in q.options {
-                md += "* \(opt)\n"
-            }
-            md += "\n<details>\n<summary>\(Localized.tr("quiz.showAnswer"))</summary>\n\n"
-            if let ans = q.answer {
-                md += "**\(Localized.tr("quiz.correctAnswer"))：** \(ans.stringValue)\n\n"
-            }
-            if let exp = q.explanation {
-                md += "**\(Localized.tr("quiz.explanation"))：** \(exp)\n"
-            }
-            md += "\n</details>\n\n"
-        }
-        
-        return md
-    }
-
     /// 生成信息图表 (Mermaid)
     func generateInfographic(content: String) async throws -> String {
-        let prompt = PromptService.shared.infographicPrompt + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
-        return try await llm.generate(prompt: prompt, systemPrompt: "")
+        let infographicInstructions = """
+        请根据提供的内容，生成一张逻辑严密的 Mermaid 可视化信息图 (Flowchart)。
+        要求：
+        1. 首行必须是 '# <总结标题>'（语言与内容一致）。
+        2. 第二行开始输出 Mermaid 代码，以 'graph TD' (或 LR/BT) 开头。
+        3. 节点定义规则：ID[文字] 或 ID((文字))。
+        4. 严禁在节点文字内使用冒号、半角括号或方括号。
+        5. 重点展示知识点之间的因果、组成或流程关系。
+        6. 禁止使用 Markdown 代码块包裹（即禁止使用 ``` 符号）。
+        """
+        
+        let prompt = infographicInstructions + PromptService.shared.languageInstruction + "\n\n内容：\n\(content)"
+        let systemPrompt = """
+        You are a senior data visualization expert. 
+        Create a professional Mermaid graph TD structure.
+        Always start with '# <Summary Title>'.
+        Do NOT use code fences (```). 
+        Only output the Title and the Mermaid code.
+        """
+        let result = try await llm.generate(prompt: prompt, systemPrompt: systemPrompt)
+        return SynthesisProcessor.formatMermaid(result, fallbackPrefix: "graph TD")
     }
+    
+
 
     /// 生成深度报告
     func generateReport(content: String) async throws -> String {
@@ -265,7 +176,7 @@ final class AISynthesisService {
         """
         
         let result = try await llm.generate(prompt: prompt, systemPrompt: "")
-        return LLMUtils.parseJSONArray(result)
+        return LLMResponseProcessor.parseJSONArray(result)
     }
 }
 

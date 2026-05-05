@@ -21,7 +21,7 @@ final class KMStore: @preconcurrency GraphDataProvider {
     @ObservationIgnored @Inject var sqliteStore: SQLiteStore
     @ObservationIgnored @Inject var linkService: LinkService
     @ObservationIgnored @Inject var lintService: LintService
-    @ObservationIgnored @Inject var logService: any LogServiceProtocol
+    @ObservationIgnored @Inject var logger: any LoggerProtocol
     @ObservationIgnored @Inject var undoService: UndoService
     @ObservationIgnored @Inject var backupService: BackupService
     @ObservationIgnored @Inject var ingestService: IngestService
@@ -49,15 +49,15 @@ final class KMStore: @preconcurrency GraphDataProvider {
     var isPrivacyModeEnabled: Bool { settingsStore.isPrivacyModeEnabled }
     
     func requestRelayout() {
-        // 图谱布局由 GraphLayoutEngine 处理，此处作为协议占位
+        // 图谱布局由 GraphLayoutProcessor 处理，此处作为协议占位
         refreshTrigger = UUID()
     }
     
     func refresh() {
-        logService.addLog(action: .systemInit, target: "KMStore", details: "Refreshing store. Current pages: \(sqliteStore.pages.count)")
+        logger.addLog(action: .systemInit, target: "KMStore", details: "Refreshing store. Current pages: \(sqliteStore.pages.count)")
         sqliteStore.reloadFromDisk()
         refreshTrigger = UUID()
-        logService.addLog(action: .systemInit, target: "KMStore", details: "Refreshed. New pages count: \(sqliteStore.pages.count)")
+        logger.addLog(action: .systemInit, target: "KMStore", details: "Refreshed. New pages count: \(sqliteStore.pages.count)")
     }
 
     // ── 健康度（由子 Store/Service 驱动） ──
@@ -86,7 +86,7 @@ final class KMStore: @preconcurrency GraphDataProvider {
         _ = refreshTrigger
         return sqliteStore.pages
     }
-    var logEntries: [LogEntry] { (logService as? LogService)?.logEntries ?? [] }
+    var logEntries: [LogEntry] { (logger as? Logger)?.logEntries ?? [] }
     var totalPages: Int { pages.count }
     var entityCount: Int { pages.filter { $0.type == .entity }.count }
     var conceptCount: Int { pages.filter { $0.type == .concept }.count }
@@ -125,7 +125,7 @@ final class KMStore: @preconcurrency GraphDataProvider {
         self.searchStore = SearchStore()
         self.aiWorkflowStore = AIWorkflowStore()
         
-        logService.addLog(action: .systemInit, target: "KMStore", details: "init called")
+        logger.addLog(action: .systemInit, target: "KMStore", details: "init called")
         sqliteStore.onLog = { [weak self] a, t, d in
             self?.addLog(action: a, target: t, details: d)
         }
@@ -180,13 +180,13 @@ final class KMStore: @preconcurrency GraphDataProvider {
     func redo() { if let next = undoService.redo(currentPages: pages) { sqliteStore.replaceAllPages(next) } }
 
     func saveToDisk() {
-        logService.saveToDisk()
+        logger.saveToDisk()
         backupService.createBackup(pages: pages)
     }
-    func loadFromDisk() { sqliteStore.reloadFromDisk(); logService.loadFromDisk() }
+    func loadFromDisk() { sqliteStore.reloadFromDisk(); logger.loadFromDisk() }
     
-    func addLog(action: LogAction, target: String, details: String) { logService.addLog(action: action, target: target, details: details) }
-    func clearLogs() { logService.clearAllLogs() }
+    func addLog(action: LogAction, target: String, details: String) { logger.addLog(action: action, target: target, details: details) }
+    func clearLogs() { logger.clearAllLogs() }
 }
 
 // MARK: - KMStore 核心扩展
@@ -347,19 +347,19 @@ extension KMStore {
 
     // MARK: - PDF 操作代理
 
-    func loadPDFDocuments() -> [PDFDocumentInfo] { PDFService.shared.loadDocumentsInfo() }
-    func savePDFDocuments(_ docs: [PDFDocumentInfo]) { PDFService.shared.saveDocumentsInfo(docs) }
-    func loadPDFDocument(fileName: String) -> PDFKit.PDFDocument? { PDFService.shared.loadPDF(fileName: fileName) }
-    func savePDFDocument(data: Data, fileName: String) -> URL? { PDFService.shared.savePDF(data: data, fileName: fileName) }
-    func deletePDFDocument(fileName: String) -> Bool { PDFService.shared.deletePDF(fileName: fileName) }
+    func loadPDFDocuments() -> [PDFDocumentInfo] { PDFProcessor.shared.loadDocumentsInfo() }
+    func savePDFDocuments(_ docs: [PDFDocumentInfo]) { PDFProcessor.shared.saveDocumentsInfo(docs) }
+    func loadPDFDocument(fileName: String) -> PDFKit.PDFDocument? { PDFProcessor.shared.loadPDF(fileName: fileName) }
+    func savePDFDocument(data: Data, fileName: String) -> URL? { PDFProcessor.shared.savePDF(data: data, fileName: fileName) }
+    func deletePDFDocument(fileName: String) -> Bool { PDFProcessor.shared.deletePDF(fileName: fileName) }
     func extractPDFText(from pdfDoc: PDFKit.PDFDocument, pageRange: Range<Int>? = nil) -> String {
-        PDFService.shared.extractText(from: pdfDoc, pageRange: pageRange)
+        PDFProcessor.shared.extractText(from: pdfDoc, pageRange: pageRange)
     }
 
     // MARK: - OCR 操作代理
 
     func recognizeText(from image: WikiImage) async throws -> String {
-        try await OCRService.shared.recognizeText(from: image)
+        try await OCRProcessor.shared.recognizeText(from: image)
     }
 }
 

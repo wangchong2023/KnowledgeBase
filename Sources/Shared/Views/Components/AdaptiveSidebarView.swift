@@ -47,7 +47,7 @@ struct AdaptiveSidebarView: View {
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button(action: {
-                    HapticManager.shared.trigger(.selection)
+                    HapticFeedback.shared.trigger(.selection)
                     store.securityService.lock()
                 }) {
                     Image(systemName: "lock.fill")

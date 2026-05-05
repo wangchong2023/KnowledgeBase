@@ -19,7 +19,7 @@ import Combine
 final class IngestStore {
     @ObservationIgnored @Inject private var sqliteStore: SQLiteStore
     @ObservationIgnored @Inject private var llmService: any LLMServiceProtocol
-    @ObservationIgnored @Inject private var logService: any LogServiceProtocol
+    @ObservationIgnored @Inject private var logger: any LoggerProtocol
     @ObservationIgnored @Inject private var ingestService: IngestService
     
     init() {}
@@ -55,8 +55,8 @@ final class IngestStore {
         // 持久化
         sqliteStore.syncRemotePage(page)
         
-        logService.addLog(action: .smartIngest, target: title, details: Localized.trf("ingest.smartIngestDoneDesc", type.displayName))
-        HapticManager.shared.trigger(.success)
+        logger.addLog(action: .smartIngest, target: title, details: Localized.trf("ingest.smartIngestDoneDesc", type.displayName))
+        HapticFeedback.shared.trigger(.success)
         
         // 刷新缓存
         sqliteStore.reloadFromDisk()
@@ -85,7 +85,7 @@ final class IngestStore {
                 
                 // 借用 finalizeSmartIngest 的逻辑进行创建
                 page = await finalizeSmartIngest(title: title, result: result, customIcon: customIcon)
-                logService.addLog(action: .smartIngest, target: title, details: Localized.trf("ingest.smartIngestDoneDesc", pageType.displayName))
+                logger.addLog(action: .smartIngest, target: title, details: Localized.trf("ingest.smartIngestDoneDesc", pageType.displayName))
             } else {
                 // 使用 IngestService 的标准流程
                 page = try await ingestWithFolding(
@@ -102,7 +102,7 @@ final class IngestStore {
             }
             
             TaskCenter.shared.updateTask(taskID, status: .completed, associatedPageID: page.id)
-            HapticManager.shared.trigger(.success)
+            HapticFeedback.shared.trigger(.success)
             sqliteStore.reloadFromDisk() // 确保数据同步
             return page
         } catch {
@@ -124,9 +124,9 @@ final class IngestStore {
     
     /// 从外部文件直接导入（拖拽/文件选择器），异步处理
     func importFile(at url: URL) {
-        logService.debug("📥 [IngestStore] 正在导入文件：\(url.lastPathComponent)")
+        logger.debug("📥 [IngestStore] 正在导入文件：\(url.lastPathComponent)")
         guard let content = try? String(contentsOf: url) else {
-            logService.error("❌ [IngestStore] 无法读取文件内容：\(url.path)")
+            logger.error("❌ [IngestStore] 无法读取文件内容：\(url.path)")
             return
         }
 

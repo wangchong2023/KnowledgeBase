@@ -72,7 +72,7 @@ struct PluginDetailView: View {
         HStack(spacing: 12) {
             Button(action: {
                 withAnimation { isInstalled.toggle() }
-                HapticManager.shared.trigger(.success)
+                HapticFeedback.shared.trigger(.success)
             }) {
                 Label(isInstalled ? Localized.tr("plugin.action.uninstall") : Localized.tr("plugin.action.install"), systemImage: isInstalled ? "trash" : "icloud.and.arrow.down")
                     .font(.headline)

@@ -67,7 +67,7 @@ final class PluginMarketService: ObservableObject {
                 self.isLoading = false
             }
         } catch {
-            LogService.shared.addLog(action: .error, target: "PluginMarketService", details: "获取插件失败: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "PluginMarketService", details: "获取插件失败: \(error.localizedDescription)")
             await MainActor.run {
                 self.errorMessage = Localized.tr("plugin.market.connectionError")
                 self.isLoading = false

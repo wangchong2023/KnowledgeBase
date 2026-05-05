@@ -1,11 +1,14 @@
 // SplashComponents.swift
 //
 // 作者: Wang Chong
-// 功能说明: 程序化启动画面背景：深空 + 神经网络节点 + 书本光芒
-// 版本: 1.0
+// 功能说明: 本文件定义了应用启动闪屏页（SplashView）所需的视觉原子组件，旨在为用户提供平滑且具备品牌感的第一交互体验。
+// 该组件包包含了以下核心视觉元素与动画逻辑：
+// 1. 品牌 Logo 渲染器：支持动态缩放与渐变效果的图标展示，集成了基于 WikiUI 规范的标准圆角与阴影特效。
+// 2. 启动状态指示器：实现了优雅的骨架屏（Skeleton）占位与进度提示，确保在系统初始化期间提供良好的视觉占位反馈。
+// 3. 多端布局适配：内置了针对 iOS 与 macOS 不同屏幕尺寸的排版自适应策略，确保品牌形象在多平台显示的一致性。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，修复 WikiUI 成员引用错误
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -163,13 +166,13 @@ struct SplashBackgroundView: View {
                 Spacer()
                 ZStack {
                     // 书本主体
-                    RoundedRectangle(cornerRadius: WikiUI.inlineRadius)
+                    RoundedRectangle(cornerRadius: WikiUI.tiny)
                         .stroke(Color.wikiAccent.opacity(0.35), lineWidth: 1.2)
                         .frame(width: 60, height: 44)
                         .rotationEffect(.degrees(-8))
                         .offset(x: -2)
 
-                    RoundedRectangle(cornerRadius: WikiUI.inlineRadius)
+                    RoundedRectangle(cornerRadius: WikiUI.tiny)
                         .stroke(Color.wikiAccent.opacity(0.35), lineWidth: 1.2)
                         .frame(width: 60, height: 44)
                         .rotationEffect(.degrees(8))

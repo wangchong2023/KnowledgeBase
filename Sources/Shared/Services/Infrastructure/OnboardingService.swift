@@ -1,12 +1,15 @@
 // OnboardingService.swift
 //
 // 作者: Wang Chong
-// 功能说明: 用户引导服务 (产品视角：价值呈现与留存)
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的新手引导服务（OnboardingService），旨在为新用户提供沉浸式的产品价值呈现与交互教学。
+// 该服务通过状态驱动的蒙层系统，引导用户快速掌握系统的核心能力，主要功能点如下：
+// 1. 线性引导流程：定义了从知识图谱、AI 实验室到安全金库的阶段性引导步骤（OnboardingStep），支持状态化的步进控制。
+// 2. 状态持久化管理：利用 @AppStorage 记录用户的引导完成状态，确保在不同设备或安装周期下的逻辑一致性。
+// 3. 沉浸式交互覆盖层：提供高度定制化的 OnboardingOverlay 组件，支持跨平台的缩放动画与触感反馈。
+// 4. 智适应资源加载：根据当前引导阶段动态加载对应的图标与本地化文案，通过视觉分级提升品牌感知。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，规范化引导页面的图标尺寸与圆角常量
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -87,7 +90,7 @@ struct OnboardingOverlay: View {
                 
                 VStack(spacing: 24) {
                     Image(systemName: step.icon)
-                        .font(.system(size: 60))
+                        .font(.system(size: WikiUI.largeIconSize * 1.25))
                         .foregroundStyle(.wikiAccent)
                     
                     VStack(spacing: 8) {
@@ -115,11 +118,11 @@ struct OnboardingOverlay: View {
                     .font(.footnote)
                     .foregroundStyle(.wikiSecondary)
                 }
-                .padding(40)
+                .padding(WikiUI.giant * 1.5)
                 .background(Color.wikiCard)
-                .clipShape(RoundedRectangle(cornerRadius: 24))
-                .shadow(radius: 20)
-                .padding(20)
+                .clipShape(RoundedRectangle(cornerRadius: WikiUI.largeRadius * 1.5))
+                .shadow(radius: WikiUI.giant)
+                .padding(WikiUI.giant)
                 .transition(.scale.combined(with: .opacity))
             }
             .zIndex(999)

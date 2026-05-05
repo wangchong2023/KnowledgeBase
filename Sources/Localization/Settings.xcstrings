@@ -681,13 +681,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Performance Stress Test (1000 nodes)"
+            "value": "Performance Stress Test"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "性能压力测试 (1000节点)"
+            "value": "性能压力测试"
           }
         }
       }

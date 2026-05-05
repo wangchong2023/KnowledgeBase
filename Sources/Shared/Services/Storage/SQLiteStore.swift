@@ -1,12 +1,16 @@
 // SQLiteStore.swift
 //
 // 作者: Wang Chong
-// 功能说明: 现代化存储门面，组合了 WikiPageStore 和 EmbeddingManager。
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的中央存储门面（SQLiteStore），作为整个应用层与底层持久化层之间的核心桥梁与协调器。
+// 该类通过高度聚合的设计模式，整合了页面管理、向量索引与全文搜索能力，核心功能点如下：
+// 1. 响应式数据流管理：基于 GRDB 的 ValueObservation 机制，实现了数据库状态与 UI 内存模型（pages）的自动同步与实时响应。
+// 2. 知识自动化治理（RAG）：内置 Deep Scan 机制，配合 TextChunkerProcessor 与 EmbeddingManager 实现资料的自动化分块与向量化同步。
+// 3. 冲突解决与同步：集成了 LWW (Last Write Wins) 合并算法，确保多端同步或并行写入时的页面元数据一致性。
+// 4. 数据安全与完整性：提供了基于签名校验（SecurityManager）的数据库完整性检查，并管理旧版本 JSON 数据的平滑迁移逻辑。
+// 5. 多维度检索调度：提供了结合 FTS5 全文搜索、别名匹配（Aliases）及反向链接追踪的综合检索接口，支撑知识的高效触达。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，详细描述存储门面的编排职责与 RAG 集成逻辑
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
@@ -46,7 +50,7 @@ final class SQLiteStore {
         // 1. 完整性校验（仅对物理文件且非内存数据库执行，测试环境跳过）
         if !DatabaseManager.shared.isInTesting && dbPath.scheme == "file" && FileManager.default.fileExists(atPath: dbPath.path) {
             if !SecurityManager.shared.verifyIntegrity(for: dbPath) {
-                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Database integrity check failed! File might be tampered.")
+                Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Database integrity check failed! File might be tampered.")
             }
         }
         do {
@@ -81,7 +85,7 @@ final class SQLiteStore {
         guard FileManager.default.fileExists(atPath: jsonURL.path) else { return }
         guard (try? repository.count()) == 0 else { return }
         
-        LogService.shared.addLog(action: .systemInit, target: "SQLiteStore", details: "Migrating from legacy JSON...")
+        Logger.shared.addLog(action: .systemInit, target: "SQLiteStore", details: "Migrating from legacy JSON...")
         do {
             let data = try Data(contentsOf: jsonURL)
             let decoder = JSONDecoder()
@@ -93,9 +97,9 @@ final class SQLiteStore {
             }
             
             try? FileManager.default.moveItem(at: jsonURL, to: jsonURL.appendingPathExtension("migrated"))
-            LogService.shared.addLog(action: .systemInit, target: "SQLiteStore", details: "Migration finished: \(legacyPages.count) pages.")
+            Logger.shared.addLog(action: .systemInit, target: "SQLiteStore", details: "Migration finished: \(legacyPages.count) pages.")
         } catch {
-            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Migration failed: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Migration failed: \(error.localizedDescription)")
         }
     }
 
@@ -106,7 +110,7 @@ final class SQLiteStore {
             do {
                 try await self.startObservation(on: dbWriter)
             } catch {
-                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "ValueObservation failed: \(error.localizedDescription)")
+                Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "ValueObservation failed: \(error.localizedDescription)")
             }
         }
     }
@@ -171,7 +175,7 @@ final class SQLiteStore {
             onLog?(.create, title, "\(Localized.tr("detail.pageType")): \(type.displayName)")
             SecurityManager.shared.updateSignature(for: dbPath)
         } catch {
-            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Create page failed: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Create page failed: \(error.localizedDescription)")
         }
         return page
     }
@@ -181,7 +185,7 @@ final class SQLiteStore {
         do {
             try DatabaseManager.shared.dbWriter?.write(updates)
         } catch {
-            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Batch write failed: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Batch write failed: \(error.localizedDescription)")
         }
     }
 
@@ -205,7 +209,7 @@ final class SQLiteStore {
                 SecurityManager.shared.updateSignature(for: dbPath)
                 onLog?(.update, page.title, "")
             } catch {
-                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Update page failed: \(error.localizedDescription)")
+                Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Update page failed: \(error.localizedDescription)")
             }
         }
     }
@@ -217,13 +221,13 @@ final class SQLiteStore {
             let mergedPage = localPage.merge(with: remotePage)
 
             if mergedPage.lamportTimestamp != localPage.lamportTimestamp || mergedPage.updated != localPage.updated {
-                LogService.shared.debug("♻️ [LWW] 页面 \(remotePage.title) 发生冲突，自动收敛至最新版本")
+                Logger.shared.debug("♻️ [LWW] 页面 \(remotePage.title) 发生冲突，自动收敛至最新版本")
                 do {
                     try repository.save(mergedPage)
                     // pages[localIndex] = mergedPage // <- 移除：由 ValueObservation 自动同步
                     embeddingManager.updateEmbedding(for: mergedPage)
                 } catch {
-                    LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Sync remote failed: \(error.localizedDescription)")
+                    Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Sync remote failed: \(error.localizedDescription)")
                 }
             }
         } else {
@@ -232,7 +236,7 @@ final class SQLiteStore {
                 // pages.append(remotePage) // <- 移除：由 ValueObservation 自动同步
                 embeddingManager.updateEmbedding(for: remotePage)
             } catch {
-                LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Insert remote failed: \(error.localizedDescription)")
+                Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Insert remote failed: \(error.localizedDescription)")
             }
         }
     }
@@ -252,7 +256,7 @@ final class SQLiteStore {
             try repository.delete(id: page.id)
             onLog?(.delete, page.title, "")
         } catch {
-            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Delete page failed: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Delete page failed: \(error.localizedDescription)")
         }
     }
 
@@ -321,7 +325,7 @@ final class SQLiteStore {
         do {
             return try repository.search(query: trimmed)
         } catch {
-            LogService.shared.addLog(action: .error, target: "SQLiteStore", details: "Search failed: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "SQLiteStore", details: "Search failed: \(error.localizedDescription)")
             return []
         }
     }
@@ -423,7 +427,7 @@ final class SQLiteStore {
     // MARK: - RAG & Deep Scan
     
     private func performDeepScan(for page: WikiPage) {
-        let chunker = RecursiveChunker()
+        let chunker = TextChunkerProcessor()
         let chunks = chunker.split(text: page.content)
         
         let manager = self.embeddingManager

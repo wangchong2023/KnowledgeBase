@@ -1,12 +1,15 @@
 // ChatComponents.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct ChatBubbleView
-// 版本: 1.0
+// 功能说明: 本文件定义了 AI 助手界面的核心 UI 组件库（ChatComponents），负责构建对话气泡、流式交互效果及 Markdown 渲染逻辑。
+// 该组件库通过以下功能点提升了对话系统的视觉表现力与交互连贯性：
+// 1. 智能气泡系统：实现了支持用户、助手及系统角色的差异化气泡渲染（ChatBubbleView），具备自动时间戳标注与头像展示。
+// 2. 交互式内容渲染：集成 Markdown 引擎并支持 Wiki-link 实时解析，点击链接可直接触发系统内的页面跳转。
+// 3. 动态状态反馈：定义了语义化的脉冲动画（PulsingDot），用于在 AI 思考阶段提供直观的视觉进度反馈。
+// 4. 引用关联展示：实现了可折叠的参考资料面板，自动根据页面类型进行归类展示，增强了 AI 响应的可信度。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-03
-// 日期: 2026-05-04
+//   - 2026-05-05: 优化 PulsingDot 动画触发机制，完善符合架构规范的功能说明
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -227,7 +230,7 @@ struct ChatContentView: View {
             MarkdownRendererView(content: displayText, isPrivate: false, onLinkTap: { title in
                 let targetTitle = title.trimmingCharacters(in: .whitespaces)
                 if let page = pages.first(where: { $0.title.localizedCaseInsensitiveCompare(targetTitle) == .orderedSame }) {
-                    HapticManager.shared.trigger(.link)
+                    HapticFeedback.shared.trigger(.link)
                     selectedTab = .wiki
                     router.navigateToPage(id: page.id)
                 }
@@ -307,15 +310,22 @@ struct ChatLinkParser {
 // MARK: - Pulsing Dot Animation
 struct PulsingDot: ViewModifier {
     let delay: Double
+    @State private var isAnimating = false
     
     func body(content: Content) -> some View {
         content
-            .opacity(0.4)
+            .scaleEffect(isAnimating ? 1.0 : 0.6)
+            .opacity(isAnimating ? 1.0 : 0.3)
             .animation(
                 Animation.easeInOut(duration: 0.6)
                     .repeatForever(autoreverses: true)
                     .delay(delay),
-                value: true
+                value: isAnimating
             )
+            .onAppear {
+                withAnimation {
+                    isAnimating = true
+                }
+            }
     }
 }

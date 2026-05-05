@@ -1,16 +1,21 @@
 // ContentView.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct ContentView
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的全局根视图（ContentView），作为整个应用程序的 UI 容器与状态协调中心。
+// 该视图集成了响应式布局引擎与全局反馈层，主要功能点如下：
+// 1. 多设备自适应导航：基于 SwiftUI 的 Size Class 机制，在 iPad/macOS 上自动切换为 NavigationSplitView（侧边栏模式），而在 iPhone 上呈现为现代化的 TabView。
+// 2. 全局安全与入库控制：挂载了隐私锁定层（LockOverlay）、新手引导（Onboarding）及全局通知（Toast）系统，确保应用在不同生命周期阶段的安全性。
+// 3. 动态路由编排：深度集成 AppRouter 与 ViewFactory，支持跨模块的视图跳转、Deep Link 唤起及全局指令面板（Command Palette）的弹出。
+// 4. 品牌交互反馈：实现了全局奖章（Medal）奖励弹窗与功能引导（Coach Marks）覆盖层，通过高阶动画引擎提升用户的品牌成就感。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，规范化 UI 层级、圆角与间距常量
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
 
+// MARK: - App Root View
+/// 全局根视图容器
 @MainActor
 struct ContentView: View {
     @Environment(KMStore.self) var store
@@ -336,11 +341,11 @@ struct CoachMarkOverlay: View {
                 ZStack {
                     Circle()
                         .fill(LinearGradient(colors: [.wikiAccent, .wikiSource], startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .frame(width: 80, height: 80)
-                        .shadow(color: .wikiAccent.opacity(0.3), radius: 10, y: 5)
+                        .frame(width: WikiUI.splashIconSize, height: WikiUI.splashIconSize)
+                        .shadow(color: .wikiAccent.opacity(0.3), radius: WikiUI.medium, y: 5)
                     
                     Image(systemName: iconName)
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.system(size: WikiUI.titleFontSize * 1.3, weight: .bold))
                         .foregroundStyle(.white)
                 }
                 .scaleEffect(isAnimating ? 1 : 0.8)
@@ -379,15 +384,15 @@ struct CoachMarkOverlay: View {
                         .font(.caption)
                         .foregroundStyle(.wikiSecondary)
                 }
-                .padding(.top, 4)
+                .padding(.top, WikiUI.tiny)
             }
-            .padding(32)
+            .padding(WikiUI.giant * 1.5)
             .background(
-                RoundedRectangle(cornerRadius: 24)
+                RoundedRectangle(cornerRadius: WikiUI.largeRadius * 1.5)
                     .fill(Color.wikiCard)
                     .shadow(color: .black.opacity(0.2), radius: 30, x: 0, y: 15)
             )
-            .padding(24)
+            .padding(WikiUI.giant)
         }
         .onAppear {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7)) {
@@ -421,7 +426,7 @@ struct CoachMarkOverlay: View {
     }
     
     private func performAction() {
-        HapticManager.shared.trigger(.success)
+        HapticFeedback.shared.trigger(.success)
         switch type {
         case .graphDiscovery:
             withAnimation {

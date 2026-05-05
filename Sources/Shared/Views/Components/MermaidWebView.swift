@@ -56,7 +56,7 @@ struct MermaidWebView: View {
 
     private func zoomButton(icon: String, action: @escaping () -> Void) -> some View {
         Button(action: {
-            HapticManager.shared.trigger(.selection)
+            HapticFeedback.shared.trigger(.selection)
             action()
         }) {
             Image(systemName: icon)

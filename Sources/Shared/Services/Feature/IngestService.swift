@@ -1,12 +1,15 @@
 // IngestService.swift
 //
 // 作者: Wang Chong
-// 功能说明: enum DocumentFormat
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的自动化入库引擎（IngestService），负责将多源异构数据（网页、文档、剪贴板）转化为结构化的 Wiki 页面。
+// 该服务整合了格式解析、语义增强与生态节能机制，核心功能点如下：
+// 1. 多格式深度解析：支持对 DOCX、XLSX、PDF 及 Markdown 等主流文档格式的流式解析与文本提取，内置 ZIP 解压与 XML 处理逻辑。
+// 2. 网页智能摄入：集成 WebScraperProcessor（原 LinkProcessor），支持通过 Jina Reader 等引擎实现网页内容的去噪提取与自动标题识别。
+// 3. 语义增强与链接发现：在入库过程中利用 LLM 对图表进行文本化解释，并自动匹配已有知识库标题以建立 Wiki-link 关联。
+// 4. 智适应节能模式：实现了针对 iOS 低功耗模式的“生态索引”机制，通过动态节流与 CPU 释放保障在大规模导入时的设备响应速度。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，修复重命名导致的 LinkProcessor 引用错误，完善 RAG 入库逻辑说明
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
@@ -57,7 +60,7 @@ protocol AnyPageStore {
 // MARK: - Ingest Service (Knowledge Ingestion)
 @MainActor
 final class IngestService {
-    let scraper = LinkScraperService()
+    let scraper = WebScraperProcessor()
 
     /// 将原始内容摄入知识库：创建新页面并自动链接已知概念。
     /// - Returns: The created page (with auto-linked content).
@@ -179,7 +182,7 @@ final class IngestService {
         case .markdown, .plainText:
             content = try? String(contentsOf: url, encoding: .utf8)
         case .pdf:
-            content = PDFService.extractText(from: url)
+            content = PDFProcessor.extractText(from: url)
         case .unknown:
             print("Unknown document format: \(url.pathExtension)")
             return nil
@@ -244,7 +247,7 @@ final class IngestService {
             return nil
         }
 
-        let parser = DocxTextParser(xmlData: documentXML)
+        let parser = DocxProcessor(xmlData: documentXML)
         if parser.parse() {
             return parser.extractedText
         } else {
@@ -275,7 +278,7 @@ final class IngestService {
         // Extract from each sheet
         for (path, data) in archive {
             if path.hasPrefix("xl/worksheets/sheet") && path.hasSuffix(".xml") {
-                let parser = XlsxSheetParser(xmlData: data)
+                let parser = ExcelProcessor(xmlData: data)
                 if parser.parse() {
                     // Resolve shared string references
                     for value in parser.values {

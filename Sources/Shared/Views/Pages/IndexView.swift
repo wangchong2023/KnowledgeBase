@@ -154,7 +154,7 @@ struct IndexViewContent: View {
             Button(Localized.tr("page.deletePage"), role: .destructive) {
                 if let page = pageToDelete {
                     store.deletePage(page)
-                    HapticManager.shared.trigger(.success)
+                    HapticFeedback.shared.trigger(.success)
                 }
             }
             Button(L10n.Common.tr("cancel"), role: .cancel) {
@@ -168,12 +168,12 @@ struct IndexViewContent: View {
 #endif
         .scrollContentBackground(.hidden)
         .background(Color.wikiBackground)
-        .navigationTitle(filterType?.displayName ?? Localized.tr("sidebar.masterIndex"))
+        .navigationTitle(filterType?.displayName ?? Localized.tr("sidebar.allPages"))
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    HapticManager.shared.trigger(.selection)
+                    HapticFeedback.shared.trigger(.selection)
                     store.refresh()
                 } label: {
                     Label(L10n.Common.tr("refresh"), systemImage: "arrow.clockwise")

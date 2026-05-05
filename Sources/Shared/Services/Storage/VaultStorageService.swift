@@ -57,7 +57,7 @@ final class VaultStorageService {
                 lastModified: modificationDate
             )
         } catch {
-            LogService.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to process external file \(url): \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to process external file \(url): \(error.localizedDescription)")
             return nil
         }
     }
@@ -80,7 +80,7 @@ final class VaultStorageService {
             let data = try url.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
             UserDefaults.standard.set(data, forKey: "vault_bookmark_\(url.lastPathComponent)")
         } catch {
-            LogService.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to create bookmark: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to create bookmark: \(error.localizedDescription)")
         }
     }
 
@@ -94,7 +94,7 @@ final class VaultStorageService {
             }
             return url
         } catch {
-            LogService.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to resolve bookmark: \(error.localizedDescription)")
+            Logger.shared.addLog(action: .error, target: "VaultStorageService", details: "Failed to resolve bookmark: \(error.localizedDescription)")
             return nil
         }
     }

@@ -30,7 +30,7 @@ final class ActivityService {
     /// 启动实时活动
     func startActivity(name: String, target: String) {
         #if os(iOS)
-        LogService.shared.debug("🏝️ [Dynamic Island] 启动实时活动: \(name) -> \(target)")
+        Logger.shared.debug("🏝️ [Dynamic Island] 启动实时活动: \(name) -> \(target)")
         // let attributes = AIProcessingAttributes(taskName: name)
         // let contentState = AIProcessingAttributes.ContentState(progress: 0.1, status: "开始中...")
         // currentActivity = try? Activity.request(attributes: attributes, content: .init(state: contentState, staleDate: nil))
@@ -48,7 +48,7 @@ final class ActivityService {
     /// 结束活动
     func endActivity() {
         #if os(iOS)
-        LogService.shared.debug("🏝️ [Dynamic Island] 实时活动已结束")
+        Logger.shared.debug("🏝️ [Dynamic Island] 实时活动已结束")
         // Task { await currentActivity?.end(dismissalPolicy: .immediate) }
         #endif
     }

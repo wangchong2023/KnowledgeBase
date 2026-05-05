@@ -1,11 +1,15 @@
 // CollaborationService.swift
 //
 // 作者: Wang Chong
-// 功能说明: 协作服务代理协议
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的多端实时协作服务（CollaborationService），基于 Apple 的 MultipeerConnectivity 框架构建了去中心化的本地同步网络。
+// 该服务支持在局域网（Wi-Fi/蓝牙）环境下实现多设备间的零配置连接与知识共享，核心功能点如下：
+// 1. 智适应对等网络：自动发现并建立 P2P 协作室（Hosting/Browsing），支持房主（Owner）与编辑者（Editor）的多角色权限管理。
+// 2. 原子级差量同步：实现了针对页面字段变更的毫秒级广播机制（Broadcast Edit），最大程度降低多端编辑下的数据冗余。
+// 3. 冲突冲突解决机制：采用“最后写入者获胜（Last-Write-Wins）”策略处理并发更新，确保多端知识状态的最终一致性。
+// 4. 容错式数据完整性：内置全量页面同步（Full Page Sync）与状态自愈能力，支持在不稳定的网络环境下保障知识库的可靠流转。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，详细描述多端协作协议与冲突处理逻辑
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation

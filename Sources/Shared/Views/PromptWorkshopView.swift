@@ -95,7 +95,7 @@ struct PromptWorkshopView: View {
 #endif
         .onDisappear {
             promptService.save()
-            HapticManager.shared.trigger(.success)
+            HapticFeedback.shared.trigger(.success)
         }
         .alert(Localized.tr("prompt.resetConfirm"), isPresented: $showResetAlert) {
             Button(L10n.Common.tr("reset"), role: .destructive) {

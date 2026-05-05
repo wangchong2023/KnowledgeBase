@@ -17,6 +17,7 @@ struct TaskCenterView: View {
     @ObservedObject var taskCenter = TaskCenter.shared
     @Environment(KMStore.self) var store
     @Environment(AppRouter.self) var router
+    @State private var showClearConfirm = false
     
     var body: some View {
         ZStack {
@@ -127,6 +128,31 @@ struct TaskCenterView: View {
         .background(Color.wikiBackground)
         .onAppear {
             taskCenter.markAllAsRead()
+        }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                if !taskCenter.tasks.isEmpty {
+                    Button(role: .destructive) {
+                        HapticFeedback.shared.trigger(.warning)
+                        showClearConfirm = true
+                    } label: {
+                        Label(L10n.Common.tr("clear"), systemImage: "trash.slash.fill")
+                    }
+                }
+            }
+        }
+        .confirmationDialog(
+            L10n.AI.Task.tr("clearConfirmTitle"),
+            isPresented: $showClearConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(L10n.Common.tr("clearAll"), role: .destructive) {
+                taskCenter.reset()
+                HapticFeedback.shared.trigger(.success)
+            }
+            Button(L10n.Common.tr("cancel"), role: .cancel) {}
+        } message: {
+            Text(L10n.AI.Task.tr("clearConfirmMessage"))
         }
     }
     
@@ -299,6 +325,7 @@ private struct TaskRow: View {
                 HStack {
                     Text(task.name)
                         .font(.subheadline.bold())
+                        .lineLimit(1)
                     if task.associatedPageID != nil {
                         Image(systemName: "arrow.up.right.square")
                             .font(.caption2)
@@ -310,15 +337,24 @@ private struct TaskRow: View {
                     .font(.caption2)
                     .foregroundStyle(.wikiSecondary)
                     .lineLimit(1)
+                
+                if case .failed(let error) = task.status {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                        .lineLimit(2)
+                        .padding(.top, 2)
+                }
             }
             
             Spacer()
             
-            VStack(alignment: .trailing, spacing: 4) {
+            VStack(alignment: .trailing, spacing: 6) {
                 statusText
-                Text(task.startTime.formatted(.dateTime.year().month().day().hour().minute().second()))
+                Text(task.startTime.formatted(.dateTime.hour().minute().second()))
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.wikiSecondary.opacity(0.6))
+                    .fixedSize()
             }
         }
         .padding(.vertical, 4)
@@ -350,11 +386,10 @@ private struct TaskRow: View {
             Text(L10n.AI.Task.tr("status.completed"))
                 .font(.caption2)
                 .foregroundStyle(.green)
-        case .failed(let error):
+        case .failed:
             Text(L10n.AI.Task.tr("status.failed"))
-                .font(.caption2)
+                .font(.caption2.bold())
                 .foregroundStyle(.red)
-                .help(error)
         }
     }
 }

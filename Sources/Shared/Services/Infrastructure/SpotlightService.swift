@@ -35,7 +35,7 @@ final class SpotlightService {
         
         CSSearchableIndex.default().indexSearchableItems([item]) { error in
             if let error = error {
-                LogService.shared.error("🔍 [Spotlight] 索引失败：\(error.localizedDescription)")
+                Logger.shared.error("🔍 [Spotlight] 索引失败：\(error.localizedDescription)")
             }
         }
     }

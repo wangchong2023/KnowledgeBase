@@ -81,7 +81,7 @@ struct PageDetailView: View {
     
     private var editButton: some View {
         Button(action: {
-            HapticManager.shared.trigger(.selection)
+            HapticFeedback.shared.trigger(.selection)
             if viewModel.isEditing {
                 store.updatePage(viewModel.page, forceDeepScan: false)
             }
@@ -153,7 +153,7 @@ struct PageDetailView: View {
                     Label(L10n.Transfer.tr("export.header"), systemImage: "square.and.arrow.up")
                 }
             }
-            Button(action: { store.copyPageToClipboard(viewModel.page); HapticManager.shared.trigger(.success) }) {
+            Button(action: { store.copyPageToClipboard(viewModel.page); HapticFeedback.shared.trigger(.success) }) {
                 Label(L10n.Common.tr("copy"), systemImage: "doc.on.doc")
             }
             
@@ -374,7 +374,7 @@ struct PageDetailView: View {
                         
                         Button(action: { 
                             WikiPasteboard.string = aiStore.activePageAIResult
-                            HapticManager.shared.trigger(.success)
+                            HapticFeedback.shared.trigger(.success)
                         }) {
                             Image(systemName: "doc.on.doc")
                                 .font(.caption)

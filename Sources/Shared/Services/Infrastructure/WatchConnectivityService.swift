@@ -36,7 +36,7 @@ final class WatchConnectivityService: NSObject, ObservableObject, WCSessionDeleg
         let userInfo = ["type": "new_page", "content": text, "date": Date()] as [String : Any]
         WCSession.default.transferUserInfo(userInfo)
         
-        LogService.shared.debug("⌚ [WatchSync] 已发起数据传输：\(text.prefix(10))...")
+        Logger.shared.debug("⌚ [WatchSync] 已发起数据传输：\(text.prefix(10))...")
     }
     
     // MARK: - WCSessionDelegate
@@ -44,7 +44,7 @@ final class WatchConnectivityService: NSObject, ObservableObject, WCSessionDeleg
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
         if let error = error {
             Task { @MainActor in
-                LogService.shared.error("⌚ [WatchSync] 激活失败: \(error.localizedDescription)")
+                Logger.shared.error("⌚ [WatchSync] 激活失败: \(error.localizedDescription)")
             }
         }
     }

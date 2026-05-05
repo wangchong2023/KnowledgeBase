@@ -84,7 +84,7 @@ struct PluginCenterView: View {
                 }
                 
                 Button(action: { 
-                    HapticManager.shared.trigger(.selection)
+                    HapticFeedback.shared.trigger(.selection)
                     showFileImporter = true 
                 }) {
                     HStack(spacing: 4) {

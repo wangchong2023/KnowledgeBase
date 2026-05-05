@@ -264,7 +264,7 @@ struct IngestView: View {
                     manualFormTitle = L10n.Ingest.tr("fileImport")
                     isExtracting = false
                     showManualForm = true
-                    HapticManager.shared.trigger(.success)
+                    HapticFeedback.shared.trigger(.success)
                 } catch {
                     isExtracting = false
                     errorMessage = error.localizedDescription
@@ -413,7 +413,7 @@ struct IngestView: View {
                     ToastManager.shared.dismiss()
                     self.showManualForm = true
                     ToastManager.shared.show(type: .success, message: L10n.Ingest.tr("success"))
-                    HapticManager.shared.trigger(.success)
+                    HapticFeedback.shared.trigger(.success)
                 }
             } catch {
                 await MainActor.run {

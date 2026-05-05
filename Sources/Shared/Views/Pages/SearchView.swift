@@ -122,7 +122,7 @@ struct SearchView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         FilterPill(title: Localized.tr("search.all"), accessibilityIdentifier: "filter-all", isSelected: filterType == nil) {
-                            HapticManager.shared.trigger(.selection)
+                            HapticFeedback.shared.trigger(.selection)
                             filterType = nil
                         }
 
@@ -134,7 +134,7 @@ struct SearchView: View {
                                 accessibilityIdentifier: "filter-\(type.rawValue)",
                                 isSelected: filterType == type
                             ) {
-                                HapticManager.shared.trigger(.selection)
+                                HapticFeedback.shared.trigger(.selection)
                                 filterType = type
                             }
                         }
@@ -233,7 +233,7 @@ struct SearchView: View {
                     List {
                         ForEach(filteredPages) { page in
                             Button(action: {
-                                HapticManager.shared.trigger(.selection)
+                                HapticFeedback.shared.trigger(.selection)
                                 router.navigate(to: .pageDetail(id: page.id))
                             }) {
                                 PageRowView(page: page)
@@ -243,7 +243,7 @@ struct SearchView: View {
                             .listRowSeparator(.hidden)
                             .contextMenu {
                                 Button {
-                                    HapticManager.shared.trigger(.selection)
+                                    HapticFeedback.shared.trigger(.selection)
                                     previewPage = page
                                 } label: {
                                     Label(L10n.Common.tr("quickPreview"), systemImage: "eye")
@@ -313,7 +313,7 @@ struct SearchView: View {
             return
         }
         
-        HapticManager.shared.trigger(.selection)
+        HapticFeedback.shared.trigger(.selection)
         Task {
             // 注意：SearchStore 内部已经处理了 isSearching 状态
             let results = await searchStore.performAdvancedSearch(query: searchText)

@@ -21,7 +21,7 @@ struct BreadcrumbView: View {
                 ForEach(Array(history.enumerated()), id: \.element.id) { index, page in
                     HStack(spacing: 8) {
                         Button(action: { 
-                            HapticManager.shared.trigger(.link)
+                            HapticFeedback.shared.trigger(.link)
                             onNavigate(page.id) 
                         }) {
                             HStack(spacing: 4) {

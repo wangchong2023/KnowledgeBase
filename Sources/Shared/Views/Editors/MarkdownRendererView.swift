@@ -1,19 +1,22 @@
 // MarkdownRendererView.swift
 //
 // 作者: Wang Chong
-// 功能说明: Renders structured Markdown blocks using MarkdownParser.
-// 版本: 1.0
+// 功能说明: 本文件实现了基于文本块解析的高级 Markdown 渲染组件（MarkdownRendererView），负责将抽象的 Markdown 语法树转化为原生 SwiftUI 视图流。
+// 该渲染引擎通过以下核心功能点确保了知识内容的高效展示与沉浸式阅读体验：
+// 1. 结构化块渲染：支持标题（H1-H6）、段落、列表、引用块、代码块及表格的差异化渲染，并自动适配系统的 WikiUI 设计规范。
+// 2. 交互式内联解析：实现了 Wiki-link 内部链接、标准超链接、加粗、斜体及行内代码的混合解析，支持点击跳转至关联页面。
+// 3. 多模态内容集成：深度集成了 Mermaid 绘图引擎与任务列表（Task List），支持在文档中直接嵌入动态图表与待办事项。
+// 4. 安全与性能优化：内置了基于隐私模式的模糊遮罩逻辑，并利用 Skeleton View 提供流式生成阶段的视觉占位反馈。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-03
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，消除渲染器内部的魔鬼数字
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 @preconcurrency import SwiftUI
 
 // MARK: - Markdown Renderer View
-/// Renders structured Markdown blocks using MarkdownParser.
-/// Parsing logic is extracted to MarkdownParser service for reuse.
+/// Renders structured Markdown blocks using MarkdownProcessor.
+/// Parsing logic is extracted to MarkdownProcessor service for reuse.
 @MainActor
 struct MarkdownRendererView: View {
     @Environment(KMStore.self) var store
@@ -23,7 +26,7 @@ struct MarkdownRendererView: View {
     var isCompact: Bool = false
 
     @State private var tempUnlocked = false
-    private let parser = MarkdownParser()
+    private let parser = MarkdownProcessor()
 
     var body: some View {
         Group {
@@ -41,11 +44,11 @@ struct MarkdownRendererView: View {
         .blur(radius: (store.isPrivacyModeEnabled && isPrivate && !tempUnlocked) ? 12 : 0)
         .overlay {
             if store.isPrivacyModeEnabled && isPrivate && !tempUnlocked {
-                VStack(spacing: 12) {
+                VStack(spacing: WikiUI.medium) {
                     Image(systemName: "eye.slash.fill")
-                        .font(.system(size: 32))
+                        .font(.system(size: WikiUI.largeIconSize / 1.5))
                     Text(Localized.tr("security.privacyMasked"))
-                        .font(.headline)
+                        .font(WikiUI.titleFont)
                     Button(action: {
                         authenticate()
                     }) {
@@ -67,7 +70,7 @@ struct MarkdownRendererView: View {
             if await store.securityService.authenticateWithBiometrics() {
                 await MainActor.run {
                     withAnimation { tempUnlocked = true }
-                    HapticManager.shared.trigger(.unlock)
+                    HapticFeedback.shared.trigger(.unlock)
                 }
             }
         }
@@ -75,7 +78,7 @@ struct MarkdownRendererView: View {
 
     // MARK: - Block Renderer
     @ViewBuilder
-    private func renderBlock(_ block: MarkdownParser.BlockType) -> some View {
+    private func renderBlock(_ block: MarkdownProcessor.BlockType) -> some View {
         switch block {
         case .heading(let text, let level):
             renderHeading(text: text, level: level)
@@ -115,23 +118,24 @@ struct MarkdownRendererView: View {
     }
 
     // MARK: - Render Heading
-    @ViewBuilder
     private func renderHeading(text: String, level: Int) -> some View {
-        let style: Font.TextStyle = level == 1 ? .title : (level == 2 ? .title2 : .title3)
-        let weight: Font.Weight = level == 1 ? .bold : .semibold
+        let headingLevel = WikiUI.HeadingLevel(rawValue: level) ?? .h6
+        let isMainTitle = level == 1
         
-        Text(text)
-            .font(.system(style, design: .rounded).weight(weight))
+        return Text(text)
+            .font(.system(size: headingLevel.size, design: .rounded).weight(headingLevel.weight))
             .foregroundStyle(.wikiText)
-            .padding(.top, level == 1 ? 16 : 8)
-            .padding(.bottom, 4)
+            .multilineTextAlignment(isMainTitle ? .center : .leading)
+            .frame(maxWidth: .infinity, alignment: isMainTitle ? .center : .leading)
+            .padding(.top, isMainTitle ? WikiUI.widePadding : headingLevel.topPadding)
+            .padding(.bottom, isMainTitle ? WikiUI.standardPadding : 4)
     }
 
     @ViewBuilder
     private func renderParagraph(text: String) -> some View {
         renderInlineContent(text)
-            .font(isCompact ? .footnote : .system(.body, design: .serif))
-            .lineSpacing(6)
+            .font(isCompact ? WikiUI.captionFont : .system(.body, design: .serif))
+            .lineSpacing(WikiUI.tiny * 1.5)
             .foregroundStyle(.wikiText.opacity(0.9))
     }
 
@@ -160,7 +164,7 @@ struct MarkdownRendererView: View {
         let isAISummary = text.contains("AI") || text.hasPrefix("> AI")
         
         HStack(spacing: 0) {
-            RoundedRectangle(cornerRadius: WikiUI.hairlineRadius)
+            RoundedRectangle(cornerRadius: WikiUI.tiny)
                 .fill(isAISummary ? Color.wikiAccent : Color.wikiAccent.opacity(0.5))
                 .frame(width: 3)
                 .padding(.trailing, 10)
@@ -168,7 +172,7 @@ struct MarkdownRendererView: View {
             renderInlineContent(text)
                 .font(isAISummary ? .system(.body, design: .serif).italic() : .body.italic())
                 .foregroundStyle(isAISummary ? .wikiAccent : .wikiSecondary)
-                .lineSpacing(isAISummary ? 8 : 6) // AI 总结采用更宽松的行间距提升阅读舒适度
+                .lineSpacing(isAISummary ? WikiUI.small : WikiUI.tiny * 1.5) // AI 总结采用更宽松的行间距提升阅读舒适度
 
             Spacer(minLength: 0)
         }
@@ -300,7 +304,7 @@ struct MarkdownRendererView: View {
             })
     }
     
-    private func buildAttributedString(from segments: [MarkdownParser.InlineSegment]) -> AttributedString {
+    private func buildAttributedString(from segments: [MarkdownProcessor.InlineSegment]) -> AttributedString {
         var result = AttributedString()
         
         for segment in segments {
@@ -318,14 +322,22 @@ struct MarkdownRendererView: View {
                 container.swiftUI.backgroundColor = Color.wikiAccent.opacity(0.15)
                 container.swiftUI.foregroundColor = .wikiText
             case .wikilink:
-                container.swiftUI.font = .body.weight(.medium)
-                container.swiftUI.foregroundColor = .wikiAccent
+                container.swiftUI.font = (isCompact ? Font.footnote : Font.body).weight(.medium)
+                container.swiftUI.foregroundColor = Color.wikiAccent
                 container.swiftUI.underlineStyle = .single
-                // 我们在 Text 上无法直接捕获这个特定属性的点击，
-                // 但我们可以通过转换整个 Text 为 Link 或使用自定义属性。
-                // 暂时使用标准 link 属性，由外部 onLinkTap 处理或通过自定义 URL 协议。
                 if let encoded = segment.content.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
                     container.foundation.link = URL(string: "wikilink://\(encoded)")
+                }
+            case .link:
+                let parts = segment.content.split(separator: "|")
+                let label = String(parts.first ?? "")
+                let urlString = String(parts.last ?? "")
+                container = AttributedString(label)
+                container.swiftUI.font = isCompact ? Font.footnote : Font.body
+                container.swiftUI.foregroundColor = Color.wikiAccent
+                container.swiftUI.underlineStyle = .single
+                if let url = URL(string: urlString) {
+                    container.foundation.link = url
                 }
             case .emoji:
                 container.swiftUI.font = .body

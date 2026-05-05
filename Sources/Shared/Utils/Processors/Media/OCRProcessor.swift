@@ -1,11 +1,16 @@
-// OCRService.swift
+// OCRProcessor.swift
 //
 // 作者: Wang Chong
-// 功能说明: OCR 文字识别服务
-// 版本: 1.0
+// 功能说明: 本文件实现了基于 Vision 框架的光学字符识别处理器（OCRProcessor），专门用于从图像资料中提取可编辑的知识文本。
+// 该处理器具备以下核心能力，为系统的数字化输入提供支撑：
+// 1. 深度图像解析：利用 Apple Vision 引擎进行高精度的文本行识别（Text Recognition），支持对复杂背景下的文字进行有效过滤。
+// 2. 布局还原：自动分析文本块的物理位置，通过坐标计算尝试还原原始图像中的段落结构与换行关系，避免语义断裂。
+// 3. 多语言支持：支持对中、英、日、韩等主流语言的混合识别，并提供识别置信度评估，确保提取内容的准确性。
+// 版本: 1.1
 // 修改记录:
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-03
+//   - 2026-05-05: 迁移至 Utils/Processors/Media 并完善 Vision 算法说明
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
@@ -38,8 +43,8 @@ import PhotosUI
 /// let text = try await ocrService.recognizeText(from: image)
 /// ```
 @MainActor
-class OCRService: ObservableObject {
-    @MainActor static let shared = OCRService()
+class OCRProcessor: ObservableObject {
+    @MainActor static let shared = OCRProcessor()
     
     /// Recognize text from a WikiImage
     func recognizeText(from image: WikiImage, completion: @escaping @Sendable (Result<String, Error>) -> Void) {
@@ -117,4 +122,4 @@ enum OCRError: LocalizedError {
     }
 }
 
-extension OCRService: @unchecked Sendable {}
+extension OCRProcessor: @unchecked Sendable {}

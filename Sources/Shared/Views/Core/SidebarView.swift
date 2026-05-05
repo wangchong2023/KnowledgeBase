@@ -1,12 +1,15 @@
 // SidebarView.swift
 //
 // 作者: Wang Chong
-// 功能说明: 应用的核心导航枢纽，负责在一级菜单、二级工具列表与三级详情页之间进行路由分发。
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的核心导航分发中心（SidebarView），负责在多层级视图间建立稳健的路由关联。
+// 视图通过深度集成 SwiftUI 的 List 选择机制与 SceneStorage，提供了卓越的导航体验：
+// 1. 三级路由调度：支持一级仪表盘能力、二级知识宇宙分类及三级页面详情的透明跳转，实现了基于有效绑定的单向数据流。
+// 2. 场景化状态恢复：利用 @SceneStorage 自动持久化侧边栏的选中状态与折叠配置，确保应用重启或多窗口切换时的 Platinum 级体验。
+// 3. 动态元数据集成：实时展示页面分类计数、健康检查问题统计及 AI 任务队列进度，将侧边栏转化为一个综合性的系统状态看板。
+// 4. 原生交互增强：内置了针对 macOS 的文件拖拽导入、iOS 触感反馈及上下文菜单（Context Menu），支持收藏与删除等快捷操作。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，规范化侧边栏图标尺寸与圆角常量
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -219,7 +222,7 @@ struct SidebarView: View {
             Button(Localized.tr("page.deletePage"), role: .destructive) {
                 if let page = pageToDelete {
                     store.deletePage(page)
-                    HapticManager.shared.trigger(.success)
+                    HapticFeedback.shared.trigger(.success)
                 }
             }
             Button(L10n.Common.tr("cancel"), role: .cancel) {
@@ -238,7 +241,7 @@ struct SidebarView: View {
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button(action: {
-                    HapticManager.shared.trigger(.selection)
+                    HapticFeedback.shared.trigger(.selection)
                     store.securityService.lock()
                 }) {
                     Image(systemName: "lock.fill")

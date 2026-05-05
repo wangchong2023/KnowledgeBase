@@ -1,12 +1,15 @@
 // LLMService.swift
 //
 // 作者: Wang Chong
-// 功能说明: 组合了 LLMConfigStore (配置) + LLMContextBuilder (上下文) + ChatHistoryStore (历史) + LLMClient (客户端)。
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的核心 AI 大模型服务层（LLMService），作为系统与生成式 AI 交互的中心枢纽与编排器。
+// 该服务通过高度解耦的架构设计，整合了配置管理、上下文构建、历史持久化及多协议客户端，主要功能点如下：
+// 1. 多模型适配与编排：通过适配器模式支持 DeepSeek、OpenAI、Ollama 等主流大模型协议，支持流式（Streaming）与非流式响应的透明切换。
+// 2. 知识增强生成（RAG）：深度集成上下文构建器（LLMContextBuilder），能够自动提取当前知识库中的相关节点并构造针对性的系统提示词。
+// 3. 智能治理与重构：提供了基于 AI 的“智能编译”（Smart Ingest）、“潜在链接发现”及“文档重构建议”功能，实现了知识库的自我优化与演进。
+// 4. 健壮性与可观测性：内置了 API 配置校验、响应延迟监控及请求取消机制，并通过 TaskCenter 提供实时的处理状态反馈。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，完善架构层说明与分点功能详述
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
@@ -57,6 +60,12 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
     @Published var isStreaming = false
     @Published var streamingContent = ""
     @Published var isProcessing = false
+    
+    // MARK: - 配置校验 (公共逻辑)
+    /// 检查 LLM 服务是否已开启且所有必要参数（Key、地址、模型）已填写完整
+    var isReady: Bool {
+        isEnabled && !apiKey.isEmpty && !baseURL.isEmpty && !model.isEmpty
+    }
     
     // MARK: - 内部模块
     let configStore: LLMConfigStore
@@ -197,7 +206,7 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
             for try await chunk in stream {
                 if !hasReceivedFirstChunk {
                     hasReceivedFirstChunk = true
-                    HapticManager.shared.trigger(.link)
+                    HapticFeedback.shared.trigger(.link)
                 }
                 await MainActor.run {
                     self.streamingContent += chunk
@@ -283,7 +292,7 @@ final class LLMService: ObservableObject, LLMServiceProtocol, @unchecked Sendabl
     // MARK: - Adapter Pattern (Expert Optimization)
     
     func generate(prompt: String, systemPrompt: String) async throws -> String {
-        let fullSystemPrompt = systemPrompt + (systemPrompt.isEmpty ? "" : PromptService.shared.languageInstruction)
+        let fullSystemPrompt = systemPrompt + (systemPrompt.isEmpty ? PromptService.shared.languageInstruction : "\n\n" + PromptService.shared.languageInstruction)
         if let adapter = activeAdapter {
             let capturedAdapter = adapter
             return try await capturedAdapter.generate(prompt: prompt, systemPrompt: fullSystemPrompt)

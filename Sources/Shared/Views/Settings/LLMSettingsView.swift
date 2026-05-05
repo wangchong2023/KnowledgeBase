@@ -17,7 +17,7 @@ struct LLMSettingsView: View {
     @State private var testing = false
     @State private var testResult: TestResult?
     @State private var showAPIKey = false
-    @State private var isConfigExpanded = false
+    @State private var isConfigExpanded = true // 默认展开，方便用户发现
     
     enum TestResult {
         case success(latency: Int)

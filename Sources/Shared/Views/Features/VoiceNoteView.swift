@@ -1,18 +1,23 @@
 // VoiceNoteView.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct VoiceNoteView
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的语音笔记记录中心（VoiceNoteView），支持高效的语音输入、实时转写及知识提取。
+// 该视图集成了原生语音识别引擎，通过以下核心功能点提升非结构化信息的捕获效率：
+// 1. 实时波形可视化：通过音频电平检测技术实时渲染动态波形图，为用户提供直觉化的录音状态反馈。
+// 2. 语音转文字（STT）：利用系统的语音识别框架实现流式文本转写，支持在录音过程中实时编辑与预览。
+// 3. 智能摘要与入库：集成 LLM 对录音内容进行关键信息提取与总结，支持一键将语音笔记转化为标准的 Wiki 页面并自动打标。
+// 4. 持久化与状态管理：通过 SpeechService 实现录音流程的生命周期控制，确保在后台或异常状态下语音数据的完整性与安全性。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，修复 WikiUI 成员引用 Bug，优化波形图 UI 常量
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
 
 // MARK: - Voice Note View
+/// 语音笔记功能主视图
 struct VoiceNoteView: View {
-    @StateObject private var speechService = SpeechService()
+    @StateObject private var speechService = SpeechProcessor()
     @Environment(KMStore.self) var store
     @State private var noteTitle = ""
     @State private var showSaveSheet = false
@@ -185,7 +190,7 @@ struct VoiceNoteView: View {
 
             HStack(spacing: 3) {
                 ForEach(0..<20, id: \.self) { i in
-                    RoundedRectangle(cornerRadius: WikiUI.hairlineRadius)
+                    RoundedRectangle(cornerRadius: WikiUI.tiny)
                         .fill(Color.wikiAccent)
                         .frame(width: 5, height: max(4, CGFloat(speechService.audioLevelHistory[i]) * 40))
                 }

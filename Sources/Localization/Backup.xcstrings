@@ -323,6 +323,41 @@
           }
         }
       }
+    },
+    "deleteConfirmTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Backup"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除备份"
+          }
+        }
+      }
+    },
+    "deleteConfirmMessage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to permanently delete this backup? This action cannot be undone."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "您确定要永久删除此备份吗？此操作不可撤销。"
+          }
+        }
+      }
     }
-  }
+  },
+  "version": "1.0"
 }

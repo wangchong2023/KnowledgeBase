@@ -136,9 +136,9 @@ struct WelcomeQuickStartGuideSection: View {
             
             // 快捷注入演示数据入口
             Button(action: {
-                HapticManager.shared.trigger(.selection)
+                HapticFeedback.shared.trigger(.selection)
                 injectedCount = store.generateDemoData()
-                HapticManager.shared.trigger(.success)
+                HapticFeedback.shared.trigger(.success)
                 showInjectSuccess = true
             }) {
                 HStack {

@@ -1,10 +1,14 @@
-// SpeechService.swift
+// SpeechProcessor.swift
 //
 // 作者: Wang Chong
-// 功能说明: Speech-to-text service using Apple's Speech framework.
-// 版本: 1.0
+// 功能说明: 本文件实现了全集成的语音处理工具（SpeechProcessor），涵盖了从语音识别（STT）到语音合成（TTS）的完整处理流程。
+// 该处理器通过以下核心模块提升系统的多模态交互能力：
+// 1. 实时语音转写：集成 Apple Speech 框架，支持对用户语音输入进行流式转写，具备自动断句与标点纠错能力，适用于语音备忘录录入。
+// 2. 语音合成输出：封装 AVSpeechSynthesizer 引擎，为系统提供流畅的语音朗读功能，支持多语种切换及语速、音调的自定义调节。
+// 3. 音频权限管理：内置完善的麦克风权限请求与状态监测机制，确保在不同 OS 系统版本下的合规性与稳定性。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
+//   - 2026-05-05: 迁移至 Utils/Processors/Media 并完善语音处理流程说明
 // 日期: 2026-05-04
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
@@ -16,7 +20,7 @@ import AVFoundation
 /// Speech-to-text service using Apple's Speech framework.
 /// Supports real-time transcription and audio file transcription.
 @MainActor
-final class SpeechService: ObservableObject {
+final class SpeechProcessor: ObservableObject {
     @Published var isRecording = false
     @Published var isTranscribing = false
     @Published var transcribedText = ""
@@ -300,4 +304,4 @@ enum SpeechError: LocalizedError {
     }
 }
 
-extension SpeechService: @unchecked Sendable {}
+extension SpeechProcessor: @unchecked Sendable {}

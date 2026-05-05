@@ -19,6 +19,8 @@ struct BackupView: View {
     @State private var showRestoreConfirmation = false
     @State private var selectedEntry: BackupService.BackupEntry?
     @State private var showCreateBackup = false
+    @State private var showDeleteConfirmation = false
+    @State private var backupToDelete: BackupService.BackupEntry?
     
     var body: some View {
         NavigationStack {
@@ -75,7 +77,9 @@ struct BackupView: View {
                                 selectedEntry = entry
                                 showRestoreConfirmation = true
                             } onDelete: {
-                                backupService.deleteBackup(entry)
+                                HapticFeedback.shared.trigger(.warning)
+                                backupToDelete = entry
+                                showDeleteConfirmation = true
                             }
                         }
                     }
@@ -101,6 +105,22 @@ struct BackupView: View {
                 Button(L10n.Common.tr("cancel"), role: .cancel) { selectedEntry = nil }
             } message: {
                 Text(L10n.Backup.tr("restoreMessage"))
+            }
+            .confirmationDialog(
+                L10n.Backup.tr("deleteConfirmTitle"),
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button(L10n.Common.tr("delete"), role: .destructive) {
+                    if let entry = backupToDelete {
+                        backupService.deleteBackup(entry)
+                        HapticFeedback.shared.trigger(.success)
+                    }
+                    backupToDelete = nil
+                }
+                Button(L10n.Common.tr("cancel"), role: .cancel) { backupToDelete = nil }
+            } message: {
+                Text(L10n.Backup.tr("deleteConfirmMessage"))
             }
         }
     }

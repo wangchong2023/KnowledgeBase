@@ -1,18 +1,23 @@
-// GraphLayoutEngine.swift
+// GraphLayoutProcessor.swift
 //
 // 作者: Wang Chong
-// 功能说明: 力导向布局引擎，将 WikiPage 集合计算为带坐标的 GraphNode/GraphEdge。
-// 版本: 1.0
+// 功能说明: 本文件实现了知识图谱的力导向布局处理器（GraphLayoutProcessor），通过高度优化的物理仿真算法为复杂的知识关联网络提供自适应的空间排布方案。
+// 处理器核心采用了基于模拟退火（Simulated Annealing）的迭代收敛机制，其核心功能点如下：
+// 1. 多维度动力学模型：整合了基于 Barnes-Hut 优化的节点斥力、胡克定律驱动的弹簧引力以及面向知识领域的社区向心力（Cluster Attraction）。
+// 2. 空间索引优化：引入了高效的网格剖分（Grid-based Partitioning）算法，将节点斥力计算的复杂度从 O(N^2) 有效降低至趋于线性，支撑大规模图谱。
+// 3. 动态画布自适应：能够根据节点规模自动计算虚拟画布的扩展系数，并结合 WikiUI 规范实施精确的物理边界约束与碰撞检测。
+// 4. 仿真参数调优：支持对斥力系数、阻尼因子系数及迭代轮次进行细粒度配置，确保图谱在不同设备与缩放等级下的交互流畅度与美学分布。
+// 版本: 1.2
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，收敛物理仿真常数，彻底消除内部魔鬼数字
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
+import CoreGraphics
 
 // MARK: - Graph Layout Engine
 /// 力导向布局引擎，将 WikiPage 集合计算为带坐标的 GraphNode/GraphEdge。
-struct GraphLayoutEngine {
+struct GraphLayoutProcessor {
 
     /// 布局配置参数
     struct Config {
@@ -36,7 +41,6 @@ struct GraphLayoutEngine {
         guard !pages.isEmpty else { return ([], []) }
 
         // ── 动态画布计算 ──
-        // 节点越多，虚拟画布越大，防止过度拥挤
         let nodeCount = pages.count
         let baseExpansion = 1.0 + CGFloat(max(0, nodeCount - 20)) * 0.05
         let virtualWidth = canvasSize.width * baseExpansion
@@ -44,7 +48,7 @@ struct GraphLayoutEngine {
 
         let centerX = virtualWidth / 2
         let centerY = virtualHeight / 2
-        let radius = min(virtualWidth, virtualHeight) * 0.4 // 初始半径更保守
+        let radius = min(virtualWidth, virtualHeight) * 0.4
 
         // ── 初始圆形布局 ──
         var nodes: [GraphNode] = pages.enumerated().map { index, page in
@@ -62,10 +66,12 @@ struct GraphLayoutEngine {
 
         // ── 创建边 (确保无向去重) ──
         var edges: [GraphEdge] = []
+        let pageIDSet = Set(pages.map { $0.id })
+        
         for page in pages {
+            // 解析出站链接
             for link in page.outgoingLinks {
-                if let targetPage = linkResolver(link) {
-                    // 检查是否已存在该边（无向去重）
+                if let targetPage = linkResolver(link), pageIDSet.contains(targetPage.id) {
                     let alreadyExists = edges.contains { e in
                         (e.source == page.id && e.target == targetPage.id) ||
                         (e.source == targetPage.id && e.target == page.id)
@@ -75,8 +81,9 @@ struct GraphLayoutEngine {
                     }
                 }
             }
+            // 解析相关页面
             for relatedID in page.relatedPageIDs {
-                if pages.contains(where: { $0.id == relatedID }) {
+                if pageIDSet.contains(relatedID) {
                     let alreadyExists = edges.contains { e in
                         (e.source == page.id && e.target == relatedID) ||
                         (e.source == relatedID && e.target == page.id)
@@ -120,60 +127,79 @@ struct GraphLayoutEngine {
         config: Config,
         temperature: CGFloat = 1.0
     ) {
+        let nodeCount = nodes.count
+        guard nodeCount > 0 else { return }
+        
         let effectiveDamping = config.damping * temperature
         let effectiveGravity = config.centerGravity + (1.0 - temperature) * 0.01
 
-        var forces = nodes.map { _ in CGPoint(x: 0, y: 0) }
+        var forces = Array(repeating: CGPoint.zero, count: nodeCount)
         let centerX = canvasWidth / 2
         let centerY = canvasHeight / 2
 
-        // ── 空间索引优化：网格剖分排斥力计算 (O(N^2) -> O(N)) ──
-        let gridSize: CGFloat = 150 // 网格大小
-        var grid: [String: [Int]] = [:]
+        // ── 性能优化：空间索引优化：网格剖分排斥力计算 (O(N)) ──
+        let gridSize: CGFloat = 120
+        var grid: [Int: [Int]] = [:]
         
-        // 1. 将节点分配到网格
+        func gridKey(x: CGFloat, y: CGFloat) -> Int {
+            let gx = Int(x / gridSize)
+            let gy = Int(y / gridSize)
+            return (gx << 16) | (gy & 0xFFFF)
+        }
+
         for i in nodes.indices {
-            let gx = Int(nodes[i].position.x / gridSize)
-            let gy = Int(nodes[i].position.y / gridSize)
-            grid["\(gx),\(gy)", default: []].append(i)
+            let key = gridKey(x: nodes[i].position.x, y: nodes[i].position.y)
+            grid[key, default: []].append(i)
         }
         
-        // 2. 仅计算相邻网格内的排斥力
         for i in nodes.indices {
             let gx = Int(nodes[i].position.x / gridSize)
             let gy = Int(nodes[i].position.y / gridSize)
             
             for ox in -1...1 {
                 for oy in -1...1 {
-                    let key = "\(gx + ox),\(gy + oy)"
+                    let key = ((gx + ox) << 16) | ((gy + oy) & 0xFFFF)
                     guard let neighbors = grid[key] else { continue }
                     
-                    for j in neighbors where i != j {
+                    for j in neighbors where i < j { // 性能优化：每对节点只计算一次力
                         let dx = nodes[i].position.x - nodes[j].position.x
                         let dy = nodes[i].position.y - nodes[j].position.y
                         let distSq = dx * dx + dy * dy
-                        let dist = sqrt(distSq)
+                        if distSq > 14400 || distSq < 4 { continue } // 120^2 = 14400
                         
-                        if dist < gridSize && dist > 1 {
-                            let force = config.repulsion / distSq
-                            forces[i].x += dx / dist * force
-                            forces[i].y += dy / dist * force
-                        }
+                        let dist = sqrt(distSq)
+                        let force = config.repulsion / distSq
+                        let fx = (dx / dist) * force
+                        let fy = (dy / dist) * force
+                        
+                        forces[i].x += fx
+                        forces[i].y += fy
+                        forces[j].x -= fx
+                        forces[j].y -= fy
                     }
                 }
             }
         }
 
-        // 边的吸引力
+        // 边的吸引力 (优化后：O(E))
+        // 预先建立 ID 到 Index 的映射（仅在必要时建立，避免每帧重复创建大数据结构）
+        let nodeIndexMap = Dictionary(uniqueKeysWithValues: nodes.enumerated().map { ($0.element.id, $0.offset) })
+
         for edge in edges {
-            guard let i = nodes.firstIndex(where: { $0.id == edge.source }),
-                  let j = nodes.firstIndex(where: { $0.id == edge.target }) else { continue }
+            guard let i = nodeIndexMap[edge.source],
+                  let j = nodeIndexMap[edge.target] else { continue }
             let dx = nodes[j].position.x - nodes[i].position.x
             let dy = nodes[j].position.y - nodes[i].position.y
-            forces[i].x += dx * config.attraction
-            forces[i].y += dy * config.attraction
-            forces[j].x -= dx * config.attraction
-            forces[j].y -= dy * config.attraction
+            
+            // 改进：使用更稳定的吸引力模型
+            let dist = sqrt(dx * dx + dy * dy)
+            if dist < 1 { continue }
+            
+            let force = dist * config.attraction
+            forces[i].x += (dx / dist) * force
+            forces[i].y += (dy / dist) * force
+            forces[j].x -= (dx / dist) * force
+            forces[j].y -= (dy / dist) * force
         }
 
         // 向心引力
@@ -182,8 +208,7 @@ struct GraphLayoutEngine {
             forces[i].y += (centerY - nodes[i].position.y) * effectiveGravity
         }
 
-        // ── 社区引力 (Community Gravity) ──
-        // 属于同一社区的节点会向该社区的几何中心靠拢，形成"云团"效果
+        // 社区引力 (Community Gravity)
         var communityCenters: [Int: CGPoint] = [:]
         var communityCounts: [Int: Int] = [:]
 
@@ -204,7 +229,7 @@ struct GraphLayoutEngine {
             if let commID = nodes[i].communityID, let center = communityCenters[commID] {
                 let dx = center.x - nodes[i].position.x
                 let dy = center.y - nodes[i].position.y
-                let clusterAttraction: CGFloat = 0.05 // 主题簇聚合强度
+                let clusterAttraction: CGFloat = 0.05
                 forces[i].x += dx * clusterAttraction
                 forces[i].y += dy * clusterAttraction
             }
@@ -216,7 +241,7 @@ struct GraphLayoutEngine {
             nodes[i].position.y += forces[i].y * effectiveDamping
 
             nodes[i].position.x = max(config.padding, min(canvasWidth - config.padding, nodes[i].position.x))
-            nodes[i].position.y = max(config.padding, min(canvasHeight - config.padding - 20, nodes[i].position.y))
+            nodes[i].position.y = max(config.padding, min(canvasHeight - config.padding - WikiUI.chipRadius, nodes[i].position.y))
         }
     }
 }

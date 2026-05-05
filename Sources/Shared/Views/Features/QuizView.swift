@@ -38,6 +38,13 @@ struct QuizView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 8) {
+                // Title Header
+                Text(quiz.title)
+                    .font(.title3.bold())
+                    .padding(.top, 8)
+                    .padding(.horizontal)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
                 if !isCompleted {
                     // Progress Header
                     VStack(spacing: 8) {

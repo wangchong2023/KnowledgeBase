@@ -112,9 +112,13 @@ final class LLMClient: @unchecked Sendable {
     }
 
     // MARK: - Error Types
-    struct APIError: Error {
+    struct APIError: Error, LocalizedError {
         let statusCode: Int
         let message: String
+        
+        var errorDescription: String? {
+            return "\(message) (Status: \(statusCode))"
+        }
     }
 }
 

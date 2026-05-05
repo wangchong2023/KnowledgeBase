@@ -47,7 +47,7 @@ final class WebViewExportService: NSObject {
             <script>\(mermaidJS)</script>
             <style>
                 body { font-family: -apple-system, sans-serif; padding: 40px; color: #333; line-height: 1.6; }
-                h1 { color: #222; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+                h1 { color: #222; text-align: center; margin-bottom: 40px; padding-bottom: 10px; }
                 pre { background: #f6f8fa; padding: 16px; border-radius: 8px; }
                 code { font-family: ui-monospace, monospace; }
                 blockquote { border-left: 4px solid #dfe2e5; color: #6a737d; padding-left: 16px; margin-left: 0; }

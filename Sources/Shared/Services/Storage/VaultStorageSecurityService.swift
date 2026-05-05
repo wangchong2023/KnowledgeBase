@@ -49,10 +49,10 @@ final class VaultStorageSecurityService: ObservableObject {
             DispatchQueue.main.async {
                 if success {
                     withAnimation { self.isLocked = false }
-                    HapticManager.shared.trigger(.unlock)
+                    HapticFeedback.shared.trigger(.unlock)
                 } else {
                     // 解锁失败逻辑
-                    HapticManager.shared.trigger(.error)
+                    HapticFeedback.shared.trigger(.error)
                 }
             }
         }
@@ -60,7 +60,7 @@ final class VaultStorageSecurityService: ObservableObject {
     
     func lock() {
         withAnimation { isLocked = true }
-        HapticManager.shared.trigger(.lock)
+        HapticFeedback.shared.trigger(.lock)
     }
 }
 

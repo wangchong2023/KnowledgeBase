@@ -1,17 +1,22 @@
 // WikiPage.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct WikiPage
-// 版本: 1.0
+// 功能说明: 本文件定义了知识管理系统的核心数据实体模型（WikiPage），承载了知识点的全量元数据与生命周期逻辑。
+// 作为系统的原子级信息单元，该模型通过以下功能点保障了知识库的稳健性与可扩展性：
+// 1. 持久化与同步能力：集成了 GRDB 协议以支持高性能本地存储，并内置 Lamport 逻辑时钟实现多端同步时的冲突解决（LWW 策略）。
+// 2. 知识关系建模：通过 WikiLinkProcessor 自动提取文档内的双向引用关系，并支持手动建立相关页面（Related Pages）的语义关联。
+// 3. 多维元数据审计：提供字数统计（支持中英混排）、隐私敏感度判定、状态追踪及溯源链接（Source URL）管理。
+// 4. 灵活的呈现逻辑：根据页面类型自动适配图标与存储路径，支持用户自定义 SF Symbol 以实现个性化的视觉分类。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，将链接解析逻辑解耦至 WikiLinkProcessor
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import Foundation
 import GRDB
 
 // MARK: - Wiki Page
+/// 知识管理系统核心数据模型
 struct WikiPage: Identifiable, Codable, Hashable, FetchableRecord, PersistableRecord {
     static let databaseTableName: String = "pages"
     
@@ -110,14 +115,7 @@ struct WikiPage: Identifiable, Codable, Hashable, FetchableRecord, PersistableRe
     
     // Extract [[wikilinks]] from content
     var outgoingLinks: [String] {
-        let pattern = "\\[\\[([^\\]]+)\\]\\]"
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
-        let nsContent = content as NSString
-        let matches = regex.matches(in: content, range: NSRange(location: 0, length: nsContent.length))
-        return matches.compactMap { match in
-            guard match.numberOfRanges > 1 else { return nil }
-            return nsContent.substring(with: match.range(at: 1))
-        }
+        WikiLinkProcessor.extractOutgoingLinks(from: content)
     }
     
     var wordCount: Int {

@@ -11,7 +11,7 @@
 import Foundation
 
 // MARK: - Insight Detection
-extension GraphLayoutEngine {
+extension GraphLayoutProcessor {
 
     /// 获取孤立页面（无任何连接的节点）
     static func orphanNodes(nodes: [GraphNode], edges: [GraphEdge]) -> [UUID] {

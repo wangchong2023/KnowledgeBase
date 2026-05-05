@@ -358,7 +358,7 @@ struct Graph3DView: View {
                 }
             }
             
-            // 2. 处理 relatedPageIDs (对应 GraphLayoutEngine 逻辑)
+            // 2. 处理 relatedPageIDs (对应 GraphLayoutProcessor 逻辑)
             for relatedID in page.relatedPageIDs {
                 if let targetNode = nodeMap[relatedID],
                    let sourceNode = nodeMap[page.id] {

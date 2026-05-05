@@ -84,13 +84,18 @@ final class SynthesisStore {
         set { withMutation(keyPath: \.synthesisResults) { _synthesisResults = newValue } }
     }
 
-    var synthesisStates: [SynthesisType: SynthesisStatus] = {
+    @ObservationIgnored private var _synthesisStates: [SynthesisType: SynthesisStatus] = {
         var states: [SynthesisType: SynthesisStatus] = [:]
         for type in SynthesisType.allCases { states[type] = .idle }
         return states
     }()
+    
+    var synthesisStates: [SynthesisType: SynthesisStatus] {
+        get { access(keyPath: \.synthesisStates); return _synthesisStates }
+        set { withMutation(keyPath: \.synthesisStates) { _synthesisStates = newValue } }
+    }
 
-    let maxSynthesisDocsPerType = 10
+    let maxSynthesisDocsPerType = 5
 
     init() {
         loadSynthesisResults()
@@ -102,7 +107,8 @@ final class SynthesisStore {
             if let data = UserDefaults.standard.data(forKey: key),
                let docs = try? JSONDecoder().decode([SynthesisDocument].self, from: data) {
                 _synthesisResults[type] = docs
-                synthesisStates[type] = .completed
+                // 注意：这里不要覆盖状态，除非确实需要
+                // _synthesisStates[type] = .completed
             }
         }
     }
@@ -114,9 +120,11 @@ final class SynthesisStore {
 
         var existing = _synthesisResults[type] ?? []
         existing.insert(doc, at: 0)
-        if existing.count > maxSynthesisDocsPerType { existing = Array(existing.prefix(maxSynthesisDocsPerType)) }
+        // 不再自动裁剪，而是由 UI 层面拦截
         _synthesisResults[type] = existing
-        synthesisStates[type] = .completed
+        withMutation(keyPath: \.synthesisStates) {
+            _synthesisStates[type] = .completed
+        }
         persistResults(for: type)
     }
 
@@ -163,7 +171,9 @@ final class SynthesisStore {
             return
         }
 
-        synthesisStates[type] = SynthesisStatus.generating
+        withMutation(keyPath: \.synthesisStates) {
+            _synthesisStates[type] = SynthesisStatus.generating
+        }
         let taskID = TaskCenter.shared.addTask(type: .synthesis, name: type.title, target: Localized.tr("sidebar.synthesis"))
 
         Task {
@@ -188,7 +198,9 @@ final class SynthesisStore {
                 }
             } catch {
                 await MainActor.run {
-                    self.synthesisStates[type] = SynthesisStatus.error(error.localizedDescription)
+                    withMutation(keyPath: \.synthesisStates) {
+                        self._synthesisStates[type] = SynthesisStatus.error(error.localizedDescription)
+                    }
                     TaskCenter.shared.updateTask(taskID, status: .failed(error: error.localizedDescription))
                 }
             }
@@ -228,12 +240,13 @@ final class SynthesisStore {
                 return title
             }
         }
-        let firstLine = content.components(separatedBy: .newlines).first?.trimmingCharacters(in: .whitespaces) ?? ""
-        let stripped = firstLine
-            .replacingOccurrences(of: #"^#+\s*"#, with: "", options: .regularExpression)
-            .replacingOccurrences(of: "```", with: "")
-            .trimmingCharacters(in: .whitespaces)
-        return stripped.isEmpty ? type.title : stripped
+        
+        // 使用公共格式化工具提取标题
+        if let extracted = SynthesisProcessor.extractTitle(from: content) {
+            return extracted
+        }
+        
+        return type.title
     }
 
     private static let dateFormatter: DateFormatter = {

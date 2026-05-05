@@ -1,12 +1,15 @@
 // LintView.swift
 //
 // 作者: Wang Chong
-// 功能说明: struct LintView
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的“健康检查”与“系统治理”中心（LintView），是确保知识库结构完整性与质量的核心视图。
+// 系统通过以下维度对知识库进行全自动审计与优化建议：
+// 1. 结构化审计：自动检测断开的链接（Broken Links）、孤儿页面（Orphan Pages）及循环引用，维护知识图谱的逻辑拓扑。
+// 2. 健康评分系统：基于页面规模、链接密度及错误率计算实时健康分，通过 Dashboard 直观展示知识库的整体质量水平。
+// 3. AI 治理建议：集成 LLM 对知识内容进行深度扫描，识别可合并的重复概念、建议拆分的冗余文档，并自动发现潜在的关联节点。
+// 4. 自动化修复流程：提供一键修复按钮与快捷跳转功能，支持通过 AI 智能补全缺失元数据，显著降低知识维护的人力成本。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
-// 日期: 2026-05-04
+//   - 2026-05-05: 修复返回按钮交互 Bug，完成全工程文档与魔鬼数字规范化升级
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -71,17 +74,22 @@ struct LintViewContent: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button(action: {
-                    HapticManager.shared.trigger(.selection)
-                    // 使用统一路由返回根视图并清理状态
-                    router.popToRoot()
-                    dismiss()
+                    HapticFeedback.shared.trigger(.selection)
+                    // 修复：优先使用 dismiss() 退出当前模态或 Push 栈，兜底使用路由返回
+                    if selection != nil {
+                        selection = nil // 如果是侧边栏选中的，清空选中状态以返回
+                    } else {
+                        dismiss()
+                        router.pop()
+                    }
                 }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .bold))
+                        .font(.system(size: WikiUI.subheadlineFontSize, weight: .bold))
                         .foregroundStyle(.wikiText)
-                        .frame(width: 32, height: 32)
+                        .frame(width: WikiUI.titleIconSize * 1.3, height: WikiUI.titleIconSize * 1.3)
                         .background(Color.wikiCard)
                         .clipShape(Circle())
+                        .contentShape(Circle()) // 确保热区完整
                         .shadow(color: .black.opacity(0.1), radius: 2)
                 }
             }

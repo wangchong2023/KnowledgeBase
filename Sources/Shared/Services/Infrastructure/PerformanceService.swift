@@ -1,11 +1,15 @@
 // PerformanceService.swift
 //
 // 作者: Wang Chong
-// 功能说明: Runtime performance monitoring and diagnostics for Knowledge Base.
-// 版本: 1.0
+// 功能说明: 本文件实现了知识管理系统的运行期性能监控与诊断服务（PerformanceService），旨在为系统的丝滑体验提供数据支撑。
+// 该组件通过多维度的指标追踪与可视化看板，确保了系统的健壮性与响应效率，核心功能点如下：
+// 1. 系统级资源监控：利用底层 Mach API 实时追踪应用的物理内存占用（MB），并提供周期性的自动刷新机制。
+// 2. 核心操作耗时审计：内置精确的计时器闭包（measure），涵盖了数据库 CRUD、图谱布局算法及 FTS5 搜索等关键路径的延迟分析。
+// 3. 知识资产画像：实时统计全库字数、页面规模及知识图谱的节点/边密度，为 RAG 索引与向量化提供量化的负载参考。
+// 4. 交互式性能看板：提供直观的 PerformanceDashboard 视图，通过动态图表直观展示系统各环节的运行状态与响应水平。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，规范化性能看板的 UI 间距与圆角常量
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI
@@ -164,7 +168,7 @@ struct PerformanceDashboardView: View {
                     }
                     .padding()
                     .background(Color.wikiCard)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
                     
                     // Last Updated
                     Text(Localized.tr("perf.lastUpdated") + ": " + service.metrics.lastUpdated.formatted())
@@ -225,7 +229,7 @@ struct MetricCardView: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
     }
 }
 
@@ -248,16 +252,16 @@ struct TimingRowView: View {
                 .frame(width: 100, alignment: .leading)
             
             GeometryReader { geo in
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: WikiUI.microRadius)
                     .fill(color.opacity(0.3))
-                    .frame(width: geo.size.width, height: 8)
+                    .frame(width: geo.size.width, height: WikiUI.small)
                     .overlay(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 4)
+                        RoundedRectangle(cornerRadius: WikiUI.microRadius)
                             .fill(color)
-                            .frame(width: max(barWidth, duration > 0 ? 4 : 0), height: 8)
+                            .frame(width: max(barWidth, duration > 0 ? WikiUI.tiny : 0), height: WikiUI.small)
                     }
             }
-            .frame(height: 8)
+            .frame(height: WikiUI.small)
             
             Text(String(format: "%.3fs", duration))
                 .font(.caption.monospacedDigit())

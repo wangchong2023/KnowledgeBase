@@ -44,7 +44,7 @@ struct SettingsView: View {
                 Task {
                     if await authenticate() {
                         settingsStore.isPrivacyModeEnabled = newValue
-                        HapticManager.shared.trigger(.success)
+                        HapticFeedback.shared.trigger(.success)
                     }
                 }
             }
@@ -56,7 +56,7 @@ struct SettingsView: View {
                 Task {
                     if await authenticate() {
                         settingsStore.isBiometricEnabled = newValue
-                        HapticManager.shared.trigger(.success)
+                        HapticFeedback.shared.trigger(.success)
                     }
                 }
             }
@@ -103,9 +103,15 @@ struct SettingsView: View {
                         LLMSettingsView()
                     } trailing: {
                         if llmService.isEnabled {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                                .font(.caption)
+                            if !llmService.isReady {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundStyle(.orange)
+                                    .font(.caption)
+                            } else {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                                    .font(.caption)
+                            }
                         } else {
                             Text(L10n.Settings.tr("llmNotConfigured"))
                                 .font(.caption)
@@ -157,7 +163,7 @@ struct SettingsView: View {
                         Button(L10n.Settings.tr("resetAllData"), role: .destructive) {
                             store.resetAllData()
                             store.seedDefaultContent()
-                            HapticManager.shared.trigger(.success)
+                            HapticFeedback.shared.trigger(.success)
                         }
                         Button(L10n.Common.tr("cancel"), role: .cancel) { }
                     } message: {
@@ -213,7 +219,7 @@ struct SettingsView: View {
                     .alert(L10n.Settings.tr("injectConfirm.title"), isPresented: $showInjectConfirmation) {
                         Button(L10n.Common.tr("confirm")) {
                             let count = store.generateDemoData()
-                            HapticManager.shared.trigger(.success)
+                            HapticFeedback.shared.trigger(.success)
                             ToastManager.shared.show(type: .success, message: L10n.Settings.trf("injectDemo.successMessage", count))
                         }
                         Button(L10n.Common.tr("cancel"), role: .cancel) { }
@@ -230,7 +236,7 @@ struct SettingsView: View {
                     .alert(L10n.Settings.tr("performanceTestConfirm.title"), isPresented: $showPerformanceTestConfirmation) {
                         Button(L10n.Common.tr("confirm")) {
                             injectedCount = store.generateStressTestData()
-                            HapticManager.shared.trigger(.success)
+                            HapticFeedback.shared.trigger(.success)
                             ToastManager.shared.show(type: .success, message: L10n.Settings.trf("injectDemo.successMessage", injectedCount))
                         }
                         Button(L10n.Common.tr("cancel"), role: .cancel) { }
@@ -245,7 +251,7 @@ struct SettingsView: View {
                     .confirmationDialog(L10n.Settings.tr("clearAll.confirmTitle"), isPresented: $showClearAllConfirmation, titleVisibility: .visible) {
                         Button(L10n.Settings.tr("clearAll.action"), role: .destructive) {
                             store.clearAllDeveloperData()
-                            HapticManager.shared.trigger(.success)
+                            HapticFeedback.shared.trigger(.success)
                             ToastManager.shared.show(type: .success, message: L10n.Settings.tr("clearAll.success"))
                         }
                         Button(L10n.Common.tr("cancel"), role: .cancel) { }
@@ -261,7 +267,7 @@ struct SettingsView: View {
                     .alert(L10n.Settings.tr("resetOnboarding.title"), isPresented: $showResetOnboardingConfirmation) {
                         Button(L10n.Common.tr("confirm"), role: .destructive) {
                             onboardingService.reset()
-                            HapticManager.shared.trigger(.success)
+                            HapticFeedback.shared.trigger(.success)
                             ToastManager.shared.show(type: .success, message: L10n.Settings.tr("resetOnboarding.success"))
                         }
                         Button(L10n.Common.tr("cancel"), role: .cancel) { }
@@ -302,12 +308,12 @@ struct SettingsView: View {
                             await MainActor.run {
                                 store.mountVault(at: url)
                                 TaskCenter.shared.updateTask(taskID, status: .completed)
-                                HapticManager.shared.trigger(.success)
+                                HapticFeedback.shared.trigger(.success)
                             }
                         }
                     }
                 case .failure(let error):
-                    HapticManager.shared.trigger(.error)
+                    HapticFeedback.shared.trigger(.error)
                     ToastManager.shared.show(type: .error, message: error.localizedDescription)
                 }
             }

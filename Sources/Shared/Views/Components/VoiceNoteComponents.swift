@@ -12,7 +12,7 @@ import SwiftUI
 
 // MARK: - Save Voice Note Sheet
 struct SaveVoiceNoteSheet: View {
-    @ObservedObject var speechService: SpeechService
+    @ObservedObject var speechService: SpeechProcessor
     @Binding var title: String
     @Environment(KMStore.self) var store
     @Environment(\.dismiss) private var dismiss

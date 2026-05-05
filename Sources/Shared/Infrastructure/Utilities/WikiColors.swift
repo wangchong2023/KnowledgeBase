@@ -1,12 +1,15 @@
 // WikiColors.swift
 //
 // 作者: Wang Chong
-// 功能说明: The current wiki accent color, propagated through the SwiftUI environment.
-// 版本: 1.0
+// 功能说明: 本文件定义了知识管理系统的核心调色盘与语义化颜色系统（WikiColors），作为 UI 组件样式的唯一可信源。
+// 该颜色系统基于 SwiftUI 环境分发机制，构建了一套智适应的视觉设计语言，核心功能点如下：
+// 1. 动态语义化映射：定义了 wikiBackground、wikiCard、wikiText 等语义化颜色 Token，自动适配 macOS/iOS 的深浅色外观切换。
+// 2. 知识维度色彩标识：为 PageType（如实体、概念、对比等）分配专属的视觉标识色，辅助用户通过色彩直观识别知识属性。
+// 3. 高性能环境注入：利用 WikiAccentColorKey 实现品牌色在 View 树中的响应式向下传播，确保全局主题变更的流畅性。
+// 4. 健壮的 HEX 解析与桥接：内置高效的 HEX 颜色转换引擎及 UIKit/AppKit 色彩桥接逻辑，解决跨平台环境下的色彩渲染一致性问题。
+// 版本: 1.1
 // 修改记录:
-//   - 创建: 2026-05-02
-//   - 更新: 2026-05-03
-// 日期: 2026-05-04
+//   - 2026-05-05: 升级全工程文档规范，规范化语义颜色定义与跨平台适配逻辑
 // 版权: Copyright © 2026 Wang Chong. All rights reserved.
 
 import SwiftUI

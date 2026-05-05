@@ -85,7 +85,7 @@ struct AIPulseIndicator: View {
     private func startHapticPulse() {
         Task {
             while isActive {
-                HapticManager.shared.trigger(.pulse)
+                HapticFeedback.shared.trigger(.pulse)
                 try? await Task.sleep(nanoseconds: 1_500_000_000) // 1.5s 脉搏周期
             }
         }

@@ -19,18 +19,19 @@ struct KMApp: App {
     @State private var router = AppRouter.shared
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var llmService = LLMService()
+    @State private var synthesisStore = SynthesisStore()
     @State private var hasSeenSplash = false
     
     init() {
         // 1. 初始化基础设施服务 (L0)
-        let logService = LogService()
+        let logger = Logger()
         let sqliteStore = SQLiteStore()
         let backupService = BackupService()
         let snapshotService = SnapshotService()
         let securityService = VaultStorageSecurityService()
         
         // 2. 注册协议与实例 (Service Locator 模式)
-        ServiceContainer.shared.register(logService, for: (any LogServiceProtocol).self)
+        ServiceContainer.shared.register(logger, for: (any LoggerProtocol).self)
         ServiceContainer.shared.register(sqliteStore, for: SQLiteStore.self)
         ServiceContainer.shared.register(backupService, for: BackupService.self)
         ServiceContainer.shared.register(snapshotService, for: SnapshotService.self)
@@ -52,6 +53,7 @@ struct KMApp: App {
         ServiceContainer.shared.register(KnowledgeInsightService(), for: KnowledgeInsightService.self)
         ServiceContainer.shared.register(PluginRegistry.shared, for: PluginRegistry.self)
         ServiceContainer.shared.register(WorkflowService.shared, for: WorkflowService.self)
+        ServiceContainer.shared.register(AISynthesisService.shared, for: AISynthesisService.self)
         
         // 5. 在服务注册完成后初始化 Store (确保 @Inject 依赖已就绪)
         _store = State(wrappedValue: KMStore())
@@ -68,7 +70,7 @@ struct KMApp: App {
                 ContentView()
                     .environment(store)
                     .environment(store.aiWorkflowStore)
-                    .environment(SynthesisStore())
+                    .environment(synthesisStore)
                     .environment(store.searchStore)
                     .environment(store.settingsStore)
                     .environment(ingestStore)

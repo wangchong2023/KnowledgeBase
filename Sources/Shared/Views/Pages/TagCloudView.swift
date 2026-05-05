@@ -173,7 +173,7 @@ struct TagCloudViewContent: View {
             ) {
                 Button(L10n.Common.tr("deleteAll"), role: .destructive) {
                     store.bulkDeleteTags(selectedTagsForBulk)
-                    HapticManager.shared.trigger(.success)
+                    HapticFeedback.shared.trigger(.success)
                     selectedTagsForBulk.removeAll()
                     isEditMode = false
                 }
@@ -256,7 +256,7 @@ struct TagCloudViewContent: View {
                     selectedTag = selectedTag == item.tag ? nil : item.tag
                 }
             }
-            HapticManager.shared.trigger(.selection)
+            HapticFeedback.shared.trigger(.selection)
         }) {
             HStack(spacing: 6) {
                 Text("#\(item.tag)")

@@ -26,7 +26,7 @@ struct ShortcutManager {
         var content: String
         
         func perform() async throws -> some IntentResult & ReturnsValue<String> {
-            LogService.shared.debug("🎙️ [Siri] 正在记录内容：\(content)")
+            Logger.shared.debug("🎙️ [Siri] 正在记录内容：\(content)")
             return .result(value: "已存入智元")
         }
     }
