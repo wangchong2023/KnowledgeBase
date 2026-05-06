@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-03
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import AppIntents
@@ -19,21 +19,21 @@ struct ShortcutManager {
     
     // MARK: - 快速记录 Intent
     struct CaptureIntent: AppIntent {
-        nonisolated(unsafe) static var title: LocalizedStringResource = "在智元中记录"
-        nonisolated(unsafe) static var description = LocalizedStringResource("快速将文本存入智元知识库")
+        nonisolated(unsafe) static var title: LocalizedStringResource = "在智宇中记录"
+        nonisolated(unsafe) static var description = LocalizedStringResource("快速将文本存入智宇知识库")
         
         @Parameter(title: "内容")
         var content: String
         
         func perform() async throws -> some IntentResult & ReturnsValue<String> {
             Logger.shared.debug("🎙️ [Siri] 正在记录内容：\(content)")
-            return .result(value: "已存入智元")
+            return .result(value: "已存入智宇")
         }
     }
     
     // MARK: - 搜索知识库 Intent
     struct SearchWikiIntent: AppIntent {
-        nonisolated(unsafe) static var title: LocalizedStringResource = "在智元中搜索"
+        nonisolated(unsafe) static var title: LocalizedStringResource = "在智宇中搜索"
         nonisolated(unsafe) static var description = LocalizedStringResource("搜索知识库内容")
         nonisolated(unsafe) static var openAppWhenRun: Bool = true
         
@@ -48,7 +48,7 @@ struct ShortcutManager {
     
     // MARK: - 获取统计 Intent
     struct GetWikiStatsIntent: AppIntent {
-        nonisolated(unsafe) static var title: LocalizedStringResource = "查看智元统计"
+        nonisolated(unsafe) static var title: LocalizedStringResource = "查看智宇统计"
         nonisolated(unsafe) static var description = LocalizedStringResource("获取知识库概览信息")
         
         func perform() async throws -> some IntentResult & ReturnsValue<String> {
@@ -58,7 +58,7 @@ struct ShortcutManager {
 }
 
 @available(iOS 16.0, macOS 13.0, *)
-struct ZhiYuanShortcuts: AppShortcutsProvider {
+struct ZhiYuShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: ShortcutManager.CaptureIntent(),

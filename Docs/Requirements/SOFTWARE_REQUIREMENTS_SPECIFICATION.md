@@ -1,4 +1,4 @@
-# 智元 (ZhiYuan) 软件需求规格说明书 (SRS)
+# 智宇 (ZhiYu) 软件需求规格说明书 (SRS)
 
 ## 1. 性能需求 (Performance Requirements)
 

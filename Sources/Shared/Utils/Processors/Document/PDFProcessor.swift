@@ -12,7 +12,7 @@
 import SwiftUI
 import PDFKit
 
-// MARK: - PDF Document Model
+// MARK: - PDF 文档模型
 
 /// PDF 文档信息模型
 ///
@@ -50,7 +50,7 @@ struct PDFDocumentInfo: Identifiable, Codable {
     }
 }
 
-// MARK: - PDF Highlight
+// MARK: - PDF 高亮
 
 /// PDF 高亮标记模型
 ///

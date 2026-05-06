@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 升级全工程文档规范，规范化 UI 层级、圆角与间距常量
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -150,7 +150,12 @@ struct ContentView: View {
             }
 
             Tab(AppTab.settings.displayTitle, systemImage: AppTab.settings.icon, value: AppTab.settings) {
-                SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
+                NavigationStack(path: $router.path) {
+                    SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
+                        .navigationDestination(for: AppRoute.self) { route in
+                            ViewFactory.makeView(for: route)
+                        }
+                }
             }
         }
         .tint(tintColor)
@@ -210,12 +215,17 @@ struct ContentView: View {
                 }
                 .tag(AppTab.graph)
 
-            SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
-                .accessibilityIdentifier("Settings")
-                .tabItem {
-                    Label(AppTab.settings.displayTitle, systemImage: AppTab.settings.icon)
-                }
-                .tag(AppTab.settings)
+            NavigationStack(path: $router.path) {
+                SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
+                    .accessibilityIdentifier("Settings")
+                    .navigationDestination(for: AppRoute.self) { route in
+                        ViewFactory.makeView(for: route)
+                    }
+            }
+            .tabItem {
+                Label(AppTab.settings.displayTitle, systemImage: AppTab.settings.icon)
+            }
+            .tag(AppTab.settings)
         }
         .tint(tintColor)
         .onOpenURL { url in
@@ -289,11 +299,18 @@ struct ContentView: View {
     @ViewBuilder
     private var ingestTabContent: some View {
         @Bindable var router = router
-        if languageForceUpdate {
-            IngestView(selectedTab: $router.selectedTab)
-                .id(languageForceUpdate)
-        } else {
-            IngestView(selectedTab: $router.selectedTab)
+        NavigationStack(path: $router.path) {
+            Group {
+                if languageForceUpdate {
+                    IngestView(selectedTab: $router.selectedTab)
+                        .id(languageForceUpdate)
+                } else {
+                    IngestView(selectedTab: $router.selectedTab)
+                }
+            }
+            .navigationDestination(for: AppRoute.self) { route in
+                ViewFactory.makeView(for: route)
+            }
         }
     }
 

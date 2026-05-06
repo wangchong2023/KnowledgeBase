@@ -1223,13 +1223,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元"
+            "value": "智宇"
           }
         }
       }
@@ -1632,13 +1632,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元"
+            "value": "智宇"
           }
         }
       }
@@ -1650,7 +1650,7 @@
         "en": {
           "stringUnit": {
             "state": "new",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         }
       }
@@ -2312,7 +2312,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan AI Assistant"
+            "value": "ZhiYu AI Assistant"
           }
         },
         "zh-Hans": {
@@ -2465,7 +2465,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan Room"
+            "value": "ZhiYu Room"
           }
         },
         "zh-Hans": {
@@ -2771,7 +2771,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan Room"
+            "value": "ZhiYu Room"
           }
         },
         "zh-Hans": {
@@ -4791,7 +4791,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan Export"
+            "value": "ZhiYu Export"
           }
         },
         "zh-Hans": {
@@ -7597,13 +7597,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Quickly save text to ZhiYuan Knowledge Base"
+            "value": "Quickly save text to ZhiYu Knowledge Base"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "快速将文本存入智元知识库"
+            "value": "快速将文本存入智宇知识库"
           }
         }
       }
@@ -7631,13 +7631,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Saved to ZhiYuan"
+            "value": "Saved to ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "已存入智元"
+            "value": "已存入智宇"
           }
         }
       }
@@ -7648,13 +7648,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Capture in ZhiYuan"
+            "value": "Capture in ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在智元中记录"
+            "value": "在智宇中记录"
           }
         }
       }
@@ -7716,13 +7716,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Search in ZhiYuan"
+            "value": "Search in ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在智元中搜索"
+            "value": "在智宇中搜索"
           }
         }
       }
@@ -7767,13 +7767,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan Statistics"
+            "value": "ZhiYu Statistics"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "查看智元统计"
+            "value": "查看智宇统计"
           }
         }
       }
@@ -9239,7 +9239,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You are a ZhiYuan compiler. Compile raw material into structured content. Return only JSON, no other text."
+            "value": "You are a ZhiYu compiler. Compile raw material into structured content. Return only JSON, no other text."
           }
         },
         "zh-Hans": {
@@ -9562,7 +9562,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You are a ZhiYuan assistant, running on the Karpathy LLM Wiki methodology."
+            "value": "You are a ZhiYu assistant, running on the Karpathy LLM Wiki methodology."
           }
         },
         "zh-Hans": {
@@ -11528,13 +11528,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs camera access to scan document text (OCR)."
+            "value": "ZhiYu needs camera access to scan document text (OCR)."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要相机权限来扫描文档文字（OCR）。"
+            "value": "智宇需要相机权限来扫描文档文字（OCR）。"
           }
         }
       }
@@ -11558,13 +11558,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs microphone access to record voice notes."
+            "value": "ZhiYu needs microphone access to record voice notes."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要麦克风权限来录制语音笔记。"
+            "value": "智宇需要麦克风权限来录制语音笔记。"
           }
         }
       }
@@ -11576,13 +11576,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs photo library access for OCR text scanning."
+            "value": "ZhiYu needs photo library access for OCR text scanning."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要相册权限来进行 OCR 文字扫描。"
+            "value": "智宇需要相册权限来进行 OCR 文字扫描。"
           }
         }
       }
@@ -11594,13 +11594,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs speech recognition to transcribe your voice notes."
+            "value": "ZhiYu needs speech recognition to transcribe your voice notes."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要语音识别来转录你的语音笔记。"
+            "value": "智宇需要语音识别来转录你的语音笔记。"
           }
         }
       }
@@ -11611,13 +11611,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan will index your knowledge vault so you can find pages directly via system search."
+            "value": "ZhiYu will index your knowledge vault so you can find pages directly via system search."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元将索引您的知识库，以便您可以通过系统搜索直接找到页面。"
+            "value": "智宇将索引您的知识库，以便您可以通过系统搜索直接找到页面。"
           }
         }
       }
@@ -12124,13 +12124,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Now, start entering your first piece of knowledge and let your wisdom take root in ZhiYuan."
+            "value": "Now, start entering your first piece of knowledge and let your wisdom take root in ZhiYu."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "现在，开始录入您的第一条知识，让您的智慧在“智元”中生根发芽。"
+            "value": "现在，开始录入您的第一条知识，让您的智慧在“智宇”中生根发芽。"
           }
         }
       }
@@ -12158,13 +12158,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan is an LLM-powered second brain tool designed to help you build a structured knowledge vault via backlinking and graph technology."
+            "value": "ZhiYu is an LLM-powered second brain tool designed to help you build a structured knowledge vault via backlinking and graph technology."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元是一款基于 LLM 的第二大脑工具，旨在通过双向链接和图谱技术，帮助您构建结构化的个人知识体系。"
+            "value": "智宇是一款基于 LLM 的第二大脑工具，旨在通过双向链接和图谱技术，帮助您构建结构化的个人知识体系。"
           }
         }
       }
@@ -12277,7 +12277,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You are a ZhiYuan assistant. Answer based on the following content."
+            "value": "You are a ZhiYu assistant. Answer based on the following content."
           }
         },
         "zh-Hans": {
@@ -12600,7 +12600,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Compile the following content into a structured ZhiYuan page. Existing pages"
+            "value": "Compile the following content into a structured ZhiYu page. Existing pages"
           }
         },
         "zh-Hans": {
@@ -12702,7 +12702,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan LLM (Bundled)"
+            "value": "ZhiYu LLM (Bundled)"
           }
         },
         "zh-Hans": {
@@ -13423,7 +13423,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Welcome to ZhiYuan"
+            "value": "Welcome to ZhiYu"
           }
         },
         "zh-Hans": {
@@ -13844,7 +13844,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
@@ -16346,13 +16346,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元 (ZhiYuan)"
+            "value": "智宇 (ZhiYu)"
           }
         }
       }
@@ -16363,13 +16363,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Automatically generated by ZhiYuan AI Engine | Privacy priority, local storage"
+            "value": "Automatically generated by ZhiYu AI Engine | Privacy priority, local storage"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "由 ZhiYuan AI 引擎自动生成 | 隐私优先，本地存储"
+            "value": "由 ZhiYu AI 引擎自动生成 | 隐私优先，本地存储"
           }
         }
       }
@@ -16964,7 +16964,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
@@ -17757,7 +17757,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reset ZhiYuan"
+            "value": "Reset ZhiYu"
           }
         },
         "zh-Hans": {
@@ -18057,7 +18057,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan Statistics"
+            "value": "ZhiYu Statistics"
           }
         },
         "zh-Hans": {
@@ -19845,13 +19845,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元"
+            "value": "智宇"
           }
         }
       }
@@ -20660,13 +20660,30 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "知识库"
+          }
+        }
+      }
+    },
+    "tag.allTags": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All Tags"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部标签"
           }
         }
       }
@@ -20837,6 +20854,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "重命名标签"
+          }
+        }
+      }
+    },
+    "tag.relatedPagesTitle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Related Pages"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关联页面"
           }
         }
       }
@@ -21779,13 +21813,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Welcome to ZhiYuan"
+            "value": "Welcome to ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "欢迎使用智元"
+            "value": "欢迎使用智宇"
           }
         }
       }
@@ -21915,7 +21949,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {

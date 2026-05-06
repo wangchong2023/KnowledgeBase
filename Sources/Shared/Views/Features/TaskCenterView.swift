@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-03
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -106,7 +106,7 @@ struct TaskCenterView: View {
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
                                         .background(taskColor(for: type).opacity(0.1))
-                                        .clipShape(Capsule())
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
                                     }
                                 }
                                 .padding(.vertical, 4)
@@ -202,7 +202,7 @@ struct TaskCenterView: View {
             cornerRadius: 20,
             background: WikiUI.containerBackground,
             border: runningCount > 0 ? color.opacity(0.3) : WikiUI.containerBorder,
-            padding: false
+            padding: true
         )
         .padding(.vertical, 14)
         .shadow(color: Color.black.opacity(0.02), radius: 8, x: 0, y: 4)

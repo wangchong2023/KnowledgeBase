@@ -6,7 +6,7 @@
 // 修改记录:
 //   - 创建: 2026-05-04
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import Security
@@ -14,7 +14,7 @@ import Security
 /// Lightweight Keychain wrapper for storing sensitive strings (e.g. API keys).
 final class KeychainService: Sendable {
     static let shared = KeychainService()
-    private let serviceName = "com.zhiyuan.keychain"
+    private let serviceName = "com.zhiyu.keychain"
 
     private init() {}
 

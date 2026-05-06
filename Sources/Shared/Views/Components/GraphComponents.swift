@@ -13,7 +13,7 @@
 //   - 2026-05-04: 引入 LOD (Level of Detail) 渲染优化。
 //   - 2026-05-05: 增加详细中文文档注释，规范函数头
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 //
 
 import SwiftUI

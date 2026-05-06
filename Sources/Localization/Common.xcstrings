@@ -578,6 +578,23 @@
       },
       "extractionState": "manual"
     },
+    "misc.refresh": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
     "misc.save": {
       "localizations": {
         "en": {
@@ -770,7 +787,7 @@
         }
       }
     },
-    "deepLink.log.indexingFailed": {
+    "misc.deepLink.log.indexingFailed": {
       "extractionState": "manual",
       "localizations": {
         "en": {
@@ -782,7 +799,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Spotlight 索引失败: %@"
+            "value": "Spotlight 索引更新失败: %@"
           }
         }
       }

@@ -1,4 +1,4 @@
-# 智元 (ZhiYuan)
+# 智宇 (ZhiYu)
 > 基于 Karpathy LLM Wiki 方法论的 AI 原生知识管理进化引擎。
 
 ---

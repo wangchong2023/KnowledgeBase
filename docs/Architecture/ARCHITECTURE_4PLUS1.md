@@ -1,4 +1,4 @@
-# 智元 (ZhiYuan) 架构设计文档 (4+1 View Model)
+# 智宇 (ZhiYu) 架构设计文档 (4+1 View Model)
 
 ---
 
@@ -131,7 +131,7 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    subgraph "Apple Sandbox (智元 (ZhiYuan) App)"
+    subgraph "Apple Sandbox (智宇 (ZhiYu) App)"
         DB[(km.sqlite3)]
         VectorIndex[(Vector Store)]
         BookmarkStore[UserDefaults Bookmarks]
@@ -149,8 +149,8 @@ graph LR
     
     BookmarkStore -- Scoped URL --> Obsidian
     BookmarkStore -- Scoped URL --> Documents
-    智元 (ZhiYuan) -- Accelerate.framework --> VectorIndex
-    智元 (ZhiYuan) -- Dynamic Load --> P1
+    智宇 (ZhiYu) -- Accelerate.framework --> VectorIndex
+    智宇 (ZhiYu) -- Dynamic Load --> P1
 ```
 
 ---
@@ -158,7 +158,7 @@ graph LR
 ## 6. 核心技术深度解析 (Core Technical Deep Dive)
 
 ### 6.1 混合检索与 RRF 融合 (Hybrid RAG)
-智元 (ZhiYuan) 采用 **“两阶段检索”** 架构以平衡查准率与查全率：
+智宇 (ZhiYu) 采用 **“两阶段检索”** 架构以平衡查准率与查全率：
 - **阶段一：混合召回 (Hybrid Recall)**
     - **FTS5 关键词检索**：利用 SQLite 原生引擎进行 BM25 类加权搜索，擅长处理人名、专有名词等精确匹配。
     - **向量相似度检索**：利用 Accelerate 框架计算余弦相似度，擅长处理“意图匹配”（如搜索“怎么做”能搜到“操作手册”）。
@@ -225,7 +225,7 @@ graph LR
 *   **非阻塞异步**：视图层通过 `await` 发起请求，确保 UI 线程（MainActor）在等待计算结果时依然保持 60 FPS 的响应性。
 
 ### 10.2 混合检索算法 (Hybrid RAG: RRF)
-智元 (ZhiYuan) 采用倒数排名融合（Reciprocal Rank Fusion, RRF）来合并 FTS5 与向量搜索结果：
+智宇 (ZhiYu) 采用倒数排名融合（Reciprocal Rank Fusion, RRF）来合并 FTS5 与向量搜索结果：
 *   **策略**：k 默认取值 60，平衡了关键词匹配的“刚性”与语义关联的“柔性”。
 *   **流程**：`LinkService` 同时触发两条链路查询，汇总后进行 RRF 打分，最后由 `LLMService` 对 Top-K 结果执行精排（Rerank）。
 

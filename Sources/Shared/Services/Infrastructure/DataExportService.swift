@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-04
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import PDFKit
@@ -35,7 +35,7 @@ final class DataExportService {
     @MainActor
     func generatePDFReport(pages: [WikiPage]) async throws -> URL {
         let markdown = pages.map { "# \($0.title)\n\n\($0.content)" }.joined(separator: "\n\n---\n\n")
-        let fileName = "ZhiYuan_Knowledge_Report_\(Int(Date().timeIntervalSince1970))"
+        let fileName = "ZhiYu_Knowledge_Report_\(Int(Date().timeIntervalSince1970))"
         
         let url = try await WebViewExportService.shared.exportToPDF(markdown: markdown, fileName: fileName)
         

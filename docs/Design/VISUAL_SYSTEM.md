@@ -1,4 +1,4 @@
-# 智元 (KM) 视觉设计系统 (Design System)
+# 智宇 (KM) 视觉设计系统 (Design System)
 
 ## 1. 设计原则 (Principles)
 *   **深邃感**：采用暗色调背景与半透明材质（Material），营造专注、理性的阅读氛围。

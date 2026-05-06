@@ -1,4 +1,4 @@
-# 智元 (ZhiYuan) 全量特性与技术规格清单
+# 智宇 (ZhiYu) 全量特性与技术规格清单
 
 > 本文档从 PRODUCT_REQUIREMENTS.md 中拆分，集中列出所有产品特性与技术规格。
 

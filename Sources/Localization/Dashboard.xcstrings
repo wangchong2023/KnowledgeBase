@@ -341,7 +341,7 @@
       },
       "extractionState": "manual"
     },
-    "insight.daily.systemPrompt": {
+    "dashboard.insight.daily.systemPrompt": {
       "localizations": {
         "en": {
           "stringUnit": {

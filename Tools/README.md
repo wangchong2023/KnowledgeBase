@@ -1,6 +1,6 @@
-# ZhiYuan 开发者工具箱 (Developer Tools)
+# ZhiYu 开发者工具箱 (Developer Tools)
 
-本目录包含用于加速 ZhiYuan 开发与测试的辅助脚本与工具。
+本目录包含用于加速 ZhiYu 开发与测试的辅助脚本与工具。
 
 ## 目录结构原则
 

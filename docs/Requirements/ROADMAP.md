@@ -1,4 +1,4 @@
-# 智元 (KM) 未来进化路线图 (Evolution Roadmap)
+# 智宇 (KM) 未来进化路线图 (Evolution Roadmap)
 
 ## 1. 短期目标 (Next 3 Months): 工程精细化
 *   [x] **嵌入式 AI 引擎**: 集成 `Llama.cpp` 实现进程内模型推断 — `OnDeviceLLMService` 已实现。

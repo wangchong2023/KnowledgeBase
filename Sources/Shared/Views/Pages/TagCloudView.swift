@@ -12,7 +12,7 @@
 //   - 2026-05-05: 修复标签云容器宽度未撑满导致边框与下方列表不齐的问题
 //   - 2026-05-05: 完善详细中文文档注释，规范函数头
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -84,7 +84,7 @@ struct TagCloudViewContent: View {
     var body: some View {
         mainContent
             .background(Color.wikiBackground)
-            .navigationTitle(Localized.tr("tag.title"))
+            .navigationTitle(L10n.Tag.title)
             .navigationBarTitleDisplayMode(.inline)
             .background(alertLayer)
             .task {
@@ -127,39 +127,42 @@ struct TagCloudViewContent: View {
             if tags.isEmpty {
                 emptyTagsView
             } else {
-                VStack(spacing: 0) {
-                    tagScrollView
-                }
-                .frame(maxWidth: .infinity)
-                .background(WikiUI.containerBackground)
-                .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                        .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 16)
-                )
-                .overlay(alignment: .bottom) {
-                    if isEditMode && !selectedTagsForBulk.isEmpty {
-                        bulkActionBar
+                VStack(alignment: .leading, spacing: WikiUI.medium) {
+                    WikiSectionHeader(
+                        title: L10n.Tag.allTags,
+                        icon: "tag.fill",
+                        iconColor: .wikiAccent
+                    )
+                    .padding(.horizontal, 4)
+
+                    VStack(spacing: 0) {
+                        tagScrollView
+                    }
+                    .wikiContainer(padding: true)
+                    .overlay(alignment: .bottom) {
+                        if isEditMode && !selectedTagsForBulk.isEmpty {
+                            bulkActionBar
+                        }
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
             }
 
             // 3. 关联页面列表（确保与上方卡片视觉对齐）
-            pagesListView
-                .background(WikiUI.containerBackground)
-                .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                        .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 16)
+            VStack(alignment: .leading, spacing: WikiUI.medium) {
+                WikiSectionHeader(
+                    title: L10n.Tag.relatedPagesTitle,
+                    icon: "doc.on.doc.fill",
+                    iconColor: .wikiSource
                 )
+                .padding(.horizontal, 4)
+
+                pagesListView
+                    .wikiContainer(padding: true)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
         }
     }
 
@@ -269,8 +272,7 @@ struct TagCloudViewContent: View {
                     tagCapsule(tagItem)
                 }
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
         }
         .frame(minHeight: 40)
         .fixedSize(horizontal: false, vertical: true)

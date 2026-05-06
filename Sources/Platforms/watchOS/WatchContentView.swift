@@ -43,7 +43,7 @@ struct WatchContentView: View {
                     }
                 }
             }
-            .navigationTitle("智元")
+            .navigationTitle("智宇")
             .navigationDestination(for: WikiPage.self) { page in
                 WatchPageDetailView(page: page)
             }

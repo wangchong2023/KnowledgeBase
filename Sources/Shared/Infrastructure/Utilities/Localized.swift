@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-04
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 
@@ -268,6 +268,7 @@ struct L10n {
         static var save: String { tr("save") }
         static var edit: String { tr("edit") }
         static var view: String { tr("view") }
+        static var refresh: String { tr("refresh") }
         
         struct Empty {
             static func tr(_ key: String) -> String { Localized.tr("empty.\(key)", table: "Common") }
@@ -390,5 +391,26 @@ struct L10n {
             let template = tr(key)
             return String(format: template, arguments: args)
         }
+    }
+    
+    /// 知识合成
+    struct Synthesis {
+        static func tr(_ key: String) -> String { Localized.tr("synthesis.\(key)", table: "Localizable") }
+        static func trf(_ key: String, _ args: CVarArg...) -> String {
+            let template = tr(key)
+            return String(format: template, arguments: args)
+        }
+    }
+
+    /// 标签管理
+    struct Tag {
+        static func tr(_ key: String) -> String { Localized.tr("tag.\(key)", table: "Localizable") }
+        static var title: String { tr("title") }
+        static var allTags: String { tr("allTags") }
+        static var relatedPagesTitle: String { tr("relatedPagesTitle") }
+        static var noRelatedPages: String { tr("noRelatedPages") }
+        static var editTags: String { tr("edit") }
+        static var deleteConfirmTitle: String { tr("deleteConfirmTitle") }
+        static var deleteConfirmMessage: String { tr("deleteConfirmMessage") }
     }
 }

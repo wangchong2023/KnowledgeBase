@@ -27,7 +27,7 @@ struct KMApp: App {
     @StateObject private var themeManager = ThemeManager()
     @StateObject private var llmService = LLMService()
     @State private var synthesisStore = SynthesisStore()
-    @State private var hasSeenSplash = false
+    @AppStorage("hasSeenSplash") private var hasSeenSplash = false
     
     /// 初始化应用环境
     /// 在此阶段完成 L0-L2 层的依赖注入与服务挂载
@@ -79,6 +79,8 @@ struct KMApp: App {
         #if canImport(UIKit)
         UIView.appearance(whenContainedInInstancesOf: [UIAlertController.self]).tintColor = UIColor(Color.wikiAccent)
         #endif
+        
+        print("🚀 [KM-LIFECYCLE] App Initialized at \(Date())")
     }
 
     /// 应用主场景定义

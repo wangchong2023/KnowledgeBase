@@ -2746,14 +2746,14 @@
 				CURRENT_PROJECT_VERSION = 100;
 				DEVELOPMENT_TEAM = 8A472TXX33;
 				INFOPLIST_FILE = Sources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ZhiYuan;
+				INFOPLIST_KEY_CFBundleDisplayName = ZhiYu;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.wangchong.zhiyuan;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wangchong.zhiyu;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -2972,14 +2972,14 @@
 				CURRENT_PROJECT_VERSION = 100;
 				DEVELOPMENT_TEAM = 8A472TXX33;
 				INFOPLIST_FILE = Sources/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = ZhiYuan;
+				INFOPLIST_KEY_CFBundleDisplayName = ZhiYu;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.wangchong.zhiyuan;
+				PRODUCT_BUNDLE_IDENTIFIER = com.wangchong.zhiyu;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-04
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -276,11 +276,6 @@ struct PageDetailView: View {
 #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
 #endif
-        // Register navigationDestination so NavigationLink(value: WikiPage) works
-        // both in the Graph tab's NavigationStack and elsewhere.
-        .navigationDestination(for: AppRoute.self) { route in
-            ViewFactory.makeView(for: route)
-        }
         .toolbar { toolbarContent }
         .confirmationDialog(Localized.tr("page.confirmDelete"), isPresented: $viewModel.showDeleteConfirmation) {
             Button(Localized.trf("page.deletePageTitle", viewModel.page.title), role: .destructive) {

@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 修复返回按钮交互 Bug，完成全工程文档与魔鬼数字规范化升级
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -88,13 +88,9 @@ struct LintViewContent: View {
                     }
                 }) {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: WikiUI.subheadlineFontSize, weight: .bold))
+                        .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(.wikiText)
-                        .frame(width: WikiUI.titleIconSize * 1.3, height: WikiUI.titleIconSize * 1.3)
-                        .background(WikiUI.containerBackground)
-                        .clipShape(Circle())
-                        .contentShape(Circle()) // 确保热区完整
-                        .shadow(color: .black.opacity(0.1), radius: 2)
+                        .frame(width: 32, height: 44) // 移除背景和形状，对齐 SynthesisView 风格
                 }
             }
 
@@ -117,16 +113,6 @@ struct LintViewContent: View {
                         Text(isRunning || aiStore.isScanningAI ? L10n.Lint.tr("scanning") : (selectedTab == 0 ? L10n.Lint.tr("runCheck") : L10n.Lint.tr("runAIScan")))
                     }
                     .font(.subheadline.bold())
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(buttonGradient.opacity(0.12))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(buttonGradient.opacity(0.1), lineWidth: 1)
-                    )
                     .foregroundStyle(buttonGradient)
                 }
                 .buttonStyle(.plain)
@@ -169,7 +155,7 @@ struct LintViewContent: View {
                                          issues: aiStore.lintIssues.filter { $0.severity == .info }, 
                                          icon: "info.circle.fill", color: .blue)
                         }
-                        .wikiContainer(cornerRadius: 16, padding: false)
+                        .wikiContainer(cornerRadius: 16, padding: true)
                         .padding(.horizontal)
                     }
                 }
@@ -183,11 +169,12 @@ struct LintViewContent: View {
             ZStack {
                 // 上次检查时间展示在左上角
                 VStack(alignment: .leading, spacing: 6) {
+                    Text(L10n.Lint.tr("lastCheck.title"))
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.wikiSecondary)
+                        .padding(.leading, 4)
+
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(L10n.Lint.tr("lastCheck.title"))
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(.wikiSecondary)
-                        
                         if let date = aiStore.lastLintDate {
                             Text(formatDate(date))
                                 .font(.system(size: 10, design: .monospaced))
@@ -198,7 +185,13 @@ struct LintViewContent: View {
                                 .foregroundStyle(.wikiSecondary)
                         }
                     }
-                    .wikiContainer(cornerRadius: 10, padding: true)
+                    .padding(8)
+                    .background(WikiUI.containerBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
+                    )
                 }
                 .padding(.leading, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -273,9 +266,9 @@ struct LintViewContent: View {
                 .padding(.horizontal, 20)
                 .padding(.vertical, 8)
                 .background(healthColor.opacity(0.12))
-                .clipShape(Capsule())
+                .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(
-                    Capsule()
+                    RoundedRectangle(cornerRadius: 12)
                         .stroke(healthColor.opacity(0.2), lineWidth: 1)
                 )
         }
@@ -424,15 +417,14 @@ struct LintViewContent: View {
     private func issueSection(title: String, issues: [LintIssue], icon: String, color: Color) -> some View {
         Group {
             if !issues.isEmpty {
-                VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: WikiUI.medium) {
                     HStack {
                         Label(title, systemImage: icon)
                             .font(.subheadline.bold())
                             .foregroundStyle(color)
                         Spacer()
                     }
-                    .padding()
-                    .background(color.opacity(0.05))
+                    .padding(.horizontal, 4)
                     
                     VStack(spacing: 0) {
                         ForEach(issues) { issue in
@@ -445,7 +437,9 @@ struct LintViewContent: View {
                             }
                         }
                     }
+                    .wikiContainer(padding: true)
                 }
+                .padding(.bottom, 8)
             }
         }
     }

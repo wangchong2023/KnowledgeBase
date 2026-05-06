@@ -25,7 +25,7 @@ struct CaptureIntent: AppIntent {
     }
 }
 
-/// 智元表盘组件
+/// 智宇表盘组件
 struct WatchCaptureWidget: Widget {
     let kind: String = "WatchCaptureWidget"
 
@@ -33,7 +33,7 @@ struct WatchCaptureWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             WatchWidgetView(entry: entry)
         }
-        .configurationDisplayName("智元采集")
+        .configurationDisplayName("智宇采集")
         .description("快速捕捉灵感。")
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryInline])
     }

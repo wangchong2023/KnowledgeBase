@@ -11,7 +11,7 @@
 // 修改记录:
 //   - 2026-05-05: 升级全系统容器规范，补全中文文档注释
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 @preconcurrency import SwiftUI
 

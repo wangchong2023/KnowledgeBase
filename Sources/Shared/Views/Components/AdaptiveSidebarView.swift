@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-04
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -74,34 +74,36 @@ struct AdaptiveSidebarView: View {
 /// 负责根据侧边栏选中项动态分发内容视图，支持跨平台的导航逻辑一致性
 struct AdaptiveDetailView: View {
     @Environment(KMStore.self) var store
+    @Environment(AppRouter.self) var router
     @Binding var selectedTab: AppTab
     @Binding var selection: SidebarSelection?
     @Binding var languageForceUpdate: Bool
     @ObservedObject var onboardingService: OnboardingService
     var heroNamespace: Namespace.ID
-    
+
     var body: some View {
-        switch selectedTab {
-        case .wiki:
-            DetailContentView(selection: $selection, selectedTab: $selectedTab)
-        case .graph:
-            NavigationStack {
-                GraphContainerView(heroNamespace: heroNamespace, selectedTab: $selectedTab)
-                    .navigationDestination(for: WikiPage.self) { page in
-                        PageDetailView(page: page)
-                    }
+        @Bindable var router = router
+        NavigationStack(path: $router.path) {
+            Group {
+                switch selectedTab {
+                case .wiki:
+                    DetailContentView(selection: $selection, selectedTab: $selectedTab)
+                case .graph:
+                    GraphContainerView(heroNamespace: heroNamespace, selectedTab: $selectedTab)
+                case .search:
+                    SearchView()
+                case .ingest:
+                    IngestView(selectedTab: $selectedTab)
+                case .settings:
+                    SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
+                }
             }
-        case .search:
-            NavigationStack {
-                SearchView()
-                    .navigationDestination(for: WikiPage.self) { page in
-                        PageDetailView(page: page)
-                    }
+            .navigationDestination(for: AppRoute.self) { route in
+                ViewFactory.makeView(for: route)
             }
-        case .ingest:
-            IngestView(selectedTab: $selectedTab)
-        case .settings:
-            SettingsView(onboardingService: onboardingService, languageForceUpdate: $languageForceUpdate)
+            .navigationDestination(for: WikiPage.self) { page in
+                PageDetailView(page: page)
+            }
         }
     }
 }

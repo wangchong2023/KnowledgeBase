@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 升级全工程文档规范，修复 WikiUI 成员引用 Bug，优化波形图 UI 常量
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -127,9 +127,8 @@ struct VoiceNoteView: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 10)
                     .background(Color.wikiAccent)
-                    .clipShape(Capsule())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
             }
         }
         .wikiContainer(cornerRadius: WikiUI.cardRadius, padding: true)
@@ -174,7 +173,7 @@ struct VoiceNoteView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 4)
                 .background(Color.wikiCard)
-                .clipShape(Capsule())
+                .clipShape(RoundedRectangle(cornerRadius: 6))
         }
     }
     
@@ -250,9 +249,8 @@ struct VoiceNoteView: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
                     .background(Color.wikiAccent)
-                    .clipShape(Capsule())
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             }
         }
@@ -271,9 +269,8 @@ struct VoiceNoteView: View {
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
                     .background(Color.wikiAccent)
-                    .clipShape(Capsule())
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
             }
             
             VStack(spacing: 6) {

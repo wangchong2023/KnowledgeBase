@@ -46,9 +46,9 @@ final class RAGPipelineTests: XCTestCase {
     
     func testFullRAGPipeline() async throws {
         // 1. 导入 (Ingest)
-        let testContent = "智元 (ZhiYuan) 是一款基于 RAG 架构的知识管理软件，支持双向链接。"
+        let testContent = "智宇 (ZhiYu) 是一款基于 RAG 架构的知识管理软件，支持双向链接。"
         let page = store.ingestService.ingestRawContent(
-            title: "智元简介",
+            title: "智宇简介",
             content: testContent,
             pageStore: store.sqliteStore
         )
@@ -64,11 +64,11 @@ final class RAGPipelineTests: XCTestCase {
         XCTAssertNotNil(embedding, "向量化任务应在导入后异步完成")
         
         // 3. 检索 (Hybrid Search)
-        let searchResults = await store.linkService.search(query: "什么是智元", in: store.pages)
+        let searchResults = await store.linkService.search(query: "什么是智宇", in: store.pages)
         XCTAssertTrue(searchResults.contains(where: { $0.id == pageID }), "混合检索应能根据关键词召回导入的内容")
         
         // 4. AI 总结 (Generation)
-        let prompt = "根据已知内容回答：智元的特点是什么？"
+        let prompt = "根据已知内容回答：智宇的特点是什么？"
         let systemPrompt = "你是一个专业的知识管理助手。"
         let aiResponse = try await store.llmService.generate(prompt: prompt, systemPrompt: systemPrompt)
         

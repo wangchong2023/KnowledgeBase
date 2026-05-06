@@ -9,11 +9,11 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 迁移至 Utils/Processors/Graph 并规范化社区发现算法描述
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 
-// MARK: - Community Detection
+// MARK: - 社区发现
 extension GraphLayoutProcessor {
 
     /// 使用 Louvain 算法检测社区，返回带社区信息的节点
@@ -234,7 +234,7 @@ extension GraphLayoutProcessor {
     }
 }
 
-// MARK: - Helper Types
+// MARK: - 辅助类型
 
 /// 无向边表示，用于去重
 struct EdgePair: Hashable {

@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "zh-Hans",
   "strings": {
+    "ingest.noSources": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No imported sources yet"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无导入源，开始导入您的第一份文档吧"
+          }
+        }
+      }
+    },
     "ingest.activity": {
       "extractionState": "manual",
       "localizations": {
@@ -1173,6 +1190,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "支持大多数网页、文章和 PDF 链接。AI 将自动提取核心内容。"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "ingest.actions": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quick Actions"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快捷操作"
+          }
+        }
+      },
+      "extractionState": "manual"
+    },
+    "ingest.sources": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingest Sources"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "知识来源"
           }
         }
       },

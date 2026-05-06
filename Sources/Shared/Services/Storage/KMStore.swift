@@ -13,7 +13,7 @@
 //   - 2026-05-02: 初始功能实现。
 //   - 2026-05-04: 引入子 Store 职责解耦与 DI 容器。
 //   - 2026-05-05: 升级全工程文档规范，规范化核心业务指令的文档注释。
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 @preconcurrency import SwiftUI
 @preconcurrency import Combine

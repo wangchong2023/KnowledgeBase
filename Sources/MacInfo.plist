@@ -16,9 +16,9 @@
 		<string>zh-Hans</string>
 	</array>
 	<key>CFBundleName</key>
-	<string>ZhiYuan</string>
+	<string>ZhiYu</string>
 	<key>CFBundleDisplayName</key>
-	<string>ZhiYuan</string>
+	<string>ZhiYu</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -63,7 +63,7 @@
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
 	<key>NSSpotlightUsageDescription</key>
-	<string>ZhiYuan will index your knowledge vault so you can find pages directly via system search.</string>
+	<string>ZhiYu will index your knowledge vault so you can find pages directly via system search.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 KM. All rights reserved.</string>
 	<key>LSApplicationCategoryType</key>

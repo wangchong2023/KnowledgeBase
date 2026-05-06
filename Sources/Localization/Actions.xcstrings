@@ -222,7 +222,7 @@
         }
       }
     },
-    "cmd.deepExplore": {
+    "action.cmd.deepExplore": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -239,7 +239,7 @@
       },
       "extractionState": "manual"
     },
-    "cmd.newWikiPage": {
+    "action.cmd.newWikiPage": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -256,7 +256,7 @@
       },
       "extractionState": "manual"
     },
-    "cmd.quickActions": {
+    "action.cmd.quickActions": {
       "localizations": {
         "en": {
           "stringUnit": {
@@ -273,7 +273,7 @@
       },
       "extractionState": "manual"
     },
-    "cmd.recentAccess": {
+    "action.cmd.recentAccess": {
       "localizations": {
         "en": {
           "stringUnit": {

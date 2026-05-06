@@ -9,7 +9,7 @@
 // 版本: 1.3
 // 修改记录:
 //   - 2026-05-05: 完整重构以实现 LLMServiceProtocol，修复功能丢失问题，集成全局清理事件。
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import Combine

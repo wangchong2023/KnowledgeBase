@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-03
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -81,6 +81,7 @@ struct WeeklyInsightCard: View {
                             }
                         }
                     }
+                    .padding(20) // 添加内边距，解决内容过于拥挤的问题
                     .background(WikiUI.containerBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(

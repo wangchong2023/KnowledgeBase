@@ -10,7 +10,7 @@
 // 版本: 1.0
 // 修改记录:
 //   - 2026-05-05: 初始创建，将链接解析逻辑从 WikiPage 中解耦
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 

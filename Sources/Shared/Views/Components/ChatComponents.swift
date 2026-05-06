@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 优化 PulsingDot 动画触发机制，完善符合架构规范的功能说明
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -181,7 +181,7 @@ struct ChatBubbleView: View {
                                         .padding(.horizontal, 8)
                                         .padding(.vertical, 4)
                                         .background(type.themedColor.opacity(0.15))
-                                        .clipShape(Capsule())
+                                        .clipShape(RoundedRectangle(cornerRadius: 6))
                                         .foregroundStyle(type.themedColor)
                                     }
                                     .buttonStyle(.plain)

@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 迁移至 Utils/Processors/Synthesis 并整合多媒体格式化逻辑
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 

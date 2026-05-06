@@ -9,7 +9,7 @@
 // 版本: 1.2
 // 修改记录:
 //   - 2026-05-05: 由 LinkProcessor 更名为 WebScraperProcessor，移入 Network 目录，并同步升级文档规范
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 

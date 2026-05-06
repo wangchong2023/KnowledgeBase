@@ -258,7 +258,7 @@ private struct OptionRow: View {
             }
             .wikiContainer(
                 cornerRadius: 12,
-                background: backgroundColor,
+                background: AnyView(backgroundColor),
                 border: borderColor,
                 padding: true
             )

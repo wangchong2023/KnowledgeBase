@@ -10,7 +10,7 @@
 // 修改记录:
 //   - 2026-05-05: 迁移至 Utils/Processors/Media 并完善语音处理流程说明
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 @preconcurrency import Speech

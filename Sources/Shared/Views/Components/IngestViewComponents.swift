@@ -9,7 +9,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 升级全工程文档规范，修复 WikiUI 成员引用错误，统一间距常量
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -157,24 +157,33 @@ struct IngestEntryCardsSection: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("ingest.voice")
         }
-        .padding(.horizontal)
     }
 
     private func entryCardContent(title: String, subtitle: String, icon: String, color: Color) -> some View {
-        WikiBorderedCard(borderColor: color.opacity(0.3)) {
-            VStack(spacing: 10) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
-                    .frame(width: 32, height: 32)
-                    .foregroundStyle(color)
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.wikiText)
-                Text(subtitle)
-                    .font(subtitleFont)
-                    .foregroundStyle(.wikiSecondary)
-            }
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .frame(width: 32, height: 32)
+                .foregroundStyle(color)
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.wikiText)
+                .multilineTextAlignment(.center)
+            Text(subtitle)
+                .font(subtitleFont)
+                .foregroundStyle(.wikiSecondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity, minHeight: 100)
+        .padding(.vertical, 12)
+        .background(Color.wikiCard)
+        .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+        .overlay(
+            RoundedRectangle(cornerRadius: WikiUI.smallRadius)
+                .stroke(color.opacity(0.15), lineWidth: WikiUI.borderWidth)
+        )
     }
 }
 
@@ -209,32 +218,47 @@ struct IngestManualFormSection: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Section header
-            WikiSectionHeader(title: L10n.Ingest.tr("manualTitle"), icon: "pencil.and.list.clipboard")
-
-            // Title field
-            VStack(alignment: .leading, spacing: 6) {
-                Text(L10n.Ingest.tr("field.title"))
-                    .font(fieldLabelFont)
-                    .foregroundStyle(.wikiSecondary)
-                WikiTextField(placeholder: L10n.Ingest.tr("field.titlePlaceholder"), text: $newTitle)
-                    .accessibilityIdentifier("ingest.titleInput")
-            }
-
-            // Type selector
-            pageTypeSelector
-
-            // Icon picker
-            iconPickerSection
-
-            // Tags field
-            VStack(alignment: .leading, spacing: 6) {
-                Text(L10n.Ingest.tr("field.tags"))
-                    .font(fieldLabelFont)
-                    .foregroundStyle(.wikiSecondary)
-                    .frame(maxWidth: .infinity, alignment: .leading) // 强制左对齐
-                WikiTagField(placeholder: L10n.Ingest.tr("field.tagsPlaceholder"), tags: $newTags)
+        VStack(spacing: 20) {
+            // Title and Type
+            VStack(alignment: .leading, spacing: 16) {
+                // Title field
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(L10n.Ingest.tr("field.title"))
+                        .font(fieldLabelFont)
+                        .foregroundStyle(.wikiSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    HStack(spacing: 12) {
+                        Image(systemName: newCustomIcon ?? newType.icon)
+                            .font(.headline)
+                            .foregroundStyle(.wikiAccent)
+                            .frame(width: 44, height: 44)
+                            .background(Color.wikiAccent.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .onTapGesture { showIconPicker = true }
+                        
+                        TextField(L10n.Ingest.tr("field.titlePlaceholder"), text: $newTitle)
+                            .font(.headline)
+                            .padding()
+                            .background(Color.wikiCard)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.wikiBorder, lineWidth: 1)
+                            )
+                    }
+                }
+                
+                pageTypeSelector
+                
+                // Tags field
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(L10n.Ingest.tr("field.tags"))
+                        .font(fieldLabelFont)
+                        .foregroundStyle(.wikiSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    WikiTagField(placeholder: L10n.Ingest.tr("field.tagsPlaceholder"), tags: $newTags)
+                }
             }
 
             // Content editor
@@ -263,7 +287,6 @@ struct IngestManualFormSection: View {
                 }
                 .tint(.wikiAccent)
                 .padding(.vertical, 12)
-                .padding(.horizontal, 16)
                 .accessibilityIdentifier("ingest.smartToggleAction")
                 
                 Divider().padding(.leading, 44)
@@ -281,7 +304,6 @@ struct IngestManualFormSection: View {
             }
             .tint(.wikiSource)
             .padding(.vertical, 12)
-            .padding(.horizontal, 16)
             
             if useSmartIngest || useDeepScan {
                 VStack(alignment: .leading, spacing: 4) {
@@ -297,17 +319,11 @@ struct IngestManualFormSection: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
                 .padding(.bottom, 12)
                 .transition(.opacity)
             }
         }
-        .background(Color.wikiCard.opacity(0.6))
-        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
-        .overlay(
-            RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                .stroke(Color.wikiBorder.opacity(0.3), lineWidth: 1)
-        )
+        .wikiContainer(padding: true)
         .padding(.horizontal)
 
         // Smart preview
@@ -469,75 +485,77 @@ struct SmartIngestPreview: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "sparkles")
-                    .foregroundStyle(.wikiAccent)
-                Text(L10n.Ingest.tr("preview"))
-                    .font(.headline)
-                    .foregroundStyle(.wikiText)
-                Spacer()
-                Button(action: onConfirm) {
-                    WikiCapsuleButton(title: L10n.Ingest.tr("previewConfirm"), icon: "checkmark", isPrimary: true, color: .wikiAccent)
-                }
-                .buttonStyle(.plain)
-                Button(action: onDiscard) {
-                    WikiCapsuleButton(title: L10n.Ingest.tr("previewDiscard"), icon: nil, isPrimary: false)
-                }
-                .buttonStyle(.plain)
-            }
-
-            // Type + Tags chips
-            HStack(spacing: 8) {
-                if let type = PageType(rawValue: result.suggestedType) {
-                    WikiChip(text: type.displayName, color: type.themedColor)
-                }
-                ForEach(result.suggestedTags.prefix(5), id: \.self) { tag in
-                    WikiChip(text: "#\(tag)", color: .wikiAccent, backgroundOpacity: 0.1)
-                }
-            }
-
-            if !result.summary.isEmpty {
-                Text(result.summary)
-                    .font(previewFont)
-                    .foregroundStyle(.wikiSecondary)
-                    .italic()
-            }
-
-            // Compiled content preview
-            ScrollView {
-                Text(result.compiledContent)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.wikiText)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .frame(maxHeight: 200)
-            .padding(8)
-            .background(Color.wikiBackground)
-            .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
-
-            // Related titles
-            if !result.relatedTitles.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(L10n.Ingest.tr("suggestLinks"))
-                        .font(previewFont.weight(.medium))
-                        .foregroundStyle(.wikiSecondary)
-
-                    ForEach(result.relatedTitles, id: \.self) { title in
-                        HStack(spacing: 4) {
-                            Image(systemName: "link")
-                                .font(.caption2)
-                            Text("[[\(title)]]")
-                                .font(previewFont)
+        VStack(alignment: .leading, spacing: WikiUI.medium) {
+            WikiSectionHeader(
+                title: L10n.Ingest.tr("preview"),
+                icon: "sparkles",
+                iconColor: .wikiAccent,
+                trailing: AnyView(
+                    HStack {
+                        Button(action: onConfirm) {
+                            WikiCapsuleButton(title: L10n.Ingest.tr("previewConfirm"), icon: "checkmark", isPrimary: true, color: .wikiAccent)
                         }
-                        .foregroundStyle(.wikiAccent)
+                        .buttonStyle(.plain)
+                        Button(action: onDiscard) {
+                            WikiCapsuleButton(title: L10n.Ingest.tr("previewDiscard"), icon: nil, isPrimary: false)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                )
+            )
+            .padding(.horizontal, 4)
+
+            VStack(alignment: .leading, spacing: 12) {
+                // Type + Tags chips
+                HStack(spacing: 8) {
+                    if let type = PageType(rawValue: result.suggestedType) {
+                        WikiChip(text: type.displayName, color: type.themedColor)
+                    }
+                    ForEach(result.suggestedTags.prefix(5), id: \.self) { tag in
+                        WikiChip(text: "#\(tag)", color: .wikiAccent, backgroundOpacity: 0.1)
+                    }
+                }
+
+                if !result.summary.isEmpty {
+                    Text(result.summary)
+                        .font(previewFont)
+                        .foregroundStyle(.wikiSecondary)
+                        .italic()
+                }
+
+                // Compiled content preview
+                ScrollView {
+                    Text(result.compiledContent)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(.wikiText)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .frame(maxHeight: 200)
+                .padding(8)
+                .background(Color.wikiBackground)
+                .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+
+                // Related titles
+                if !result.relatedTitles.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L10n.Ingest.tr("suggestLinks"))
+                            .font(previewFont.weight(.medium))
+                            .foregroundStyle(.wikiSecondary)
+
+                        ForEach(result.relatedTitles, id: \.self) { title in
+                            HStack(spacing: 4) {
+                                Image(systemName: "link")
+                                    .font(.caption2)
+                                Text("[[\(title)]]")
+                                    .font(previewFont)
+                            }
+                            .foregroundStyle(.wikiAccent)
+                        }
                     }
                 }
             }
+            .wikiContainer(padding: true)
         }
-        .padding()
-        .background(Color.wikiCard)
-        .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
     }
 }
 
@@ -546,10 +564,9 @@ struct SmartIngestPreview: View {
 /// 负责提供各导入方式的功能说明及操作建议，提升用户初次使用体验
 struct IngestTipsSection: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.Ingest.tr("tips"))
-                .font(.headline)
-                .foregroundStyle(.wikiText)
+        VStack(alignment: .leading, spacing: WikiUI.medium) {
+            WikiSectionHeader(title: L10n.Ingest.tr("tips"), icon: "lightbulb.fill", iconColor: .orange)
+                .padding(.horizontal, 4)
 
             // Three import method cards
             HStack(spacing: 10) {
@@ -569,6 +586,7 @@ struct IngestTipsSection: View {
                     desc: L10n.Ingest.tr("method.manualDesc")
                 )
             }
+            .wikiContainer(padding: true)
         }
         .padding(.horizontal)
     }

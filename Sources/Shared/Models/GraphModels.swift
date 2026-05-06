@@ -5,7 +5,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 移出 LogEntry 模型至 Logger.swift，专注于图谱业务模型。
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import CoreGraphics

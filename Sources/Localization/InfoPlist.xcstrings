@@ -7,13 +7,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元"
+            "value": "智宇"
           }
         }
       },
@@ -26,7 +26,7 @@
         "en": {
           "stringUnit": {
             "state": "new",
-            "value": "ZhiYuan"
+            "value": "ZhiYu"
           }
         }
       }
@@ -37,13 +37,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs camera access to scan document text (OCR)."
+            "value": "ZhiYu needs camera access to scan document text (OCR)."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要相机权限来扫描文档文字（OCR）。"
+            "value": "智宇需要相机权限来扫描文档文字（OCR）。"
           }
         }
       },
@@ -67,13 +67,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs microphone access to record voice notes."
+            "value": "ZhiYu needs microphone access to record voice notes."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要麦克风权限来录制语音笔记。"
+            "value": "智宇需要麦克风权限来录制语音笔记。"
           }
         }
       },
@@ -85,13 +85,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs photo library access for OCR text scanning."
+            "value": "ZhiYu needs photo library access for OCR text scanning."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要相册权限来进行 OCR 文字扫描。"
+            "value": "智宇需要相册权限来进行 OCR 文字扫描。"
           }
         }
       },
@@ -103,13 +103,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan needs speech recognition to transcribe your voice notes."
+            "value": "ZhiYu needs speech recognition to transcribe your voice notes."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元需要语音识别来转录你的语音笔记。"
+            "value": "智宇需要语音识别来转录你的语音笔记。"
           }
         }
       },
@@ -121,13 +121,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "ZhiYuan will index your knowledge vault so you can find pages directly via system search."
+            "value": "ZhiYu will index your knowledge vault so you can find pages directly via system search."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "智元将索引您的知识库，以便您可以通过系统搜索直接找到页面。"
+            "value": "智宇将索引您的知识库，以便您可以通过系统搜索直接找到页面。"
           }
         }
       }

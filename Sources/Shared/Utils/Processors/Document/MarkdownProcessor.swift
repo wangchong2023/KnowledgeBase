@@ -10,16 +10,16 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 优化 H1-H6 解析逻辑，迁移至 Utils/Processors 归口管理
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 
-// MARK: - Markdown Parser
+// MARK: - Markdown 解析器
 /// Pure parsing layer for Markdown content. Returns structured block representations.
 /// Rendering is handled separately by MarkdownRendererView.
 final class MarkdownProcessor {
 
-    // MARK: - Block Types
+    // MARK: - 块类型
     enum BlockType {
         case heading(text: String, level: Int)
         case paragraph(text: String)
@@ -32,7 +32,7 @@ final class MarkdownProcessor {
         case details(summary: String, content: String)
     }
 
-    // MARK: - Inline Types
+    // MARK: - 行内类型
     enum InlineType {
         case text, bold, italic, code, wikilink, link, emoji
     }
@@ -42,7 +42,7 @@ final class MarkdownProcessor {
         let content: String
     }
 
-    // MARK: - Parse Full Content
+    // MARK: - 解析完整内容
     func parse(_ content: String) -> [BlockType] {
         let lines = content.components(separatedBy: "\n")
         var blocks: [BlockType] = []
@@ -113,7 +113,7 @@ final class MarkdownProcessor {
         return blocks
     }
 
-    // MARK: - Parse Details Block
+    // MARK: - 解析折叠块
     private func parseDetailsBlock(lines: [String], startIndex: Int) -> (block: BlockType, nextIndex: Int)? {
         let trimmed = lines[startIndex].trimmingCharacters(in: .whitespaces)
         guard trimmed.hasPrefix("<details>") else { return nil }
@@ -147,7 +147,7 @@ final class MarkdownProcessor {
         return (.details(summary: summary, content: contentLines.joined(separator: "\n")), i)
     }
 
-    // MARK: - Parse Code Block
+    // MARK: - 解析代码块
     private func parseCodeBlock(lines: [String], startIndex: Int) -> (block: BlockType, nextIndex: Int)? {
         let trimmed = lines[startIndex].trimmingCharacters(in: .whitespaces)
         guard trimmed.hasPrefix("```") else { return nil }
@@ -164,7 +164,7 @@ final class MarkdownProcessor {
         return (.codeBlock(code: codeLines.joined(separator: "\n"), language: language), i + 1)
     }
 
-    // MARK: - Parse Heading
+    // MARK: - 解析标题
     private func parseHeading(_ line: String) -> BlockType? {
         let trimmed = line.trimmingCharacters(in: .whitespaces)
         guard trimmed.hasPrefix("#") else { return nil }
@@ -186,7 +186,7 @@ final class MarkdownProcessor {
         return nil
     }
 
-    // MARK: - Parse Horizontal Rule
+    // MARK: - 解析水平线
     private func parseHorizontalRule(_ line: String) -> BlockType? {
         if line.hasPrefix("---") || line.hasPrefix("***") || line.hasPrefix("___") {
             return .horizontalRule
@@ -194,7 +194,7 @@ final class MarkdownProcessor {
         return nil
     }
 
-    // MARK: - Parse Task List
+    // MARK: - 解析任务列表
     private func parseTaskList(lines: [String], startIndex: Int) -> (block: BlockType, nextIndex: Int)? {
         let trimmed = lines[startIndex].trimmingCharacters(in: .whitespaces)
         guard trimmed.hasPrefix("- [ ] ") || trimmed.hasPrefix("- [x] ") ||
@@ -225,7 +225,7 @@ final class MarkdownProcessor {
         return (.taskList(items: items), i)
     }
 
-    // MARK: - Parse Bullet List
+    // MARK: - 解析无序列表
     private func parseBulletList(lines: [String], startIndex: Int) -> (block: BlockType, nextIndex: Int)? {
         let trimmed = lines[startIndex].trimmingCharacters(in: .whitespaces)
 
@@ -257,7 +257,7 @@ final class MarkdownProcessor {
         return (.bulletList(items: items, indent: 0), i)
     }
 
-    // MARK: - Parse Blockquote
+    // MARK: - 解析引用块
     private func parseBlockquote(_ line: String) -> BlockType? {
         if line.hasPrefix("> ") {
             return .blockquote(text: String(line.dropFirst(2)))
@@ -265,7 +265,7 @@ final class MarkdownProcessor {
         return nil
     }
 
-    // MARK: - Parse Table
+    // MARK: - 解析表格
     private func parseTable(lines: [String], startIndex: Int) -> (block: BlockType, nextIndex: Int)? {
         guard isTableLine(lines[startIndex].trimmingCharacters(in: .whitespaces)) else { return nil }
 
@@ -289,7 +289,7 @@ final class MarkdownProcessor {
         return (.table(headers: headers, rows: rows), i)
     }
 
-    // MARK: - Inline Parsing
+    // MARK: - 行内解析
     func parseInlineSegments(_ text: String) -> [InlineSegment] {
         var segments: [InlineSegment] = []
         let nsText = text as NSString
@@ -352,7 +352,7 @@ final class MarkdownProcessor {
         return segments
     }
 
-    // MARK: - Table Helpers
+    // MARK: - 表格辅助方法
     private func isTableLine(_ line: String) -> Bool {
         line.hasPrefix("|") && line.hasSuffix("|")
     }

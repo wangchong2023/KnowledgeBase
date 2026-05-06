@@ -1,4 +1,4 @@
-# 智元 (ZhiYuan) 性能基准报告 (Performance Benchmarks)
+# 智宇 (ZhiYu) 性能基准报告 (Performance Benchmarks)
 
 本报告基于真机（Apple Silicon / Neural Engine）实测数据，旨在为开发者提供系统级性能红线参考。
 

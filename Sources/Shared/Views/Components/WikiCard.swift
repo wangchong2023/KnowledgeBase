@@ -6,7 +6,7 @@
 // 修改记录:
 //   - 创建: 2026-05-02
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -72,7 +72,7 @@ struct WikiBorderedCard<Content: View>: View {
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
-                    .stroke(borderColor, lineWidth: 1)
+                    .stroke(borderColor, lineWidth: WikiUI.borderWidth)
             )
     }
 }
@@ -211,7 +211,7 @@ struct WikiIconChip: View {
         .foregroundStyle(isSelected ? color : .wikiSecondary)
         .overlay(
             RoundedRectangle(cornerRadius: WikiUI.smallRadius)
-                .stroke(isSelected ? color.opacity(0.5) : Color.clear, lineWidth: 1)
+                .stroke(isSelected ? color.opacity(0.5) : Color.clear, lineWidth: WikiUI.borderWidth)
         )
     }
 }
@@ -370,7 +370,7 @@ struct WikiTagField: View {
             .clipShape(RoundedRectangle(cornerRadius: WikiUI.standardRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: WikiUI.standardRadius)
-                    .stroke(Color.wikiBorder.opacity(0.5), lineWidth: 1)
+                    .stroke(Color.wikiBorder.opacity(0.5), lineWidth: WikiUI.borderWidth)
             )
         }
     }

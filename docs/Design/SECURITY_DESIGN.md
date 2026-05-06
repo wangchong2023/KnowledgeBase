@@ -1,12 +1,12 @@
-# 智元 (ZhiYuan) 安全规范与隐私架构 (Security & Privacy Spec)
+# 智宇 (ZhiYu) 安全规范与隐私架构 (Security & Privacy Spec)
 
-本文档阐述了智元系统的安全设计原则、数据隔离机制及隐私保护措施。
+本文档阐述了智宇系统的安全设计原则、数据隔离机制及隐私保护措施。
 
 ---
 
 ## 1. 数据隔离架构 (Sandbox & Isolation)
 
-智元严格遵循 **Apple Sandbox** 规范，并实施了以下内部隔离策略：
+智宇严格遵循 **Apple Sandbox** 规范，并实施了以下内部隔离策略：
 
 ### 1.1 文件访问控制 (Scoped Access)
 - **书签持有机制**：所有挂载的外部文件夹（Vault）均通过 `Security-Scoped Bookmarks` 进行权限持有。

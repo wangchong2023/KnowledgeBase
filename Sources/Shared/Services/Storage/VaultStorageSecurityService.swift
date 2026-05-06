@@ -10,7 +10,7 @@
 // 修改记录:
 //   - 2026-05-05: 增加详细中文文档注释，规范函数头
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import LocalAuthentication
@@ -25,7 +25,7 @@ final class VaultStorageSecurityService: Sendable {
     /// 当前硬件环境是否支持并已配置生物识别（FaceID/TouchID）
     var biometricsAvailable = false
     
-    private let context = LAContext()
+    // 移除单例 context，避免跨次认证状态冲突导致闪退
     
     /**
      * @description: 初始化安全服务并执行首次硬件能力审计
@@ -40,6 +40,7 @@ final class VaultStorageSecurityService: Sendable {
      * @return {*}
      */
     func checkBiometrics() {
+        let context = LAContext()
         var error: NSError?
         biometricsAvailable = context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
@@ -49,6 +50,7 @@ final class VaultStorageSecurityService: Sendable {
      * @return {Bool} 认证是否成功。注意：若硬件不支持则默认返回 true 以免逻辑死锁
      */
     func authenticateWithBiometrics() async -> Bool {
+        let context = LAContext()
         var error: NSError?
         // 若硬件不支持，直接放行（由 UI 层负责显示不可用状态）
         guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
@@ -66,6 +68,7 @@ final class VaultStorageSecurityService: Sendable {
      * @return {*}
      */
     func unlock() {
+        let context = LAContext()
         let reason = Localized.tr("security.unlockReason")
         context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, error in
             DispatchQueue.main.async {

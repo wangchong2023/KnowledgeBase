@@ -470,9 +470,14 @@ struct Graph3DView: View {
     
     private func resetCamera() {
         guard let camera = cameraNode else { return }
-        cameraDistance = 100
+        HapticFeedback.shared.trigger(.selection)
+        
+        // 强制重置相机控制器的状态
+        cameraDistance = 140 
+        
         SCNTransaction.begin()
         SCNTransaction.animationDuration = 0.8
+        SCNTransaction.animationTimingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         camera.position = SCNVector3(0, 15, Float(cameraDistance))
         camera.look(at: SCNVector3(0, 0, 0))
         SCNTransaction.commit()

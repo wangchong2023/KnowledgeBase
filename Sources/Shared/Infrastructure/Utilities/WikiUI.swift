@@ -14,7 +14,7 @@
 
 import SwiftUI
 
-// MARK: - 智元 UI 常量规范
+// MARK: - 智宇 UI 常量规范
 /// 集中管理的 UI 设计常量，用于替换工程中散落的硬编码数值。
 enum WikiUI {
     // MARK: - 布局与圆角
@@ -108,12 +108,21 @@ enum WikiUI {
     }
 
     // MARK: - 标注颜色与容器规范
-    /// 统一的容器背景色 (基于图谱 2D 柔和材质规范)
-    static let containerBackground: Color = Color.wikiCard.opacity(0.6)
-    /// 统一的容器边框色 (采用 2D 图谱工具栏样式的细边框)
-    static let containerBorder: Color = Color.wikiBorder.opacity(0.5)
+    /// 统一的容器背景色 (采用与 AI 助手背景一致的 wikiBackground 作为底色)
+    static let containerBackground: Color = Color.wikiBackground
+    /// 统一的容器边框色 (采用加深的边框色以增强辨识度)
+    static let containerBorder: Color = Color.wikiMainBorder
     /// 统一的边框线宽
-    static let borderWidth: CGFloat = 0.5
+    static let borderWidth: CGFloat = 0.8
+    
+    // MARK: - 阴影与材质规范
+    /// 标准卡片阴影
+    static let cardShadowColor = Color.black.opacity(0.05)
+    static let cardShadowRadius: CGFloat = 10
+    static let cardShadowY: CGFloat = 4
+    
+    /// 现代感材质背景 (用于容器)
+    static let containerMaterial = Material.thin
 }
 
 // MARK: - UI 扩展助手
@@ -125,9 +134,9 @@ extension View {
     ///   - background: 自定义背景色，默认为 WikiUI.containerBackground
     ///   - border: 自定义边框色，默认为 WikiUI.containerBorder
     ///   - padding: 是否应用内边距，默认为 true
-    func wikiContainer(
+    func wikiContainer<V: View>(
         cornerRadius: CGFloat = WikiUI.cardRadius,
-        background: Color = WikiUI.containerBackground,
+        background: V,
         border: Color = WikiUI.containerBorder,
         padding: Bool = true
     ) -> some View {
@@ -138,6 +147,28 @@ extension View {
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .stroke(border, lineWidth: WikiUI.borderWidth)
             )
+            .shadow(color: WikiUI.cardShadowColor, radius: WikiUI.cardShadowRadius, x: 0, y: WikiUI.cardShadowY)
+    }
+
+    /// 应用知识管理系统统一的容器样式 (默认背景)
+    func wikiContainer(
+        cornerRadius: CGFloat = WikiUI.cardRadius,
+        border: Color = WikiUI.containerBorder,
+        padding: Bool = true
+    ) -> some View {
+        self.wikiContainer(
+            cornerRadius: cornerRadius,
+            background: WikiUI.containerBackground,
+            border: border,
+            padding: padding
+        )
+    }
+    
+    /// 现代 Apple 风格卡片样式 (去边框、柔和投影、白色填充)
+    func wikiCardStyle(cornerRadius: CGFloat = WikiUI.large) -> some View {
+        self.background(Color.wikiCard)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 6)
     }
 }
 

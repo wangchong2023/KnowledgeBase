@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 升级全工程文档规范，完善 EventKit 集成与任务解析逻辑说明
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import EventKit
@@ -61,7 +61,7 @@ final class WorkflowService: ObservableObject {
         for task in tasks {
             let reminder = EKReminder(eventStore: eventStore)
             reminder.title = task
-            reminder.notes = "来自智元：\(title)"
+            reminder.notes = "来自智宇：\(title)"
             reminder.calendar = eventStore.defaultCalendarForNewReminders()
             
             try eventStore.save(reminder, commit: true)

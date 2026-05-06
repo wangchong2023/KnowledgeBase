@@ -5,9 +5,9 @@
 // 版本: 1.0
 // 修改记录:
 //   - 创建: 2026-05-02
-//   - 更新: 2026-05-04
+//   - 更新: 2026-05-06 (重构布局)
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 @preconcurrency import SwiftUI
 import UniformTypeIdentifiers
@@ -90,32 +90,46 @@ struct IngestView: View {
     var body: some View {
         @Bindable var router = router
         ScrollView {
-            VStack(spacing: 20) {
-                IngestHeroSection()
+            VStack(spacing: 24) {
+                // 1. 导入操作区域
+                VStack(alignment: .leading, spacing: WikiUI.medium) {
+                    WikiSectionHeader(title: L10n.Ingest.tr("actions"), icon: "square.and.arrow.down")
+                        .padding(.horizontal, 4)
+                    
+                    IngestEntryCardsSection(
+                        showManualForm: Binding(
+                            get: { showManualForm },
+                            set: { newValue in
+                                if newValue { manualFormTitle = L10n.Ingest.tr("manualEntry") }
+                                showManualForm = newValue
+                            }
+                        ),
+                        showOCRScan: $showOCRScan,
+                        newType: $newType,
+                        showFileImporter: $showFileImporter,
+                        showVoiceNote: $showVoiceNote,
+                        showURLImport: $showURLImport
+                    )
+                    .wikiContainer(padding: true)
+                }
 
-                IngestEntryCardsSection(
-                    showManualForm: Binding(
-                        get: { showManualForm },
-                        set: { newValue in
-                            if newValue { manualFormTitle = L10n.Ingest.tr("manualEntry") }
-                            showManualForm = newValue
-                        }
-                    ),
-                    showOCRScan: $showOCRScan,
-                    newType: $newType,
-                    showFileImporter: $showFileImporter,
-                    showVoiceNote: $showVoiceNote,
-                    showURLImport: $showURLImport
-                )
+                // 2. 导入源区域 (参考 Notebook LM)
+                importSourcesSection
 
-                // 导入活动状态展示区域（改为跳转到全局任务中心）
+                // 3. 导入活动状态展示区域
                 if !TaskCenter.shared.tasks.filter({ $0.type == .ingest }).isEmpty {
-                    taskCenterLinkSection
+                    VStack(alignment: .leading, spacing: WikiUI.medium) {
+                        taskCenterLinkSection
+                    }
                 }
                 
-                // 最近处理的文档列表
-                recentActivitiesSection
+                // 4. 最近处理的文档列表
+                VStack(alignment: .leading, spacing: WikiUI.medium) {
+                    recentActivitiesSection
+                }
             }
+            .padding(.horizontal)
+            .padding(.top, 16)
             .padding(.bottom, 40)
         }
         .background(Color.wikiBackground)
@@ -171,8 +185,66 @@ struct IngestView: View {
         .onReceive(NotificationCenter.default.publisher(for: .importFromClipboard)) { _ in
             performClipboardImport()
         }
-        .navigationDestination(for: AppRoute.self) { route in
-            ViewFactory.makeView(for: route)
+    }
+
+    // MARK: - Import Sources Section
+    private var importSourcesSection: some View {
+        let sources = store.pages.filter { $0.type == .source || $0.sourceURL != nil }
+            .sorted(by: { $0.updated > $1.updated })
+            .prefix(10)
+        
+        return VStack(alignment: .leading, spacing: WikiUI.medium) {
+            WikiSectionHeader(title: L10n.Ingest.tr("sources"), icon: "tray.full")
+                .padding(.horizontal, 4)
+            
+            VStack(spacing: 0) {
+                if sources.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "tray")
+                            .font(.system(size: 32))
+                            .foregroundStyle(.wikiSecondary.opacity(0.5))
+                        Text(L10n.Ingest.tr("noSources"))
+                            .font(.subheadline)
+                            .foregroundStyle(.wikiSecondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 32)
+                } else {
+                    ForEach(sources) { page in
+                        Button(action: { router.navigate(to: .pageDetail(id: page.id)) }) {
+                            HStack(spacing: 12) {
+                                Image(systemName: page.sourceURL != nil ? "link" : "doc.text")
+                                    .foregroundStyle(.wikiAccent)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(page.title)
+                                        .font(.subheadline.weight(.medium))
+                                        .foregroundStyle(.wikiText)
+                                    if let url = page.sourceURL {
+                                        Text(url)
+                                            .font(.caption2)
+                                            .foregroundStyle(.wikiSecondary)
+                                            .lineLimit(1)
+                                    }
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.wikiSecondary)
+                            }
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        
+                        if page.id != sources.last?.id {
+                            Divider().padding(.leading, 48)
+                        }
+                    }
+                }
+            }
+            .wikiContainer(padding: true)
         }
     }
 
@@ -244,9 +316,7 @@ struct IngestView: View {
                     .font(.caption)
                     .foregroundStyle(.wikiSecondary)
             }
-            .padding()
-            .background(Color.wikiCard)
-            .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
+            .wikiContainer(padding: true)
             .padding(.horizontal)
         }
         .buttonStyle(.plain)
@@ -356,11 +426,9 @@ struct IngestView: View {
         
         return Group {
             if !recentTasks.isEmpty {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text(L10n.Ingest.tr("recentActivities"))
-                        .font(.headline)
-                        .foregroundStyle(.wikiText)
-                        .padding(.horizontal)
+                VStack(alignment: .leading, spacing: WikiUI.medium) {
+                    WikiSectionHeader(title: L10n.Ingest.tr("recentActivities"), icon: "clock.arrow.circlepath")
+                        .padding(.horizontal, 4)
                     
                     VStack(spacing: 8) {
                         ForEach(recentTasks) { task in
@@ -372,7 +440,7 @@ struct IngestView: View {
                             ), isCurrent: false, selectedTab: $selectedTab)
                         }
                     }
-                    .padding(.horizontal)
+                    .wikiContainer(padding: true)
                 }
             }
         }

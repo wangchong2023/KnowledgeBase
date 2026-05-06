@@ -7,7 +7,7 @@
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-03
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 @preconcurrency import SwiftUI
 import WebKit
@@ -26,8 +26,16 @@ struct NavigationView: View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView(heroNamespace: heroNamespace, selection: $router.sidebarSelection)
         } detail: {
-            DetailContentView(selection: $router.sidebarSelection, selectedTab: $selectedTab)
-                .id("\(String(describing: router.sidebarSelection))-\(renderNonce.uuidString)")
+            NavigationStack(path: $router.path) {
+                DetailContentView(selection: $router.sidebarSelection, selectedTab: $selectedTab)
+                    .id("\(String(describing: router.sidebarSelection))-\(renderNonce.uuidString)")
+                    .navigationDestination(for: AppRoute.self) { route in
+                        ViewFactory.makeView(for: route)
+                    }
+                    .navigationDestination(for: WikiPage.self) { page in
+                        PageDetailView(page: page)
+                    }
+            }
         }
         .navigationSplitViewStyle(.balanced)
         .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("splashDismissed"))) { _ in
@@ -47,12 +55,7 @@ struct DetailContentView: View {
     var body: some View {
         @Bindable var router = router
 
-        NavigationStack(path: $router.path) {
-            destinationView(for: selection)
-            .navigationDestination(for: AppRoute.self) { route in
-                ViewFactory.makeView(for: route)
-            }
-        }
+        destinationView(for: selection)
     }
 
     /// 根据 SidebarSelection 路由到对应视图

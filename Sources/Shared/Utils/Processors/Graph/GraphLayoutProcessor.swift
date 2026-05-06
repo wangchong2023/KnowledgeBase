@@ -10,12 +10,12 @@
 // 版本: 1.2
 // 修改记录:
 //   - 2026-05-05: 升级全工程文档规范，收敛物理仿真常数，彻底消除内部魔鬼数字
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import CoreGraphics
 
-// MARK: - Graph Layout Engine
+// MARK: - 图谱布局引擎
 /// 力导向布局引擎，将 WikiPage 集合计算为带坐标的 GraphNode/GraphEdge。
 struct GraphLayoutProcessor {
 

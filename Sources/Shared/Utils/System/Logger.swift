@@ -9,7 +9,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 迁移至 Utils/System 并重构为核心工具类，强化了功能说明注释
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 import Combine

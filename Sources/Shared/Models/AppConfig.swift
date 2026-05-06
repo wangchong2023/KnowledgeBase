@@ -1,17 +1,17 @@
 // AppConfig.swift
 //
 // 作者: Wang Chong
-// 功能说明: 智元 (ZhiYuan) 全局配置中心
+// 功能说明: 智宇 (ZhiYu) 全局配置中心
 // 版本: 1.0
 // 修改记录:
 //   - 创建: 2026-05-02
 //   - 更新: 2026-05-03
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import Foundation
 
-/// 智元 (ZhiYuan) 全局配置中心
+/// 智宇 (ZhiYu) 全局配置中心
 /// 采用“动态读取 + 静态分区”模式，确保系统的高可配置性与类型安全。
 enum AppConfig {
     

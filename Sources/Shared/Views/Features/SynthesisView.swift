@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 升级全工程文档规范，规范化 UI 常量与物理常数
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 
@@ -43,6 +43,7 @@ struct SynthesisView: View {
     @State private var expandedSynthesisSections: Set<SynthesisStore.SynthesisType> = Set(SynthesisStore.SynthesisType.allCases)
     @State private var showClearAllConfirm = false
     @State private var showBatchDeleteConfirm = false
+    @State private var showLLMAlert = false
 
     /**
      * @description: 触发全局知识合成任务，聚合所有 Wiki 页面内容并提交给 SynthesisStore
@@ -78,10 +79,10 @@ struct SynthesisView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 20)
             // ══ 弹窗锚点注入点 (挂载在内层容器以确保居中) ══
-            .alert(Localized.tr("synthesis.error.noPages"), isPresented: $showNoPagesAlert) {
+            .alert(L10n.Synthesis.tr("error.noPages"), isPresented: $showNoPagesAlert) {
                 Button(L10n.Common.tr("ok"), role: .cancel) { }
             }
-            .alert(Localized.tr("synthesis.error.limitReached"), isPresented: $showLimitAlert) {
+            .alert(L10n.Synthesis.tr("error.limitReached"), isPresented: $showLimitAlert) {
                 Button(L10n.Common.tr("done"), role: .cancel) { }
             }
             .alert(Localized.tr("tag.rename"), isPresented: $showRenameDialog) {
@@ -153,22 +154,13 @@ struct SynthesisView: View {
                     }
                 }
             }
-            .padding(.horizontal, 16) // 解决贴边问题
-            .padding(.vertical, 16)   // 增加垂直内边距，确保呼吸感
-            .background(
-                RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                    .fill(WikiUI.containerBackground)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                    .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
-            )
+            .wikiContainer(background: AnyView(Rectangle().fill(WikiUI.containerMaterial)))
         }
     }
     
     private var listHeader: some View {
         HStack {
-            Text(Localized.tr("synthesis.documentList")).font(.title3.bold())
+            Text(L10n.Synthesis.tr("documentList")).font(.title3.bold())
             Spacer()
             editAndBatchDeleteControls
         }
@@ -204,7 +196,7 @@ struct SynthesisView: View {
                         .padding(.vertical, 2)
                         .background(Color.wikiAccent.opacity(0.1))
                         .foregroundStyle(.wikiAccent)
-                        .clipShape(Capsule())
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .bold))
@@ -298,8 +290,7 @@ struct SynthesisView: View {
             Image(systemName: "chevron.left")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(.wikiText)
-                .frame(width: 44, height: 44).background(.ultraThinMaterial)
-                .clipShape(Circle()).shadow(color: .black.opacity(0.1), radius: 4)
+                .frame(width: 32, height: 44) // 移除背景和形状，保留标准热区
         }
     }
     
@@ -402,7 +393,6 @@ struct SynthesisView: View {
 
 
     
-    @State private var showLLMAlert = false
     @State private var llmError: String?
 
     private func synthesisButton(type: SynthesisStore.SynthesisType) -> some View {
@@ -457,14 +447,13 @@ struct SynthesisView: View {
                     }
                 }
             }
-            .background(
-                RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                    .fill(WikiUI.containerBackground)
-            )
+            .background(WikiUI.containerMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: WikiUI.cardRadius))
             .overlay(
                 RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                    .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
+                    .stroke(WikiUI.containerBorder.opacity(0.2), lineWidth: 0.5)
             )
+            .shadow(color: Color.black.opacity(0.03), radius: 8, y: 4)
         }
     }
 
@@ -489,10 +478,7 @@ struct SynthesisView: View {
     /// 合成操作入口视图：展示各类型合成任务的启动按钮
     private var synthesisEntryView: some View {
         VStack(alignment: .leading, spacing: WikiUI.medium) {
-            // 标题区
-            Text(Localized.tr("synthesis.actions"))
-                .font(.title3.bold())
-                .foregroundStyle(.wikiText)
+            WikiSectionHeader(title: L10n.Synthesis.tr("actions"), icon: "wand.and.stars")
                 .padding(.horizontal, 4)
             
             // 操作网格
@@ -501,19 +487,8 @@ struct SynthesisView: View {
                     synthesisButton(type: type)
                 }
             }
-            .padding(16) // 内部内边距，解决文字图标贴边问题
-            .background(
-                RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                    .fill(WikiUI.containerBackground)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: WikiUI.cardRadius)
-                    .stroke(WikiUI.containerBorder, lineWidth: WikiUI.borderWidth)
-            )
+            .wikiContainer(padding: true)
         }
-        .padding(.vertical, 8)
-        .listRowBackground(Color.clear)
-        .listRowSeparator(.hidden)
     }
 
     /// 正在运行的任务区域 Header
@@ -630,19 +605,8 @@ private struct SynthesisActionButton: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, WikiUI.medium)
-                .background(
-                    RoundedRectangle(cornerRadius: WikiUI.large)
-                        .fill(isLimitReached ? Color.red.opacity(0.08) : Color.wikiBorder.opacity(0.12))
-                )
+                .wikiCardStyle(cornerRadius: WikiUI.large)
                 .foregroundStyle(isLimitReached ? .wikiSecondary : .wikiText)
-                .overlay(
-                    RoundedRectangle(cornerRadius: WikiUI.large)
-                        .stroke(
-                            isLimitReached ? Color.red.opacity(0.2) : WikiUI.containerBorder,
-                            lineWidth: WikiUI.borderWidth
-                        )
-                )
-                .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
             }
             .buttonStyle(SynthesisButtonStyle())
             .disabled(state == .generating || isLimitReached)
@@ -702,14 +666,18 @@ private struct SynthesisTypeSection: View {
                             .padding(.vertical, 2)
                             .background(Color.wikiAccent.opacity(0.1))
                             .foregroundStyle(.wikiAccent)
-                            .clipShape(Capsule())
+                            .clipShape(RoundedRectangle(cornerRadius: 4))
                     }
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .bold))
                         .rotationEffect(.degrees(expandedSections.contains(type) ? 90 : 0))
                         .foregroundStyle(.wikiSecondary)
                 }
-                .padding(.vertical, 4)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.wikiCard)
+                .clipShape(RoundedRectangle(cornerRadius: WikiUI.smallRadius))
+                .shadow(color: Color.black.opacity(0.03), radius: 4, x: 0, y: 2)
             }
             .buttonStyle(.plain)
             .listRowBackground(Color.wikiCard)
@@ -719,10 +687,13 @@ private struct SynthesisTypeSection: View {
             if expandedSections.contains(type) {
                 if docs.isEmpty {
                     Text(Localized.tr("synthesis.noDocs"))
-                        .font(.caption)
-                        .foregroundStyle(.wikiSecondary)
-                        .padding(.leading, 56)
-                        .padding(.vertical, 8)
+                        .font(.caption.bold())
+                        .foregroundStyle(.wikiSecondary.opacity(0.8))
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 12)
+                        .background(Color.wikiBackground.opacity(0.3))
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .padding(.top, 4)
                 } else {
                     ForEach(docs) { doc in
                         SynthesisDocRow(
@@ -839,7 +810,8 @@ private struct SynthesisDocRow: View {
             }
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
+        .wikiCardStyle(cornerRadius: 10)
         .contentShape(Rectangle())
         .onTapGesture {
             onTap()

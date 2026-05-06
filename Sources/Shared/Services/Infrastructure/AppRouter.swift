@@ -10,7 +10,7 @@
 // 版本: 1.1
 // 修改记录:
 //   - 2026-05-05: 升级全工程文档规范，完善导航状态管理与历史追踪逻辑说明
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 import Observation
@@ -63,8 +63,16 @@ final class AppRouter {
     /// 当前侧边栏选中项
     var sidebarSelection: SidebarSelection? = nil
     
-    /// 当前主 Tab
-    var selectedTab: AppTab = .wiki
+    /// 当前主 Tab (通过 UserDefaults 持久化，防止后台切换后状态丢失)
+    var selectedTab: AppTab {
+        get {
+            let raw = UserDefaults.standard.string(forKey: "app_selected_tab") ?? AppTab.wiki.rawValue
+            return AppTab(rawValue: raw) ?? .wiki
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawValue, forKey: "app_selected_tab")
+        }
+    }
     
     /// 空间导航历史 (面包屑)
     var navigationHistory: [WikiPage] = []

@@ -1,4 +1,4 @@
-// GraphViewModel.swift
+// Graph视图模型.swift
 //
 // 作者: Wang Chong
 // 功能说明: Graph视图模型.swift
@@ -6,7 +6,7 @@
 // 修改记录:
 //   - 创建: 2026-05-04
 // 日期: 2026-05-04
-// 版权: Copyright © 2026 Wang Chong. All rights reserved.
+// 版权: 版权所有 © 2026 Wang Chong。保留所有权利。
 
 import SwiftUI
 import Observation
@@ -57,7 +57,7 @@ final class GraphViewModel {
         }
     }
 
-    // MARK: - Physics Simulation Loop
+    // MARK: - 物理仿真循环
     
     /// 开启物理仿真循环
     private func startSimulation() {
